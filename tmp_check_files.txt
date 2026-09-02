@@ -1,0 +1,17 @@
+Files with @section('content') but NO @section('top_bar_left') that need breadcrumb update:
+1. reports/tag_report.blade.php
+2. reports/cogs_chronology.blade.php  
+3. reports/ar_subledger.blade.php
+4. reports/ap_subledger.blade.php
+5. reports/ar_dp_report.blade.php
+6. reports/ap_dp_report.blade.php
+7. report/profit-loss.blade.php
+8. report/balance-sheet.blade.php
+9. report/cash-flow.blade.php
+10. report/balance-sheet-matrix.blade.php
+11. budgetng/index.blade.php
+12. dashboard.blade.php
+13. ledger/index.blade.php
+14. asset/list.blade.php
+15. product/ledger.blade.php
+16. account/opening_balance.blade.php

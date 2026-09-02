@@ -1,0 +1,164 @@
+
+  GET|HEAD        / ................................................................ dashboard › DashboardController@index
+  GET|HEAD        _debugbar/assets ............... debugbar.assets › Fruitcake\LaravelDebugbar › AssetController@getAssets
+  DELETE          _debugbar/cache/{key} ....... debugbar.cache.delete › Fruitcake\LaravelDebugbar › CacheController@delete
+  GET|HEAD        _debugbar/clockwork/{id} debugbar.clockwork › Fruitcake\LaravelDebugbar › OpenHandlerController@clockwo…
+  GET|HEAD        _debugbar/open ......... debugbar.openhandler › Fruitcake\LaravelDebugbar › OpenHandlerController@handle
+  POST            _debugbar/queries/explain debugbar.queries.explain › Fruitcake\LaravelDebugbar › QueriesController@expl…
+  GET|HEAD        account/download-template-opening-balance account.download_template_opening_balance › AccountController…
+  POST            account/import-opening-balance . account.import_opening_balance › AccountController@importOpeningBalance
+  GET|HEAD        akun ........................................................... account.index › AccountController@index
+  POST            akun ........................................................... account.store › AccountController@store
+  POST            akun/bulk-delete ..................................... account.bulkDelete › AccountController@bulkDelete
+  GET|HEAD        akun/create .................................................. account.create › AccountController@create
+  GET|HEAD        akun/export .................................................. account.export › AccountController@export
+  POST            akun/import .................................................. account.import › AccountController@import
+  GET|HEAD        akun/opening-balance .................... account.opening_balance › AccountController@openingBalanceForm
+  POST            akun/opening-balance ............. account.store_opening_balance › AccountController@openingBalanceStore
+  GET|HEAD        akun/template .................................... account.template › AccountController@downloadTemplate
+  PUT             akun/{id} .................................................... account.update › AccountController@update
+  DELETE          akun/{id} .................................................. account.destroy › AccountController@destroy
+  GET|HEAD        akun/{id}/edit ................................................... account.edit › AccountController@edit
+  GET|HEAD        aset ................................................................ aset.index › AssetController@index
+  POST            aset/generate-depreciation ........... aset.generate_depreciation › AssetController@generateDepreciation
+  GET|HEAD        aset/list-depresiasi ...................................... aset.list › AssetController@depreciationList
+  POST            aset/update/{id} .................................................. aset.update › AssetController@update
+  GET|HEAD        budgeting .................................................. budgeting.index › BudgetingController@index
+  GET|HEAD        buku-besar ................................................... buku-besar.index › LedgerController@index
+  GET|HEAD        dashboard .................................................. dashboard.index › DashboardController@index
+  GET|HEAD        divisi ........................................................... divisi.index › DivisiController@index
+  GET|HEAD        divisi/create .................................................. divisi.create › DivisiController@create
+  POST            divisi/store ..................................................... divisi.store › DivisiController@store
+  DELETE          divisi/{id}/delete ........................................... divisi.destroy › DivisiController@destroy
+  GET|HEAD        divisi/{id}/edit ................................................... divisi.edit › DivisiController@edit
+  PUT             divisi/{id}/update ............................................. divisi.update › DivisiController@update
+  GET|HEAD        form-pengajuan .................................. payment.public_form › PaymentPlanController@publicForm
+  POST            form-pengajuan/kirim .......................... payment.public_store › PaymentPlanController@publicStore
+  POST            jubelio/webhook/sales .................................. Api\JubelioWebhookController@handleSalesWebhook
+  GET|HEAD        jurnal .......................................................... jurnal.index › JournalController@index
+  POST            jurnal .......................................................... jurnal.store › JournalController@store
+  GET|HEAD        jurnal/create ................................................. jurnal.create › JournalController@create
+  GET|HEAD        jurnal/detail/ajax ........................ jurnal.detail.ajax › JournalController@getJournalDetailsAjax
+  GET|HEAD        jurnal/download-template ................. jurnal.download-template › JournalController@downloadTemplate
+  GET|HEAD        jurnal/export ................................................. jurnal.export › JournalController@export
+  POST            jurnal/import ................................................. jurnal.import › JournalController@import
+  DELETE          jurnal/mass-delete .................................. jurnal.massDestroy › JournalController@massDestroy
+  POST            jurnal/sync-temp .................................. jurnal.sync_temp › JournalController@dispatchSyncJob
+  PUT             jurnal/{journal_id} ........................................... jurnal.update › JournalController@update
+  DELETE          jurnal/{journal_id} ......................................... jurnal.destroy › JournalController@destroy
+  GET|HEAD        jurnal/{journal_id}/edit .......................................... jurnal.edit › JournalController@edit
+  GET|HEAD        kode-bantu ................................................... helper.index › HelperCodeController@index
+  POST            kode-bantu ................................................... helper.store › HelperCodeController@store
+  POST            kode-bantu/bulk-delete ............................ helper.bulk-delete › HelperCodeController@bulkDelete
+  GET|HEAD        kode-bantu/create .......................................... helper.create › HelperCodeController@create
+  GET|HEAD        kode-bantu/download-template .......... helper.download-template › HelperCodeController@downloadTemplate
+  POST            kode-bantu/import .......................................... helper.import › HelperCodeController@import
+  DELETE          kode-bantu/{id} .......................................... helper.destroy › HelperCodeController@destroy
+  GET|HEAD        laba-rugi ................................................. laba-rugi.index › ProfitLossController@index
+  GET|HEAD        lang/{locale} .......................................... lang.switch › LanguageController@switchLanguage
+  GET|HEAD        laporan/arus-kas ............................................. arus-kas.index › CashFlowController@index
+  GET|HEAD        login ....................................................... login › Auth\LoginController@showLoginForm
+  POST            login ....................................................................... Auth\LoginController@login
+  POST            logout ............................................................ logout › Auth\LoginController@logout
+  GET|HEAD        master-barang .................................................. product.index › ProductController@index
+  POST            master-barang .................................................. product.store › ProductController@store
+  GET|HEAD        master-barang/create ......................................... product.create › ProductController@create
+  POST            master-barang/import ......................................... product.import › ProductController@import
+  GET|HEAD        master-barang/kartu-stok ............................ inventory.ledger › InventoryLedgerController@index
+  GET|HEAD        master-barang/template ........................... product.template › ProductController@downloadTemplate
+  PUT             master-barang/{id} ........................................... product.update › ProductController@update
+  DELETE          master-barang/{id} ......................................... product.destroy › ProductController@destroy
+  GET|HEAD        master-barang/{id}/edit .......................................... product.edit › ProductController@edit
+  GET|HEAD        neraca ..................................................... neraca.index › BalanceSheetController@index
+  GET|HEAD        payment-plan ............................................... payment.index › PaymentPlanController@index
+  POST            payment-plan ............................................... payment.store › PaymentPlanController@store
+  GET|HEAD        payment-plan/create ...................................... payment.create › PaymentPlanController@create
+  POST            payment-plan/import ................................... payment.import › PaymentPlanController@importCsv
+  POST            payment-plan/post-journal ..................... payment.post_journal › PaymentPlanController@postJournal
+  GET|HEAD        payment-plan/template ........................ payment.template › PaymentPlanController@downloadTemplate
+  POST            payment-plan/{id}/set-coa ............................... payment.set_coa › PaymentPlanController@setCoa
+  POST            payment-plan/{id}/update-status ............. payment.update_status › PaymentPlanController@updateStatus
+  DELETE          payment-plan/{no_transaksi}/delete ..................... payment.destroy › PaymentPlanController@destroy
+  GET|HEAD        payment-plan/{no_transaksi}/edit ............................. payment.edit › PaymentPlanController@edit
+  PUT             payment-plan/{no_transaksi}/update ....................... payment.update › PaymentPlanController@update
+  GET|HEAD        penerimaan-barang ................................. inbound.index › PurchaseOrderController@inboundIndex
+  GET|HEAD        purchase-bills ..................................... purchase-bills.index › PurchaseBillController@index
+  POST            purchase-bills ..................................... purchase-bills.store › PurchaseBillController@store
+  GET|HEAD        purchase-bills/create ............................ purchase-bills.create › PurchaseBillController@create
+  GET|HEAD        purchase-bills/get-pos ................ purchase-bills.get-pos › PurchaseBillController@getPosBySupplier
+  GET|HEAD        purchase-bills/{id} .................................. purchase-bills.show › PurchaseBillController@show
+  DELETE          purchase-bills/{id} ............................ purchase-bills.destroy › PurchaseBillController@destroy
+  GET|HEAD        purchase-order ................................................ po.index › PurchaseOrderController@index
+  POST            purchase-order ................................................ po.store › PurchaseOrderController@store
+  GET|HEAD        purchase-order/create ....................................... po.create › PurchaseOrderController@create
+  POST            purchase-order/import ....................................... po.import › PurchaseOrderController@import
+  GET|HEAD        purchase-order/template ......................... po.template › PurchaseOrderController@downloadTemplate
+  PUT             purchase-order/{id} ......................................... po.update › PurchaseOrderController@update
+  DELETE          purchase-order/{id} ....................................... po.destroy › PurchaseOrderController@destroy
+  GET|HEAD        purchase-order/{id}/edit ........................................ po.edit › PurchaseOrderController@edit
+  POST            purchase-order/{id}/receive .......................... po.receive › PurchaseOrderController@receiveItems
+  POST            purchase-order/{id}/void ................................. po.void › PurchaseOrderController@voidReceipt
+  GET|HEAD        purchase-returns ............................... purchase-returns.index › PurchaseReturnController@index
+  POST            purchase-returns ............................... purchase-returns.store › PurchaseReturnController@store
+  GET|HEAD        purchase-returns/create ...................... purchase-returns.create › PurchaseReturnController@create
+  GET|HEAD        purchase-returns/get-po-items/{id} . purchase-returns.get-po-items › PurchaseReturnController@getPoItems
+  GET|HEAD        purchase-returns/{id} ............................ purchase-returns.show › PurchaseReturnController@show
+  POST            purchase-returns/{id}/process .............. purchase-returns.process › PurchaseReturnController@process
+  GET|HEAD        reports/ap-dp ...................................... reports.ap_dp › AdvancedReportController@reportApDp
+  GET|HEAD        reports/ap-management ...................... reports.ap_subledger › AdvancedReportController@apSubledger
+  GET|HEAD        reports/ar-dp ...................................... reports.ar_dp › AdvancedReportController@reportArDp
+  GET|HEAD        reports/ar-management ...................... reports.ar_subledger › AdvancedReportController@arSubledger
+  GET|HEAD        reports/cogs-chronology ......................... reports.cogs › AdvancedReportController@cogsChronology
+  GET|HEAD        reports/tags ....................................... reports.tags › AdvancedReportController@reportByTag
+  GET|HEAD        sales-invoices ............................................ invoice.index › SalesInvoiceController@index
+  POST            sales-invoices ............................................ invoice.store › SalesInvoiceController@store
+  GET|HEAD        sales-invoices/create ................................... invoice.create › SalesInvoiceController@create
+  POST            sales-invoices/sync-temp .................... invoice.sync_temp › SalesInvoiceController@dispatchSyncJob
+  GET|HEAD        sales-invoices/{id}/show .................................... invoice.show › SalesInvoiceController@show
+  GET|HEAD        sales-order ...................................................... so.index › SalesOrderController@index
+  POST            sales-order ...................................................... so.store › SalesOrderController@store
+  GET|HEAD        sales-order/create ............................................. so.create › SalesOrderController@create
+  POST            sales-order/import ............................................. so.import › SalesOrderController@import
+  POST            sales-order/sync-temp .............................. so.sync_temp › SalesOrderController@dispatchSyncJob
+  GET|HEAD        sales-order/template ............................... so.template › SalesOrderController@downloadTemplate
+  PUT             sales-order/{id} ............................................... so.update › SalesOrderController@update
+  DELETE          sales-order/{id} ............................................. so.destroy › SalesOrderController@destroy
+  GET|HEAD        sales-order/{id}/edit .............................................. so.edit › SalesOrderController@edit
+  POST            sales-order/{id}/rollback .......................... so.rollback › SalesOrderController@rollbackShipment
+  POST            sales-order/{id}/ship ................................... so.ship › SalesOrderController@processShipment
+  GET|HEAD        sales-returns ........................................ sales-returns.index › SalesReturnController@index
+  POST            sales-returns ........................................ sales-returns.store › SalesReturnController@store
+  GET|HEAD        sales-returns/create ............................... sales-returns.create › SalesReturnController@create
+  GET|HEAD        sales-returns/get-invoice-items/{id} sales-returns.get-invoice-items › SalesReturnController@getInvoice…
+  GET|HEAD        sales-returns/{id} ..................................... sales-returns.show › SalesReturnController@show
+  POST            sales-returns/{id}/process ....................... sales-returns.process › SalesReturnController@process
+  GET|HEAD        sanctum/csrf-cookie .................. sanctum.csrf-cookie › Laravel\Sanctum › CsrfCookieController@show
+  GET|HEAD        storage/{path} storage.local › vendor/laravel/framework/src/Illuminate/Filesystem/FilesystemServiceProv…
+  PUT             storage/{path} storage.local.upload › vendor/laravel/framework/src/Illuminate/Filesystem/FilesystemServ…
+  GET|HEAD        system-logs ..................................................... logs.index › SystemLogController@index
+  GET|HEAD        tax .................................................................... tax.index › TaxController@index
+  POST            tax .................................................................... tax.store › TaxController@store
+  GET|HEAD        tax/create ........................................................... tax.create › TaxController@create
+  GET|HEAD        tax/generate-default ...................................... tax.generate › TaxController@generateDefault
+  GET|HEAD        tax/{tax} ................................................................ tax.show › TaxController@show
+  PUT|PATCH       tax/{tax} ............................................................ tax.update › TaxController@update
+  DELETE          tax/{tax} .......................................................... tax.destroy › TaxController@destroy
+  GET|HEAD        tax/{tax}/edit ........................................................... tax.edit › TaxController@edit
+  GET|HEAD        up ......... vendor/laravel/framework/src/Illuminate/Foundation/Configuration/ApplicationBuilder.php:219
+  GET|HEAD        users ............................................................... users.index › UserController@index
+  POST            users ............................................................... users.store › UserController@store
+  GET|HEAD        users/create ...................................................... users.create › UserController@create
+  GET|HEAD        users/{user} .......................................................... users.show › UserController@show
+  PUT|PATCH       users/{user} ...................................................... users.update › UserController@update
+  DELETE          users/{user} .................................................... users.destroy › UserController@destroy
+  GET|HEAD        users/{user}/edit ..................................................... users.edit › UserController@edit
+  GET|HEAD        warehouse/inbound ...................................... warehouse.inbound › WarehouseController@inbound
+  POST            warehouse/inbound ........................... warehouse.inbound.store › WarehouseController@storeInbound
+  GET|HEAD        warehouse/inbound/create .................. warehouse.inbound.create › WarehouseController@createInbound
+  GET|HEAD        warehouse/outbound ................................... warehouse.outbound › WarehouseController@outbound
+  POST            warehouse/outbound ........................ warehouse.outbound.store › WarehouseController@storeOutbound
+  GET|HEAD        warehouse/outbound/create ............... warehouse.outbound.create › WarehouseController@createOutbound
+  GET|HEAD        warehouse/process-orders .................. warehouse.process-orders › WarehouseController@processOrders
+
+                                                                                                      Showing [160] routes
+

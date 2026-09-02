@@ -1,0 +1,131 @@
+# FIX SUMMARY: Anti-Double-Posting & Opening Balance Exclusion
+
+**Tanggal:** 4 Agustus 2026  
+**Berdasarkan:** Analisis Flow Auto-Jurnal PO/SO & Potensi Tumpang Tindih dengan Jubelio
+
+---
+
+## Daftar Fix yang Diterapkan
+
+### Fix #1 — Idempotency Check di `receivePartialOrder()` 🔴 Kritis → ✅ Fixed
+**File:** `app/Services/PurchaseOrderService.php`
+
+**Masalah:** `receivePartialOrder()` membuat `JournalHeader` baru tanpa pernah mengecek apakah `evidence_number` (nomor Bill) sudah punya jurnal sebelumnya — baik dari proses manual sebelumnya, maupun dari `import:bil`.
+
+**Fix:** Sebelum membuat `JournalHeader`, cek apakah `evidence_number` + `transaction_type = 'Purchase Bill'` sudah ada jurnalnya. Jika sudah, throw exception dengan pesan jelas.
+
+```php
+$existingJournal = JournalHeader::where('evidence_number', $evidenceNumber)
+    ->where('transaction_type', 'Purchase Bill')
+    ->exists();
+if ($existingJournal) {
+    throw new Exception("Gagal: Nomor Bill '{$evidenceNumber}' sudah memiliki jurnal...");
+}
+```
+
+---
+
+### Fix #2 — Satukan Sumber Kebenaran Nomor Invoice 🔴 Kritis → ✅ Fixed
+**Files:** `app/Services/SalesOrderService.php`, `app/Http/Controllers/Api/JubelioWebhookController.php`
+
+**Masalah:** `createInvoiceAndShip()` selalu generate nomor invoice sendiri (`INV-YYMMDD-XXXX`), bukan pakai nomor invoice asli Jubelio. Sementara `import:inv` memakai nomor asli Jubelio. Kedua jalur tidak saling cek → double-posting.
+
+**Fix:** 
+- Tambah parameter optional `?string $externalInvoiceNumber = null` di `createInvoiceAndShip()`
+- Jika disediakan (dari webhook), pakai nomor itu langsung + cek idempotensi
+- Jika tidak (jalur manual/import:sales), generate sendiri seperti sebelumnya (backward compatible)
+- Webhook controller sekarang mengirim `$headerData['invoice_no']` dari payload Jubelio
+
+---
+
+### Fix #3 — Cross-Path Guard di `FastImportINV` 🔴 Kritis → ✅ Fixed
+**File:** `app/Console/Commands/FastImportINV.php`
+
+**Masalah:** `import:inv` berjalan independen, tidak mengecek tabel `sales_orders` sama sekali. Jika webhook sudah membuat SO → Invoice → Jurnal, lalu `import:inv` dijalankan untuk data yang sama → double-posting.
+
+**Fix:** Sebelum insert invoice baru, cek apakah ada SO dengan status `SHIPPED` yang memiliki customer + tanggal + grand_total yang sama. Jika ada, skip dengan warning.
+
+```php
+$matchingShippedSo = SalesOrder::where('status', 'SHIPPED')
+    ->where('contact_name', $doc['contact_name'])
+    ->whereDate('transaction_date', $doc['transaction_date'])
+    ->where('grand_total', $grandTotal)
+    ->exists();
+if ($matchingShippedSo) {
+    $this->warn("⚠️ INV {$noFaktur} dilewati: kemungkinan sudah tercatat via SO/Webhook...");
+    continue;
+}
+```
+
+---
+
+### Fix #4 — Unique Index di Database 🟡 Penting → ✅ Fixed
+**File:** `database/migrations/2026_08_04_000001_add_unique_index_evidence_number_transaction_type.php`
+
+**Masalah:** Kolom `journal_headers.evidence_number` tidak memiliki unique constraint. Semua proteksi anti-dobel murni logika aplikasi, rawan lolos saat race condition/retry.
+
+**Fix:** 
+- Migration otomatis cleanup duplikat existing (keep oldest, delete rest + journal_details)
+- Tambah unique index `uq_journal_evidence_type` pada `(evidence_number, transaction_type)`
+- Graceful fallback jika index gagal dibuat (tidak break migration)
+
+---
+
+### Fix #5 — Duplikasi Route Webhook 🟢 Rendah → ✅ Already Resolved
+**Files:** `routes/web.php`, `routes/api.php`
+
+**Status:** Webhook route sudah hanya ada di `routes/api.php` (dipindahkan dari `web.php`). Tidak ada duplikasi.
+
+---
+
+### Fix #6 — Pengecualian Saldo Awal (`SA-%`) 🔴 Kritis → ✅ Fixed
+**Files:** `app/Http/Controllers/ProfitLossController.php`, `app/Http/Controllers/BalanceSheetController.php`
+
+**Masalah:** Query P&L (prefix 4-9) di kedua controller hanya mengecualikan `description NOT LIKE '%SETUP SALDO AWAL%'` dan `is_opening_balance = 0`, tapi **tidak** mengecualikan `evidence_number NOT LIKE 'SA-%'`. `BudgetingService` sudah punya cek ini, tapi `ProfitLossController` dan `BalanceSheetController` tidak.
+
+**Fix:** Tambah `->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')` ke semua query P&L:
+- `ProfitLossController`: 3 query (bulanan, custom date range, calculateUltimateProfit)
+- `BalanceSheetController`: 4 query (TAHAP A, TAHAP B, TAHAP C, calculateSplitProfits)
+- **TIDAK** ditambahkan ke query Aset/Kewajiban/Modal (prefix 1-3) — opening balance harus tetap dihitung di Neraca
+
+---
+
+### Verification Command — Deteksi Double-Posting yang Sudah Terjadi
+**File:** `app/Console/Commands/CheckDuplicateJournals.php`
+
+**Command:** `php artisan journal:check-duplicates`
+
+Menjalankan query verifikasi:
+```sql
+SELECT evidence_number, transaction_type, COUNT(*) AS jumlah_jurnal
+FROM journal_headers
+GROUP BY evidence_number, transaction_type
+HAVING COUNT(*) > 1;
+```
+
+Menampilkan detail setiap duplikat (journal_id, tanggal) dan total jurnal berlebih yang perlu dihapus.
+
+---
+
+## File yang Dimodifikasi
+
+| # | File | Perubahan |
+|---|---|---|
+| 1 | `app/Services/PurchaseOrderService.php` | +15 baris: idempotency check di `receivePartialOrder()` |
+| 2 | `app/Services/SalesOrderService.php` | +15 baris: optional `$externalInvoiceNumber` param + idempotensi cek |
+| 3 | `app/Http/Controllers/Api/JubelioWebhookController.php` | +5 baris: kirim `$jubelioInvoiceNo` ke service |
+| 4 | `app/Console/Commands/FastImportINV.php` | +12 baris: cross-path guard vs shipped SO |
+| 5 | `app/Http/Controllers/ProfitLossController.php` | +3 baris: `SA-%` exclusion di 3 query P&L |
+| 6 | `app/Http/Controllers/BalanceSheetController.php` | +4 baris: `SA-%` exclusion di 4 query P&L |
+| 7 | `database/migrations/2026_08_04_000001_...php` | **File baru**: migration unique index + cleanup |
+| 8 | `app/Console/Commands/CheckDuplicateJournals.php` | **File baru**: verification command |
+
+---
+
+## Langkah Selanjutnya (Manual)
+
+1. **Jalankan `php artisan journal:check-duplicates`** untuk melihat apakah ada double-posting yang sudah terjadi di database produksi.
+2. **Jalankan `php artisan migrate`** untuk menerapkan unique index + auto-cleanup duplikat.
+3. **Verifikasi laporan Laba Rugi & Neraca** setelah fix `SA-%` — angka seharusnya lebih kecil dari sebelumnya (karena opening balance yang sebelumnya bocor sekarang sudah dikecualikan).
+4. **Bandingkan dengan Jubelio** — setelah semua fix diterapkan, laporan ERP seharusnya lebih cocok dengan data Jubelio.
+5. **SOP:** Dokumentasikan bahwa `import:inv` hanya untuk backfill data historis SEBELUM webhook berjalan, bukan untuk periode yang sudah dicover webhook.

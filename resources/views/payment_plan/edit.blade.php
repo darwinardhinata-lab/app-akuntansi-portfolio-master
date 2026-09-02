@@ -1,0 +1,371 @@
+@extends('layouts.app')
+
+@section('top_bar_left')
+    <a href="{{ route('payment.index') }}" class="btn btn-sm btn-white border fw-bold shadow-sm text-secondary me-3" style="border-radius: 8px;">
+        <i class="fa-solid fa-arrow-left me-1"></i> Kembali
+    </a>
+    <x-breadcrumb :links="['Akuntansi' => '#', 'Payment Plan' => route('payment.index'), 'Edit' => null]" />
+@endsection
+
+@section('content')
+<div class="container-fluid px-0">
+    @php
+        $statusTerkunci = in_array($data->status_payment, ['PAID', 'POSTED']);
+        $details = $data->details ?? collect();
+    @endphp
+    <div class="card shadow-sm border-warning">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="m-0 fw-bold"><i class="fas fa-edit me-2"></i> Edit Data Payment Plan #{{ $data->no_transaksi }}</h5>
+        </div>
+        <div class="card-body">
+            @if($statusTerkunci)
+                <div class="alert alert-danger fw-bold">
+                    <i class="fa-solid fa-lock me-1"></i> Status sudah <strong>{{ $data->status_payment }}</strong>. Nominal item tidak dapat diubah/ditambah/dihapus lagi (sudah diposting ke Jurnal). Anda tetap bisa mengubah data non-nominal (vendor, keterangan header, dsb).
+                </div>
+            @endif
+
+            <form action="{{ route('payment.update', $data->id_payment) }}" method="POST" enctype="multipart/form-data" id="form-payment-edit">
+                @csrf
+                @method('PUT')
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-dark">Pilih Bagian / Divisi *</label>
+                        <select name="id_divisi" class="form-select" required>
+                            @foreach($divisi as $div)
+                                <option value="{{ $div->id_divisi }}" {{ $data->id_divisi == $div->id_divisi ? 'selected' : '' }}>
+                                    {{ $div->nama_divisi }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-dark">Rekening Ops *</label>
+                        <select name="jenis_transaksi" class="form-select" required>
+                            <option value="BCA BBW OPS" {{ $data->jenis_transaksi == 'BCA BBW OPS' ? 'selected' : '' }}>BCA BBW OPS</option>
+                            <option value="BCA BBB OPS" {{ $data->jenis_transaksi == 'BCA BBB OPS' ? 'selected' : '' }}>BCA BBB OPS</option>
+                            <option value="BCA KOI OPS" {{ $data->jenis_transaksi == 'BCA KOI OPS' ? 'selected' : '' }}>BCA KOI OPS</option>
+                            <option value="BCA GBB OPS" {{ $data->jenis_transaksi == 'BCA GBB OPS' ? 'selected' : '' }}>BCA GBB OPS</option>
+                            <option value="BCA BBW" {{ $data->jenis_transaksi == 'BCA BBW' ? 'selected' : '' }}>BCA BBW</option>
+                            <option value="BCA BBB" {{ $data->jenis_transaksi == 'BCA BBB' ? 'selected' : '' }}>BCA BBB</option>
+                            <option value="BCA KOI" {{ $data->jenis_transaksi == 'BCA KOI' ? 'selected' : '' }}>BCA KOI</option>
+                            <option value="BCA GBB" {{ $data->jenis_transaksi == 'BCA GBB' ? 'selected' : '' }}>BCA GBB</option>
+                            <option value="MANDIRI BBW" {{ $data->jenis_transaksi == 'MANDIRI BBW' ? 'selected' : '' }}>MANDIRI BBW</option>
+                            <option value="MANDIRI KOI" {{ $data->jenis_transaksi == 'MANDIRI KOI' ? 'selected' : '' }}>MANDIRI KOI</option>
+                            <option value="MANDIRI BBB" {{ $data->jenis_transaksi == 'MANDIRI BBB' ? 'selected' : '' }}>MANDIRI BBB</option>
+                            <option value="XENDIT" {{ $data->jenis_transaksi == 'XENDIT' ? 'selected' : '' }}>XENDIT</option>
+                            <option value="BRI BBW" {{ $data->jenis_transaksi == 'BRI BBW' ? 'selected' : '' }}>BRI BBW</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-dark">Kategori Payment *</label>
+                        <select name="kategori_payment" class="form-select" required>
+                            <option value="PEMBELIAN PERSEDIAAN (PEMBAYARAN HUTANG)" {{ $data->kategori_payment == 'PEMBELIAN PERSEDIAAN (PEMBAYARAN HUTANG)' ? 'selected' : '' }}>PEMBELIAN PERSEDIAAN (PEMBAYARAN HUTANG)</option>
+                            <option value="PEMBELIAN PERSEDIAAN (UANG MUKA)" {{ $data->kategori_payment == 'PEMBELIAN PERSEDIAAN (UANG MUKA)' ? 'selected' : '' }}>PEMBELIAN PERSEDIAAN (UANG MUKA)</option>
+                            <option value="DEPOSIT" {{ $data->kategori_payment == 'DEPOSIT' ? 'selected' : '' }}>DEPOSIT</option>
+                            <option value="ASET" {{ $data->kategori_payment == 'ASET' ? 'selected' : '' }}>ASET</option>
+                            <option value="PEMBELIAN & OPERASIONAL" {{ $data->kategori_payment == 'PEMBELIAN & OPERASIONAL' ? 'selected' : '' }}>PEMBELIAN & OPERASIONAL</option>
+                            <option value="PRIVE" {{ $data->kategori_payment == 'PRIVE' ? 'selected' : '' }}>PRIVE</option>
+                            <option value="PB" {{ $data->kategori_payment == 'PB' ? 'selected' : '' }}>PB</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-dark">Tgl Pengajuan *</label>
+                        <input type="date" name="tgl_pengajuan" class="form-control" value="{{ $data->tgl_pengajuan }}" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-dark">Tgl Transaksi *</label>
+                        <input type="date" name="tgl_transaksi" class="form-control" value="{{ $data->tgl_transaksi ?? $data->tgl_pengajuan }}" required>
+                        <small class="text-muted">Tanggal transaksi yang akan muncul di jurnal</small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-dark">Jatuh Tempo</label>
+                        <input type="date" name="jatuh_tempo" class="form-control" value="{{ $data->jatuh_tempo }}">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-dark">Vendor / Toko *</label>
+                        <input type="text" name="vendor_toko" class="form-control" value="{{ $data->vendor_toko }}" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-dark">Penanggung Jawab (PJ) *</label>
+                        <input type="text" name="penerima_pj" class="form-control" value="{{ $data->penerima_pj }}" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-dark">Rekening / Virtual Account</label>
+                        <input type="text" name="rekening_va" class="form-control" value="{{ $data->rekening_va }}">
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-dark">Nama Toko / Link</label>
+                        <input type="text" name="nama_toko_link" class="form-control" value="{{ $data->nama_toko_link ?? '' }}" placeholder="Contoh: Shopee, Tokopedia, atau link toko">
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold text-dark">Keterangan Umum</label>
+                        <textarea name="keterangan" class="form-control" rows="2">{{ $data->keterangan }}</textarea>
+                    </div>
+
+                    <!-- ITEM PAYMENT PLAN (repeater) -->
+                    <div class="col-md-12 mb-3">
+                        <div class="bg-light p-3 border border-warning rounded">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-warning mb-0"><i class="fa-solid fa-cart-shopping me-1"></i> Rincian Item Pembayaran</h6>
+                                @unless($statusTerkunci)
+                                <button type="button" class="btn btn-warning btn-sm fw-bold text-dark" onclick="tambahItem()">
+                                    <i class="fa-solid fa-plus me-1"></i> Tambah Item
+                                </button>
+                                @endunless
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered align-middle bg-white" id="tabel-item">
+                                    <thead class="table-secondary text-muted small text-center">
+                                        <tr>
+                                            <th width="16%">Nama Item</th>
+                                            <th width="19%">Keterangan *</th>
+                                            <th width="8%">Qty</th>
+                                            <th width="8%">Satuan</th>
+                                            <th width="12%">Harga Satuan (Rp)</th>
+                                            <th width="12%">Nominal (Rp)</th>
+                                            <th width="12%">Nominal Aktual (Rp)</th>
+                                            <th width="9%">Bukti</th>
+                                            <th width="4%"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="baris-item">
+                                        @forelse($details as $i => $d)
+                                        <tr class="baris-item-row">
+                                            <td>
+                                                <input type="hidden" name="items[{{ $i }}][id_detail]" value="{{ $d->id_detail }}">
+                                                <input type="text" name="items[{{ $i }}][nama_item]" class="form-control form-control-sm" value="{{ $d->nama_item }}" placeholder="Nama barang/jasa" {{ $statusTerkunci ? 'readonly' : '' }}>
+                                            </td>
+                                            <td><input type="text" name="items[{{ $i }}][keterangan]" class="form-control form-control-sm item-keterangan" value="{{ $d->keterangan }}" required {{ $statusTerkunci ? 'readonly' : '' }}></td>
+                                            <td><input type="number" step="0.01" min="0.01" name="items[{{ $i }}][qty]" class="form-control form-control-sm text-center item-qty" value="{{ $d->qty }}" {{ $statusTerkunci ? 'readonly' : '' }}></td>
+                                            <td><input type="text" name="items[{{ $i }}][satuan]" class="form-control form-control-sm text-center item-satuan" value="{{ $d->satuan }}" {{ $statusTerkunci ? 'readonly' : '' }}></td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm text-end item-harga-mask" value="{{ $d->harga_satuan !== null ? number_format($d->harga_satuan, 0, ',', '.') : '' }}" placeholder="0" {{ $statusTerkunci ? 'readonly' : '' }}>
+                                                <input type="hidden" name="items[{{ $i }}][harga_satuan]" class="item-harga-asli" value="{{ $d->harga_satuan ?? '' }}">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm text-end fw-bold text-primary item-nominal-mask" value="{{ number_format($d->nominal, 0, ',', '.') }}" {{ $statusTerkunci ? 'readonly' : '' }}>
+                                                <input type="hidden" name="items[{{ $i }}][nominal]" class="item-nominal-asli" value="{{ (int) $d->nominal }}" required>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm text-end fw-bold text-success item-aktual-mask" value="{{ $d->nominal_aktual !== null ? number_format($d->nominal_aktual, 0, ',', '.') : '' }}" placeholder="Kosongkan jika = Nominal">
+                                                <input type="hidden" name="items[{{ $i }}][nominal_aktual]" class="item-aktual-asli" value="{{ $d->nominal_aktual ?? '' }}">
+                                            </td>
+                                            <td>
+                                                <input type="file" name="items[{{ $i }}][bukti_file]" class="form-control form-control-sm" accept=".jpg,.jpeg,.png,.pdf">
+                                                @if($d->bukti_file)
+                                                    <a href="{{ asset('storage/' . $d->bukti_file) }}" target="_blank" class="small d-block mt-1"><i class="fa-solid fa-paperclip"></i> Lihat</a>
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                @unless($statusTerkunci)
+                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="hapusItem(this, {{ $d->id_detail }})"><i class="fa-solid fa-trash"></i></button>
+                                                @endunless
+                                            </td>
+                                        </tr>
+                                        @empty
+                                        {{-- kalau tidak ada detail sama sekali, baris kosong akan ditambahkan lewat JS saat load --}}
+                                        @endforelse
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-light">
+                                            <td colspan="5" class="text-end fw-bold">TOTAL NOMINAL</td>
+                                            <td class="fw-bold text-primary text-end" id="total-nominal-display">Rp {{ number_format($data->nominal, 0, ',', '.') }}</td>
+                                            <td class="fw-bold text-success text-end" id="total-aktual-display">
+                                                Rp {{ number_format($data->nominal_aktual ?? 0, 0, ',', '.') }}
+                                            </td>
+                                            <td colspan="2"></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <input type="hidden" id="deleted_detail_ids_json" name="deleted_detail_ids_json" value="[]">
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr class="mb-4">
+
+                <button type="submit" class="btn btn-warning px-4 py-2 fw-bold text-dark">
+                    <i class="fas fa-save me-2"></i> Update Perubahan Data
+                </button>
+                <a href="{{ route('payment.index') }}" class="btn btn-secondary px-4 py-2 fw-bold ms-2">Batal</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<template id="template-item-row">
+    <tr class="baris-item-row">
+        <td><input type="text" name="items[__IDX__][nama_item]" class="form-control form-control-sm" placeholder="Nama barang/jasa"></td>
+        <td><input type="text" name="items[__IDX__][keterangan]" class="form-control form-control-sm item-keterangan" placeholder="Uraian item" required></td>
+        <td><input type="number" step="0.01" min="0.01" name="items[__IDX__][qty]" class="form-control form-control-sm text-center item-qty" value="1"></td>
+        <td><input type="text" name="items[__IDX__][satuan]" class="form-control form-control-sm text-center item-satuan" value="Pcs"></td>
+        <td>
+            <input type="text" class="form-control form-control-sm text-end item-harga-mask" placeholder="0">
+            <input type="hidden" name="items[__IDX__][harga_satuan]" class="item-harga-asli">
+        </td>
+        <td>
+            <input type="text" class="form-control form-control-sm text-end fw-bold text-primary item-nominal-mask" placeholder="0">
+            <input type="hidden" name="items[__IDX__][nominal]" class="item-nominal-asli" required>
+        </td>
+        <td>
+            <input type="text" class="form-control form-control-sm text-end fw-bold text-success item-aktual-mask" placeholder="Kosongkan jika = Nominal">
+            <input type="hidden" name="items[__IDX__][nominal_aktual]" class="item-aktual-asli">
+        </td>
+        <td><input type="file" name="items[__IDX__][bukti_file]" class="form-control form-control-sm" accept=".jpg,.jpeg,.png,.pdf"></td>
+        <td class="text-center">
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="hapusItem(this)"><i class="fa-solid fa-trash"></i></button>
+        </td>
+    </tr>
+</template>
+
+<script>
+    function formatRupiah(angka) {
+        if (!angka) return '';
+        let number_string = angka.toString(), sisa = number_string.length % 3,
+            rupiah = number_string.substr(0, sisa), ribuan = number_string.substr(sisa).match(/\d{3}/gi);
+        if (ribuan) { let separator = sisa ? '.' : ''; rupiah += separator + ribuan.join('.'); }
+        return rupiah;
+    }
+    function parseRupiah(str) {
+        return (str || '').toString().replace(/[^0-9]/g, '');
+    }
+
+    let itemIdx = {{ $details->count() }};
+    let deletedIds = [];
+    const totalNominalDisplay = document.getElementById('total-nominal-display');
+    const totalAktualDisplay = document.getElementById('total-aktual-display');
+    const deletedIdsInput = document.getElementById('deleted_detail_ids_json');
+
+    function hitungTotalSemuaItem() {
+        let totalNominal = 0;
+        let totalAktual = 0;
+        let adaAktual = false;
+
+        document.querySelectorAll('#baris-item .baris-item-row').forEach(function(tr) {
+            const nominalAsli = tr.querySelector('.item-nominal-asli');
+            const aktualAsli = tr.querySelector('.item-aktual-asli');
+            const nominal = parseFloat(nominalAsli?.value || 0);
+            totalNominal += nominal;
+
+            if (aktualAsli && aktualAsli.value !== '') {
+                totalAktual += parseFloat(aktualAsli.value);
+                adaAktual = true;
+            } else {
+                totalAktual += nominal;
+            }
+        });
+
+        totalNominalDisplay.textContent = 'Rp ' + formatRupiah(Math.round(totalNominal).toString());
+        totalAktualDisplay.textContent = 'Rp ' + formatRupiah(Math.round(totalAktual).toString());
+    }
+
+    function hitungNominalBaris(tr) {
+        const hargaAsli = tr.querySelector('.item-harga-asli');
+        const qtyInput = tr.querySelector('.item-qty');
+        const nominalMask = tr.querySelector('.item-nominal-mask');
+        const nominalAsli = tr.querySelector('.item-nominal-asli');
+
+        const harga = parseFloat(hargaAsli.value || 0);
+        const qty = parseFloat(qtyInput.value || 0);
+
+        if (harga > 0) {
+            const total = Math.round(harga * qty);
+            nominalAsli.value = total;
+            nominalMask.value = formatRupiah(total.toString());
+        }
+        hitungTotalSemuaItem();
+    }
+
+    function bindBarisItem(tr) {
+        const hargaMask = tr.querySelector('.item-harga-mask');
+        const hargaAsli = tr.querySelector('.item-harga-asli');
+        const nominalMask = tr.querySelector('.item-nominal-mask');
+        const nominalAsli = tr.querySelector('.item-nominal-asli');
+        const aktualMask = tr.querySelector('.item-aktual-mask');
+        const aktualAsli = tr.querySelector('.item-aktual-asli');
+        const qtyInput = tr.querySelector('.item-qty');
+
+        if (hargaMask.readOnly) return; // status terkunci, tidak perlu binding edit
+
+        hargaMask.addEventListener('input', function() {
+            hargaAsli.value = parseRupiah(this.value);
+            this.value = formatRupiah(hargaAsli.value);
+            hitungNominalBaris(tr);
+        });
+
+        qtyInput.addEventListener('input', function() { hitungNominalBaris(tr); });
+        qtyInput.addEventListener('change', function() { hitungNominalBaris(tr); });
+
+        nominalMask.addEventListener('input', function() {
+            nominalAsli.value = parseRupiah(this.value);
+            this.value = formatRupiah(nominalAsli.value);
+            hitungTotalSemuaItem();
+        });
+
+        aktualMask.addEventListener('input', function() {
+            aktualAsli.value = parseRupiah(this.value);
+            this.value = formatRupiah(aktualAsli.value);
+            hitungTotalSemuaItem();
+        });
+    }
+
+    function tambahItem() {
+        const template = document.getElementById('template-item-row');
+        const html = template.innerHTML.replaceAll('__IDX__', itemIdx);
+        const tbody = document.getElementById('baris-item');
+        const wrapper = document.createElement('tbody');
+        wrapper.innerHTML = html;
+        const tr = wrapper.firstElementChild;
+        tbody.appendChild(tr);
+        bindBarisItem(tr);
+        itemIdx++;
+        hitungTotalSemuaItem();
+    }
+
+    function hapusItem(btn, idDetail) {
+        const tbody = document.getElementById('baris-item');
+        if (tbody.querySelectorAll('.baris-item-row').length <= 1) {
+            alert('Minimal harus ada 1 item.');
+            return;
+        }
+        if (idDetail) {
+            deletedIds.push(idDetail);
+            deletedIdsInput.value = JSON.stringify(deletedIds);
+        }
+        btn.closest('tr').remove();
+        hitungTotalSemuaItem();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('#baris-item .baris-item-row').forEach(bindBarisItem);
+        if (document.querySelectorAll('#baris-item .baris-item-row').length === 0) {
+            tambahItem();
+        }
+        hitungTotalSemuaItem();
+    });
+
+    document.getElementById('form-payment-edit').addEventListener('submit', function(e) {
+        hitungTotalSemuaItem();
+        const rows = document.querySelectorAll('#baris-item .baris-item-row');
+        if (rows.length === 0) {
+            e.preventDefault();
+            alert('Minimal harus ada 1 item pembayaran.');
+            return;
+        }
+    });
+</script>
+@endsection
