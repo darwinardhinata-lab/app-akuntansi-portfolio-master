@@ -48,7 +48,8 @@
             <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size: 0.85rem;">
                 <thead class="table-light text-uppercase text-muted">
                     <tr>
-                        <th class="ps-4 py-3">Nama Divisi</th>
+                        <th class="ps-4 py-3">Kode</th>
+                        <th class="py-3">Nama Divisi</th>
                         <th class="text-center py-3">Total Plot Akun</th>
                         <th class="text-center pe-4 py-3">Aksi</th>
                     </tr>
@@ -56,7 +57,8 @@
                 <tbody>
                     @forelse($divisi as $div)
                     <tr>
-                        <td class="ps-4 py-3 fw-bold text-dark">{{ $div->nama_divisi }}</td>
+                        <td class="ps-4 py-3"><span class="badge bg-light text-dark border fw-bold">{{ $div->kode_divisi }}</span></td>
+                        <td class="py-3 fw-bold text-dark">{{ $div->nama_divisi }}</td>
                         <td class="text-center py-3">{{ $div->akun_count ?? 0 }}</td>
                         <td class="text-center pe-4 py-3">
                             <div class="btn-group">
@@ -70,7 +72,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="3" class="text-center py-5 text-muted">Belum ada data divisi.</td></tr>
+                    <tr><td colspan="4" class="text-center py-5 text-muted">Belum ada data divisi.</td></tr>
                     @endforelse
                 </tbody>
             </table>

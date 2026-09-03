@@ -64,7 +64,8 @@ class DivisiController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'kode_divisi' => 'required|max:10',
+            // FIX: kode_divisi unik kecuali untuk baris yang sedang diedit (ignore ID sendiri)
+            'kode_divisi' => 'required|max:10|unique:master_divisi,kode_divisi,' . $id . ',id_divisi',
             'nama_divisi' => 'required|max:50'
         ]);
 
