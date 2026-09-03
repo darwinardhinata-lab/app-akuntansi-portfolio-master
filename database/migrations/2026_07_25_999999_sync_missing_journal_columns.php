@@ -11,8 +11,15 @@ return new class extends Migration
         // 1. Sync journal_headers
         if (!Schema::hasColumn('journal_headers', 'evidence_number')) {
             Schema::table('journal_headers', function (Blueprint $table) {
-                $table->string('evidence_number', 150)->nullable()->after('transaction_date')->index();
+                $table->string('evidence_number', 150)->nullable()->after('transaction_date');
             });
+            
+            // Only create index if it doesn't already exist
+            if (!Schema::hasIndex('journal_headers', 'journal_headers_evidence_number_index')) {
+                Schema::table('journal_headers', function (Blueprint $table) {
+                    $table->index('evidence_number');
+                });
+            }
         }
         
         if (!Schema::hasColumn('journal_headers', 'jj_id')) {
@@ -22,11 +29,7 @@ return new class extends Migration
         }
 
         // 2. Sync journal_details
-        if (!Schema::hasColumn('journal_details', 'id')) {
-            Schema::table('journal_details', function (Blueprint $table) {
-                $table->id()->first();
-            });
-        }
+        // Note: journal_details already has journal_detail_id as primary key, so we skip adding 'id'
         
         if (!Schema::hasColumn('journal_details', 'position')) {
             Schema::table('journal_details', function (Blueprint $table) {

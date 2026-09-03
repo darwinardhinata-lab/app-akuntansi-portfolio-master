@@ -62,13 +62,14 @@
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold text-dark">Kategori Payment *</label>
                         <select name="kategori_payment" class="form-select" required>
-                            <option value="PEMBELIAN PERSEDIAAN (PEMBAYARAN HUTANG)" {{ $data->kategori_payment == 'PEMBELIAN PERSEDIAAN (PEMBAYARAN HUTANG)' ? 'selected' : '' }}>PEMBELIAN PERSEDIAAN (PEMBAYARAN HUTANG)</option>
-                            <option value="PEMBELIAN PERSEDIAAN (UANG MUKA)" {{ $data->kategori_payment == 'PEMBELIAN PERSEDIAAN (UANG MUKA)' ? 'selected' : '' }}>PEMBELIAN PERSEDIAAN (UANG MUKA)</option>
-                            <option value="DEPOSIT" {{ $data->kategori_payment == 'DEPOSIT' ? 'selected' : '' }}>DEPOSIT</option>
-                            <option value="ASET" {{ $data->kategori_payment == 'ASET' ? 'selected' : '' }}>ASET</option>
-                            <option value="PEMBELIAN & OPERASIONAL" {{ $data->kategori_payment == 'PEMBELIAN & OPERASIONAL' ? 'selected' : '' }}>PEMBELIAN & OPERASIONAL</option>
-                            <option value="PRIVE" {{ $data->kategori_payment == 'PRIVE' ? 'selected' : '' }}>PRIVE</option>
-                            <option value="PB" {{ $data->kategori_payment == 'PB' ? 'selected' : '' }}>PB</option>
+                            @if(isset($payment_categories))
+                                @foreach($payment_categories as $cat)
+                                    <option value="{{ $cat->name }}" {{ $data->kategori_payment == $cat->name ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                @endforeach
+                                @if(!empty($data->kategori_payment) && !$payment_categories->contains('name', $data->kategori_payment))
+                                    <option value="{{ $data->kategori_payment }}" selected>{{ $data->kategori_payment }} (Nonaktif/Lama)</option>
+                                @endif
+                            @endif
                         </select>
                     </div>
 

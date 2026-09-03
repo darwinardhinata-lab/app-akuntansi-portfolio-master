@@ -139,11 +139,17 @@
     <div class="brand-panel">
         <div>
             <div class="mb-4">
-                <div class="d-inline-flex align-items-center justify-content-center bg-white text-primary rounded-3 shadow-sm mb-3" style="width: 52px; height: 52px; font-size: 1.6rem;">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </div>
+                @if(isset($companyProfile) && $companyProfile->logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($companyProfile->logo))
+                    <div class="d-inline-flex align-items-center justify-content-center bg-white p-2 rounded-3 shadow-sm mb-3" style="max-height: 60px;">
+                        <img src="{{ asset('storage/' . $companyProfile->logo) }}" alt="Logo" style="max-height: 44px; max-width: 140px; object-fit: contain;">
+                    </div>
+                @else
+                    <div class="d-inline-flex align-items-center justify-content-center bg-white text-primary rounded-3 shadow-sm mb-3" style="width: 52px; height: 52px; font-size: 1.6rem;">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </div>
+                @endif
             </div>
-            <h1 class="brand-title">Portal Pengajuan Dana Internal</h1>
+            <h1 class="brand-title">Portal Pengajuan Dana {{ isset($companyProfile->company_name) ? '- ' . $companyProfile->company_name : 'Internal' }}</h1>
             <p class="brand-subtitle">Sistem formulir terintegrasi otomatis untuk permohonan pencairan kas operasional, reimbursement, dan pembayaran ke vendor.</p>
             
             <ul class="feature-list">
@@ -153,7 +159,7 @@
             </ul>
         </div>
         <div class="mt-4 pt-4 border-top border-light border-opacity-25" style="font-size: 0.85rem; font-weight: 600; opacity: 0.8;">
-            &copy; {{ date('Y') }} ERP Accounting System.
+            &copy; {{ date('Y') }} {{ $companyProfile->company_name ?? 'ERP Accounting System' }}.
         </div>
     </div>
 
@@ -175,6 +181,19 @@
             </div>
         @endif
 
+        @if(isset($errors) && $errors->any())
+            <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4 p-3" style="background-color: #fef2f2; color: #991b1b;">
+                <div class="d-flex align-items-center mb-1">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i> <strong>Mohon periksa kembali input Anda:</strong>
+                </div>
+                <ul class="mb-0 ps-3 small">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <form action="{{ route('payment.public_store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
@@ -182,12 +201,12 @@
                 
                 <div class="col-md-6">
                     <label class="form-label">Tgl Pengajuan <span class="text-danger">*</span></label>
-                    <input type="date" name="tgl_pengajuan" class="form-control" value="{{ date('Y-m-d') }}" required>
+                    <input type="date" name="tgl_pengajuan" class="form-control" value="{{ old('tgl_pengajuan', date('Y-m-d')) }}" required>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label">Tgl Transaksi <span class="text-danger">*</span></label>
-                    <input type="date" name="tgl_transaksi" class="form-control" value="{{ date('Y-m-d') }}" required>
+                    <input type="date" name="tgl_transaksi" class="form-control" value="{{ old('tgl_transaksi', date('Y-m-d')) }}" required>
                     <small class="text-muted" style="font-size: 0.8rem;">Tanggal transaksi yang akan muncul di jurnal</small>
                 </div>
 
@@ -215,11 +234,11 @@
                     <label class="form-label">Kategori Pengeluaran <span class="text-danger">*</span></label>
                     <select name="kategori_payment" class="form-select" required>
                         <option value="">Pilih Kategori...</option>
-                        <option value="PEMBELIAN & OPERASIONAL">PEMBELIAN & OPERASIONAL</option>
-                        <option value="PEMBELIAN PERSEDIAAN (UANG MUKA)">PEMBELIAN PERSEDIAAN (UANG MUKA)</option>
-                        <option value="PEMBELIAN PERSEDIAAN (PEMBAYARAN HUTANG)">PEMBELIAN PERSEDIAAN (PEMBAYARAN HUTANG)</option>
-                        <option value="ASET">ASET</option>
-                        <option value="PRIVE">PRIVE (Pribadi)</option>
+                        @if(isset($payment_categories))
+                            @foreach($payment_categories as $cat)
+                                <option value="{{ $cat->name }}" {{ old('kategori_payment') == $cat->name ? 'selected' : '' }}>{{ $cat->name }}</option>
+                            @endforeach
+                        @endif
                     </select>
                 </div>
 
@@ -242,8 +261,8 @@
                     <label class="form-label">Total Nominal <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <span class="input-group-text">Rp</span>
-                        <input type="text" id="nominal_mask" class="form-control form-control-lg fw-bold text-primary" placeholder="0" required>
-                        <input type="hidden" name="nominal" id="nominal_asli" required>
+                        <input type="text" id="nominal_mask" class="form-control form-control-lg fw-bold text-primary" placeholder="0" value="{{ old('nominal') ? number_format((float)old('nominal'), 0, ',', '.') : '' }}" required>
+                        <input type="hidden" name="nominal" id="nominal_asli" value="{{ old('nominal') }}" required>
                     </div>
                 </div>
 

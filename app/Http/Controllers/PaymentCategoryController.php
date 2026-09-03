@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PaymentCategory;
+use App\Models\PaymentPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -42,12 +43,19 @@ class PaymentCategoryController extends Controller
             'description' => 'nullable|string',
         ]);
 
+        $oldName = $category->name;
+        $newName = strtoupper($request->name);
+
         $category->update([
-            'name' => strtoupper($request->name),
+            'name' => $newName,
             'slug' => strtolower($request->slug),
             'description' => $request->description,
             'is_active' => $request->has('is_active'),
         ]);
+
+        if ($oldName !== $newName) {
+            PaymentPlan::where('kategori_payment', $oldName)->update(['kategori_payment' => $newName]);
+        }
 
         return redirect()->back()->with('success', 'Kategori Payment Plan berhasil diperbarui!');
     }

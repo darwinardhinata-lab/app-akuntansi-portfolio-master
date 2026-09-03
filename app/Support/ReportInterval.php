@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Facades\DB;
+
 class ReportInterval
 {
     public const OPTIONS = [
@@ -88,6 +90,19 @@ class ReportInterval
 
     public static function periodKeyExpr(string $interval, string $dateColumn): string
     {
+        $driver = DB::connection()->getDriverName();
+        if ($driver === 'sqlite') {
+            switch ($interval) {
+                case 'harian':   return "date({$dateColumn})";
+                case 'mingguan': return "strftime('%Y%W', {$dateColumn})";
+                case 'bulanan':  return "strftime('%Y-%m', {$dateColumn})";
+                case 'quarter':  return "strftime('%Y', {$dateColumn}) || '-Q' || ((cast(strftime('%m', {$dateColumn}) as integer) + 2) / 3)";
+                case 'semester': return "strftime('%Y', {$dateColumn}) || '-S' || (case when cast(strftime('%m', {$dateColumn}) as integer) <= 6 then 1 else 2 end)";
+                case 'tahunan':  return "strftime('%Y', {$dateColumn})";
+                default:         return "strftime('%Y-%m', {$dateColumn})";
+            }
+        }
+
         switch ($interval) {
             case 'harian':   return "DATE({$dateColumn})";
             case 'mingguan': return "YEARWEEK({$dateColumn}, 3)";

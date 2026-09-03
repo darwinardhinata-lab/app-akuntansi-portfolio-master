@@ -284,7 +284,8 @@ class PaymentPlanController extends Controller
             return redirect()->route('payment.index')->with('error', 'Data tidak ditemukan!');
         }
         $divisi = MasterDivisi::where('status_aktif', 1)->orderBy('nama_divisi', 'asc')->get();
-        return view('payment_plan.edit', compact('data', 'divisi'));
+        $payment_categories = PaymentCategory::active()->orderBy('name', 'asc')->get();
+        return view('payment_plan.edit', compact('data', 'divisi', 'payment_categories'));
     }
 
     public function update(Request $request, $id)
@@ -883,22 +884,26 @@ class PaymentPlanController extends Controller
     public function publicForm()
     {
         $divisi = MasterDivisi::where('status_aktif', 1)->orderBy('nama_divisi', 'asc')->get();
-        return view('payment_plan.public_form', compact('divisi'));
+        $payment_categories = PaymentCategory::active()->orderBy('name', 'asc')->get();
+        $companyProfile = \App\Models\CompanyProfile::first();
+        return view('payment_plan.public_form', compact('divisi', 'payment_categories', 'companyProfile'));
     }
 
     public function publicStore(Request $request)
     {
         $request->validate([
-            'id_divisi' => 'required',
+            'id_divisi' => 'required|exists:master_divisi,id_divisi',
             'tgl_pengajuan' => 'required|date',
             'tgl_transaksi' => 'nullable|date',
-            'kategori_payment' => 'required',
-            'vendor_toko' => 'required',
-            'penerima_pj' => 'required',
-            'keterangan' => 'required',
-            'nominal' => 'required|numeric|min:0',
+            'jatuh_tempo' => 'nullable|date',
+            'kategori_payment' => 'required|string|max:255',
+            'vendor_toko' => 'required|string|max:255',
+            'penerima_pj' => 'required|string|max:255',
+            'rekening_va' => 'nullable|string|max:255',
+            'keterangan' => 'required|string',
+            'nominal' => 'required|numeric|min:1',
             'bukti_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'pin_perusahaan' => 'required|numeric'
+            'pin_perusahaan' => 'required'
         ]);
 
         $dbPin = \App\Models\CompanyProfile::first()?->employee_pin;
@@ -910,6 +915,7 @@ class PaymentPlanController extends Controller
 
         try {
             $tgl_pengajuan = $request->tgl_pengajuan;
+            $tgl_transaksi = $request->tgl_transaksi ?? $tgl_pengajuan;
             $no_transaksi = $this->generateNoTransaksi($request->id_divisi, $tgl_pengajuan, 'KAS');
 
             $filePath = null;
@@ -920,34 +926,36 @@ class PaymentPlanController extends Controller
             }
 
             $pp = PaymentPlan::create([
-                'no_transaksi'     => strtoupper($no_pp),
-                'id_divisi'        => $id_divisi,
-                'id_akun'          => !empty($detil_akun) ? $detil_akun : null,
-                'tgl_pengajuan'    => $parsedDate,
-                'tgl_transaksi'    => $parsedDate,
-                'jatuh_tempo'      => null,
-                'jenis_transaksi'  => strtoupper($rekening_ops),
-                'kategori_payment' => strtoupper($kategori),
-                'vendor_toko'      => strtoupper($vendor),
-                'nama_toko_link'   => $nama_toko_link,
-                'penerima_pj'      => strtoupper($nama_pj),
-                'rekening_va'      => strtoupper($rekening_va),
-                'keterangan'       => $keterangan,
-                'nominal'          => 0,
-                'status_payment'   => $status,
+                'no_transaksi'     => $no_transaksi,
+                'id_divisi'        => $request->id_divisi,
+                'id_akun'          => null,
+                'tgl_pengajuan'    => $tgl_pengajuan,
+                'tgl_transaksi'    => $tgl_transaksi,
+                'jatuh_tempo'      => $request->jatuh_tempo,
+                'jenis_transaksi'  => 'PENDING',
+                'kategori_payment' => strtoupper($request->kategori_payment),
+                'vendor_toko'      => strtoupper($request->vendor_toko),
+                'nama_toko_link'   => $request->nama_toko_link ?? null,
+                'penerima_pj'      => strtoupper($request->penerima_pj),
+                'rekening_va'      => $request->rekening_va ? strtoupper($request->rekening_va) : null,
+                'keterangan'       => $request->keterangan,
+                'nominal'          => (float) $request->nominal,
+                'status_payment'   => 'PENGAJUAN',
+                'bukti_file'       => $filePath,
             ]);
 
             $pp->details()->create([
                 'nama_item'      => null,
-                'qty'            => $qty,
-                'satuan'         => $satuan,
-                'keterangan'     => $keterangan,
-                'nominal'        => $nominal,
-                'nominal_aktual' => $nominal_aktual,
+                'qty'            => 1,
+                'harga_satuan'   => (float) $request->nominal,
+                'satuan'         => 'Pcs',
+                'keterangan'     => $request->keterangan,
+                'nominal'        => (float) $request->nominal,
+                'nominal_aktual' => null,
+                'bukti_file'     => $filePath,
             ]);
 
             $pp->recalcFromDetails();
-            $inserted++;
 
             DB::commit();
             SystemLog::record('CREATE', 'Payment Plan', 'Pengajuan baru dari portal karyawan: ' . $no_transaksi . ' - ' . ($request->penerima_pj ?? '-'));

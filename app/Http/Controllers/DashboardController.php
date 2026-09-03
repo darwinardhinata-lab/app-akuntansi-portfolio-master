@@ -53,35 +53,37 @@ class DashboardController extends Controller
                   ->orWhere('coa_type', 'like', '%Bank%')
                   ->orWhere('account_name', 'like', '%Kas%')
                   ->orWhere('account_name', 'like', '%Bank%');
-            })->where(DB::raw('LEFT(TRIM(account_code), 1)'), '1')
+            })->where(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), '1')
             ->pluck('account_code')->map(fn($c) => trim($c))->toArray();
 
         if (empty($cashAccountCodes)) $cashAccountCodes = ['00000'];
 
+        $monthExpr = $this->getMonthExpression();
+
         $cashRows = DB::table('journal_details')
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
-            ->selectRaw('MONTH(journal_headers.transaction_date) as month')
-            ->selectRaw('SUM(CASE WHEN journal_details.position = "DEBET" THEN journal_details.amount ELSE 0 END) as cash_in')
-            ->selectRaw('SUM(CASE WHEN journal_details.position = "KREDIT" THEN journal_details.amount ELSE 0 END) as cash_out')
+            ->selectRaw("{$monthExpr} as month")
+            ->selectRaw("SUM(CASE WHEN journal_details.position = 'DEBET' THEN journal_details.amount ELSE 0 END) as cash_in")
+            ->selectRaw("SUM(CASE WHEN journal_details.position = 'KREDIT' THEN journal_details.amount ELSE 0 END) as cash_out")
             ->whereIn(DB::raw('TRIM(journal_details.account_code)'), $cashAccountCodes)
             ->whereYear('journal_headers.transaction_date', $year)
             ->where('journal_headers.evidence_number', '!=', 'SA-00000')
-            ->groupBy(DB::raw('MONTH(journal_headers.transaction_date)'))
+            ->groupBy(DB::raw($monthExpr))
             ->get()->keyBy('month');
 
         // 2. Ambil Kueri Laba Rugi Matriks
         $plRows = DB::table('journal_details')
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
-            ->selectRaw('MONTH(journal_headers.transaction_date) as month')
-            ->selectRaw("SUM(CASE WHEN LEFT(TRIM(journal_details.account_code), 1) IN ('4','7') AND journal_details.position = 'KREDIT' THEN journal_details.amount WHEN LEFT(TRIM(journal_details.account_code), 1) IN ('4','7') AND journal_details.position = 'DEBET' THEN -journal_details.amount ELSE 0 END) as revenue")
-            ->selectRaw("SUM(CASE WHEN LEFT(TRIM(journal_details.account_code), 1) IN ('5','6','8','9') AND journal_details.position = 'DEBET' THEN journal_details.amount WHEN LEFT(TRIM(journal_details.account_code), 1) IN ('5','6','8','9') AND journal_details.position = 'KREDIT' THEN -journal_details.amount ELSE 0 END) as expense")
+            ->selectRaw("{$monthExpr} as month")
+            ->selectRaw("SUM(CASE WHEN SUBSTR(TRIM(journal_details.account_code), 1, 1) IN ('4','7') AND journal_details.position = 'KREDIT' THEN journal_details.amount WHEN SUBSTR(TRIM(journal_details.account_code), 1, 1) IN ('4','7') AND journal_details.position = 'DEBET' THEN -journal_details.amount ELSE 0 END) as revenue")
+            ->selectRaw("SUM(CASE WHEN SUBSTR(TRIM(journal_details.account_code), 1, 1) IN ('5','6','8','9') AND journal_details.position = 'DEBET' THEN journal_details.amount WHEN SUBSTR(TRIM(journal_details.account_code), 1, 1) IN ('5','6','8','9') AND journal_details.position = 'KREDIT' THEN -journal_details.amount ELSE 0 END) as expense")
             ->whereYear('journal_headers.transaction_date', $year)
             ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
             ->where(function ($q) {
                 $q->whereNull('journal_headers.is_opening_balance')
                   ->orWhere('journal_headers.is_opening_balance', 0);
             })
-            ->groupBy(DB::raw('MONTH(journal_headers.transaction_date)'))
+            ->groupBy(DB::raw($monthExpr))
             ->get()->keyBy('month');
 
         // 3. Format Data Berdasarkan Interval
@@ -143,12 +145,12 @@ class DashboardController extends Controller
             });
 
         $pemasukan = (clone $base)
-            ->whereIn(DB::raw('LEFT(TRIM(journal_details.account_code), 1)'), ['4', '7'])
+            ->whereIn(DB::raw('SUBSTR(TRIM(journal_details.account_code), 1, 1)'), ['4', '7'])
             ->where('journal_details.position', 'KREDIT')
             ->sum('journal_details.amount');
 
         $pengeluaran = (clone $base)
-            ->whereIn(DB::raw('LEFT(TRIM(journal_details.account_code), 1)'), ['5', '6', '8'])
+            ->whereIn(DB::raw('SUBSTR(TRIM(journal_details.account_code), 1, 1)'), ['5', '6', '8'])
             ->where('journal_details.position', 'DEBET')
             ->sum('journal_details.amount');
 
@@ -175,36 +177,38 @@ class DashboardController extends Controller
                   ->orWhere('coa_type', 'like', '%Bank%')
                   ->orWhere('account_name', 'like', '%Kas%')
                   ->orWhere('account_name', 'like', '%Bank%');
-            })->where(DB::raw('LEFT(TRIM(account_code), 1)'), '1')
+            })->where(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), '1')
             ->pluck('account_code')->map(fn($c) => trim($c))->toArray();
 
         if (empty($cashAccountCodes)) $cashAccountCodes = ['00000'];
 
+        $monthExpr = $this->getMonthExpression();
+
         $cashRows = DB::table('journal_details')
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
-            ->selectRaw('MONTH(journal_headers.transaction_date) as month')
-            ->selectRaw('SUM(CASE WHEN journal_details.position = "DEBET" THEN journal_details.amount ELSE 0 END) as cash_in')
-            ->selectRaw('SUM(CASE WHEN journal_details.position = "KREDIT" THEN journal_details.amount ELSE 0 END) as cash_out')
+            ->selectRaw("{$monthExpr} as month")
+            ->selectRaw("SUM(CASE WHEN journal_details.position = 'DEBET' THEN journal_details.amount ELSE 0 END) as cash_in")
+            ->selectRaw("SUM(CASE WHEN journal_details.position = 'KREDIT' THEN journal_details.amount ELSE 0 END) as cash_out")
             ->whereIn(DB::raw('TRIM(journal_details.account_code)'), $cashAccountCodes)
             ->whereYear('journal_headers.transaction_date', $year)
             ->where('journal_headers.evidence_number', '!=', 'SA-00000')
-            ->groupBy(DB::raw('MONTH(journal_headers.transaction_date)'))
+            ->groupBy(DB::raw($monthExpr))
             ->get()
             ->keyBy('month');
 
         // 2. HITUNG LABA RUGI MATRIKS AKTUAL (REVENUE VS EXPENSE)
         $plRows = DB::table('journal_details')
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
-            ->selectRaw('MONTH(journal_headers.transaction_date) as month')
-            ->selectRaw("SUM(CASE WHEN LEFT(TRIM(journal_details.account_code), 1) IN ('4','7') AND journal_details.position = 'KREDIT' THEN journal_details.amount WHEN LEFT(TRIM(journal_details.account_code), 1) IN ('4','7') AND journal_details.position = 'DEBET' THEN -journal_details.amount ELSE 0 END) as revenue")
-            ->selectRaw("SUM(CASE WHEN LEFT(TRIM(journal_details.account_code), 1) IN ('5','6','8','9') AND journal_details.position = 'DEBET' THEN journal_details.amount WHEN LEFT(TRIM(journal_details.account_code), 1) IN ('5','6','8','9') AND journal_details.position = 'KREDIT' THEN -journal_details.amount ELSE 0 END) as expense")
+            ->selectRaw("{$monthExpr} as month")
+            ->selectRaw("SUM(CASE WHEN SUBSTR(TRIM(journal_details.account_code), 1, 1) IN ('4','7') AND journal_details.position = 'KREDIT' THEN journal_details.amount WHEN SUBSTR(TRIM(journal_details.account_code), 1, 1) IN ('4','7') AND journal_details.position = 'DEBET' THEN -journal_details.amount ELSE 0 END) as revenue")
+            ->selectRaw("SUM(CASE WHEN SUBSTR(TRIM(journal_details.account_code), 1, 1) IN ('5','6','8','9') AND journal_details.position = 'DEBET' THEN journal_details.amount WHEN SUBSTR(TRIM(journal_details.account_code), 1, 1) IN ('5','6','8','9') AND journal_details.position = 'KREDIT' THEN -journal_details.amount ELSE 0 END) as expense")
             ->whereYear('journal_headers.transaction_date', $year)
             ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
             ->where(function ($q) {
                 $q->whereNull('journal_headers.is_opening_balance')
                   ->orWhere('journal_headers.is_opening_balance', 0);
             })
-            ->groupBy(DB::raw('MONTH(journal_headers.transaction_date)'))
+            ->groupBy(DB::raw($monthExpr))
             ->get()
             ->keyBy('month');
 
@@ -273,5 +277,12 @@ class DashboardController extends Controller
             'total_jurnal' => JournalHeader::count(),
             'total_pp'     => DB::table('transaksi_payment_plan')->count(),
         ];
+    }
+
+    private function getMonthExpression(): string
+    {
+        return DB::connection()->getDriverName() === 'sqlite'
+            ? "CAST(strftime('%m', journal_headers.transaction_date) AS INTEGER)"
+            : "MONTH(journal_headers.transaction_date)";
     }
 }
