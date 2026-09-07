@@ -39,7 +39,7 @@ class ProfitLossController extends Controller
                 )
                 ->where('transaction_date', '>=', $rangeStart . ' 00:00:00')
                 ->where('transaction_date', '<=', $rangeEnd . ' 23:59:59')
-                ->where('journal_headers.description', 'NOT LIKE', '%SETUP SALDO AWAL%')
+                ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
                 ->where(function ($q) {
                     $q->whereNull('journal_headers.is_opening_balance')
@@ -60,7 +60,7 @@ class ProfitLossController extends Controller
                 ->select(DB::raw('TRIM(account_code) as account_code'), 'position', DB::raw('SUM(amount) as total'))
                 ->where('transaction_date', '>=', $startDate . ' 00:00:00')
                 ->where('transaction_date', '<=', $endDate . ' 23:59:59')
-                ->where('journal_headers.description', 'NOT LIKE', '%SETUP SALDO AWAL%')
+                ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
                 ->where(function ($q) {
                     $q->whereNull('journal_headers.is_opening_balance')
@@ -266,7 +266,7 @@ class ProfitLossController extends Controller
                 ->where('transaction_date', '>=', $startDate . ' 00:00:00')
                 ->where('transaction_date', '<=', $endDate . ' 23:59:59')
                 ->whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['4','5','6','7','8','9'])
-                ->where('journal_headers.description', 'NOT LIKE', '%SETUP SALDO AWAL%')
+                ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
                 ->where(function ($q) {
                     $q->whereNull('journal_headers.is_opening_balance')

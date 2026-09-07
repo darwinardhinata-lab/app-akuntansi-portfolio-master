@@ -20,7 +20,6 @@ class JournalHeader extends Model
         'journal_id',
         'transaction_date',
         'evidence_number',
-        'description',
         'jj_id',
         // --- Kolom Tambahan dari Jubelio ---
         'journal_no',
@@ -83,6 +82,16 @@ class JournalHeader extends Model
         $id   = 'JRN-PP-' . substr($slug, 0, 40);
 
         return substr($id, 0, 50);
+    }
+
+    /**
+     * Backward-compatibility accessor:
+     * Kolom di database adalah 'notes', bukan 'description'.
+     * Accessor ini memastikan $header->description tetap berfungsi.
+     */
+    public function getDescriptionAttribute(): ?string
+    {
+        return $this->attributes['notes'] ?? null;
     }
 
     public function details()

@@ -71,7 +71,7 @@ class BalanceSheetController extends Controller
                 ->select('position', DB::raw('SUM(amount) as total'))
                 ->where('journal_headers.transaction_date', '<', $yearOfRangeStart . '-01-01 00:00:00')
                 ->whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['4', '5', '6', '7', '8', '9'])
-                ->where('journal_headers.description', 'NOT LIKE', '%SETUP SALDO AWAL%')
+                ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
                 ->where(function ($q) {
                     $q->whereNull('journal_headers.is_opening_balance')
@@ -86,7 +86,7 @@ class BalanceSheetController extends Controller
                 ->where('journal_headers.transaction_date', '>=', $yearOfRangeStart . '-01-01 00:00:00')
                 ->where('journal_headers.transaction_date', '<', $rangeStart . ' 00:00:00')
                 ->whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['4', '5', '6', '7', '8', '9'])
-                ->where('journal_headers.description', 'NOT LIKE', '%SETUP SALDO AWAL%')
+                ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
                 ->where(function ($q) {
                     $q->whereNull('journal_headers.is_opening_balance')
@@ -105,7 +105,7 @@ class BalanceSheetController extends Controller
                 ->where('journal_headers.transaction_date', '>=', $rangeStart . ' 00:00:00')
                 ->where('journal_headers.transaction_date', '<=', $rangeEnd . ' 23:59:59')
                 ->whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['4', '5', '6', '7', '8', '9'])
-                ->where('journal_headers.description', 'NOT LIKE', '%SETUP SALDO AWAL%')
+                ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
                 ->where(function ($q) {
                     $q->whereNull('journal_headers.is_opening_balance')
@@ -345,7 +345,7 @@ class BalanceSheetController extends Controller
                 ->select('position', DB::raw('YEAR(journal_headers.transaction_date) as year'), DB::raw('SUM(amount) as total'))
                 ->where('journal_headers.transaction_date', '<=', $date . ' 23:59:59')
                 ->whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['4', '5', '6', '7', '8', '9'])
-                ->where('journal_headers.description', 'NOT LIKE', '%SETUP SALDO AWAL%')
+                ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
                 ->where(function ($q) {
                     $q->whereNull('journal_headers.is_opening_balance')

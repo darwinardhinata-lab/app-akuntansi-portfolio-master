@@ -366,7 +366,7 @@ class JournalController extends Controller
             ->where('journal_headers.evidence_number', $evidence)
             ->select(
                 'journal_headers.transaction_date',
-                'journal_headers.description as header_desc',
+                'journal_headers.notes as header_desc',
                 'accounts.account_code',
                 'accounts.account_name',
                 'journal_details.position',

@@ -73,7 +73,7 @@
                                     {{ $row->evidence_number }}
                                 </a>
                             </td>
-                            <td style="max-width: 350px; overflow: hidden; text-overflow: ellipsis;">{{ $row->description }}</td>
+                            <td style="max-width: 350px; overflow: hidden; text-overflow: ellipsis;">{{ $row->notes }}</td>
                             
                             @if($tab == 'tagihan')
                                 <td class="text-end fw-bold text-muted">Rp {{ number_format($row->total_invoice, 0, ',', '.') }}</td>

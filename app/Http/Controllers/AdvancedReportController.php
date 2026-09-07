@@ -46,7 +46,7 @@ class AdvancedReportController extends Controller
                 ->select(
                     'journal_headers.transaction_date', 
                     'journal_headers.evidence_number', 
-                    'journal_headers.description as header_desc', 
+                    'journal_headers.notes as header_desc', 
                     'journal_headers.tags',
                     'accounts.account_name',
                     DB::raw('CASE WHEN journal_details.position = "DEBET" THEN journal_details.amount ELSE 0 END as debit'),
@@ -55,7 +55,7 @@ class AdvancedReportController extends Controller
                 // FIX: Filter diarahkan ke kolom 'tags' ATAU 'description'
                 ->where(function($q) use ($tag) {
                     $q->where('journal_headers.tags', 'LIKE', "%{$tag}%")
-                      ->orWhere('journal_headers.description', 'LIKE', "%{$tag}%");
+                      ->orWhere('journal_headers.notes', 'LIKE', "%{$tag}%");
                 })
                 ->orderBy('journal_headers.transaction_date', 'desc')
                 ->get();
@@ -169,7 +169,7 @@ class AdvancedReportController extends Controller
 
             $unpaidInvoices = DB::table('journal_headers')
                 ->joinSub($subquery, 'details', 'journal_headers.journal_id', '=', 'details.journal_id')
-                ->select('journal_headers.evidence_number', 'journal_headers.transaction_date', 'journal_headers.description', 'details.remaining_balance', 'details.total_invoice')
+                ->select('journal_headers.evidence_number', 'journal_headers.transaction_date', 'journal_headers.notes', 'details.remaining_balance', 'details.total_invoice')
                 ->orderBy('journal_headers.transaction_date', 'asc')
                 ->simplePaginate(50);
         } elseif ($tab === 'pembayaran') {
@@ -178,8 +178,8 @@ class AdvancedReportController extends Controller
                 ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
                 ->whereIn('journal_details.account_code', $kodeAkunPiutang)
                 ->where('journal_details.position', 'KREDIT')
-                ->where('journal_headers.description', 'NOT LIKE', '%Retur%')
-                ->select('journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.description', 'journal_details.amount')
+                ->where('journal_headers.notes', 'NOT LIKE', '%Retur%')
+                ->select('journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.notes', 'journal_details.amount')
                 ->orderBy('journal_headers.transaction_date', 'desc')
                 ->simplePaginate(50);
         } elseif ($tab === 'retur') {
@@ -187,7 +187,7 @@ class AdvancedReportController extends Controller
             $returns = DB::table('journal_details')
                 ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
                 ->whereIn('journal_details.account_code', $kodeAkunReturJual)
-                ->select('journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.description', 'journal_details.amount')
+                ->select('journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.notes', 'journal_details.amount')
                 ->orderBy('journal_headers.transaction_date', 'desc')
                 ->simplePaginate(50);
         }
@@ -222,7 +222,7 @@ class AdvancedReportController extends Controller
 
             $unpaidBills = DB::table('journal_headers')
                 ->joinSub($subquery, 'details', 'journal_headers.journal_id', '=', 'details.journal_id')
-                ->select('journal_headers.evidence_number', 'journal_headers.transaction_date', 'journal_headers.description', 'details.remaining_balance', 'details.total_invoice')
+                ->select('journal_headers.evidence_number', 'journal_headers.transaction_date', 'journal_headers.notes', 'details.remaining_balance', 'details.total_invoice')
                 ->orderBy('journal_headers.transaction_date', 'asc')
                 ->simplePaginate(50);
         } elseif ($tab === 'pembayaran') {
@@ -231,8 +231,8 @@ class AdvancedReportController extends Controller
                 ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
                 ->whereIn('journal_details.account_code', $kodeAkunHutang)
                 ->where('journal_details.position', 'DEBET')
-                ->where('journal_headers.description', 'NOT LIKE', '%Retur%')
-                ->select('journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.description', 'journal_details.amount')
+                ->where('journal_headers.notes', 'NOT LIKE', '%Retur%')
+                ->select('journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.notes', 'journal_details.amount')
                 ->orderBy('journal_headers.transaction_date', 'desc')
                 ->simplePaginate(50);
         } elseif ($tab === 'retur') {
@@ -241,8 +241,8 @@ class AdvancedReportController extends Controller
                 ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
                 ->whereIn('journal_details.account_code', $kodeAkunHutang)
                 ->where('journal_details.position', 'DEBET')
-                ->where('journal_headers.description', 'LIKE', '%Retur%')
-                ->select('journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.description', 'journal_details.amount')
+                ->where('journal_headers.notes', 'LIKE', '%Retur%')
+                ->select('journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.notes', 'journal_details.amount')
                 ->orderBy('journal_headers.transaction_date', 'desc')
                 ->simplePaginate(50);
         }

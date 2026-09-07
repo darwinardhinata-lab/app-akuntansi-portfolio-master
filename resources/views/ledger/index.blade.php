@@ -162,7 +162,7 @@
                                    <i class="fa-solid fa-link fa-sm me-1"></i> {{ $tx->evidence_number }}
                                 </a>
                             </td>
-                            <td class="fw-medium text-dark">{{ $tx->description }}</td>
+                            <td class="fw-medium text-dark">{{ $tx->notes }}</td>
                             
                             <td class="text-end text-nowrap nominal-number {{ $deb > 0 ? 'text-success fw-bold' : 'text-muted' }}">
                                 {{ $deb > 0 ? number_format($deb, 2, ',', '.') : '-' }}

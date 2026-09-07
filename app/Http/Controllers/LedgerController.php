@@ -86,7 +86,7 @@ class LedgerController extends Controller
         // =====================================================================================
         $transactions = JournalDetail::with(['header.details.account']) 
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
-            ->select('journal_details.*', 'journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.description')
+            ->select('journal_details.*', 'journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.notes')
             ->where('account_code', $accCode)
             ->whereBetween('transaction_date', [$startDate, $endDate])
             ->orderBy('transaction_date', 'asc')

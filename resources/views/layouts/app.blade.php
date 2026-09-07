@@ -705,6 +705,7 @@
                     <div class="d-flex gap-2">
                         <a href="{{ route('lang.switch', 'id') }}" class="btn btn-sm w-100 fw-bold {{ app()->getLocale() == 'id' ? 'btn-primary' : 'btn-light text-dark' }}">🇮🇩 ID</a>
                         <a href="{{ route('lang.switch', 'en') }}" class="btn btn-sm w-100 fw-bold {{ app()->getLocale() == 'en' ? 'btn-primary' : 'btn-light text-dark' }}">🇬🇧 EN</a>
+                        <a href="{{ route('lang.switch', 'zh_CN') }}" class="btn btn-sm w-100 fw-bold {{ app()->getLocale() == 'zh_CN' ? 'btn-primary' : 'btn-light text-dark' }}">🇨🇳 中文</a>
                     </div>
                 </li>
                 <li><hr class="dropdown-divider"></li>

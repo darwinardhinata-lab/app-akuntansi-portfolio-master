@@ -56,7 +56,7 @@ class CashFlowController extends Controller
                 // a. Mutasi Kas Normal SEBELUM tanggal mulai laporan (Mengabaikan Opening Balance)
                 $query->where(function($q1) use ($rangeStart) {
                     $q1->where('journal_headers.transaction_date', '<', $rangeStart . ' 00:00:00')
-                       ->where('journal_headers.description', 'NOT LIKE', '%SETUP SALDO AWAL%')
+                       ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                        ->where(function($q) {
                             $q->whereNull('journal_headers.is_opening_balance')
                               ->orWhere('journal_headers.is_opening_balance', 0);
@@ -66,7 +66,7 @@ class CashFlowController extends Controller
                 ->orWhere(function($q2) use ($rangeStart) {
                     $q2->where('journal_headers.transaction_date', '<=', $rangeStart . ' 23:59:59')
                        ->where(function($q) {
-                            $q->where('journal_headers.description', 'LIKE', '%SETUP SALDO AWAL%')
+                            $q->where('journal_headers.notes', 'LIKE', '%SETUP SALDO AWAL%')
                               ->orWhere('journal_headers.is_opening_balance', 1);
                         });
                 });
@@ -94,7 +94,7 @@ class CashFlowController extends Controller
                 ->whereIn(DB::raw('TRIM(journal_details.account_code)'), $cashAccountCodes)
                 ->where('journal_headers.transaction_date', '>=', $rangeStart . ' 00:00:00')
                 ->where('journal_headers.transaction_date', '<=', $rangeEnd . ' 23:59:59')
-                ->where('journal_headers.description', 'NOT LIKE', '%SETUP SALDO AWAL%')
+                ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 // BLOCKIR JURNAL SALDO AWAL JUBELIO MASUK KE MUTASI JULI
                 ->where(function($q) {
                     $q->whereNull('journal_headers.is_opening_balance')
@@ -153,7 +153,7 @@ class CashFlowController extends Controller
                 )
                 ->where('journal_headers.transaction_date', '>=', $rangeStart . ' 00:00:00')
                 ->where('journal_headers.transaction_date', '<=', $rangeEnd . ' 23:59:59')
-                ->where('journal_headers.description', 'NOT LIKE', '%SETUP SALDO AWAL%')
+                ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 // BLOCKIR JURNAL SALDO AWAL JUBELIO MASUK KE MUTASI JULI
                 ->where(function($q) {
                     $q->whereNull('journal_headers.is_opening_balance')

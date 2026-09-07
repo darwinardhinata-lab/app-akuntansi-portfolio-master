@@ -24,11 +24,11 @@ class CheckJournalBalance extends Command
                 'journal_headers.journal_id',
                 'journal_headers.evidence_number',
                 'journal_headers.transaction_date',
-                'journal_headers.description',
+                'journal_headers.notes',
                 DB::raw("SUM(CASE WHEN journal_details.position = 'DEBET' THEN journal_details.amount ELSE 0 END) as total_debet"),
                 DB::raw("SUM(CASE WHEN journal_details.position = 'KREDIT' THEN journal_details.amount ELSE 0 END) as total_kredit")
             )
-            ->groupBy('journal_headers.journal_id', 'journal_headers.evidence_number', 'journal_headers.transaction_date', 'journal_headers.description')
+            ->groupBy('journal_headers.journal_id', 'journal_headers.evidence_number', 'journal_headers.transaction_date', 'journal_headers.notes')
             ->havingRaw("ROUND(SUM(CASE WHEN journal_details.position = 'DEBET' THEN journal_details.amount ELSE 0 END), 2) <> ROUND(SUM(CASE WHEN journal_details.position = 'KREDIT' THEN journal_details.amount ELSE 0 END), 2)")
             ->orderBy('journal_headers.transaction_date')
             ->get();

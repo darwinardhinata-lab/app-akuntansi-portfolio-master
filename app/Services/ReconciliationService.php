@@ -704,7 +704,7 @@ class ReconciliationService
             ->where('journal_headers.transaction_date', '>=', $startDate . ' 00:00:00')
             ->where('journal_headers.transaction_date', '<=', $endDate . ' 23:59:59')
             ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
-            ->where('journal_headers.description', 'NOT LIKE', '%SETUP SALDO AWAL%')
+            ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
             ->where(function ($q) {
                 $q->whereNull('journal_headers.is_opening_balance')
                   ->orWhere('journal_headers.is_opening_balance', 0);
