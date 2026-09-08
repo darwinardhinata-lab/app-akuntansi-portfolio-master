@@ -1,0 +1,1203 @@
+Total: 1200
+===START===
+&larr; Kembali || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\show.blade.php
+&times; || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php
+' + akun.account_code + ' || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+' + data.message + ' || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_subledger.blade.php
+'analisa']) }}">Analisa Pivot || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+'batal']) }}">Batal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+'belum_dibayar']) }}">Belum Dibayar || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+'diretur']) }}">Diretur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+'gagal_download']) }}">Gagal Download || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+'gagal_picking']) }}">Gagal Picking || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+'packing']) }}">Packing || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+'pembelian']) }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+'penempatan_barang']) }}">Penempatan Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\inbound.blade.php
+'penerimaan_barang']) }}">Penerimaan Barang (BIL) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\inbound.blade.php
+'pesanan_pembelian']) }}">Pesanan Pembelian (PO) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\inbound.blade.php
+'picking']) }}">Picking || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+'request_batal']) }}">Request Batal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+'retur_online']) }}">Retur Channel Online || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\inbound.blade.php
+'retur_pembelian']) }}">Retur Pembelian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\outbound.blade.php
+'retur_penjualan']) }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+'selesai']) }}">Selesai || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+'semua']) }}">Semua || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+'shipping']) }}">Shipping || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+'siap_proses']) }}">Siap Proses || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+'stok_kosong']) }}">Stok Kosong || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+'sudah_dikirim']) }}">Sudah Dikirim || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+'transfer_keluar']) }}">Transfer Keluar || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\outbound.blade.php
+'transfer_masuk']) }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+'transfer_masuk']) }}">Transfer Masuk || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\inbound.blade.php
++ Tambah Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_outbound.blade.php
++ Tambah Baris || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\edit.blade.php
++ Tambah Baris Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
++ Tambah Baris Biaya || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
++ Tambah Baris Item || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
++ Tambah Baris Jurnal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php
++ Tambah Baris Produk || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+-- Internal -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+-- Ketik Nama Supplier -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+-- Pilih Akun -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_outbound.blade.php
+-- Pilih Barang -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\cogs_chronology.blade.php
+-- Pilih Bill -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+-- Pilih Divisi -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+-- Pilih Fabric -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php
+-- Pilih Faktur -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+-- Pilih Kategori -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+-- Pilih Kategori Akun -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+-- Pilih nanti saat SPK selesai -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php
+-- Pilih PO -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php
+-- Pilih Produk -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+-- Pilih Rekening -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+-- Pilih Supplier -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php
+-- Pilih Supplier Dahulu -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+-- Pilih Vendor -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+-- Pilih Yarn -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php
+-- Semua Status -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\index.blade.php
+-- Tidak ada -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+-- Tidak Ada -- || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+- Kosong - || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\edit.blade.php
+- Rp 0 || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+30s || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+100% Cotton || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+account_name }} || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_dp_report.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ar_dp_report.blade.php
+ADMINISTRATOR || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\index.blade.php
+Aktif || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Aktual (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Akumulasi Depresiasi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Akun Penyeimbang Jurnal (DEBET) * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_outbound.blade.php
+Akun Penyeimbang Jurnal (KREDIT) * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Alamat || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Alamat Lengkap || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Alamat Pengiriman || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Alokasi Biaya / Pembelian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
+Analisa Pivot (Analytic Matrix) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php
+Analisa Sejak || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+APPROVED || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\dashboard.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+APPROVED (Pending) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Arsip dokumen sah pengubah stok gudang dan dasar posting keuangan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php
+Asal Toko / Gudang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php
+Asal Toko / Lokasi Gudang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+A S E T || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet-matrix.blade.php
+Aset Lancar Lainnya || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Aset Management || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Audit trail aman dan terdokumentasi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Auto-submit saat dipilih || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Auto Detect || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Bagian / Divisi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\index.blade.php
+Bandingkan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+Bandingkan saldo per akun antara sumber Jubelio dan ledger ERP untuk periode yang sama. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Barang Keluar || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Barang Keluar (Outbound) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\outbound.blade.php
+Barang Masuk || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Barang Masuk (Inbound) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\inbound.blade.php
+Barang Pengganti || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Barcode Label & Penyelesaian SPK || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Baris || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php
+Baris per Halaman || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+Batal / Void Faktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+BATCH-01 || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Batch Number || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+BCA BBB OPS || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+BCA BBW OPS || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+BCA GBB OPS || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+BCA KOI OPS || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Belum ada Cutting Order. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Belum ada data divisi. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\index.blade.php
+Belum ada data fabric. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Belum ada data pajak. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\index.blade.php
+Belum ada data rate proses. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Belum ada data Retur Pembelian. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\index.blade.php
+Belum ada data retur penjualan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\index.blade.php
+Belum ada data supplier. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Belum ada data yarn. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Belum Ada di ERP || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+Belum ada faktur yang diterbitkan atau kecocokan filter tidak ditemukan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php
+Belum ada Knit Order. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Belum ada MRN. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\index.blade.php
+Belum ada mutasi untuk barang ini. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\cogs_chronology.blade.php
+Belum ada Processing Order. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Belum ada riwayat barang keluar. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\outbound.blade.php
+Belum ada riwayat barang masuk. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\inbound.blade.php
+Belum ada riwayat mutasi stok untuk barang ini di periode terpilih. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\ledger.blade.php
+Belum ada SPK. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\index.blade.php
+Belum ada Stitching Order. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Belum ada tagihan pembelian. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\index.blade.php
+Belum ada transaksi pembelian. Silakan import CSV atau Buat Manual. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Belum ada transaksi penjualan terdeteksi. Silakan import CSV. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Belum di ERP || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Belum Diterima || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+BELUM LUNAS || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\index.blade.php
+Berhasil! || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_category\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Berkode (ada kode akun) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Biaya || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Biaya Bahan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\index.blade.php
+Biaya Jasa Knitting (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Biaya Jasa Proses (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Biaya Lain-lain || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Biaya Lainnya || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Biaya Proses || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\index.blade.php
+Bisa dikosongkan dulu, diisi saat SPK selesai (WorkOrderService::complete). || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php
+Bruto || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\index.blade.php
+Buat Baru || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Buat Dokumen Retur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Buat Faktur Penjualan (Direct) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php
+Buat MRN Baru || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php
+Buat Purchase Order (PO) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php
+Buat SPK Baru || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php
+Buat Tagihan & Terima Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Buat Tagihan Langsung (Direct Bill) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
+Budget HPP (Max) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Budget HPP / Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Budget Operasional || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Budget Operasional (Max) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Bukti || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Buku Besar (General Ledger) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+Buku Besar Pembantu Hutang, pemantauan tagihan supplier, pelunasan, dan retur material. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_subledger.blade.php
+Bulan: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Bulanan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\dashboard.blade.php
+Cari || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Cari & Pilih Bill * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Cari & Pilih PO * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Cari Detil Akun (COA)... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Cari Kode/Jenis Fabric || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Cari Kode/Jenis Yarn || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Cari Kode/Nama Supplier || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Cari Kode Aset / Nama Aset... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Cari No. Bukti / Keterangan... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php
+Cari No. Faktur / Pelanggan... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php
+Cari No. MRN || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\index.blade.php
+Cari No. SPK / Nama Garmen / Style SKU || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\index.blade.php
+Cari Produk... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Cari Tag || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\tag_report.blade.php
+Cash & Bank || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Catatan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php
+Catat tagihan supplier, biaya operasional harian, dan ATK secara langsung. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\index.blade.php
+Catat transaksi akuntansi secara manual || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php
+Ceklis || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+Centang / isi Qty Retur untuk barang yang diretur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\create.blade.php
+Cepat (Hanya Status PENGAJUAN) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Cetak Barcode Label || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Cetak Label || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+COA tidak ditemukan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Cocok || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Cocok (MATCH) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+color }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+COMPLETED || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+composition }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Condition || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\show.blade.php
+contact_name }} || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+contact_person }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Contoh: 36 || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\create.blade.php
+Contoh: 11101 || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php
+Contoh: Barang Rusak / Kadaluarsa || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_outbound.blade.php
+CONTOH: BCA - 123456 - NAMA || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Contoh: Beli ATK untuk bulan ini || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
+Contoh: CUST-001 || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\create.blade.php
+Contoh: Divisi Keuangan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\create.blade.php
+Contoh: FIN || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\create.blade.php
+Contoh: Kas Besar || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php
+Contoh: Pembayaran listrik bulan ini || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php
+Contoh: PPN 11% || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\create.blade.php
+Contoh: Shopee, Tokopedia, atau link toko || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Contoh: Stok Opname / Pindah Gudang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Cotton Combed || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Count || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Custom (Semua Data + Filter) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Cutting || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Cutting Order Baru || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Daftar Akun (COA) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php
+Daftar Arsip Faktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php
+Daftar pesanan aktif yang menunggu proses (Picking, Packing, Shipping). || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+Daftar pesanan pembelian dari Supplier. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Daftar Retur Penjualan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\index.blade.php
+Dari: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\profit-loss.blade.php
+Dari Tanggal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+Dashboard Gudang: Proses Pesanan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+Database mutasi penjualan produk terintegrasi otomatisasi akuntansi keuangan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Database SKU dan Harga Modal untuk automasi HPP. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Data divisi gagal diperbarui. Periksa kembali data berikut: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\edit.blade.php
+Data induk benang beserta stok & HPP moving average. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Data induk kain GREY & FINISHED beserta stok & HPP moving average. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Data masih kosong atau tidak ditemukan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\index.blade.php
+Data Payment Plan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Data selalu ditambahkan baru (tidak ada kode unik utk update), edit rate lama lewat tombol Edit di tabel. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Debet (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\partials\ajax_detail.blade.php
+DEBET: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Debit (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\tag_report.blade.php
+description }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Deskripsi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\edit.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_category\index.blade.php
+Deskripsi (Opsional) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Deskripsi / Tag || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\tag_report.blade.php
+Deskripsi Akun || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet-matrix.blade.php
+Deskripsi Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Deskripsi Biaya || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
+Deskripsi Jurnal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php
+Deskripsi Transaksi / Supplier || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_subledger.blade.php
+Detail || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\dashboard.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\index.blade.php
+Detail Alamat Jalan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+Detail Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php
+Detail Barang Retur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\create.blade.php
+Detail Faktur Penjualan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Detail per Akun || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+Detail Rekonsiliasi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Detail Transaksi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_subledger.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ar_subledger.blade.php
+Detil Akun || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Dimensi Baris (Rows) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Dimensi Kolom (Columns) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Disc || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Disc. Ongkir || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Disc. Ongkos Kirim || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+disc_amount }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Disetujui || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\index.blade.php
+Disetujui / Lunas || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Diskon || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php
+Diskon (Gabungan) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Diskon (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Diskon: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php
+Diskon Lainnya || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Diskon Produk || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Ditolak || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\index.blade.php
+Divisi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Divisi / Bagian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Divisi gagal disimpan. Periksa kembali data berikut: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\create.blade.php
+Divisi non-aktif tidak akan muncul di pilihan form pengajuan Payment Plan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\edit.blade.php
+Documentation || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\welcome.blade.php
+DPP (Dasar Pengenaan Pajak) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Duplikat/Duplicate || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Edit Data || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Edit Divisi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\edit.blade.php
+Edit Fabric || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Edit Jurnal Umum || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\edit.blade.php
+Edit Kategori Payment Plan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_category\index.blade.php
+Edit Master Akun (COA) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Edit Master Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\edit.blade.php
+Edit Pajak || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\edit.blade.php
+Edit Pengguna || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\edit.blade.php
+Edit Pesanan Penjualan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Edit PO || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Edit Purchase Order || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Edit Rate Proses || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Edit Supplier || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Edit Yarn || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Ekspedisi / Kurir || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Email || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\auth\login.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Email Login || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\index.blade.php
+Email Perusahaan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+email }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+ERP Accounting || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\auth\login.blade.php
+Estimasi Total || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Exclude PPN (Belum Termasuk) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php
+Executive Dashboard: Budgeting & Proyeksi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Export || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Export Arus Kas || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Export Custom (Semua Data + Filter) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Export Excel || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Export Laba Rugi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\profit-loss.blade.php
+Export Neraca || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet.blade.php
+Export PDF || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Fabric Terpakai (kg) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Fabric Wastage (kg) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+fabric_code }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+fabric_type }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Faktur Penjualan Asal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+FB-GREY-180 || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+File CSV Purchase Orders Details || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+File Sumber Jubelio (CSV) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+Filter || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\index.blade.php
+Filter Analitik Pencarian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\index.blade.php
+Filter Pencarian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+FINISHED || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+FINISHING || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Format: JPG, PNG (Maks. 2MB). Rekomendasi rasio Landscape/Kotak transparan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+Format CSV/Excel (11 Kolom): || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Format CSV Jubelio (9 Kolom): || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php
+Format CSV yang didukung: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+Format File || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Format yang diizinkan: JPG, PNG, PDF (Maks. 5 MB) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Form ini hanya utk 1 ukuran per submit — untuk multi-ukuran, ulangi submit per ukuran. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Form Pengajuan Payment Plan (Terintegrasi PO) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Form Retur Pembelian (Debit Note) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php
+Gagal memuat data || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Gagal menarik data PO. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php
+Gagal mengambil data. Pastikan koneksi internet stabil. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Garmen / Style || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\index.blade.php
+Grafik Laba Rugi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\dashboard.blade.php
+Grand Total || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+GRAND TOTAL || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Grand Total (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+GRAND TOTAL: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php
+GRAND TOTAL AKTUAL || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Grand Total ERP || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Grand Total Jubelio || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+gsm }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Gudang Kosong || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+Gunakan format CSV standar Jubelio. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Gunakan susunan kolom template CSV. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\index.blade.php
+Hak Akses (Role) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\index.blade.php
+Hanya Administrator yang dapat mengubah PIN ini. PIN ini digunakan di form pengajuan karyawan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+Hapus Data || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Hapus PO || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Hapus Terpilih || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\index.blade.php
+Harga || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Harga (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Harga Jual (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\edit.blade.php
+Harga Pokok Penjualan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Harga Satuan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Harga Satuan (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Harga Termasuk Pajak (Include Tax) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Header Surat Perintah Kerja — akan menampung seluruh biaya WIP mulai tahap Cutting. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php
+Hingga || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Hitung || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+HPP / Nilai Rata-rata Terkini || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\ledger.blade.php
+HPP/Pcs || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+HPP / Unit (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\inbound.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\outbound.blade.php
+HPP Baru per Unit (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+HPP Rata-rata || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Hrg Satuan (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Hrg Satuan / HPP || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\ledger.blade.php
+Hutang Dagang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Hutang Jangka Panjang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Hutang Lainnya || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+I. ARUS KAS MASUK (PENERIMAAN KAS) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Identitas Profil Perusahaan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+id_detail }})"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+id }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+id }}">+ Tahap Finishing || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+id }}">Buat Stitching || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+id }}">Catat QC || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+id }}">Issue Kain Grey || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+id }}">Issue Yarn || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+id }}">Terima Kain Finished || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+id }}">Terima Kain Grey || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+II. ARUS KAS KELUAR (PENGELUARAN KAS) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Import Aset Tetap || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Import CSV Kode Bantu (Relasi) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\index.blade.php
+Import CSV Master Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Import CSV Payment Plan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Import CSV Pembelian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Import CSV Penjualan (Jubelio) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Import Excel/CSV Master Akun (COA) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php
+Import Jurnal Umum || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php
+Import Master Fabric || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Import Master Rate Proses || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Import Master Supplier || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Import Master Yarn || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Import MRN Massal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\index.blade.php
+Import Saldo Awal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+Include PPN (Sudah Termasuk) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php
+Informasi Faktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php
+Informasi ini otomatis dicetak di kop atas lembar print/export Excel seluruh laporan keuangan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+Informasi Pembelian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Informasi Pengiriman || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Informasi Retur Penjualan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\create.blade.php
+Informasi Tagihan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
+Ingat saya || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\auth\login.blade.php
+Input Penerimaan Barang (Inbound) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Interval: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Investasi Jangka Panjang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Isi kolom || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+issue_number }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Item || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+item) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Item Bahan Baku || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\show.blade.php
+Item Code || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Item Code / SKU || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Item Dipesan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+item_code }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Jatuh Tempo || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Jatuh Tempo (Opsional) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Jatuh Tempo Bayar || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Jatuh Tempo Bayar (Opsional) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Jejak Aktivitas ( || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Jejak Log Aktivitas || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\index.blade.php
+Jelaskan secara rinci detail item dan tujuan penggunaan dana... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Jenis || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+JNE / J&T / Sicepat || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Jubelio || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+Jubelio Shipment || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Jubelio Status || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Jumlah || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\show.blade.php
+Jumlah SPK || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+Jurnal Umum Baru || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php
+Kain || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Kain Finished || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Kain Finished Tujuan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Kain Grey || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Kalkulasi & Pajak || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Kalkulasi Akhir || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php
+Kaos Polo Lengan Pendek || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php
+Kartu pergerakan mutasi dan riwayat saldo per satu kode akun. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+Kartu Stok (Inventory Ledger) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\ledger.blade.php
+Kas & Bank (Siap Import Jubelio) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Kas & Bank - Custom Filter || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Kata Sandi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\auth\login.blade.php
+Kategori Payment || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Kategori Payment * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Kategori Pengeluaran || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Kelola aset tetap, umur ekonomis, dan pantau penyusutan otomatis. Buat jurnal dengan kode akun 12000 (Aset Tetap) untuk menambahkan aset secara otomatis. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Kelola daftar divisi/bagian untuk struktur organisasi dan pengajuan Payment Plan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\index.blade.php
+Kelola daftar entitas untuk otomatisasi laporan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\index.blade.php
+Kelola kategori payment plan yang dapat ditambah, diedit, atau dihapus. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_category\index.blade.php
+Kelola pengajuan pembayaran dan posting jurnal akuntansi otomatis. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Keluar (Out) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\cogs_chronology.blade.php
+Kembali || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Kembali ke daftar || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\show.blade.php
+Kembali ke Daftar || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+KENAIKAN (PENURUNAN) KAS BERSIH || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Keperluan Pengajuan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Keputusan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\show.blade.php
+Keputusan Final || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\show.blade.php
+Kerugian Wastage || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+Keterangan * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Keterangan / Alasan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_outbound.blade.php
+Keterangan Aktivitas || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Keterangan kategori... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_category\index.blade.php
+Keterangan Tambahan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
+KETERANGAN UMUM || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+Keterangan Umum || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Keterangan Umum (Opsional) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Ketik kata kunci... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Ketik Kode atau Nama Akun... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php
+Ketik Kode atau Nama Entitas / Kategori... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\index.blade.php
+Ketik nama atau email... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\index.blade.php
+Ketik nama divisi... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\index.blade.php
+Ketik nama pajak... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\index.blade.php
+Ketik nama tag / proyek... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\tag_report.blade.php
+Ketik No / Vendor... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Ketik No Retur... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\index.blade.php
+Ketik SKU, Nama Barang, atau Kategori... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Ketik SKU... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+K E W A J I B A N || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet-matrix.blade.php
+Klik untuk lihat detail mutasi jurnal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_subledger.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ar_subledger.blade.php
+Klik untuk menelusuri dokumen asal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+Klik untuk menelusuri dokumen operasional asli || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php
+Klik untuk toggle status || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Knit Order Baru || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Knitter || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Knitter, Processor (dyeing/printing), Stitcher/CMT, dan supplier bahan baku. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+KNITTING || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Knitting Single Jersey || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Kode || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Kode Akun || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+KODE AKUN || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\edit.blade.php
+Kode Akun (Debet) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
+Kode Akun (ID) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Kode Akun * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php
+Kode akun tidak dapat diubah untuk menjaga integritas jurnal. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+KODE BANTU || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\edit.blade.php
+Kode Bantu (AP) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Kode Bantu (ID) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\create.blade.php
+KODE BANTU (OPSIONAL) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php
+Kode Bantu (Subledger AP) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Kode Divisi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\edit.blade.php
+Kode Fabric || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Kode Item || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php
+Kode Pos || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+Kode Produk (SKU) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Kode Supplier || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Kode Yarn || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Kolom: kode akun, (nama akun), nominal. Delimiter koma/titik-koma. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Kolom minimal: Kode Akun, Nama Akun, Nominal (Rp). || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+Komposisi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Konfigurasi tarif pajak penambah (PPN) dan pemotong (PPh) untuk otomatisasi pembelian. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\index.blade.php
+Kontak || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Kontak Person || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Kontrol hak akses, jabatan, dan divisi pengguna sistem ERP. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\index.blade.php
+Kosongkan jika = Nominal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Kosongkan jika ingin otomatis diringkas dari jumlah item. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Kota / Kabupaten || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+Kredit (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\partials\ajax_detail.blade.php
+KREDIT: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Kronologi HPP & Kartu Stok || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\cogs_chronology.blade.php
+Kuantitas Barang Terjual (Pcs) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Kuartal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\dashboard.blade.php
+Kurir || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+Laba (Rugi) Akumulatif || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet.blade.php
+Laba (Rugi) Berjalan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet-matrix.blade.php
+LABA (RUGI) BERSIH || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\profit-loss.blade.php
+LABA KOTOR || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\profit-loss.blade.php
+LABA RUGI || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php
+LABA USAHA || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\profit-loss.blade.php
+Laporan Arus Kas (Statement of Cash Flows) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Laporan Harga Pokok Produksi (HPP) Manufaktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+Laporan HPP Manufaktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Laporan Hutang & Uang Muka Pembelian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_dp_report.blade.php
+Laporan Keuangan dengan presisi desimal 100% tersinkronisasi. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\profit-loss.blade.php
+Laporan Laba/Rugi per Tag (Proyek/Cabang) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\tag_report.blade.php
+Laporan Laba Rugi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\profit-loss.blade.php
+LAPORAN LABA RUGI PERIODE || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\profit-loss.blade.php
+Laporan Piutang & Uang Muka Penjualan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ar_dp_report.blade.php
+Laporan Posisi Keuangan dengan presisi sen mutlak dan sinkronisasi penuh. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet.blade.php
+Laporan posisi keuangan komparatif per bulan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet-matrix.blade.php
+Laracasts || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\welcome.blade.php
+Laravel has an incredibly rich ecosystem. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\welcome.blade.php
+Lebar (width) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Let's get started || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\welcome.blade.php
+Lihat bukti item ini || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Lihat Bukti Nota/Upload || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Lihat Pasangan Jurnal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+Lihat Rincian Faktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php
+Lihat rincian item || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Limit/Bulan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Loading... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_subledger.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ar_subledger.blade.php
+Login — ERP Accounting System || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\auth\login.blade.php
+Lokasi Gudang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Lot || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\show.blade.php
+Lot Number || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Maks. 10 karakter. Dipakai pada penomoran transaksi Payment Plan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\edit.blade.php
+Manajemen Hutang Pembelian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_subledger.blade.php
+Manajemen pengembalian barang ke Supplier (Debit Note). || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\index.blade.php
+Manajemen Pengguna || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\index.blade.php
+MANDIRI BBW || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Manufaktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Marker Efficiency (%) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Master Barang (Products) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Master Data Manufaktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Master data seluruh bagan akun yang digunakan dalam sistem akuntansi. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php
+Master Fabric || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Master Fabric (Kain) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Master Kategori Payment Plan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_category\index.blade.php
+Master Kode Bantu (Relasi) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\index.blade.php
+Master Pajak (PPN / PPh) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\index.blade.php
+Master Rate Proses || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Master Rate Proses (Jasa Vendor) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Master Supplier/Vendor || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Master Supplier / Vendor Jasa Manufaktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Master Yarn || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Master Yarn (Benang) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Masuk || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\ledger.blade.php
+Masuk (In) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\cogs_chronology.blade.php
+Masukkan Alamat Tujuan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Masukkan nama vendor... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php
+Masukkan nominal saldo awal neraca & laba rugi. Sistem otomatis memposisikannya sesuai sifat saldo normal. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+Masukkan PIN numerik untuk otorisasi karyawan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+Masukkan PIN Perusahaan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Masuk untuk melanjutkan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\auth\login.blade.php
+Material Receipt (MRN) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Material Receipt Note (MRN) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\index.blade.php
+Memuat... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Memuat barang... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php
+Memuat Barang... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Memuat riwayat transaksi... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Mengambil rincian mutasi jurnal... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_subledger.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ar_subledger.blade.php
+Mengubah transaksi: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\edit.blade.php
+Menunggu Approval || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Metode COD || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Metode Forecasting || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Metrik Nilai (Values) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Misal: BKM-01 || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php
+Misal: INV-SUP-01 || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Misal: SJ-001 / INV-001 || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Modal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+M O D A L & E K U I T A S || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet-matrix.blade.php
+Modul || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\system_log\index.blade.php
+Modul Faktur Penjualan (Invoices) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php
+Mohon periksa kembali input Anda: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+MRP (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Mulai Import || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\index.blade.php
+Mulai Sinkronisasi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Mulai Tgl || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php
+Nama || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Nama (PJ) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Nama Akun & Ref || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+Nama Akun * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Nama Bank - Nomor - Atas Nama || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Nama Barang... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Nama barang/jasa || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Nama Customer || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php
+Nama Divisi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\edit.blade.php
+Nama Entitas || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\index.blade.php
+Nama Entitas / Toko || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\create.blade.php
+Nama Garmen || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php
+Nama Item || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Nama Kategori || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_category\index.blade.php
+Nama Lengkap || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\edit.blade.php
+Nama Lengkap Karyawan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Nama Marketing / PIC (Opsional) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\create.blade.php
+Nama Pajak || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\index.blade.php
+Nama Pajak * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\edit.blade.php
+Nama Pelanggan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php
+Nama Pelanggan (Customer) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Nama Pelanggan / Customer || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Nama Penerima || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Nama Perusahaan * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+Nama Produk || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\edit.blade.php
+Nama Produk & Varian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Nama Proses || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Nama Supplier || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Nama Supplier/Vendor || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Nama Toko / Link || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Nama Toko atau Supplier || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
+Nama Toko Cabang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+name }} || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Native Jubelio (tanpa kode) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Negara || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+NERACA PERIODE || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet.blade.php
+Neto || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\index.blade.php
+Nilai aset akan mendebet Persediaan (11200), pilih akun penyeimbangnya (Misal: Modal Awal / Pendapatan Penyesuaian Stok). || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Nilai aset akan mengkredit Persediaan (11200), pilih akun penyeimbangnya (Misal: Beban Kerusakan / Penyesuaian Stok). || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_outbound.blade.php
+Nilai Saldo Akhir || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Nilai Sisa || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+No. Bukti Jurnal / PO || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_subledger.blade.php
+No. CO || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+No. Dokumen || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\cogs_chronology.blade.php
+No. Dokumen Retur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php
+No. Dokumen Supplier || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php
+No. Faktur (Invoice) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php
+No. Faktur * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php
+No. Invoice || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+No. KO || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+No. MRN || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\index.blade.php
+No. Pembelian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+No. Pesanan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+No. Pesanan Penjualan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+No. PRC || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+No. Ref (Opsional) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+No. Referensi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\inbound.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\outbound.blade.php
+No. Referensi * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_outbound.blade.php
+No. Referensi SO || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+No. Rekening / VA || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+No. Resi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+No. Resi (Tracking) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+No. Retur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\show.blade.php
+No. SEW || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+No. SPK || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\index.blade.php
+No. Surat Jalan / Tagihan * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+No. Tagihan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php
+No. Tagihan * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
+No. Tagihan Supplier * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+No. Telepon || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+No. Telepon / Kontak * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+No;Kode Aset;Nama Aset;Kategori;Qty;Tgl. Pemakaian;Nilai Perolehan;Akumulasi Penyusutan;Nilai Buku;Nilai Sisa;Status || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+No Bukti || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\ledger.blade.php
+NOMINAL (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\edit.blade.php
+Nominal (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Nominal Aktual (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Nominal Beda || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+Nominal Saldo (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+Nomor Faktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Nomor Pembelian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Nomor PO || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+NO PP || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+No VA/Rekening/Kode Bayar || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Oleh: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\system_log\partials\ajax_list.blade.php
+Ongkos Kirim || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Ongkos Kirim: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php
+Ongkos Kirim Bersih || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php
+Operator || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Otorisasi Keamanan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+PACKING (tahap akhir) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Pajak || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\index.blade.php
+Pajak (PPN) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Pajak (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php
+Pajak (Tax) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Pajak / PPN || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Pajak: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php
+Pajak Pemotong (-) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Pajak Pemotong (PPh) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Pajak Penambah (+) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Pajak Penambah (PPN) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Pantau riwayat masuk-keluar barang dan pergerakan Harga Modal (HPP). || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\ledger.blade.php
+PARTIAL (Sebagian) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Password || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\create.blade.php
+Password (biarkan kosong jika tidak diubah) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\edit.blade.php
+payment_status == 'PAID') || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\index.blade.php
+Pelanggan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+PELANGGAN || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Pelanggan * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php
+Pelanggan / Customer || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Pemasok/Toko || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Pembelian (PO) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+PEMBELIAN PERSEDIAAN (PEMBAYARAN HUTANG) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_category\index.blade.php
+Pemeriksaan fisik barang retur dan resolusi jurnal akuntansi. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\index.blade.php
+Pemohon (PIC) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Pemotong (PPh) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\create.blade.php
+Pemrosesan instan dan transparan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Penambah (PPN) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\create.blade.php
+Penanggung Jawab (PJ) * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Pencarian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Pencarian Akun || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php
+Pencarian Kode / Nama Aset || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Pencarian Nomor || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\index.blade.php
+Pencarian Nomor / Keterangan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\index.blade.php
+Pencatatan mutasi transaksi harian dengan kaidah pembukuan berpasangan (Double-Entry). || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php
+Pendapatan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Pendapatan Lainnya || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Pending (Gudang) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\index.blade.php
+Penerima & Pengiriman || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Penerima / Pelanggan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+Penerimaan bahan baku (yarn/kain) dari supplier — otomatis posting jurnal Persediaan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\index.blade.php
+Penerimaan bahan baku dari supplier — akan langsung memposting Jurnal #1 (Debit Persediaan Bahan Baku, Kredit Hutang Usaha Maklun). || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php
+PENGAJUAN || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Pengajuan (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Pengajuan Terekam! || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Pengeluaran Barang Manual || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_outbound.blade.php
+PENTING: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Penyusutan / Bln || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Peringatan Kontrol: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Periode: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\profit-loss.blade.php
+Periode Waktu (Bulan Transaksi) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Per KG || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Per PCS || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Persediaan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Persediaan Barang (11200) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Per Tanggal: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet.blade.php
+Pesanan Penjualan (Sales Orders) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Peta Proyeksi: Pendapatan vs Pengeluaran || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Petunjuk: Saldo awal akuntansi wajib seimbang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+phone }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Pieces || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Pieces Dipotong || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Pieces Diserahkan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Pieces Masuk || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Pieces OK || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Pieces Reject || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+pieces_issued }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Pilih "Native" jika file tidak memiliki kolom kode akun. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Pilih Akun (COA) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+Pilih Akun... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php
+Pilih Akun Biaya... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
+Pilih aset yang belum mengalami penyusutan untuk mengatur lama masa pakai (umur penyusutan). || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\create.blade.php
+Pilih Bagian / Divisi * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Pilih Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Pilih Barang (SKU) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\ledger.blade.php
+Pilih Barang Tersedia || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_outbound.blade.php
+Pilih Barang yang Diretur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php
+Pilih Divisi... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Pilih Faktur Penjualan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\create.blade.php
+Pilih Faktur Penjualan untuk memuat barang. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\create.blade.php
+Pilih Faktur untuk memuat barang. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Pilih File (.xlsx/.xls/.csv) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Pilih File (CSV / Excel) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php
+Pilih File CSV Hasil Edit || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+Pilih File CSV Kode Bantu || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\index.blade.php
+Pilih File CSV Master Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Pilih File CSV Payment Plan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Pilih File CSV Penjualan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Pilih File Excel (.xlsx / .csv) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php
+Pilih Kategori... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Pilih Nomor Bill (Pembayaran Hutang) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Pilih Nomor PO (Uang Muka Pembelian) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Pilih PO Asli * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php
+Pilih PO untuk memuat barang. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Pilih Produk... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_outbound.blade.php
+Pilih Produk Pengganti... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Pilih Purchase Order (PO) * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Pilih Supplier / Vendor * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Pilih Tahun || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet-matrix.blade.php
+Pilih tanggal transaksi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Pilih vendor terlebih dahulu, lalu pilih Bill yang akan dibayar. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Pilih vendor terlebih dahulu, lalu pilih PO untuk uang muka. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+PIN Karyawan (Form Pengajuan) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+PIN verifikasi karyawan internal. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Piutang Dagang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+planned_pieces }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+PO-XXXX || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php
+Portal Pengajuan Dana — Internal Employee || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Posisi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\show.blade.php
+Posisi Normal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+Pos Laporan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php
+Pos Laporan * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Pos Saldo || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\index.blade.php
+Pos Saldo Normal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\create.blade.php
+Pos Saldo Normal * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Posting Jurnal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Posting Jurnal WIP || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Potongan Item || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Potongan Lain-lain || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+price }}" min="0" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+price }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+PRINTING || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Processing (Dyeing/Printing/Finishing Kain) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Processing Order Baru || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+PROCESSOR || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Processor || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+process_name }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+process_rate }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Produk || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Produk (SKU) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+produk) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Produk / Item Code || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Produk / SKU || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\inbound.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\outbound.blade.php
+Produk Dipesan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Produk Tujuan (SKU) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Produk Tujuan (SKU Barang Jadi) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php
+Profil Perusahaan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Proses Import || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+Proses Penerimaan & Jurnal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Proses Pesanan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Provinsi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+Proyeksi Laba Bersih || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Purchase Orders (Pembelian) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Qty || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\show.blade.php
+Qty Aktual || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Qty Approved || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\show.blade.php
+Qty Dipesan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+Qty di PO || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php
+Qty Diretur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Qty Diterima (kg) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Qty Faktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Qty Issued (kg) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Qty Jadi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+Qty Jadi (pcs) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Qty Kain (kg) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Qty Kain Dipakai (kg) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Qty Keluar || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_outbound.blade.php
+Qty Masuk || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\inbound.blade.php
+QTY Pesan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Qty Pesan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Qty Reject (kg) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Qty Rencana || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\index.blade.php
+Qty Rencana (pcs) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php
+Qty Retur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\create.blade.php
+Qty Returned || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\show.blade.php
+qty }}" min="1" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+qty }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Rata-rata/Bulan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Rate || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php
+Rate (%) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\index.blade.php
+Rate (%) * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\edit.blade.php
+Rate (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Rate default per kg/pcs untuk knitting, dyeing, printing, finishing, cutting, stitching. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Rate per Pcs (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+RAW_MATERIAL || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Real-time Aggregated Grid || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+receipt_number }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+RECEIVED || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+RECEIVED (Komplit) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Ref. Faktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\index.blade.php
+Ref. Faktur (Invoice) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\show.blade.php
+Ref. Pesanan (SO) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php
+REF. PESANAN (SO) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Ref. PO || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\show.blade.php
+Ref. PO Asli || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\index.blade.php
+Referensi Eksternal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Refund Shipping Cost (Ongkir dikembalikan) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\show.blade.php
+REJECTED || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Rekapitulasi aliran kas masuk dan keluar berbasis matriks interval tersinkronisasi. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Rekapitulasi Hutang (AP) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_dp_report.blade.php
+Rekapitulasi Piutang (AR) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ar_dp_report.blade.php
+Rekapitulasi Uang Muka ke Supplier || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_dp_report.blade.php
+Rekapitulasi Uang Muka Pelanggan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ar_dp_report.blade.php
+Rekap SPK yang sudah COMPLETED (selesai & masuk stok barang jadi) dalam periode terpilih, berdasarkan tanggal jurnal penyelesaian. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+Rekening / Virtual Account || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Rekening Ops || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Rekening Ops * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Rekonsiliasi Jubelio || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Rekonsiliasi Jubelio vs ERP || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Rencana (kg) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Rencana Pcs || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Rencana Pieces || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Rencana Qty (kg) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Reset Filter || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Return Shipping Cost (Biaya tarik retur) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\show.blade.php
+Rincian Barang Faktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Rincian Barang Keluar || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php
+Rincian Barang Purchase Order (Jubelio) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Rincian Item Pembayaran || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Rincian Jurnal Umum || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+Rincian Kalkulasi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Rincian Proyeksi & Budget Per Akun || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Ringkasan pengajuan, misal: Belanja ATK & Operasional Bulan Ini || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Riwayat Aktivitas Sistem || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\system_log\index.blade.php
+Riwayat penerimaan barang dan mutasi masuk lainnya. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\inbound.blade.php
+Riwayat pengeluaran barang dan mutasi keluar lainnya. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\outbound.blade.php
+Role / Hak Akses || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\edit.blade.php
+role == 'ADMIN') || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\index.blade.php
+role == 'FINANCE') || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\index.blade.php
+Rp 0 || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+s/d || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Saldo (Qty) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\cogs_chronology.blade.php
+Saldo Akhir || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_dp_report.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ar_dp_report.blade.php
+Saldo Akhir (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+SALDO AKHIR KAS & BANK || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+SALDO AWAL KAS & BANK || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Saldo Nilai (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\ledger.blade.php
+SALDO NORMAL || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+Salesman || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Sales Orders || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+Sampai: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\profit-loss.blade.php
+Sampai Tanggal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+Sampai Tgl || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php
+Satuan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Satuan Rate || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Selesai || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+Selesaikan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Selisih || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+Selisih: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+Semua Divisi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Semua Kategori || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Semua Laporan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php
+Semua Role || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\index.blade.php
+Semua Status || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Semua Stok || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Semua Tipe || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php
+server. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Setelah barang selesai di-packing, instruksikan bagian Finance/Admin untuk memproses resi dan menerbitkan Faktur Penjualan di menu || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+Setting Umur Penyusutan Aset || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\create.blade.php
+Setup Saldo Awal Akun (Opening Balance) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+Shrinkage (%) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Silakan pilih PO Asli di atas terlebih dahulu. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php
+Simpan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\create.blade.php
+Simpan & Posting Jurnal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php
+Simpan Akun || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php
+Simpan Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\create.blade.php
+Simpan Draft Retur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php
+Simpan Jurnal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php
+Simpan Kode Bantu || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\create.blade.php
+Simpan Pajak || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\create.blade.php
+Simpan Perubahan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\edit.blade.php
+Simpan Perubahan Profil || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+Simpan Pesanan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Simpan QC || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Simpan SPK || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php
+Simpan Tagihan & Jurnal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
+Single Jersey || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Sinkronkan data produk dari Dashboard || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Sisa Blm Datang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Sisa Hutang Kita || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_subledger.blade.php
+Sisa Retur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Sisa Stok || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\ledger.blade.php
+Sistem akan menjurnal & memotong stok berdasarkan angka yang Anda input di tabel ini, || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Sistem formulir terintegrasi otomatis untuk permohonan pencairan kas operasional, reimbursement, dan pembayaran ke vendor. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Sistem mendeteksi ini sebagai transaksi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Size || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+SKU & Deskripsi Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+SKU (Kode Barang) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\edit.blade.php
+SKU... || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+SKU / Item Code || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Slug || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_category\index.blade.php
+SPK (Surat Perintah Kerja) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+SPK ini sudah || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+STAFF BIASA || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\index.blade.php
+State || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Status & Catatan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Status / Kategori || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Status Aktif || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\edit.blade.php
+Status Bayar || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php
+Status Faktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Status Harga || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Status Payment || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Status Retur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\index.blade.php
+Status sudah || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+STITCHER || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+STITCHING || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Stitching & Finishing || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+stock_quantity || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Stok || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Stok & HPP tidak ikut diimport — hanya berubah lewat transaksi MRN. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Stok Akhir || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Stok Aktual || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\edit.blade.php
+Stok Awal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\create.blade.php
+Stok Kosong / Habis || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Stok Tersedia (> 0) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Struktur kolom wajib sesuai template. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+STY-2026-001 || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php
+Style SKU (opsional) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php
+Subtotal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php
+Sub Total || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Subtotal ( || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Subtotal: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php
+Subtotal Aktual || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Subtotal Barang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Subtype || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+subtype }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Sumber || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Sumber Pembayaran (Kredit Akun) * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
+SUP-KNIT-01 || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Supplier || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\index.blade.php
+Supplier / Toko * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php
+Supplier / Vendor || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+supplier_code }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+supplier_doc_no) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\show.blade.php
+supplier_name }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Surat Perintah Kerja (SPK) Manufaktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\index.blade.php
+Susunan kolom harus patuh pada template. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php
+System || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+System Activity Logs || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\system_log\index.blade.php
+Tagihan Pembelian (Bills) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\index.blade.php
+Tahap || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Tahap Finishing || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Tahun: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\profit-loss.blade.php
+Tahun Buku: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Tambah Divisi Baru || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\create.blade.php
+Tambah Fabric || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Tambah Item || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php
+Tambah Kategori Payment Plan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_category\index.blade.php
+Tambah Kode Bantu Baru || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\helper_code\create.blade.php
+Tambah Master Akun (COA) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php
+Tambah Master Barang Baru || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\create.blade.php
+Tambah Pajak Baru || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\create.blade.php
+Tambah Pengguna Baru || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\user\create.blade.php
+Tambah Pesanan Penjualan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Tambah Rate Proses || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Tambah Supplier || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Tambah Yarn || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Tampilkan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet-matrix.blade.php
+Tandai Langsung Lunas (CASH) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php
+Tandai Sudah Lunas (LUNAS) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Tanggal * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php
+Tanggal Akhir || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\ledger.blade.php
+Tanggal Awal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\ledger.blade.php
+Tanggal Faktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php
+Tanggal Issue || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Tanggal QC || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Tanggal Retur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\create.blade.php
+Tanggal Retur * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php
+Tanggal Saldo Awal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+Tanggal Saldo Awal (Cut-off) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+Tanggal Selesai || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Tanggal SPK || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php
+Tanggal Tagihan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Tanggal Terima || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+TANGGAL TRANSAKSI || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+Tanggal transaksi yang akan muncul di jurnal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Tanggal transaksi yang akan muncul di jurnal (wajib diisi sebelum posting) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Target Kain || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Target Kain Grey || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Target Pendapatan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Target Penjualan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Target Selesai || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Telepon || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Terbit || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Terbitkan Faktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\create.blade.php
+Terbitkan Faktur & Jurnal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Terbitkan Faktur Penjualan (Kirim Aktual) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Terima Barang dari Pesanan Pembelian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Terima Retur dari Pelanggan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Terima Sekarang || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Terima Skrg || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Terima Skrg (Aktual) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Terjadi Kesalahan! || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_category\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Terjadi kesalahan sistem saat mengambil data jurnal. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_subledger.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ar_subledger.blade.php
+Terkoneksi Payment Plan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Tersinkronisasi langsung ke Dashboard Finance || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+TGL AKTUAL PENGIRIMAN || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Tgl Beli || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+Tgl Pengajuan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Tgl Pengajuan * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Tgl PO || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Tgl SO || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Tgl Tagihan & Jatuh Tempo || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Tgl Terima / Masuk * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Tgl Transaksi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Tgl Transaksi * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Tidak || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Tidak ada barang pada faktur ini. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Tidak ada barang pada PO ini. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\create.blade.php
+Tidak ada data ditemukan. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php
+Tidak ada data log. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\system_log\index.blade.php
+Tidak ada data pengiriman (Faktur Manual) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Tidak ada detail barang. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php
+Tidak ada detail barang untuk retur ini. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_return\show.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_return\show.blade.php
+Tidak Ada di Sumber || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+Tidak ada pesanan penjualan yang menunggu untuk diproses saat ini. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+Tidak ada SPK yang selesai pada periode ini. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+Tidak Cocok || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Tidak di Sumber || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+timeout || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Tip: Untuk data > 10.000 baris, gunakan fitur Import via Command Line VS Code agar bebas dari limit || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\index.blade.php
+Tipe || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\supplier_index.blade.php
+Tipe Akun (COA Type) * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\edit.blade.php
+Tipe COA || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\index.blade.php
+Tipe Pajak * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\edit.blade.php
+Tipe Proses || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Titik Awal WIP || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Toko || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Toko / Vendor Tujuan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Toleransi (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Toleransi Selisih (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+Top 6 Sedotan Biaya Operasional || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Total (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php
+TOTAL (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\profit-loss.blade.php
+TOTAL: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\index.blade.php
+Total Akun || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\index.blade.php
+Total Akun Dibandingkan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+TOTAL BALANCE || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+Total Bayar || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\edit.blade.php
+Total Berat (Gram) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Total Biaya || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Total Biaya Bahan: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Total Biaya Proses: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+TOTAL BUDGET HPP || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+TOTAL DEBET || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\edit.blade.php
+Total Debet: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+Total Historis || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Total HPP || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+Total HPP (WIP) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+Total Item || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\process_orders.blade.php
+TOTAL KESELURUHAN || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+TOTAL KESELURUHAN: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\list.blade.php
+TOTAL KEWAJIBAN + MODAL || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\balance-sheet.blade.php
+TOTAL KREDIT || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\edit.blade.php
+Total Kredit: || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\account\opening_balance.blade.php
+Total Nilai Omset Penjualan (Rupiah) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\index.blade.php
+Total Nilai Tagihan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reports\ap_subledger.blade.php
+TOTAL NOMINAL || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Total Nominal || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+TOTAL OPERASIONAL || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Total Pcs Jadi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+TOTAL PENERIMAAN KAS || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+Total Pengajuan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Total Pengajuan (Bulan Ini) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+TOTAL PENGELUARAN KAS || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\report\cash-flow.blade.php
+TOTAL PENJUALAN || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\budgeting\index.blade.php
+Total Pesan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Total Plot Akun || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\index.blade.php
+TOTAL SALDO HALAMAN INI || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\ledger\index.blade.php
+Total Selisih Absolut || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+Total Tagihan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\show.blade.php
+Total Tagihan (Rp) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_bill\index.blade.php
+Total WIP || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\index.blade.php
+Transaksi Faktur || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_invoice\show.blade.php
+Transaksi Penjualan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Transfer Masuk || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Transfer Masuk Manual || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\warehouse\create_inbound.blade.php
+Umur (Bln) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\list.blade.php
+unit }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Update || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\divisi\edit.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_category\index.blade.php
+Update Pajak || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\tax\edit.blade.php
+Update Pesanan || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\edit.blade.php
+Upload & Sinkronisasi || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\purchase_order\index.blade.php
+Upload Bukti / Nota || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\public_form.blade.php
+Upload Logo Baru (Opsional) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+Uraian item || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Urutan Kolom (wajib dengan header): || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\asset\index.blade.php
+User || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\system_log\index.blade.php
+Varian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\create.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\product\edit.blade.php
+Vendor / Pemasok * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\create.blade.php
+Vendor / Toko * || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\edit.blade.php
+Vendor CMT || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Vendor Default || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\process_index.blade.php
+Void Cutting Order || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Void FR || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Void GFR || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Void MRN || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\material_receipt\show.blade.php
+Void Penyelesaian || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Void QC || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Void Stitching Order || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Void {{ $fi->issue_number }} || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Void {{ $fr->receipt_number }} || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Void {{ $gfr->receipt_number }} || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Void {{ $yi->issue_number }} || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Waktu || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\system_log\index.blade.php
+Warehouse (Gudang) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\layouts\app.blade.php
+Warna || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php, D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Warna / Shade Code || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+Wastage || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\report\hpp.blade.php
+Website || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\company_profile\edit.blade.php
+We suggest starting with the following. || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\welcome.blade.php
+width }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\fabric_index.blade.php
+Worklist Manual - Custom Filter || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Worklist Manual Hutang/UM/Deposit || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\payment_plan\index.blade.php
+Y-COTTON-30S || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+Ya (Cash on Delivery) || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\sales_order\create.blade.php
+Yarn || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\work_order\show.blade.php
+yarn_code }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+yarn_count }}"> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+yarn_type }}" required> || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\manufacturing\master\yarn_index.blade.php
+✕ TIDAK SEIMBANG || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\journal\create.blade.php
+🔍 Rekonsiliasi Laporan: Jubelio vs ERP || D:\xampp\htdocs\app-akuntansi-portfolio-master/resources/views\reconciliation\reconciliation_index.blade.php
+===END===

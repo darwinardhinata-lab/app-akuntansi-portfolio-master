@@ -1,0 +1,1050 @@
+&larr; Kembali
+&times;
+' + akun.account_code + '
+' + data.message + '
++ Tambah Barang
++ Tambah Baris
++ Tambah Baris Barang
++ Tambah Baris Biaya
++ Tambah Baris Item
++ Tambah Baris Jurnal
++ Tambah Baris Produk
+-- Internal --
+-- Ketik Nama Supplier --
+-- Pilih Akun --
+-- Pilih Barang --
+-- Pilih Bill --
+-- Pilih Divisi --
+-- Pilih Fabric --
+-- Pilih Faktur --
+-- Pilih Kategori --
+-- Pilih Kategori Akun --
+-- Pilih nanti saat SPK selesai --
+-- Pilih PO --
+-- Pilih Produk --
+-- Pilih Rekening --
+-- Pilih Supplier --
+-- Pilih Supplier Dahulu --
+-- Pilih Vendor --
+-- Pilih Yarn --
+-- Semua Status --
+-- Tidak ada --
+-- Tidak Ada --
+- Kosong -
+30s
+100% Cotton
+Aktif
+Aktual (Rp)
+Akumulasi Depresiasi
+Akun Penyeimbang Jurnal (DEBET) *
+Akun Penyeimbang Jurnal (KREDIT) *
+Alamat
+Alamat Lengkap
+Alamat Pengiriman
+Alokasi Biaya / Pembelian
+Analisa Pivot (Analytic Matrix)
+Analisa Sejak
+Arsip dokumen sah pengubah stok gudang dan dasar posting keuangan.
+Asal Toko / Gudang
+Asal Toko / Lokasi Gudang
+A S E T
+Aset Lancar Lainnya
+Aset Management
+Audit trail aman dan terdokumentasi
+Auto-submit saat dipilih
+Bagian / Divisi
+Bandingkan
+Bandingkan saldo per akun antara sumber Jubelio dan ledger ERP untuk periode yang sama.
+Barang Keluar
+Barang Keluar (Outbound)
+Barang Masuk
+Barang Masuk (Inbound)
+Barang Pengganti
+Barcode Label & Penyelesaian SPK
+Baris
+Baris per Halaman
+Batal / Void Faktur
+BCA BBB OPS
+BCA BBW OPS
+BCA GBB OPS
+BCA KOI OPS
+Belum ada Cutting Order.
+Belum ada data divisi.
+Belum ada data fabric.
+Belum ada data pajak.
+Belum ada data rate proses.
+Belum ada data Retur Pembelian.
+Belum ada data retur penjualan.
+Belum ada data supplier.
+Belum ada data yarn.
+Belum Ada di ERP
+Belum ada faktur yang diterbitkan atau kecocokan filter tidak ditemukan.
+Belum ada Knit Order.
+Belum ada MRN.
+Belum ada mutasi untuk barang ini.
+Belum ada Processing Order.
+Belum ada riwayat barang keluar.
+Belum ada riwayat barang masuk.
+Belum ada riwayat mutasi stok untuk barang ini di periode terpilih.
+Belum ada SPK.
+Belum ada Stitching Order.
+Belum ada tagihan pembelian.
+Belum ada transaksi pembelian. Silakan import CSV atau Buat Manual.
+Belum ada transaksi penjualan terdeteksi. Silakan import CSV.
+Belum di ERP
+Belum Diterima
+BELUM LUNAS
+Berhasil!
+Berkode (ada kode akun)
+Biaya
+Biaya Bahan
+Biaya Jasa Knitting (Rp)
+Biaya Jasa Proses (Rp)
+Biaya Lain-lain
+Biaya Lainnya
+Biaya Proses
+Bisa dikosongkan dulu, diisi saat SPK selesai (WorkOrderService::complete).
+Bruto
+Buat Baru
+Buat Dokumen Retur
+Buat Faktur Penjualan (Direct)
+Buat MRN Baru
+Buat Purchase Order (PO)
+Buat SPK Baru
+Buat Tagihan & Terima Barang
+Buat Tagihan Langsung (Direct Bill)
+Budget HPP (Max)
+Budget HPP / Barang
+Budget Operasional
+Budget Operasional (Max)
+Bukti
+Buku Besar (General Ledger)
+Buku Besar Pembantu Hutang, pemantauan tagihan supplier, pelunasan, dan retur material.
+Bulan:
+Bulanan
+Cari
+Cari & Pilih Bill *
+Cari & Pilih PO *
+Cari Detil Akun (COA)...
+Cari Kode/Jenis Fabric
+Cari Kode/Jenis Yarn
+Cari Kode/Nama Supplier
+Cari Kode Aset / Nama Aset...
+Cari No. Bukti / Keterangan...
+Cari No. Faktur / Pelanggan...
+Cari No. MRN
+Cari No. SPK / Nama Garmen / Style SKU
+Cari Produk...
+Cari Tag
+Catatan
+Catat tagihan supplier, biaya operasional harian, dan ATK secara langsung.
+Catat transaksi akuntansi secara manual
+Ceklis
+Centang / isi Qty Retur untuk barang yang diretur
+Cepat (Hanya Status PENGAJUAN)
+Cetak Barcode Label
+Cetak Label
+COA tidak ditemukan
+Cocok
+Cocok (MATCH)
+Contoh: 36
+Contoh: 11101
+Contoh: Barang Rusak / Kadaluarsa
+CONTOH: BCA - 123456 - NAMA
+Contoh: Beli ATK untuk bulan ini
+Contoh: CUST-001
+Contoh: Divisi Keuangan
+Contoh: FIN
+Contoh: Kas Besar
+Contoh: Pembayaran listrik bulan ini
+Contoh: PPN 11%
+Contoh: Shopee, Tokopedia, atau link toko
+Contoh: Stok Opname / Pindah Gudang
+Custom (Semua Data + Filter)
+Cutting Order Baru
+Daftar Akun (COA)
+Daftar Arsip Faktur
+Daftar pesanan aktif yang menunggu proses (Picking, Packing, Shipping).
+Daftar pesanan pembelian dari Supplier.
+Daftar Retur Penjualan
+Dari:
+Dari Tanggal
+Dashboard Gudang: Proses Pesanan
+Database mutasi penjualan produk terintegrasi otomatisasi akuntansi keuangan.
+Database SKU dan Harga Modal untuk automasi HPP.
+Data divisi gagal diperbarui. Periksa kembali data berikut:
+Data induk benang beserta stok & HPP moving average.
+Data induk kain GREY & FINISHED beserta stok & HPP moving average.
+Data masih kosong atau tidak ditemukan.
+Data Payment Plan
+Data selalu ditambahkan baru (tidak ada kode unik utk update), edit rate lama lewat tombol Edit di tabel.
+Debet (Rp)
+DEBET:
+Deskripsi
+Deskripsi (Opsional)
+Deskripsi / Tag
+Deskripsi Akun
+Deskripsi Barang
+Deskripsi Biaya
+Deskripsi Jurnal
+Deskripsi Transaksi / Supplier
+Detail Alamat Jalan
+Detail Barang
+Detail Barang Retur
+Detail Faktur Penjualan
+Detail per Akun
+Detail Rekonsiliasi
+Detail Transaksi
+Detil Akun
+Dimensi Baris (Rows)
+Dimensi Kolom (Columns)
+Disc
+Disc. Ongkir
+Disc. Ongkos Kirim
+Disetujui
+Disetujui / Lunas
+Diskon
+Diskon (Gabungan)
+Diskon (Rp)
+Diskon:
+Diskon Lainnya
+Diskon Produk
+Ditolak
+Divisi
+Divisi / Bagian
+Divisi gagal disimpan. Periksa kembali data berikut:
+Divisi non-aktif tidak akan muncul di pilihan form pengajuan Payment Plan.
+DPP (Dasar Pengenaan Pajak)
+Duplikat/Duplicate
+Edit Data
+Edit Divisi
+Edit Jurnal Umum
+Edit Kategori Payment Plan
+Edit Master Akun (COA)
+Edit Master Barang
+Edit Pajak
+Edit Pengguna
+Edit Pesanan Penjualan
+Edit Rate Proses
+Ekspedisi / Kurir
+Email Login
+Email Perusahaan
+Estimasi Total
+Exclude PPN (Belum Termasuk)
+Executive Dashboard: Budgeting & Proyeksi
+Export Arus Kas
+Export Custom (Semua Data + Filter)
+Export Laba Rugi
+Export Neraca
+Fabric Terpakai (kg)
+Faktur Penjualan Asal
+File CSV Purchase Orders Details
+File Sumber Jubelio (CSV)
+Filter Analitik Pencarian
+Filter Pencarian
+Format: JPG, PNG (Maks. 2MB). Rekomendasi rasio Landscape/Kotak transparan.
+Format CSV/Excel (11 Kolom):
+Format CSV Jubelio (9 Kolom):
+Format CSV yang didukung:
+Format File
+Format yang diizinkan: JPG, PNG, PDF (Maks. 5 MB)
+Form ini hanya utk 1 ukuran per submit — untuk multi-ukuran, ulangi submit per ukuran.
+Form Pengajuan Payment Plan (Terintegrasi PO)
+Form Retur Pembelian (Debit Note)
+Gagal memuat data
+Gagal menarik data PO.
+Gagal mengambil data. Pastikan koneksi internet stabil.
+Garmen / Style
+Grafik Laba Rugi
+GRAND TOTAL
+GRAND TOTAL AKTUAL
+Grand Total ERP
+Grand Total Jubelio
+Gudang Kosong
+Gunakan format CSV standar Jubelio.
+Gunakan susunan kolom template CSV.
+Hak Akses (Role)
+Hanya Administrator yang dapat mengubah PIN ini. PIN ini digunakan di form pengajuan karyawan.
+Hapus Data
+Hapus PO
+Hapus Terpilih
+Harga
+Harga (Rp)
+Harga Jual (Rp)
+Harga Pokok Penjualan
+Harga Satuan
+Harga Satuan (Rp)
+Harga Termasuk Pajak (Include Tax)
+Header Surat Perintah Kerja — akan menampung seluruh biaya WIP mulai tahap Cutting.
+Hingga
+Hitung
+HPP / Nilai Rata-rata Terkini
+HPP/Pcs
+HPP / Unit (Rp)
+HPP Baru per Unit (Rp)
+HPP Rata-rata
+Hrg Satuan (Rp)
+Hrg Satuan / HPP
+Hutang Dagang
+Hutang Jangka Panjang
+Hutang Lainnya
+I. ARUS KAS MASUK (PENERIMAAN KAS)
+Identitas Profil Perusahaan
+II. ARUS KAS KELUAR (PENGELUARAN KAS)
+Import Aset Tetap
+Import CSV Kode Bantu (Relasi)
+Import CSV Master Barang
+Import CSV Pembelian
+Import CSV Penjualan (Jubelio)
+Import Excel/CSV Master Akun (COA)
+Import Jurnal Umum
+Import Master Rate Proses
+Import Saldo Awal
+Include PPN (Sudah Termasuk)
+Informasi Faktur
+Informasi ini otomatis dicetak di kop atas lembar print/export Excel seluruh laporan keuangan.
+Informasi Pembelian
+Informasi Pengiriman
+Informasi Retur Penjualan
+Informasi Tagihan
+Ingat saya
+Input Penerimaan Barang (Inbound)
+Investasi Jangka Panjang
+Isi kolom
+item)
+Item Bahan Baku
+Item Dipesan
+Jatuh Tempo
+Jatuh Tempo (Opsional)
+Jatuh Tempo Bayar
+Jatuh Tempo Bayar (Opsional)
+Jejak Aktivitas (
+Jejak Log Aktivitas
+Jelaskan secara rinci detail item dan tujuan penggunaan dana...
+Jenis
+Jumlah
+Jumlah SPK
+Jurnal Umum Baru
+Kain
+Kain Finished
+Kain Finished Tujuan
+Kain Grey
+Kalkulasi & Pajak
+Kalkulasi Akhir
+Kaos Polo Lengan Pendek
+Kartu pergerakan mutasi dan riwayat saldo per satu kode akun.
+Kartu Stok (Inventory Ledger)
+Kas & Bank (Siap Import Jubelio)
+Kas & Bank - Custom Filter
+Kata Sandi
+Kategori Payment
+Kategori Payment *
+Kategori Pengeluaran
+Kelola aset tetap, umur ekonomis, dan pantau penyusutan otomatis. Buat jurnal dengan kode akun 12000 (Aset Tetap) untuk menambahkan aset secara otomatis.
+Kelola daftar divisi/bagian untuk struktur organisasi dan pengajuan Payment Plan.
+Kelola daftar entitas untuk otomatisasi laporan
+Kelola kategori payment plan yang dapat ditambah, diedit, atau dihapus.
+Kelola pengajuan pembayaran dan posting jurnal akuntansi otomatis.
+Keluar (Out)
+Kembali
+Kembali ke daftar
+Kembali ke Daftar
+KENAIKAN (PENURUNAN) KAS BERSIH
+Keperluan Pengajuan
+Keputusan
+Keputusan Final
+Kerugian Wastage
+Keterangan *
+Keterangan / Alasan
+Keterangan Aktivitas
+Keterangan kategori...
+Keterangan Tambahan
+KETERANGAN UMUM
+Keterangan Umum
+Keterangan Umum (Opsional)
+Ketik kata kunci...
+Ketik Kode atau Nama Akun...
+Ketik Kode atau Nama Entitas / Kategori...
+Ketik nama atau email...
+Ketik nama divisi...
+Ketik nama pajak...
+Ketik nama tag / proyek...
+Ketik No / Vendor...
+Ketik No Retur...
+Ketik SKU, Nama Barang, atau Kategori...
+Ketik SKU...
+K E W A J I B A N
+Klik untuk lihat detail mutasi jurnal
+Klik untuk menelusuri dokumen asal
+Klik untuk menelusuri dokumen operasional asli
+Klik untuk toggle status
+Knit Order Baru
+Knitter, Processor (dyeing/printing), Stitcher/CMT, dan supplier bahan baku.
+Kode
+Kode Akun
+KODE AKUN
+Kode Akun (Debet)
+Kode Akun (ID)
+Kode Akun *
+Kode akun tidak dapat diubah untuk menjaga integritas jurnal.
+KODE BANTU
+Kode Bantu (AP)
+Kode Bantu (ID)
+KODE BANTU (OPSIONAL)
+Kode Bantu (Subledger AP)
+Kode Divisi
+Kode Fabric
+Kode Item
+Kode Pos
+Kode Produk (SKU)
+Kode Supplier
+Kode Yarn
+Kolom: kode akun, (nama akun), nominal. Delimiter koma/titik-koma.
+Kolom minimal: Kode Akun, Nama Akun, Nominal (Rp).
+Komposisi
+Konfigurasi tarif pajak penambah (PPN) dan pemotong (PPh) untuk otomatisasi pembelian.
+Kontak
+Kontak Person
+Kontrol hak akses, jabatan, dan divisi pengguna sistem ERP.
+Kosongkan jika = Nominal
+Kosongkan jika ingin otomatis diringkas dari jumlah item.
+Kota / Kabupaten
+Kredit (Rp)
+KREDIT:
+Kronologi HPP & Kartu Stok
+Kuantitas Barang Terjual (Pcs)
+Kuartal
+Kurir
+Laba (Rugi) Akumulatif
+Laba (Rugi) Berjalan
+LABA (RUGI) BERSIH
+LABA KOTOR
+LABA RUGI
+LABA USAHA
+Laporan Arus Kas (Statement of Cash Flows)
+Laporan Harga Pokok Produksi (HPP) Manufaktur
+Laporan HPP Manufaktur
+Laporan Hutang & Uang Muka Pembelian
+Laporan Keuangan dengan presisi desimal 100% tersinkronisasi.
+Laporan Laba/Rugi per Tag (Proyek/Cabang)
+Laporan Laba Rugi
+LAPORAN LABA RUGI PERIODE
+Laporan Piutang & Uang Muka Penjualan
+Laporan Posisi Keuangan dengan presisi sen mutlak dan sinkronisasi penuh.
+Laporan posisi keuangan komparatif per bulan.
+Laracasts
+Laravel has an incredibly rich ecosystem.
+Lebar (width)
+Let's get started
+Lihat bukti item ini
+Lihat Bukti Nota/Upload
+Lihat Pasangan Jurnal
+Lihat Rincian Faktur
+Lihat rincian item
+Limit/Bulan
+Login — ERP Accounting System
+Lokasi Gudang
+Lot
+Lot Number
+Maks. 10 karakter. Dipakai pada penomoran transaksi Payment Plan.
+Manajemen Hutang Pembelian
+Manajemen pengembalian barang ke Supplier (Debit Note).
+Manajemen Pengguna
+MANDIRI BBW
+Manufaktur
+Marker Efficiency (%)
+Master Barang (Products)
+Master Data Manufaktur
+Master data seluruh bagan akun yang digunakan dalam sistem akuntansi.
+Master Fabric (Kain)
+Master Kategori Payment Plan
+Master Kode Bantu (Relasi)
+Master Pajak (PPN / PPh)
+Master Rate Proses
+Master Rate Proses (Jasa Vendor)
+Master Supplier/Vendor
+Master Supplier / Vendor Jasa Manufaktur
+Master Yarn (Benang)
+Masuk
+Masuk (In)
+Masukkan Alamat Tujuan
+Masukkan nama vendor...
+Masukkan nominal saldo awal neraca & laba rugi. Sistem otomatis memposisikannya sesuai sifat saldo normal.
+Masukkan PIN numerik untuk otorisasi karyawan
+Masukkan PIN Perusahaan
+Masuk untuk melanjutkan
+Memuat...
+Memuat barang...
+Memuat Barang...
+Memuat riwayat transaksi...
+Mengambil rincian mutasi jurnal...
+Mengubah transaksi:
+Menunggu Approval
+Metode COD
+Metode Forecasting
+Metrik Nilai (Values)
+Misal: BKM-01
+Modal
+M O D A L & E K U I T A S
+Modul
+Modul Faktur Penjualan (Invoices)
+Mohon periksa kembali input Anda:
+Mulai Import
+Mulai Sinkronisasi
+Mulai Tgl
+Nama
+Nama (PJ)
+Nama Akun & Ref
+Nama Akun *
+Nama Bank - Nomor - Atas Nama
+Nama Barang...
+Nama barang/jasa
+Nama Customer
+Nama Divisi
+Nama Entitas
+Nama Entitas / Toko
+Nama Garmen
+Nama Item
+Nama Kategori
+Nama Lengkap
+Nama Lengkap Karyawan
+Nama Marketing / PIC (Opsional)
+Nama Pajak
+Nama Pajak *
+Nama Pelanggan
+Nama Pelanggan (Customer)
+Nama Pelanggan / Customer
+Nama Penerima
+Nama Perusahaan *
+Nama Produk
+Nama Produk & Varian
+Nama Proses
+Nama Supplier
+Nama Supplier/Vendor
+Nama Toko / Link
+Nama Toko atau Supplier
+Nama Toko Cabang
+Native Jubelio (tanpa kode)
+Negara
+NERACA PERIODE
+Neto
+Nilai aset akan mendebet Persediaan (11200), pilih akun penyeimbangnya (Misal: Modal Awal / Pendapatan Penyesuaian Stok).
+Nilai aset akan mengkredit Persediaan (11200), pilih akun penyeimbangnya (Misal: Beban Kerusakan / Penyesuaian Stok).
+Nilai Saldo Akhir
+Nilai Sisa
+No. Bukti Jurnal / PO
+No. CO
+No. Dokumen
+No. Dokumen Retur
+No. Dokumen Supplier
+No. Faktur (Invoice)
+No. Faktur *
+No. Invoice
+No. KO
+No. MRN
+No. Pembelian
+No. Pesanan
+No. Pesanan Penjualan
+No. PRC
+No. Ref (Opsional)
+No. Referensi
+No. Referensi *
+No. Referensi SO
+No. Rekening / VA
+No. Resi
+No. Resi (Tracking)
+No. Retur
+No. SEW
+No. SPK
+No. Surat Jalan / Tagihan *
+No. Tagihan
+No. Tagihan *
+No. Tagihan Supplier *
+No. Telepon
+No. Telepon / Kontak *
+No;Kode Aset;Nama Aset;Kategori;Qty;Tgl. Pemakaian;Nilai Perolehan;Akumulasi Penyusutan;Nilai Buku;Nilai Sisa;Status
+No Bukti
+NOMINAL (Rp)
+Nominal (Rp)
+Nominal Aktual (Rp)
+Nominal Beda
+Nominal Saldo (Rp)
+Nomor Faktur
+Nomor Pembelian
+Nomor PO
+NO PP
+No VA/Rekening/Kode Bayar
+Oleh:
+Ongkos Kirim
+Ongkos Kirim:
+Ongkos Kirim Bersih
+Otorisasi Keamanan
+PACKING (tahap akhir)
+Pajak
+Pajak (PPN)
+Pajak (Rp)
+Pajak (Tax)
+Pajak / PPN
+Pajak:
+Pajak Pemotong (-)
+Pajak Pemotong (PPh)
+Pajak Penambah (+)
+Pajak Penambah (PPN)
+Pantau riwayat masuk-keluar barang dan pergerakan Harga Modal (HPP).
+PARTIAL (Sebagian)
+Password (biarkan kosong jika tidak diubah)
+payment_status == 'PAID')
+Pelanggan
+Pelanggan *
+Pelanggan / Customer
+Pemasok/Toko
+Pembelian (PO)
+PEMBELIAN PERSEDIAAN (PEMBAYARAN HUTANG)
+Pemeriksaan fisik barang retur dan resolusi jurnal akuntansi.
+Pemohon (PIC)
+Pemotong (PPh)
+Pemrosesan instan dan transparan
+Penambah (PPN)
+Penanggung Jawab (PJ) *
+Pencarian
+Pencarian Akun
+Pencarian Kode / Nama Aset
+Pencarian Nomor
+Pencarian Nomor / Keterangan
+Pencatatan mutasi transaksi harian dengan kaidah pembukuan berpasangan (Double-Entry).
+Pendapatan
+Pendapatan Lainnya
+Pending (Gudang)
+Penerima & Pengiriman
+Penerima / Pelanggan
+Penerimaan bahan baku (yarn/kain) dari supplier — otomatis posting jurnal Persediaan.
+Penerimaan bahan baku dari supplier — akan langsung memposting Jurnal #1 (Debit Persediaan Bahan Baku, Kredit Hutang Usaha Maklun).
+Pengajuan (Rp)
+Pengajuan Terekam!
+Pengeluaran Barang Manual
+PENTING:
+Penyusutan / Bln
+Peringatan Kontrol:
+Periode:
+Periode Waktu (Bulan Transaksi)
+Per KG
+Per PCS
+Persediaan
+Persediaan Barang (11200)
+Per Tanggal:
+Pesanan Penjualan (Sales Orders)
+Peta Proyeksi: Pendapatan vs Pengeluaran
+Petunjuk: Saldo awal akuntansi wajib seimbang
+Pieces
+Pieces Dipotong
+Pieces Diserahkan
+Pieces Masuk
+Pieces OK
+Pieces Reject
+Pilih "Native" jika file tidak memiliki kolom kode akun.
+Pilih Akun (COA)
+Pilih Akun...
+Pilih Akun Biaya...
+Pilih aset yang belum mengalami penyusutan untuk mengatur lama masa pakai (umur penyusutan).
+Pilih Bagian / Divisi *
+Pilih Barang
+Pilih Barang (SKU)
+Pilih Barang Tersedia
+Pilih Barang yang Diretur
+Pilih Divisi...
+Pilih Faktur Penjualan
+Pilih Faktur Penjualan untuk memuat barang.
+Pilih Faktur untuk memuat barang.
+Pilih File (.xlsx/.xls/.csv)
+Pilih File (CSV / Excel)
+Pilih File CSV Hasil Edit
+Pilih File CSV Kode Bantu
+Pilih File CSV Master Barang
+Pilih File CSV Payment Plan
+Pilih File CSV Penjualan
+Pilih File Excel (.xlsx / .csv)
+Pilih Kategori...
+Pilih Nomor Bill (Pembayaran Hutang)
+Pilih Nomor PO (Uang Muka Pembelian)
+Pilih PO Asli *
+Pilih PO untuk memuat barang.
+Pilih Produk...
+Pilih Produk Pengganti...
+Pilih Purchase Order (PO) *
+Pilih Supplier / Vendor *
+Pilih Tahun
+Pilih tanggal transaksi
+Pilih vendor terlebih dahulu, lalu pilih Bill yang akan dibayar.
+Pilih vendor terlebih dahulu, lalu pilih PO untuk uang muka.
+PIN Karyawan (Form Pengajuan)
+PIN verifikasi karyawan internal.
+Piutang Dagang
+Portal Pengajuan Dana — Internal Employee
+Posisi
+Posisi Normal
+Pos Laporan
+Pos Laporan *
+Pos Saldo
+Pos Saldo Normal
+Pos Saldo Normal *
+Posting Jurnal
+Posting Jurnal WIP
+Potongan Item
+Potongan Lain-lain
+Processing (Dyeing/Printing/Finishing Kain)
+Processing Order Baru
+Processor
+Produk
+Produk (SKU)
+produk)
+Produk / Item Code
+Produk / SKU
+Produk Dipesan
+Produk Tujuan (SKU)
+Produk Tujuan (SKU Barang Jadi)
+Profil Perusahaan
+Proses Import
+Proses Penerimaan & Jurnal
+Proses Pesanan
+Provinsi
+Proyeksi Laba Bersih
+Purchase Orders (Pembelian)
+Qty Aktual
+Qty Approved
+Qty Dipesan
+Qty di PO
+Qty Diretur
+Qty Diterima (kg)
+Qty Faktur
+Qty Issued (kg)
+Qty Jadi
+Qty Jadi (pcs)
+Qty Kain (kg)
+Qty Kain Dipakai (kg)
+Qty Keluar
+Qty Masuk
+QTY Pesan
+Qty Pesan
+Qty Reject (kg)
+Qty Rencana
+Qty Rencana (pcs)
+Qty Retur
+Qty Returned
+Rata-rata/Bulan
+Rate
+Rate (%)
+Rate (%) *
+Rate (Rp)
+Rate default per kg/pcs untuk knitting, dyeing, printing, finishing, cutting, stitching.
+Rate per Pcs (Rp)
+RAW_MATERIAL
+Real-time Aggregated Grid
+RECEIVED (Komplit)
+Ref. Faktur
+Ref. Faktur (Invoice)
+Ref. Pesanan (SO)
+REF. PESANAN (SO)
+Ref. PO
+Ref. PO Asli
+Referensi Eksternal
+Refund Shipping Cost (Ongkir dikembalikan)
+Rekapitulasi aliran kas masuk dan keluar berbasis matriks interval tersinkronisasi.
+Rekapitulasi Hutang (AP)
+Rekapitulasi Piutang (AR)
+Rekapitulasi Uang Muka ke Supplier
+Rekapitulasi Uang Muka Pelanggan
+Rekap SPK yang sudah COMPLETED (selesai & masuk stok barang jadi) dalam periode terpilih, berdasarkan tanggal jurnal penyelesaian.
+Rekening / Virtual Account
+Rekening Ops
+Rekening Ops *
+Rekonsiliasi Jubelio
+Rekonsiliasi Jubelio vs ERP
+Rencana (kg)
+Rencana Pcs
+Rencana Pieces
+Rencana Qty (kg)
+Reset Filter
+Return Shipping Cost (Biaya tarik retur)
+Rincian Barang Faktur
+Rincian Barang Keluar
+Rincian Barang Purchase Order (Jubelio)
+Rincian Item Pembayaran
+Rincian Jurnal Umum
+Rincian Kalkulasi
+Rincian Proyeksi & Budget Per Akun
+Ringkasan pengajuan, misal: Belanja ATK & Operasional Bulan Ini
+Riwayat Aktivitas Sistem
+Riwayat penerimaan barang dan mutasi masuk lainnya.
+Riwayat pengeluaran barang dan mutasi keluar lainnya.
+Role / Hak Akses
+role == 'ADMIN')
+role == 'FINANCE')
+Rp 0
+s/d
+Saldo (Qty)
+Saldo Akhir
+Saldo Akhir (Rp)
+SALDO AKHIR KAS & BANK
+SALDO AWAL KAS & BANK
+Saldo Nilai (Rp)
+SALDO NORMAL
+Salesman
+Sales Orders
+Sampai:
+Sampai Tanggal
+Sampai Tgl
+Satuan
+Satuan Rate
+Selesai
+Selesaikan
+Selisih
+Selisih:
+Semua Divisi
+Semua Kategori
+Semua Laporan
+Semua Role
+Semua Status
+Semua Stok
+Semua Tipe
+server.
+Setelah barang selesai di-packing, instruksikan bagian Finance/Admin untuk memproses resi dan menerbitkan Faktur Penjualan di menu
+Setting Umur Penyusutan Aset
+Setup Saldo Awal Akun (Opening Balance)
+Shrinkage (%)
+Silakan pilih PO Asli di atas terlebih dahulu.
+Simpan
+Simpan & Posting Jurnal
+Simpan Akun
+Simpan Barang
+Simpan Draft Retur
+Simpan Jurnal
+Simpan Kode Bantu
+Simpan Pajak
+Simpan Perubahan
+Simpan Perubahan Profil
+Simpan Pesanan
+Simpan QC
+Simpan SPK
+Simpan Tagihan & Jurnal
+Single Jersey
+Sinkronkan data produk dari Dashboard
+Sisa Blm Datang
+Sisa Hutang Kita
+Sisa Retur
+Sisa Stok
+Sistem akan menjurnal & memotong stok berdasarkan angka yang Anda input di tabel ini,
+Sistem formulir terintegrasi otomatis untuk permohonan pencairan kas operasional, reimbursement, dan pembayaran ke vendor.
+Sistem mendeteksi ini sebagai transaksi
+Size
+SKU & Deskripsi Barang
+SKU (Kode Barang)
+SKU...
+SKU / Item Code
+Slug
+SPK (Surat Perintah Kerja)
+SPK ini sudah
+STAFF BIASA
+State
+Status & Catatan
+Status / Kategori
+Status Aktif
+Status Bayar
+Status Faktur
+Status Harga
+Status Payment
+Status Retur
+Status sudah
+Stitching & Finishing
+stock_quantity
+Stok
+Stok & HPP tidak ikut diimport — hanya berubah lewat transaksi MRN.
+Stok Akhir
+Stok Aktual
+Stok Awal
+Stok Kosong / Habis
+Stok Tersedia (> 0)
+Struktur kolom wajib sesuai template.
+Style SKU (opsional)
+Sub Total
+Subtotal (
+Subtotal:
+Subtotal Aktual
+Subtotal Barang
+Subtype
+Sumber
+Sumber Pembayaran (Kredit Akun) *
+Supplier / Toko *
+Supplier / Vendor
+supplier_doc_no)
+Surat Perintah Kerja (SPK) Manufaktur
+Susunan kolom harus patuh pada template.
+System Activity Logs
+Tagihan Pembelian (Bills)
+Tahap
+Tahap Finishing
+Tahun:
+Tahun Buku:
+Tambah Divisi Baru
+Tambah Fabric
+Tambah Item
+Tambah Kategori Payment Plan
+Tambah Kode Bantu Baru
+Tambah Master Akun (COA)
+Tambah Master Barang Baru
+Tambah Pajak Baru
+Tambah Pengguna Baru
+Tambah Pesanan Penjualan
+Tambah Rate Proses
+Tambah Supplier
+Tambah Yarn
+Tampilkan
+Tandai Langsung Lunas (CASH)
+Tandai Sudah Lunas (LUNAS)
+Tanggal *
+Tanggal Akhir
+Tanggal Awal
+Tanggal Faktur
+Tanggal Issue
+Tanggal QC
+Tanggal Retur
+Tanggal Retur *
+Tanggal Saldo Awal
+Tanggal Saldo Awal (Cut-off)
+Tanggal Selesai
+Tanggal SPK
+Tanggal Tagihan
+Tanggal Terima
+TANGGAL TRANSAKSI
+Tanggal transaksi yang akan muncul di jurnal
+Tanggal transaksi yang akan muncul di jurnal (wajib diisi sebelum posting)
+Target Kain
+Target Kain Grey
+Target Pendapatan
+Target Penjualan
+Target Selesai
+Telepon
+Terbit
+Terbitkan Faktur
+Terbitkan Faktur & Jurnal
+Terbitkan Faktur Penjualan (Kirim Aktual)
+Terima Barang dari Pesanan Pembelian
+Terima Retur dari Pelanggan
+Terima Sekarang
+Terima Skrg
+Terima Skrg (Aktual)
+Terjadi Kesalahan!
+Terjadi kesalahan sistem saat mengambil data jurnal.
+Terkoneksi Payment Plan
+Tersinkronisasi langsung ke Dashboard Finance
+TGL AKTUAL PENGIRIMAN
+Tgl Beli
+Tgl Pengajuan
+Tgl Pengajuan *
+Tgl PO
+Tgl SO
+Tgl Tagihan & Jatuh Tempo
+Tgl Terima / Masuk *
+Tgl Transaksi
+Tgl Transaksi *
+Tidak
+Tidak ada barang pada faktur ini.
+Tidak ada barang pada PO ini.
+Tidak ada data ditemukan.
+Tidak ada data log.
+Tidak ada data pengiriman (Faktur Manual)
+Tidak ada detail barang.
+Tidak ada detail barang untuk retur ini.
+Tidak Ada di Sumber
+Tidak ada pesanan penjualan yang menunggu untuk diproses saat ini.
+Tidak ada SPK yang selesai pada periode ini.
+Tidak Cocok
+Tidak di Sumber
+timeout
+Tip: Untuk data > 10.000 baris, gunakan fitur Import via Command Line VS Code agar bebas dari limit
+Tipe
+Tipe Akun (COA Type) *
+Tipe COA
+Tipe Pajak *
+Tipe Proses
+Titik Awal WIP
+Toko
+Toko / Vendor Tujuan
+Toleransi (Rp)
+Toleransi Selisih (Rp)
+Top 6 Sedotan Biaya Operasional
+Total (Rp)
+TOTAL (Rp)
+TOTAL:
+Total Akun
+Total Akun Dibandingkan
+TOTAL BALANCE
+Total Bayar
+Total Berat (Gram)
+Total Biaya
+Total Biaya Bahan:
+Total Biaya Proses:
+TOTAL BUDGET HPP
+TOTAL DEBET
+Total Debet:
+Total Historis
+Total HPP
+Total HPP (WIP)
+Total Item
+TOTAL KESELURUHAN
+TOTAL KESELURUHAN:
+TOTAL KEWAJIBAN + MODAL
+TOTAL KREDIT
+Total Kredit:
+Total Nilai Omset Penjualan (Rupiah)
+Total Nilai Tagihan
+TOTAL NOMINAL
+Total Nominal
+TOTAL OPERASIONAL
+Total Pcs Jadi
+TOTAL PENERIMAAN KAS
+Total Pengajuan
+Total Pengajuan (Bulan Ini)
+TOTAL PENGELUARAN KAS
+TOTAL PENJUALAN
+Total Pesan
+Total Plot Akun
+TOTAL SALDO HALAMAN INI
+Total Selisih Absolut
+Total Tagihan
+Total Tagihan (Rp)
+Total WIP
+Transaksi Faktur
+Transaksi Penjualan
+Transfer Masuk
+Transfer Masuk Manual
+Umur (Bln)
+Update Pajak
+Update Pesanan
+Upload & Sinkronisasi
+Upload Bukti / Nota
+Uraian item
+Urutan Kolom (wajib dengan header):
+Varian
+Vendor / Pemasok *
+Vendor / Toko *
+Vendor CMT
+Vendor Default
+Void Cutting Order
+Void FR
+Void GFR
+Void MRN
+Void Penyelesaian
+Void QC
+Void Stitching Order
+Waktu
+Warehouse (Gudang)
+Warna
+Warna / Shade Code
+Wastage
+We suggest starting with the following.
+Worklist Manual - Custom Filter
+Worklist Manual Hutang/UM/Deposit
+Ya (Cash on Delivery)
+Yarn
+✕ TIDAK SEIMBANG
+🔍 Rekonsiliasi Laporan: Jubelio vs ERP

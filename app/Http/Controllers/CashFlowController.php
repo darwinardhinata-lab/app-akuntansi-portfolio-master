@@ -40,7 +40,7 @@ class CashFlowController extends Controller
               ->orWhere('account_name', 'like', '%Tokopedia%')
               ->orWhere('account_name', 'like', '%Lazada%')
               ->orWhere('account_name', 'like', '%Dummy%');
-        })->where(DB::raw('LEFT(TRIM(account_code), 1)'), '1')
+        })->where(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), '1')
           ->orderBy('account_code', 'asc')
           ->get();
 

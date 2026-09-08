@@ -71,7 +71,7 @@ class ProfitLossController extends Controller
         }
 
         // 2. Tarik Master Akun (Bagan Akun berawalan 4 sampai 9)
-        $masterAccounts = Account::whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['4', '5', '6', '7', '8', '9'])
+        $masterAccounts = Account::whereIn(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), ['4', '5', '6', '7', '8', '9'])
             ->get()
             ->keyBy(function($item) {
                 return trim($item->account_code);
@@ -265,7 +265,7 @@ class ProfitLossController extends Controller
                 ->select('position', DB::raw('SUM(amount) as total'))
                 ->where('transaction_date', '>=', $startDate . ' 00:00:00')
                 ->where('transaction_date', '<=', $endDate . ' 23:59:59')
-                ->whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['4','5','6','7','8','9'])
+                ->whereIn(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), ['4','5','6','7','8','9'])
                 ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
                 ->where(function ($q) {

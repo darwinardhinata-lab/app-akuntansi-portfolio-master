@@ -21,7 +21,7 @@ class BalanceSheetController extends Controller
         $isExport = $request->get('export') == 'excel';
 
         // 2. Tarik Master Akun Neraca
-        $masterAccounts = Account::whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['1', '2', '3'])
+        $masterAccounts = Account::whereIn(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), ['1', '2', '3'])
             ->get()->keyBy(fn($item) => trim($item->account_code));
 
         if ($tab == 'bulanan') {
@@ -41,7 +41,7 @@ class BalanceSheetController extends Controller
             $openingRows = JournalDetail::join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
                 ->select(DB::raw('TRIM(account_code) as account_code'), 'position', DB::raw('SUM(amount) as total'))
                 ->where('journal_headers.transaction_date', '<', $rangeStart . ' 00:00:00')
-                ->whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['1', '2', '3'])
+                ->whereIn(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), ['1', '2', '3'])
                 ->groupBy(DB::raw('TRIM(account_code)'), 'position')
                 ->get();
 
@@ -57,7 +57,7 @@ class BalanceSheetController extends Controller
                 )
                 ->where('journal_headers.transaction_date', '>=', $rangeStart . ' 00:00:00')
                 ->where('journal_headers.transaction_date', '<=', $rangeEnd . ' 23:59:59')
-                ->whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['1', '2', '3'])
+                ->whereIn(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), ['1', '2', '3'])
                 ->groupBy(DB::raw('TRIM(account_code)'), 'position', DB::raw($periodExpr))
                 ->get();
 
@@ -70,7 +70,7 @@ class BalanceSheetController extends Controller
             $plRetained = JournalDetail::join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
                 ->select('position', DB::raw('SUM(amount) as total'))
                 ->where('journal_headers.transaction_date', '<', $yearOfRangeStart . '-01-01 00:00:00')
-                ->whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['4', '5', '6', '7', '8', '9'])
+                ->whereIn(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), ['4', '5', '6', '7', '8', '9'])
                 ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
                 ->where(function ($q) {
@@ -85,7 +85,7 @@ class BalanceSheetController extends Controller
                 ->select('position', DB::raw('SUM(amount) as total'))
                 ->where('journal_headers.transaction_date', '>=', $yearOfRangeStart . '-01-01 00:00:00')
                 ->where('journal_headers.transaction_date', '<', $rangeStart . ' 00:00:00')
-                ->whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['4', '5', '6', '7', '8', '9'])
+                ->whereIn(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), ['4', '5', '6', '7', '8', '9'])
                 ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
                 ->where(function ($q) {
@@ -104,7 +104,7 @@ class BalanceSheetController extends Controller
                 )
                 ->where('journal_headers.transaction_date', '>=', $rangeStart . ' 00:00:00')
                 ->where('journal_headers.transaction_date', '<=', $rangeEnd . ' 23:59:59')
-                ->whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['4', '5', '6', '7', '8', '9'])
+                ->whereIn(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), ['4', '5', '6', '7', '8', '9'])
                 ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
                 ->where(function ($q) {
@@ -120,7 +120,7 @@ class BalanceSheetController extends Controller
             $allData = JournalDetail::join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
                 ->select(DB::raw('TRIM(account_code) as account_code'), 'position', DB::raw('SUM(amount) as total'))
                 ->where('journal_headers.transaction_date', '<=', $date . ' 23:59:59')
-                ->whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['1', '2', '3'])
+                ->whereIn(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), ['1', '2', '3'])
                 ->groupBy(DB::raw('TRIM(account_code)'), 'position')
                 ->get();
             $dataCodes = $allData->pluck('account_code')->unique();
@@ -342,16 +342,16 @@ class BalanceSheetController extends Controller
     private function calculateSplitProfits($date, $year)
     {
         $data = JournalDetail::join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
-                ->select('position', DB::raw('YEAR(journal_headers.transaction_date) as year'), DB::raw('SUM(amount) as total'))
+                ->select('position', DB::raw("STRFTIME('%Y', journal_headers.transaction_date) as year"), DB::raw('SUM(amount) as total'))
                 ->where('journal_headers.transaction_date', '<=', $date . ' 23:59:59')
-                ->whereIn(DB::raw('LEFT(TRIM(account_code), 1)'), ['4', '5', '6', '7', '8', '9'])
+                ->whereIn(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), ['4', '5', '6', '7', '8', '9'])
                 ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
                 ->where('journal_headers.evidence_number', 'NOT LIKE', 'SA-%')
                 ->where(function ($q) {
                     $q->whereNull('journal_headers.is_opening_balance')
                       ->orWhere('journal_headers.is_opening_balance', 0);
                 })
-                ->groupBy('position', DB::raw('YEAR(journal_headers.transaction_date)'))
+                ->groupBy('position', DB::raw("STRFTIME('%Y', journal_headers.transaction_date)"))
                 ->get();
 
         $totalLabaDitahan = 0;

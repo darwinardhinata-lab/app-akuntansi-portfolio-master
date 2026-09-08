@@ -61,12 +61,12 @@ class SalesInvoiceController extends Controller
             ->join('sales_invoice_details as sid', 'si.id', '=', 'sid.sales_invoice_id')
             ->leftJoin('sales_orders as so', 'si.sales_order_id', '=', 'so.id')
             ->select([
-                DB::raw("DATE_FORMAT(si.transaction_date, '%Y-%m') as bulan"),
+                DB::raw("STRFTIME('%Y-%m', si.transaction_date) as bulan"),
                 DB::raw("IFNULL(so.location_name, 'Pusat') as lokasi"),
                 'si.contact_name as pelanggan',
                 'sid.item_code as sku',
                 DB::raw("SUM(sid.qty_actual) as total_qty"),
-                DB::raw("CAST(SUM(sid.amount) AS UNSIGNED) as total_omset")
+                DB::raw("CAST(SUM(sid.amount) AS INTEGER) as total_omset")
             ]);
 
         // Berikan filter tanggal yang sama pada menu analitik pivotnya
