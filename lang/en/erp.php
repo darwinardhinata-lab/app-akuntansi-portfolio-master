@@ -3034,4 +3034,85 @@ return [
     'status_kustomisasi' => 'Customization',
     'status_personalisasi' => 'Personalization',
     'status_konfigurasi' => 'Configuration',
+
+    // === MANUFACTURING MODULE (MFG) ===
+    'mfg_module' => 'Manufacturing',
+    'mfg_work_orders' => 'Work Orders (SPK)',
+    'mfg_material_receipt' => 'Material Receipt (MRN)',
+    'mfg_master_yarn' => 'Yarn Master',
+    'mfg_master_fabric' => 'Fabric Master',
+    'mfg_master_supplier' => 'Supplier/Vendor Master',
+    'mfg_master_process' => 'Process Rate Master',
+    'mfg_report_hpp' => 'Manufacturing COGS Report',
+
+    // Status
+    'mfg_status_open' => 'Open',
+    'mfg_status_in_progress' => 'In Progress',
+    'mfg_status_completed' => 'Completed',
+    'mfg_status_voided' => 'Voided',
+
+    // Process Types
+    'mfg_process_knitting' => 'Knitting',
+    'mfg_process_dyeing' => 'Dyeing',
+    'mfg_process_printing' => 'Printing',
+    'mfg_process_finishing' => 'Finishing',
+    'mfg_process_cutting' => 'Cutting',
+    'mfg_process_stitching' => 'Stitching',
+    'mfg_process_other' => 'Other',
+
+    // Fabric States
+    'mfg_fabric_grey' => 'Grey Fabric',
+    'mfg_fabric_finished' => 'Finished Fabric',
+
+    // Finishing Stages
+    'mfg_stage_washing' => 'Washing',
+    'mfg_stage_ironing' => 'Ironing',
+    'mfg_stage_qc' => 'Quality Control',
+    'mfg_stage_packing' => 'Packing',
+    'mfg_stage_other' => 'Other',
+
+    // Material Types
+    'mfg_material_yarn' => 'Yarn',
+    'mfg_material_fabric' => 'Fabric',
+
+    // Ledger Types
+    'mfg_ledger_in' => 'In',
+    'mfg_ledger_out' => 'Out',
+
+    // Success Messages
+    'mfg_processing_order_created' => 'Processing Order :number created successfully.',
+    'mfg_material_receipt_created' => 'MRN :number recorded & journal posted.',
+    'mfg_work_order_completed' => 'SPK :number completed. COGS recalculated.',
+    'mfg_void_success' => 'Document :number voided. Reversal journal posted.',
+
+    // Error Messages
+    'mfg_processing_order_failed' => 'Failed to create Processing Order: :reason',
+    'mfg_material_receipt_failed' => 'Failed to record MRN: :reason',
+    'mfg_fabric_stock_insufficient' => 'Fabric stock :fabric_code insufficient. Available: :available, Requested: :requested',
+    'mfg_yarn_stock_insufficient' => 'Yarn stock :yarn_code insufficient. Available: :available, Requested: :requested',
+    'mfg_work_order_not_found' => 'SPK ID :id not found.',
+    'mfg_work_order_already_completed' => 'SPK :number already completed, cannot be modified.',
+    'mfg_target_date_must_future' => 'Target date must be today or in the future.',
+    'mfg_journal_not_balance' => 'Manufacturing journal not balanced (Debit ≠ Credit). Transaction cancelled.',
+    'mfg_mrn_no_items' => 'MRN must have at least 1 item.',
+
+    // Form Labels
+    'mfg_fabric_code' => 'Fabric Code',
+    'mfg_fabric_type' => 'Fabric Type',
+    'mfg_yarn_code' => 'Yarn Code',
+    'mfg_yarn_count' => 'Yarn Count',
+    'mfg_gsm' => 'GSM (Gram per m²)',
+    'mfg_composition' => 'Composition',
+    'mfg_width' => 'Width',
+    'mfg_lot_number' => 'Lot Number',
+    'mfg_qty_issued' => 'Qty Issued',
+    'mfg_qty_received' => 'Qty Received',
+    'mfg_wastage_kg' => 'Wastage (kg)',
+    'mfg_pieces_cut' => 'Pieces Cut',
+    'mfg_pieces_ok' => 'Pieces OK',
+    'mfg_pieces_rejected' => 'Pieces Rejected',
+    'mfg_process_name' => 'Process Name',
+    'mfg_process_type' => 'Process Type',
+    'mfg_rate_unit' => 'Rate Unit',
+    'mfg_process_rate' => 'Process Rate',
 ];

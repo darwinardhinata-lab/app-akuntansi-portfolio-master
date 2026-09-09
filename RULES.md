@@ -92,6 +92,230 @@ if (count($detailsToInsert) >= 500) {
 * **[BARU]** Menghapus atau mengubah prefix key dokumen yang sudah beredar di data historis (`INV`, `PO`, `SO`, `BIL`, `SR`, `PR`, `GJ`, `JRN`) tanpa migrasi data — akan merusak seluruh fitur pelacakan dokumen (`DocumentTraceController`) dan laporan sub-ledger.
 * **[BARU]** Menambahkan hardcoded `account_code` baru langsung di Controller/Service tanpa mendokumentasikannya — pertimbangkan memindahkan seluruh mapping akun ke satu file konfigurasi terpusat (`config/coa_mapping.php`) sebagai *technical debt* prioritas (lihat §7.3).
 
+## 10. Standar Multi-Bahasa (i18n) — WAJIB DIPATUHI
+
+> **Status: [BARU]** — Ditambahkan untuk mendukung deployment multi-bahasa
+> (ID/EN/ZH_CN) tanpa merusak integritas data akuntansi.
+
+### 10.1 Prinsip Dasar: "Data Baku, UI Fleksibel"
+
+Sistem ERP Akuntansi ini beroperasi dalam 3 bahasa (ID/EN/ZH_CN), dengan
+pemisahan tegas antara **data** dan **presentasi**:
+
+| Layer | Aturan | Contoh |
+|---|---|---|
+| Database (kolom, enum, COA codes) | **TETAP** dalam bahasa Inggris/Indonesia baku | `account_code='11210'`, `status='COMPLETED'` |
+| Istilah akuntansi PSAK | **TETAP** dalam Bahasa Indonesia | DEBET, KREDIT, Neraca, Laba Rugi, HPP, COA |
+| Log sistem (`SystemLog::record`) | **TETAP** dalam Bahasa Indonesia | `'Menambahkan produk: SKU-001'` |
+| UI labels (tombol, menu, judul) | **WAJIB** pakai `__('erp.key')` | `{{ __('erp.save') }}` |
+| Flash messages (success/error) | **WAJIB** pakai `__('erp.key')` | `->with('success', __('erp.data_saved'))` |
+| Validation messages | **OTOMATIS** dari `lang/{locale}/validation.php` | Bawaan Laravel |
+| Export Excel / Print headers | **WAJIB** pakai `__()` | `__('erp.report_header_date')` |
+| Email templates | **WAJIB** pakai `__()` | `__('erp.email_greeting', ['name' => ...])` |
+
+### 10.2 Aturan Penulisan Kode i18n-Ready
+
+#### ✅ WAJIB DILAKUKAN:
+
+**1. Semua string UI harus melalui `__()` helper:**
+```php
+// Controller
+return redirect()->back()->with('success', __('erp.data_saved'));
+return redirect()->back()->with('error', __('erp.failed_create_order', ['order' => $no]));
+
+// Blade
+<button>{{ __('erp.save') }}</button>
+<label>{{ __('erp.account_name') }}</label>
+<input placeholder="{{ __('erp.enter_supplier_name') }}">
+<title>{{ __('erp.dashboard') }} - {{ config('app.name') }}</title>
+
+// Service (untuk pesan yang akan ditampilkan ke user)
+throw new \Exception(__('erp.journal_not_balance'));
+```
+
+**2. Gunakan placeholder untuk nilai dinamis (JANGAN concat):**
+```php
+// ❌ SALAH — tidak bisa diterjemahkan dengan struktur kalimat berbeda
+__('erp.welcome') . ' ' . $user->name
+
+// ✅ BENAR — struktur kalimat bisa berbeda per bahasa
+__('erp.welcome_user', ['name' => $user->name])
+// lang/id/erp.php: 'welcome_user' => 'Selamat datang, :name'
+// lang/en/erp.php: 'welcome_user' => 'Welcome, :name'
+// lang/zh_CN/erp.php: 'welcome_user' => '欢迎，:name'
+```
+
+**3. Pluralization untuk jumlah:**
+```php
+// ✅ BENAR — menggunakan pipe | untuk plural
+__('erp.items_count', ['count' => $n])
+// lang/id/erp.php: 'items_count' => ':count barang|:count barang'
+// lang/en/erp.php: 'items_count' => ':count item|:count items'
+// lang/zh_CN/erp.php: 'items_count' => ':count 件商品'
+```
+
+**4. Tanggal & angka mengikuti locale:**
+```php
+// ✅ BENAR — pakai Carbon's locale() + NumberFormatter
+\Carbon\Carbon::setLocale(app()->getLocale());
+$tanggal = $date->translatedFormat('d F Y'); // "09 September 2026" / "2026年9月9日"
+
+$formatter = new \NumberFormatter(app()->getLocale(), \NumberFormatter::DECIMAL);
+$angka = $formatter->format(1234567.89); // "1.234.567,89" / "1,234,567.89" / "1,234,567.89"
+```
+
+#### ❌ DILARANG KERAS:
+
+**1. JANGAN translate data yang tersimpan di database:**
+```php
+// ❌ SALAH FATAL — merusak integritas data
+$account->name = __('erp.cash_account'); // Nama akun jadi tergantung bahasa user!
+
+// ✅ BENAR — nama akun tetap di DB, UI yang translate
+// Database: accounts.name = 'Kas' (tetap)
+// Blade: {{ $account->name }} (tidak perlu __(), sudah di DB)
+// KECUALI untuk label generik seperti "Total Debet" → pakai __()
+```
+
+**2. JANGAN hardcode string di Blade/Controller:**
+```php
+// ❌ SALAH
+<button>Simpan</button>
+<div>Total: Rp {{ number_format($total) }}</div>
+
+// ✅ BENAR
+<button>{{ __('erp.save') }}</button>
+<div>{{ __('erp.total') }}: {{ __('erp.currency_prefix') }}{{ number_format($total) }}</div>
+```
+
+**3. JANGAN translate enum/logika bisnis:**
+```php
+// ❌ SALAH — akan break query & logika
+if ($order->status === __('erp.completed')) { ... }
+
+// ✅ BENAR
+if ($order->status === 'COMPLETED') { ... }
+// Di Blade untuk display:
+<span>{{ __('erp.status_' . strtolower($order->status)) }}</span>
+```
+
+### 10.3 Konvensi Key Naming di `lang/*/erp.php`
+
+```php
+// Format: snake_case, hierarki berdasarkan modul/fitur
+return [
+    // === GENERAL UI ===
+    'save' => 'Simpan',
+    'cancel' => 'Batal',
+    'delete' => 'Hapus',
+    'edit' => 'Edit',
+    'create' => 'Buat',
+    'search' => 'Cari',
+    'filter' => 'Filter',
+    'export' => 'Ekspor',
+    'import' => 'Impor',
+    'print' => 'Cetak',
+    'back' => 'Kembali',
+    'actions' => 'Aksi',
+    'status' => 'Status',
+    'date' => 'Tanggal',
+    'total' => 'Total',
+    'currency_prefix' => 'Rp', // Bisa diganti '¥' untuk ZH_CN
+
+    // === MODULE-PREFIXED (untuk menghindari tabrakan) ===
+    'journal_not_balance' => 'Jurnal tidak seimbang (Debet ≠ Kredit)',
+    'mfg_processing_order_created' => 'Processing Order :number berhasil dibuat',
+    'mfg_material_receipt_voided' => 'MRN :number berhasil dibatalkan',
+    'so_invoice_generated' => 'Faktur :invoice_no berhasil diterbitkan',
+
+    // === STATUS LABELS (untuk enum display) ===
+    'status_open' => 'Terbuka',
+    'status_in_progress' => 'Sedang Diproses',
+    'status_completed' => 'Selesai',
+    'status_voided' => 'Dibatalkan',
+    'status_draft' => 'Draft',
+    'status_posted' => 'Terposting',
+
+    // === VALIDATION CUSTOM (opsional, Laravel sudah punya default) ===
+    'validation' => [
+        'journal_must_balance' => 'Total Debet harus sama dengan Total Kredit',
+        'date_must_not_future' => 'Tanggal tidak boleh di masa depan',
+    ],
+];
+```
+
+### 10.4 Error Handling Multi-Bahasa
+
+**Setiap `throw new Exception` yang pesannya sampai ke user WAJIB pakai `__()`:**
+
+```php
+// ✅ BENAR — user lihat pesan dalam bahasa mereka
+try {
+    $receipt = MaterialReceiptService::createAndPost($data);
+} catch (\Exception $e) {
+    // Log internal TETAP bahasa Indonesia (untuk developer)
+    \Log::error('MRN creation failed: ' . $e->getMessage());
+
+    // Pesan ke user WAJIB i18n
+    return redirect()->back()
+        ->withInput()
+        ->with('error', __('erp.mfg_mrn_creation_failed', [
+            'reason' => $this->mapErrorToI18nKey($e->getMessage())
+        ]));
+}
+
+// Helper untuk map error teknis → key i18n
+private function mapErrorToI18nKey(string $technicalMsg): string
+{
+    return match(true) {
+        str_contains($technicalMsg, 'not balance') => __('erp.journal_not_balance'),
+        str_contains($technicalMsg, 'insufficient stock') => __('erp.stock_insufficient'),
+        str_contains($technicalMsg, 'duplicate entry') => __('erp.duplicate_document'),
+        default => __('erp.system_error_generic'),
+    };
+}
+```
+
+### 10.5 Fallback Strategy
+
+Jika key tidak ditemukan di bahasa aktif, Laravel otomatis fallback ke bahasa default
+(config('app.fallback_locale') = 'id'). **WAJIB**: pastikan key yang dipakai di kode
+**SELALU ada di `lang/id/erp.php`** (sebagai fallback universal).
+
+```php
+// Cek kelengkapan keys — jalankan di CI/CD atau artisan command
+php artisan lang:check-missing
+// Output: "❌ 12 keys missing in zh_CN, 3 keys missing in en"
+```
+
+### 10.6 Testing i18n
+
+Sebelum deploy, WAJIB test di ketiga bahasa:
+```bash
+# Test manual — buka browser, klik switcher bahasa
+http://app.local/lang/id
+http://app.local/lang/en
+http://app.local/lang/zh_CN
+
+# Test otomatis — cek tidak ada hardcoded string di blade
+php artisan i18n:scan-hardcoded
+# Output: "⚠️ 5 hardcoded strings found in resources/views/..."
+```
+
+### 10.7 Checklist Developer (tempel di PR template)
+
+- [ ] Semua string UI baru memakai `__('erp.key')`
+- [ ] Key baru ditambahkan di `lang/id/erp.php` (fallback)
+- [ ] Key baru ditambahkan di `lang/en/erp.php`
+- [ ] Key baru ditambahkan di `lang/zh_CN/erp.php`
+- [ ] Tidak ada concat string — pakai placeholder `:variable`
+- [ ] Exception message ke user sudah i18n
+- [ ] Log internal (`\Log::`) tetap bahasa Indonesia/Inggris baku
+- [ ] Export Excel headers sudah i18n (jika ada fitur export)
+- [ ] Test di 3 bahasa sebelum merge
+
+---
+
 ## 7. Catatan Konsistensi & Isu Terbuka (Hasil Audit Ulang 25 Juli 2026)
 
 Bagian ini menjawab pertanyaan: *"apakah logic, perhitungan, struktur sudah dalam satu flow yang tidak terpisahkan?"* — Jawaban: **sebagian besar YA** untuk jalur transaksi inti (PO→Bill→Jurnal, SO→Invoice→Jurnal, semuanya bermuara konsisten ke `journal_headers`/`journal_details` dengan validasi balance yang seragam), namun ada beberapa titik **tidak sepenuhnya menyatu**:

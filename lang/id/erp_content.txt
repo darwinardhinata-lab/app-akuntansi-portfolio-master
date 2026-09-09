@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'main_menu' => 'Menu Utama',
@@ -181,85 +181,4 @@ return [
     'income_mil' => 'Pemasukan (jt)',
     'expense_mil' => 'Pengeluaran (jt)',
     'net_cash_mil' => 'Net Cash (jt)',
-
-    // === MANUFACTURING MODULE (MFG) ===
-    'mfg_module' => 'Manufaktur',
-    'mfg_work_orders' => 'Surat Perintah Kerja (SPK)',
-    'mfg_material_receipt' => 'Penerimaan Bahan (MRN)',
-    'mfg_master_yarn' => 'Master Benang',
-    'mfg_master_fabric' => 'Master Kain',
-    'mfg_master_supplier' => 'Master Supplier/Vendor',
-    'mfg_master_process' => 'Master Rate Proses',
-    'mfg_report_hpp' => 'Laporan HPP Manufaktur',
-
-    // Status
-    'mfg_status_open' => 'Terbuka',
-    'mfg_status_in_progress' => 'Sedang Diproses',
-    'mfg_status_completed' => 'Selesai',
-    'mfg_status_voided' => 'Dibatalkan',
-
-    // Process Types
-    'mfg_process_knitting' => 'Knitting (Rajut)',
-    'mfg_process_dyeing' => 'Dyeing (Celup)',
-    'mfg_process_printing' => 'Printing (Cetak)',
-    'mfg_process_finishing' => 'Finishing',
-    'mfg_process_cutting' => 'Cutting (Potong)',
-    'mfg_process_stitching' => 'Stitching (Jahit)',
-    'mfg_process_other' => 'Lainnya',
-
-    // Fabric States
-    'mfg_fabric_grey' => 'Kain Grey (Mentah)',
-    'mfg_fabric_finished' => 'Kain Finished (Jadi)',
-
-    // Finishing Stages
-    'mfg_stage_washing' => 'Washing (Cuci)',
-    'mfg_stage_ironing' => 'Ironing (Setrika)',
-    'mfg_stage_qc' => 'Quality Control',
-    'mfg_stage_packing' => 'Packing (Kemas)',
-    'mfg_stage_other' => 'Lainnya',
-
-    // Material Types
-    'mfg_material_yarn' => 'Benang',
-    'mfg_material_fabric' => 'Kain',
-
-    // Ledger Types
-    'mfg_ledger_in' => 'Masuk',
-    'mfg_ledger_out' => 'Keluar',
-
-    // Success Messages
-    'mfg_processing_order_created' => 'Processing Order :number berhasil dibuat.',
-    'mfg_material_receipt_created' => 'MRN :number berhasil dicatat & jurnal diposting.',
-    'mfg_work_order_completed' => 'SPK :number berhasil diselesaikan. HPP dihitung ulang.',
-    'mfg_void_success' => 'Dokumen :number berhasil dibatalkan. Jurnal pembalik diposting.',
-
-    // Error Messages
-    'mfg_processing_order_failed' => 'Gagal membuat Processing Order: :reason',
-    'mfg_material_receipt_failed' => 'Gagal mencatat MRN: :reason',
-    'mfg_fabric_stock_insufficient' => 'Stok kain :fabric_code tidak cukup. Tersedia: :available, Diminta: :requested',
-    'mfg_yarn_stock_insufficient' => 'Stok benang :yarn_code tidak cukup. Tersedia: :available, Diminta: :requested',
-    'mfg_work_order_not_found' => 'SPK ID :id tidak ditemukan.',
-    'mfg_work_order_already_completed' => 'SPK :number sudah selesai, tidak bisa diubah.',
-    'mfg_target_date_must_future' => 'Tanggal target harus hari ini atau di masa depan.',
-    'mfg_journal_not_balance' => 'Jurnal manufaktur tidak seimbang (Debet ≠ Kredit). Transaksi dibatalkan.',
-    'mfg_mrn_no_items' => 'MRN harus memiliki minimal 1 item.',
-
-    // Form Labels
-    'mfg_fabric_code' => 'Kode Kain',
-    'mfg_fabric_type' => 'Jenis Kain',
-    'mfg_yarn_code' => 'Kode Benang',
-    'mfg_yarn_count' => 'Count Benang',
-    'mfg_gsm' => 'GSM (Gram per m²)',
-    'mfg_composition' => 'Komposisi',
-    'mfg_width' => 'Lebar',
-    'mfg_lot_number' => 'Nomor Lot',
-    'mfg_qty_issued' => 'Qty Dikeluarkan',
-    'mfg_qty_received' => 'Qty Diterima',
-    'mfg_wastage_kg' => 'Wastage (kg)',
-    'mfg_pieces_cut' => 'Pieces Dipotong',
-    'mfg_pieces_ok' => 'Pieces OK',
-    'mfg_pieces_rejected' => 'Pieces Reject',
-    'mfg_process_name' => 'Nama Proses',
-    'mfg_process_type' => 'Tipe Proses',
-    'mfg_rate_unit' => 'Satuan Rate',
-    'mfg_process_rate' => 'Rate Proses',
 ];

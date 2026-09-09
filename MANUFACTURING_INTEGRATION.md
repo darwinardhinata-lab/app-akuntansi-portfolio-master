@@ -250,3 +250,387 @@ dari database jika perlu, tidak memengaruhi akuntansi).
 Semua logic/struktur/workflow bersumber dari Anthrilo; semua konvensi kode/penamaan
 mengikuti proyek akuntansi Anda. `RULES.md` hanya referensi konvensi, bukan sumber desain
 manufaktur, dan tidak pernah menyiratkan Anthrilo harus tetap berjalan.
+
+## 10. Multi-Bahasa (i18n) untuk Modul Manufaktur
+
+> **Status: [BARU]** — Modul Manufaktur (MFG/SPK) sekarang fully i18n-ready.
+> Mengikuti prinsip §10 RULES.md: "Data Baku, UI Fleksibel".
+
+### 10.1 Apa yang TIDAK Diterjemahkan (Tetap Baku)
+
+| Item | Nilai di DB | Alasan |
+|---|---|---|
+| `mfg_work_orders.status` | `OPEN`, `IN_PROGRESS`, `COMPLETED`, `VOIDED` | Enum, logika bisnis |
+| `mfg_processes.process_type` | `KNITTING`, `DYEING`, `PRINTING`, `FINISHING`, `CUTTING`, `STITCHING`, `OTHER` | Enum master data |
+| `mfg_fabrics.state` | `GREY`, `FINISHED` | Enum master data |
+| `mfg_finishing_stages.stage` | `WASHING`, `IRONING`, `QC`, `PACKING`, `OTHER` | Enum |
+| `mfg_material_ledgers.item_type` | `YARN`, `FABRIC` | Enum |
+| `mfg_material_ledgers.type` | `IN`, `OUT` | Enum |
+| Prefix dokumen | `MFG-`, `MRN-`, `CO-`, `SEW-`, `FI-`, `PRC-`, `GFR-` | Audit trail |
+| COA codes | `11210`, `11220`, `11500`, `21110`, `88006`, dll | Standar akuntansi |
+| Nama akun di `accounts` | 'Persediaan Bahan Baku - Yarn', 'Hutang Usaha Maklun', dll | Data master |
+
+### 10.2 Apa yang WAJIB Diterjemahkan (UI Layer)
+
+#### A. Label Status di Blade (pakai helper)
+
+Buat helper `App\Support\ManufacturingLabel` untuk sentralisasi:
+
+```php
+<?php
+namespace App\Support;
+
+class ManufacturingLabel
+{
+    /**
+     * Terjemahkan status SPK ke label UI multi-bahasa.
+     * DB: 'COMPLETED' → ID: 'Selesai' / EN: 'Completed' / ZH: '已完成'
+     */
+    public static function workOrderStatus(string $status): string
+    {
+        return match(strtoupper($status)) {
+            'OPEN' => __('erp.mfg_status_open'),
+            'IN_PROGRESS' => __('erp.mfg_status_in_progress'),
+            'COMPLETED' => __('erp.mfg_status_completed'),
+            'VOIDED' => __('erp.mfg_status_voided'),
+            default => $status, // fallback aman
+        };
+    }
+
+    public static function processType(string $type): string
+    {
+        return match(strtoupper($type)) {
+            'KNITTING' => __('erp.mfg_process_knitting'),
+            'DYEING' => __('erp.mfg_process_dyeing'),
+            'PRINTING' => __('erp.mfg_process_printing'),
+            'FINISHING' => __('erp.mfg_process_finishing'),
+            'CUTTING' => __('erp.mfg_process_cutting'),
+            'STITCHING' => __('erp.mfg_process_stitching'),
+            'OTHER' => __('erp.mfg_process_other'),
+            default => $type,
+        };
+    }
+
+    public static function fabricState(string $state): string
+    {
+        return match(strtoupper($state)) {
+            'GREY' => __('erp.mfg_fabric_grey'),
+            'FINISHED' => __('erp.mfg_fabric_finished'),
+            default => $state,
+        };
+    }
+
+    public static function finishingStage(string $stage): string
+    {
+        return match(strtoupper($stage)) {
+            'WASHING' => __('erp.mfg_stage_washing'),
+            'IRONING' => __('erp.mfg_stage_ironing'),
+            'QC' => __('erp.mfg_stage_qc'),
+            'PACKING' => __('erp.mfg_stage_packing'),
+            'OTHER' => __('erp.mfg_stage_other'),
+            default => $stage,
+        };
+    }
+}
+```
+
+**Pemakaian di Blade:**
+```blade
+{{-- ❌ SALAH (hardcoded) --}}
+<td>{{ $order->status }}</td>
+<td class="badge bg-{{ $order->status === 'COMPLETED' ? 'success' : 'warning' }}">
+    {{ $order->status === 'COMPLETED' ? 'Selesai' : 'Dalam Proses' }}
+</td>
+
+{{-- ✅ BENAR (i18n-ready) --}}
+<td>{{ \App\Support\ManufacturingLabel::workOrderStatus($order->status) }}</td>
+<td class="badge bg-{{ $order->status === 'COMPLETED' ? 'success' : 'warning' }}">
+    {{ \App\Support\ManufacturingLabel::workOrderStatus($order->status) }}
+</td>
+```
+
+#### B. Flash Messages di Controller Manufaktur
+
+**Semua controller di `App\Modules\Manufacturing\Http\Controllers` WAJIB i18n:**
+
+```php
+// ✅ BENAR — ProcessingOrderController.php
+public function store(Request $request)
+{
+    $request->validate([
+        'work_order_id' => 'required|exists:mfg_work_orders,id',
+        'supplier_id' => 'required|exists:mfg_suppliers,id',
+        'target_date' => 'required|date|after_or_equal:today',
+    ], [
+        // Validation messages otomatis i18n dari lang/{locale}/validation.php
+        // Tapi custom message tetap bisa di-override:
+        'target_date.after_or_equal' => __('erp.mfg_target_date_must_future'),
+    ]);
+
+    try {
+        $order = $this->service->create($request->validated());
+        SystemLog::record('CREATE', 'Manufacturing Processing Order',
+            'Membuat Processing Order: ' . $order->order_number); // Log TETAP ID
+
+        return redirect()->route('mfg.work-orders.show', $request->work_order_id)
+            ->with('success', __('erp.mfg_processing_order_created', [
+                'number' => $order->order_number
+            ]));
+    } catch (\Exception $e) {
+        \Log::error('ProcessingOrder creation failed: ' . $e->getMessage());
+        return redirect()->back()
+            ->withInput()
+            ->with('error', __('erp.mfg_processing_order_failed', [
+                'reason' => $this->mapError($e->getMessage())
+            ]));
+    }
+}
+
+public function issueFabric(Request $request, $id)
+{
+    // ...
+    if ($fabric->stock_quantity < $request->qty_issued) {
+        return redirect()->back()
+            ->with('error', __('erp.mfg_fabric_stock_insufficient', [
+                'available' => $fabric->stock_quantity,
+                'requested' => $request->qty_issued,
+                'fabric_code' => $fabric->fabric_code,
+            ]));
+    }
+    // ...
+}
+```
+
+#### C. Breadcrumb & Page Title
+
+```blade
+{{-- ❌ SALAH --}}
+<x-breadcrumb :links="['Manufaktur' => '#', 'Material Receipt (MRN)' => route('mfg.material-receipts.index'), 'Buat Baru' => null]" />
+
+{{-- ✅ BENAR --}}
+<x-breadcrumb :links="[
+    __('erp.mfg_module') => '#',
+    __('erp.mfg_material_receipt') => route('mfg.material-receipts.index'),
+    __('erp.create_new') => null,
+]" />
+```
+
+#### D. Export Excel Headers
+
+```php
+// ManufacturingProcessExport.php
+public function headings(): array
+{
+    return [
+        __('erp.mfg_process_name'),
+        __('erp.mfg_process_type'),
+        __('erp.mfg_rate_unit'),
+        __('erp.mfg_process_rate'),
+        __('erp.status'),
+    ];
+}
+```
+
+#### E. Alert/Notification Messages
+
+```php
+// Service layer — pesan error yang akan ditampilkan ke user
+if (!$workOrder) {
+    throw new \Exception(__('erp.mfg_work_order_not_found', ['id' => $id]));
+}
+
+if ($workOrder->status === 'COMPLETED') {
+    throw new \Exception(__('erp.mfg_work_order_already_completed', [
+        'number' => $workOrder->spk_number
+    ]));
+}
+```
+
+### 10.3 Keys i18n Wajib untuk Modul Manufaktur
+
+Tambahkan di `lang/id/erp.php`, `lang/en/erp.php`, `lang/zh_CN/erp.php`:
+
+```php
+// === MANUFACTURING MODULE (MFG) ===
+'mfg_module' => 'Manufaktur',
+'mfg_work_orders' => 'Surat Perintah Kerja (SPK)',
+'mfg_material_receipt' => 'Penerimaan Bahan (MRN)',
+'mfg_master_yarn' => 'Master Benang',
+'mfg_master_fabric' => 'Master Kain',
+'mfg_master_supplier' => 'Master Supplier/Vendor',
+'mfg_master_process' => 'Master Rate Proses',
+'mfg_report_hpp' => 'Laporan HPP Manufaktur',
+
+// Status
+'mfg_status_open' => 'Terbuka',
+'mfg_status_in_progress' => 'Sedang Diproses',
+'mfg_status_completed' => 'Selesai',
+'mfg_status_voided' => 'Dibatalkan',
+
+// Process Types
+'mfg_process_knitting' => 'Knitting (Rajut)',
+'mfg_process_dyeing' => 'Dyeing (Celup)',
+'mfg_process_printing' => 'Printing (Cetak)',
+'mfg_process_finishing' => 'Finishing',
+'mfg_process_cutting' => 'Cutting (Potong)',
+'mfg_process_stitching' => 'Stitching (Jahit)',
+'mfg_process_other' => 'Lainnya',
+
+// Fabric States
+'mfg_fabric_grey' => 'Kain Grey (Mentah)',
+'mfg_fabric_finished' => 'Kain Finished (Jadi)',
+
+// Finishing Stages
+'mfg_stage_washing' => 'Washing (Cuci)',
+'mfg_stage_ironing' => 'Ironing (Setrika)',
+'mfg_stage_qc' => 'Quality Control',
+'mfg_stage_packing' => 'Packing (Kemas)',
+'mfg_stage_other' => 'Lainnya',
+
+// Success Messages
+'mfg_processing_order_created' => 'Processing Order :number berhasil dibuat.',
+'mfg_material_receipt_created' => 'MRN :number berhasil dicatat & jurnal diposting.',
+'mfg_work_order_completed' => 'SPK :number berhasil diselesaikan. HPP dihitung ulang.',
+'mfg_void_success' => 'Dokumen :number berhasil dibatalkan. Jurnal pembalik diposting.',
+
+// Error Messages
+'mfg_processing_order_failed' => 'Gagal membuat Processing Order: :reason',
+'mfg_material_receipt_failed' => 'Gagal mencatat MRN: :reason',
+'mfg_fabric_stock_insufficient' => 'Stok kain :fabric_code tidak cukup. Tersedia: :available, Diminta: :requested',
+'mfg_yarn_stock_insufficient' => 'Stok benang :yarn_code tidak cukup. Tersedia: :available, Diminta: :requested',
+'mfg_work_order_not_found' => 'SPK ID :id tidak ditemukan.',
+'mfg_work_order_already_completed' => 'SPK :number sudah selesai, tidak bisa diubah.',
+'mfg_target_date_must_future' => 'Tanggal target harus hari ini atau di masa depan.',
+'mfg_journal_not_balance' => 'Jurnal manufaktur tidak seimbang (Debet ≠ Kredit). Transaksi dibatalkan.',
+
+// Form Labels
+'mfg_fabric_code' => 'Kode Kain',
+'mfg_fabric_type' => 'Jenis Kain',
+'mfg_yarn_code' => 'Kode Benang',
+'mfg_yarn_count' => 'Count Benang',
+'mfg_gsm' => 'GSM (Gram per m²)',
+'mfg_composition' => 'Komposisi',
+'mfg_width' => 'Lebar',
+'mfg_lot_number' => 'Nomor Lot',
+'mfg_qty_issued' => 'Qty Dikeluarkan',
+'mfg_qty_received' => 'Qty Diterima',
+'mfg_wastage_kg' => 'Wastage (kg)',
+'mfg_pieces_cut' => 'Pieces Dipotong',
+'mfg_pieces_ok' => 'Pieces OK',
+'mfg_pieces_rejected' => 'Pieces Reject',
+```
+
+**Versi English (lang/en/erp.php):**
+```php
+'mfg_module' => 'Manufacturing',
+'mfg_status_open' => 'Open',
+'mfg_status_in_progress' => 'In Progress',
+'mfg_status_completed' => 'Completed',
+'mfg_status_voided' => 'Voided',
+'mfg_fabric_stock_insufficient' => 'Fabric stock :fabric_code is insufficient. Available: :available, Requested: :requested',
+// ... (lanjutkan pola yang sama)
+```
+
+**Versi Simplified Chinese (lang/zh_CN/erp.php):**
+```php
+'mfg_module' => '生产模块',
+'mfg_status_open' => '待处理',
+'mfg_status_in_progress' => '进行中',
+'mfg_status_completed' => '已完成',
+'mfg_status_voided' => '已作废',
+'mfg_fabric_stock_insufficient' => '面料 :fabric_code 库存不足。可用: :available，需求: :requested',
+'mfg_process_knitting' => '针织',
+'mfg_process_dyeing' => '染色',
+'mfg_process_printing' => '印花',
+'mfg_process_cutting' => '裁剪',
+'mfg_process_stitching' => '缝制',
+// ... (lanjutkan pola yang sama)
+```
+
+### 10.4 Error Handling Pattern (WAJIB di Semua Service Manufaktur)
+
+Setiap Service di `App\Modules\Manufacturing\Services\` WAJIB mengikuti pola ini:
+
+```php
+<?php
+namespace App\Modules\Manufacturing\Services;
+
+use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Support\JournalBalanceValidator;
+
+class MaterialReceiptService
+{
+    public function createAndPost(array $data)
+    {
+        // 1. Validasi bisnis — lempar Exception dengan key i18n
+        if (empty($data['items'])) {
+            throw new Exception(__('erp.mfg_mrn_no_items'));
+        }
+
+        // 2. Cek stok cukup (jika berlaku)
+        // ...
+
+        // 3. Bangun jurnal
+        $journalRows = $this->buildJournalRows($data);
+
+        // 4. Validasi double-entry (RULES.md §2)
+        if (!JournalBalanceValidator::isBalanced($journalRows)) {
+            // Log internal TETAP bahasa Indonesia/Inggris
+            Log::error('MRN journal not balance', ['data' => $data]);
+            // Pesan ke user WAJIB i18n
+            throw new Exception(__('erp.mfg_journal_not_balance'));
+        }
+
+        // 5. Atomic transaction
+        DB::beginTransaction();
+        try {
+            // ... insert operations ...
+            DB::commit();
+            return $receipt;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Log internal
+            Log::error('MRN creation failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'data' => $data,
+            ]);
+            // Re-throw dengan pesan i18n (jika belum)
+            if (str_starts_with($e->getMessage(), 'mfg.')) {
+                throw $e; // sudah i18n
+            }
+            throw new Exception(__('erp.mfg_material_receipt_failed', [
+                'reason' => __('erp.system_error_generic')
+            ]));
+        }
+    }
+}
+```
+
+### 10.5 Testing Checklist Modul Manufaktur
+
+Sebelum merge PR yang mengubah modul manufaktur:
+
+- [ ] Test create MRN di 3 bahasa → flash message muncul di bahasa aktif
+- [ ] Test void SPK di 3 bahasa → alert konfirmasi & success message i18n
+- [ ] Test export Excel HPP Report di 3 bahasa → header kolom terjemahan benar
+- [ ] Test validation error (mis. stok kurang) di 3 bahasa
+- [ ] Cek `SystemLog::record()` — tetap bahasa Indonesia (audit trail)
+- [ ] Cek `\Log::error()` — tetap bahasa Indonesia/Inggris (developer log)
+- [ ] Enum di DB (status, process_type) tidak berubah saat switch bahasa
+- [ ] Print PDF MRN/SPK di 3 bahasa → label terjemahan benar
+
+### 10.6 Migration Path (untuk kode yang sudah ada)
+
+Kode manufaktur yang sudah terlanjur hardcoded **TIDAK perlu di-rewrite sekaligus**.
+Lakukan bertahap:
+
+1. **Sprint 1**: Tambahkan `ManufacturingLabel` helper + keys i18n di 3 file bahasa
+2. **Sprint 2**: Update Blade files (prioritas: index & show pages)
+3. **Sprint 3**: Update Controllers (flash messages)
+4. **Sprint 4**: Update Services (exception messages)
+5. **Sprint 5**: Update Exports (Excel headers)
+6. **Sprint 6**: Jalankan `php artisan i18n:scan-hardcoded` untuk sisa hardcoded
+
+**JANGAN** melakukan big-bang rewrite — risiko bug terlalu tinggi.
