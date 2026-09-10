@@ -19,14 +19,14 @@
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show shadow-sm fw-bold" role="alert">
             <i class="fa-solid fa-triangle-exclamation me-2"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm fw-bold" role="alert">
             <i class="fa-solid fa-circle-check me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
@@ -75,7 +75,7 @@
                                         <td class="text-center" width="120">
                                             <input type="number" name="useful_life_months" class="form-control form-control-sm text-center" 
                                                    value="{{ $asset->useful_life_months > 0 ? $asset->useful_life_months : '' }}" 
-                                                   min="1" placeholder="Contoh: 36" required>
+                                                   min="1" placeholder="{{ __('erp.eg_useful_life') }}" required>
                                         </td>
                                         <td class="text-end text-danger" style="font-weight: 500;">
                                             Rp {{ number_format($asset->depreciation_per_month ?? 0, 2, ',', '.') }}

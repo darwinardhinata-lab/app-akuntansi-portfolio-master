@@ -42,11 +42,11 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.customer_label') }} <span class="text-danger">*</span></label>
-                                <input type="text" name="contact_name" class="form-control" placeholder="Nama Pelanggan / Customer" required>
+                                <input type="text" name="contact_name" class="form-control" placeholder="{{ __('erp.customer_name') }}" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.ref_no_optional') }}</label>
-                                <input type="text" name="ref_number" class="form-control" placeholder="Referensi Eksternal">
+                                <input type="text" name="ref_number" class="form-control" placeholder="{{ __('erp.external_reference') }}">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.salesman_label') }}</label>
@@ -58,7 +58,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.store_label') }}</label>
-                                <input type="text" name="store_name" class="form-control" placeholder="Nama Toko Cabang">
+                                <input type="text" name="store_name" class="form-control" placeholder="{{ __('erp.branch_store_name') }}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.warehouse_location') }}</label>
@@ -95,7 +95,7 @@
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.full_address') }}</label>
-                                <textarea name="receiver_address" class="form-control" rows="2" placeholder="Masukkan Alamat Tujuan"></textarea>
+                                <textarea name="receiver_address" class="form-control" rows="2" placeholder="{{ __('erp.enter_dest_address') }}"></textarea>
                             </div>
                             <div class="col-12"><hr class="my-2"></div>
                             <div class="col-md-4">
@@ -121,7 +121,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.expedition_courier') }}</label>
-                                <input type="text" name="courier" class="form-control" placeholder="JNE / J&T / Sicepat">
+                                <input type="text" name="courier" class="form-control" placeholder="{{ __('erp.courier_ph') }}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.tracking_no') }}</label>

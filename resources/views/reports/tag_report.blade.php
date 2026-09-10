@@ -9,7 +9,7 @@
     <h4 class="fw-bold mb-4">{{ __('erp.profit_loss_by_tag_report') }}</h4>
     
     <form method="GET" class="mb-4 d-flex gap-2 w-50">
-        <input type="text" name="tag" class="form-control" placeholder="Ketik nama tag / proyek..." value="{{ request('tag') }}" required>
+        <input type="text" name="tag" class="form-control" placeholder="{{ __('erp.search_tag') }}" value="{{ request('tag') }}" required>
         <button type="submit" class="btn btn-primary fw-bold">{{ __('erp.search_tag') }}</button>
     </form>
 

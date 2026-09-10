@@ -69,7 +69,7 @@
                         <tr>
                             <td class="ps-4">{{ \Carbon\Carbon::parse($row->transaction_date)->format('d/m/Y') }}</td>
                             <td class="fw-bold text-primary">
-                                <a href="javascript:void(0)" class="text-decoration-none text-primary" onclick="showJournalDetail('{{ $row->evidence_number }}')" title="Klik untuk lihat detail mutasi jurnal">
+                                <a href="javascript:void(0)" class="text-decoration-none text-primary" onclick="showJournalDetail('{{ $row->evidence_number }}')" title="{{ __('erp.click_view_mutation_detail') }}">
                                     {{ $row->evidence_number }}
                                 </a>
                             </td>
@@ -110,7 +110,7 @@
     <div class="modal-content border-0 shadow">
       <div class="modal-header bg-danger text-white border-bottom-0 rounded-top">
         <h5 class="modal-title fw-bold" id="journalDetailModalLabel"><i class="fa-solid fa-file-invoice me-2"></i>{{ __('erp.transaction_detail') }}</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ __('erp.close_btn') }}"></button>
       </div>
       <div class="modal-body p-4" id="journalDetailModalBody">
         <div class="text-center py-4">

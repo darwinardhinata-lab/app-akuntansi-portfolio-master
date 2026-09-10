@@ -39,12 +39,12 @@
                 <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number_desc') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari No. Faktur / Pelanggan..." value="{{ request('search', $search) }}">
+                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="{{ __('erp.search_invoice') }}" value="{{ request('search', $search) }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
-                <a href="{{ route('invoice.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
+                <a href="{{ route('invoice.index') }}" class="btn btn-sm btn-danger fw-bold" title="{{ __('erp.reset_filter') }}"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
     </div>
@@ -92,12 +92,12 @@
                                 </td>
                                 <td class="text-center pe-4">
                                     <div class="btn-group">
-                                        <button type="button" onclick="showEntityLog('{{ $inv->invoice_number }}')" class="btn btn-sm btn-outline-secondary" title="Jejak Log Aktivitas"><i class="fa-solid fa-clock-rotate-left"></i></button>
-                                        <a href="{{ route('invoice.show', $inv->id) }}" class="btn btn-sm btn-outline-primary" title="Lihat Rincian Faktur"><i class="fa-solid fa-eye"></i></a>
+                                        <button type="button" onclick="showEntityLog('{{ $inv->invoice_number }}')" class="btn btn-sm btn-outline-secondary" title="{{ __('erp.activity_log') }}"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                                        <a href="{{ route('invoice.show', $inv->id) }}" class="btn btn-sm btn-outline-primary" title="{{ __('erp.view_invoice_details') }}"><i class="fa-solid fa-eye"></i></a>
                                         <form action="{{ route('invoice.destroy', $inv->id) }}" method="POST" class="m-0" onsubmit="return confirm('Hapus faktur ini? Stok dan Jurnal akan dibatalkan.')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus" style="border-top-left-radius: 0; border-bottom-left-radius: 0;"><i class="fa-solid fa-trash"></i></button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('erp.delete_btn') }}" style="border-top-left-radius: 0; border-bottom-left-radius: 0;"><i class="fa-solid fa-trash"></i></button>
                                         </form>
                                     </div>
                                 </td>

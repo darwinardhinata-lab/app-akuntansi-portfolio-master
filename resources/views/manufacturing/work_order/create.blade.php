@@ -34,7 +34,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">{{ __('erp.garment_name') }}</label>
-                        <input type="text" name="garment_name" class="form-control" value="{{ old('garment_name') }}" required placeholder="Kaos Polo Lengan Pendek">
+                        <input type="text" name="garment_name" class="form-control" value="{{ old('garment_name') }}" required placeholder="{{ __('erp.eg_garment_name') }}">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">{{ __('erp.planned_qty_pcs') }}</label>

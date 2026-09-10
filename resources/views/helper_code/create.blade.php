@@ -17,7 +17,7 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label fw-bold small text-muted">{{ __('erp.helper_code_id') }}</label>
-                    <input type="text" name="helper_code" class="form-control fw-bold" placeholder="Contoh: CUST-001" required>
+                    <input type="text" name="helper_code" class="form-control fw-bold" placeholder="{{ __('erp.eg_customer_code') }}" required>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold small text-muted">{{ __('erp.normal_balance_position') }}</label>

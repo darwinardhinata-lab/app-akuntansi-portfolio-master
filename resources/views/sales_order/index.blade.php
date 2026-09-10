@@ -80,12 +80,12 @@
                 <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number_desc') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik kata kunci..." value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="{{ __('erp.search_placeholder') }}" value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
-                <a href="{{ route('so.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
+                <a href="{{ route('so.index') }}" class="btn btn-sm btn-danger fw-bold" title="{{ __('erp.reset_filter') }}"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
     </div>
@@ -209,19 +209,19 @@
                                 @else
                                     <form action="{{ route('so.rollback', $o->id) }}" method="POST" class="m-0 me-2" onsubmit="return confirm('PERINGATAN: Membatalkan faktur ini akan MENGHAPUS jurnal akuntansi dan MENGEMBALIKAN stok barang ke gudang. Lanjutkan?')">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-danger fw-bold shadow-sm" title="Batal / Void Faktur">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger fw-bold shadow-sm" title="{{ __('erp.void_invoice_btn') }}">
                                             <i class="fa-solid fa-rotate-left me-1"></i> Batal / Void
                                         </button>
                                     </form>
                                 @endif
 
-                                <button type="button" onclick="showEntityLog('{{ $o->so_number }}')" class="btn btn-sm btn-outline-info shadow-sm" title="Jejak Log Aktivitas"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                                <button type="button" onclick="showEntityLog('{{ $o->so_number }}')" class="btn btn-sm btn-outline-info shadow-sm" title="{{ __('erp.activity_log') }}"><i class="fa-solid fa-clock-rotate-left"></i></button>
                                 
                                 @if(!$o->invoice_no)
-                                    <a href="{{ route('so.edit', $o->id) }}" class="btn btn-sm btn-outline-primary shadow-sm" title="Edit"><i class="fa-solid fa-pen"></i></a>
+                                    <a href="{{ route('so.edit', $o->id) }}" class="btn btn-sm btn-outline-primary shadow-sm" title="{{ __('erp.edit_btn') }}"><i class="fa-solid fa-pen"></i></a>
                                     <form action="{{ route('so.destroy', $o->id) }}" method="POST" class="m-0 d-inline" onsubmit="return confirm('Batalkan dan Hapus SO ini secara permanen?')">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" title="{{ __('erp.delete_btn') }}"><i class="fa-solid fa-trash-can"></i></button>
                                     </form>
                                 @endif
                             </div>

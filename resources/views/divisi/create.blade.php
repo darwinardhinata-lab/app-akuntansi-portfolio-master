@@ -17,7 +17,7 @@
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
@@ -31,7 +31,7 @@
                 <div class="row g-3">
                     <div class="col-12 col-md-4">
                         <label class="form-label fw-bold">{{ __('erp.division_code') }} <span class="text-danger">*</span></label>
-                        <input type="text" name="kode_divisi" value="{{ old('kode_divisi') }}" class="form-control text-uppercase {{ $errors->has('kode_divisi') ? 'is-invalid' : '' }}" placeholder="Contoh: FIN" maxlength="10" required>
+                        <input type="text" name="kode_divisi" value="{{ old('kode_divisi') }}" class="form-control text-uppercase {{ $errors->has('kode_divisi') ? 'is-invalid' : '' }}" placeholder="{{ __('erp.eg_divisi_code') }}" maxlength="10" required>
                         <div class="form-text">{{ __('erp.max_10_chars_payment_plan') }}</div>
                         @error('kode_divisi')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -39,7 +39,7 @@
                     </div>
                     <div class="col-12 col-md-8">
                         <label class="form-label fw-bold">{{ __('erp.division_name') }} <span class="text-danger">*</span></label>
-                        <input type="text" name="nama_divisi" value="{{ old('nama_divisi') }}" class="form-control {{ $errors->has('nama_divisi') ? 'is-invalid' : '' }}" placeholder="Contoh: Divisi Keuangan" maxlength="50" required>
+                        <input type="text" name="nama_divisi" value="{{ old('nama_divisi') }}" class="form-control {{ $errors->has('nama_divisi') ? 'is-invalid' : '' }}" placeholder="{{ __('erp.eg_finance_division') }}" maxlength="50" required>
                         @error('nama_divisi')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
