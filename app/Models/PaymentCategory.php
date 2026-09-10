@@ -14,7 +14,7 @@ class PaymentCategory extends Model
         'slug',
         'description',
         'is_active',
-        'jubelio_flow',
+        'cash_bank_flow',
         'tipe_kas_bank',
     ];
 
@@ -29,11 +29,11 @@ class PaymentCategory extends Model
 
     public function scopeKasBank($query)
     {
-        return $query->where('jubelio_flow', 'KAS_BANK');
+        return $query->where('cash_bank_flow', 'CASH_BANK');
     }
 
     public function scopeManualHutang($query)
     {
-        return $query->where('jubelio_flow', 'MANUAL_HUTANG');
+        return $query->where('cash_bank_flow', 'MANUAL_HUTANG');
     }
 }

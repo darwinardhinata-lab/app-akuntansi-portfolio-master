@@ -16,7 +16,6 @@ use App\Http\Controllers\PaymentCategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BudgetingController;
 use App\Http\Controllers\SalesInvoiceController;
-use App\Http\Controllers\ReconciliationController;
 // ── Guest (login) ─────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -33,8 +32,7 @@ Route::post('/form-pengajuan/kirim', [App\Http\Controllers\PaymentPlanController
     ->middleware('throttle:5,1')
     ->name('payment.public_store');
 
-// FIX #030: Webhook endpoint dipindahkan ke routes/api.php (lebih tepat untuk webhook eksternal)
-// Lihat: Route::post('/api/jubelio/webhook/sales', ...) di routes/api.php
+// Webhook endpoint dipindahkan ke routes/api.php (lebih tepat untuk webhook eksternal)
 
 // ── Authenticated ERP routes ──────────────────────────────────
 Route::middleware(['auth'])->group(function () {
@@ -129,10 +127,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reports/ar-management', [App\Http\Controllers\AdvancedReportController::class, 'arSubledger'])->name('reports.ar_subledger');
     Route::get('/reports/ap-management', [App\Http\Controllers\AdvancedReportController::class, 'apSubledger'])->name('reports.ap_subledger');
 
-    Route::get('/reconciliation', [ReconciliationController::class, 'index'])->name('reconciliation.index');
-    Route::post('/reconciliation/compare', [ReconciliationController::class, 'compare'])->name('reconciliation.compare');
-    Route::post('/reconciliation/export', [ReconciliationController::class, 'exportMismatch'])->name('reconciliation.export');
-
     Route::get('/divisi', [DivisiController::class, 'index'])->name('divisi.index');
     Route::get('/divisi/create', [DivisiController::class, 'create'])->name('divisi.create');
     Route::post('/divisi/store', [DivisiController::class, 'store'])->name('divisi.store');
@@ -157,7 +151,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/payment-plan/{id}/set-coa', [PaymentPlanController::class, 'setCoa'])->name('payment.set_coa');
     Route::post('/payment-plan/{id}/set-rekening', [PaymentPlanController::class, 'setRekening'])->name('payment.set_rekening');
     Route::post('/payment-plan/{id}/update-status', [PaymentPlanController::class, 'updateStatus'])->name('payment.update_status');
-    Route::get('/payment-plan/export/kasbank', [PaymentPlanController::class, 'exportJubelioKasBank'])->name('payment.export.kasbank');
     Route::get('/payment-plan/export/worklist', [PaymentPlanController::class, 'exportManualWorklist'])->name('payment.export.worklist');
     
     // --- MASTER KATEGORI PAYMENT ---
