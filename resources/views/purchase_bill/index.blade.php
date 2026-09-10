@@ -50,10 +50,10 @@
                         </td>
                         <td class="text-center pe-4">
                             <div class="btn-group">
-                                <button type="button" onclick="showEntityLog('{{ $b->bill_number }}')" class="btn btn-sm btn-outline-secondary" title="{{ __('erp.activity_log') }}"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                                <button type="button" onclick="showEntityLog('{{ $b->bill_number }}')" class="btn btn-sm btn-outline-secondary" title="Jejak Log Aktivitas"><i class="fa-solid fa-clock-rotate-left"></i></button>
                                 <form action="{{ route('purchase-bills.destroy', $b->id) }}" method="POST" onsubmit="return confirm('Hapus tagihan ini? Jurnal akan dibatalkan.')">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('erp.delete_btn') }}" style="border-top-left-radius: 0; border-bottom-left-radius: 0;"><i class="fa-solid fa-trash"></i></button>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus" style="border-top-left-radius: 0; border-bottom-left-radius: 0;"><i class="fa-solid fa-trash"></i></button>
                                 </form>
                             </div>
                         </td>

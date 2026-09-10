@@ -81,14 +81,14 @@
     @if(session('info'))
         <div class="alert alert-info alert-dismissible fade show shadow-sm fw-bold" role="alert">
             <i class="fa-solid fa-circle-info me-2"></i> {{ session('info') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show shadow-sm fw-bold" role="alert">
             <i class="fa-solid fa-triangle-exclamation me-2"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
@@ -158,7 +158,7 @@
                             <td>
                                 <a href="{{ route('trace.document', $tx->evidence_number) }}" 
                                    class="text-primary text-decoration-none fw-bold" 
-                                   title="{{ __('erp.trace_origin_doc') }}">
+                                   title="Klik untuk menelusuri dokumen asal">
                                    <i class="fa-solid fa-link fa-sm me-1"></i> {{ $tx->evidence_number }}
                                 </a>
                             </td>
@@ -176,7 +176,7 @@
                             
                             <td class="text-center pe-4 no-print">
                                 @if($tx->header && $tx->header->details)
-                                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalJournal-{{ $tx->header->journal_id ?? $tx->header->id }}" title="{{ __('erp.view_journal_pair') }}">
+                                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalJournal-{{ $tx->header->journal_id ?? $tx->header->id }}" title="Lihat Pasangan Jurnal">
                                         <i class="fa-solid fa-eye small"></i>
                                     </button>
                                 @else
@@ -227,7 +227,7 @@
                                 No. Bukti: {{ $headerObj->evidence_number }}
                             </h5>
                         </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('erp.close_btn') }}"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
                     <div class="modal-body px-4 py-3">

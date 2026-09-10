@@ -105,7 +105,7 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold text-dark">{{ __('erp.store_name_link') }}</label>
-                        <input type="text" name="nama_toko_link" class="form-control" value="{{ $data->nama_toko_link ?? '' }}" placeholder="{{ __('erp.eg_store_link') }}">
+                        <input type="text" name="nama_toko_link" class="form-control" value="{{ $data->nama_toko_link ?? '' }}" placeholder="Contoh: Shopee, Tokopedia, atau link toko">
                     </div>
 
                     <div class="col-md-12 mb-3">
@@ -145,7 +145,7 @@
                                         <tr class="baris-item-row">
                                             <td>
                                                 <input type="hidden" name="items[{{ $i }}][id_detail]" value="{{ $d->id_detail }}">
-                                                <input type="text" name="items[{{ $i }}][nama_item]" class="form-control form-control-sm" value="{{ $d->nama_item }}" placeholder="{{ __('erp.item_service_name') }}" {{ $statusTerkunci ? 'readonly' : '' }}>
+                                                <input type="text" name="items[{{ $i }}][nama_item]" class="form-control form-control-sm" value="{{ $d->nama_item }}" placeholder="Nama barang/jasa" {{ $statusTerkunci ? 'readonly' : '' }}>
                                             </td>
                                             <td><input type="text" name="items[{{ $i }}][keterangan]" class="form-control form-control-sm item-keterangan" value="{{ $d->keterangan }}" required {{ $statusTerkunci ? 'readonly' : '' }}></td>
                                             <td><input type="number" step="0.01" min="0.01" name="items[{{ $i }}][qty]" class="form-control form-control-sm text-center item-qty" value="{{ $d->qty }}" {{ $statusTerkunci ? 'readonly' : '' }}></td>
@@ -159,7 +159,7 @@
                                                 <input type="hidden" name="items[{{ $i }}][nominal]" class="item-nominal-asli" value="{{ (int) $d->nominal }}" required>
                                             </td>
                                             <td>
-                                                <input type="text" class="form-control form-control-sm text-end fw-bold text-success item-aktual-mask" value="{{ $d->nominal_aktual !== null ? number_format($d->nominal_aktual, 0, ',', '.') : '' }}" placeholder="{{ __('erp.leave_blank_if_nominal') }}">
+                                                <input type="text" class="form-control form-control-sm text-end fw-bold text-success item-aktual-mask" value="{{ $d->nominal_aktual !== null ? number_format($d->nominal_aktual, 0, ',', '.') : '' }}" placeholder="Kosongkan jika = Nominal">
                                                 <input type="hidden" name="items[{{ $i }}][nominal_aktual]" class="item-aktual-asli" value="{{ $d->nominal_aktual ?? '' }}">
                                             </td>
                                             <td>
@@ -209,8 +209,8 @@
 
 <template id="template-item-row">
     <tr class="baris-item-row">
-        <td><input type="text" name="items[__IDX__][nama_item]" class="form-control form-control-sm" placeholder="{{ __('erp.item_service_name') }}"></td>
-        <td><input type="text" name="items[__IDX__][keterangan]" class="form-control form-control-sm item-keterangan" placeholder="{{ __('erp.item_description_ph') }}" required></td>
+        <td><input type="text" name="items[__IDX__][nama_item]" class="form-control form-control-sm" placeholder="Nama barang/jasa"></td>
+        <td><input type="text" name="items[__IDX__][keterangan]" class="form-control form-control-sm item-keterangan" placeholder="Uraian item" required></td>
         <td><input type="number" step="0.01" min="0.01" name="items[__IDX__][qty]" class="form-control form-control-sm text-center item-qty" value="1"></td>
         <td><input type="text" name="items[__IDX__][satuan]" class="form-control form-control-sm text-center item-satuan" value="Pcs"></td>
         <td>
@@ -222,7 +222,7 @@
             <input type="hidden" name="items[__IDX__][nominal]" class="item-nominal-asli" required>
         </td>
         <td>
-            <input type="text" class="form-control form-control-sm text-end fw-bold text-success item-aktual-mask" placeholder="{{ __('erp.leave_blank_if_nominal') }}">
+            <input type="text" class="form-control form-control-sm text-end fw-bold text-success item-aktual-mask" placeholder="Kosongkan jika = Nominal">
             <input type="hidden" name="items[__IDX__][nominal_aktual]" class="item-aktual-asli">
         </td>
         <td><input type="file" name="items[__IDX__][bukti_file]" class="form-control form-control-sm" accept=".jpg,.jpeg,.png,.pdf"></td>

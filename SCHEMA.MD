@@ -1,4 +1,4 @@
-# SCHEMA.MD — Skema Basis Data ERP Akuntansi
+﻿# SCHEMA.MD — Skema Basis Data ERP Akuntansi
 
 > Status: **REVISI/BARU**. Disusun dari 45 file migration + seluruh pemakaian `Model::$fillable`/`DB::table()` di kode aplikasi.
 > ⚠️ **Catatan Penting**: Beberapa kolom yang **dipakai aktif oleh kode aplikasi TIDAK ditemukan pada file migration manapun** dalam snapshot ini (kemungkinan migration hilang dari export, atau skema di-patch manual di server produksi). Kolom demikian ditandai **`[INFERRED]`** — didokumentasikan berdasarkan penggunaan di kode (Model `$fillable`, query), bukan berdasarkan file migration yang ditemukan. Ini WAJIB diverifikasi langsung ke `information_schema` server produksi.
@@ -15,7 +15,7 @@ Migration: `2026_05_05_043745_create_accounts_table.php` + `2026_06_29_042345_ad
 | `coa_type` | string(50) | Tipe COA (ASSET, LIABILITY, dst.) |
 | `normal_balance` | enum(DEBET, KREDIT) | Saldo normal akun — dipakai dinamis oleh Laporan Laba Rugi/Neraca |
 | `report_pos` | enum(NERACA, LABA RUGI) | Posisi pelaporan |
-| `coa_id` | (ditambahkan) | Kolom tambahan referensi ID Jubelio |
+| `coa_id` | (ditambahkan) | Kolom tambahan referensi ID [External Platform] |
 | timestamps | | |
 
 ### 1.2 `journal_headers`
@@ -23,11 +23,11 @@ Migration: `2026_05_05_043759_create_journal_headers_table.php`
 
 | Kolom | Tipe | Keterangan |
 |---|---|---|
-| `journal_id` | string(50), **PK**, non-increment | Format: `JRN-YYYYMMDD-000001` (manual) atau ID asli Jubelio, atau `JRN-PP-<slug>` (dari Payment Plan) |
-| `journal_no` | string(150) nullable | Nomor jurnal dari Jubelio |
+| `journal_id` | string(50), **PK**, non-increment | Format: `JRN-YYYYMMDD-000001` (manual) atau ID asli [External Platform], atau `JRN-PP-<slug>` (dari Payment Plan) |
+| `journal_no` | string(150) nullable | Nomor jurnal dari [External Platform] |
 | `transaction_date` | datetime | |
 | `source_doc_no` | string(150) nullable | Nomor dokumen sumber |
-| `payment_id`, `invoice_id`, `bill_id`, `sales_ret_id`, `purch_ret_id`, `item_adj_id` | integer nullable | Tracking ID asal dari Jubelio |
+| `payment_id`, `invoice_id`, `bill_id`, `sales_ret_id`, `purch_ret_id`, `item_adj_id` | integer nullable | Tracking ID asal dari [External Platform] |
 | `is_opening_balance` | boolean default false | Penanda saldo awal |
 | `debit`, `credit` | float(16,4) nullable | Total header (agregat) |
 | `notes` | text nullable | |
@@ -42,7 +42,7 @@ Migration: `2026_05_05_043810_create_journal_details_table.php` + `2026_05_08_03
 
 | Kolom | Tipe (migration asli) | Tipe/pemakaian aktual di kode | Keterangan |
 |---|---|---|---|
-| `journal_detail_id` | integer, PK | — | PK asli (skema Jubelio import) |
+| `journal_detail_id` | integer, PK | — | PK asli (skema [External Platform] import) |
 | `id` | **[INFERRED]** | integer, PK auto-increment (dipakai `JournalDetail` Model: `$primaryKey='id'`, `$incrementing=true`) | **Tidak ada di migration manapun.** Kemungkinan besar `journal_detail_id` di-rename/di-drop dan `id` bawaan Laravel ditambahkan via migration yang hilang dari snapshot ini. |
 | `journal_id` | string(50) nullable, indexed | FK logis ke `journal_headers.journal_id` (tanpa constraint FK formal) | |
 | `account_code` | string(50) nullable, indexed | FK logis ke `accounts.account_code` | |
@@ -198,7 +198,7 @@ Migration: `2026_07_20_100000_create_payment_categories_table.php`. Model `Payme
 | `company_profiles` | `2026_07_07_000000` + `..._000001` (logo) + `..._000002` (employee_pin) | Profil perusahaan, PIN karyawan (untuk portal publik payment plan?) |
 | `system_logs` | `2026_06_19_033525_create_system_logs_table.php` | Audit trail aksi user |
 | `personal_access_tokens` | `2026_06_11_045852` | Laravel Sanctum (API token) |
-| `temp_journal_tables` (staging) | `2026_06_15_071710_create_temp_journal_tables.php` | Tabel sementara untuk proses sinkronisasi Jubelio async via Job |
+| `temp_journal_tables` (staging) | `2026_06_15_071710_create_temp_journal_tables.php` | Tabel sementara untuk proses sinkronisasi [External Platform] async via Job |
 | `users`, `cache`, `jobs` | `0001_01_01_*` (bawaan Laravel) | |
 
 ## 8. Ringkasan Tipe Primary Key Non-Standar (WAJIB DIPATUHI — lihat RULES.md)

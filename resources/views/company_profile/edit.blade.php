@@ -30,7 +30,7 @@
                 <div class="col-12 text-center">
                     @if($profile->logo)
                         <div class="mb-3">
-                            <img src="{{ asset('storage/' . $profile->logo) }}" alt="{{ __('erp.company_logo') }}" class="img-fluid rounded-3 shadow-sm border p-2" style="max-height: 120px; max-width: 300px; object-fit: contain; background-color: #f8fafc;">
+                            <img src="{{ asset('storage/' . $profile->logo) }}" alt="Logo Perusahaan" class="img-fluid rounded-3 shadow-sm border p-2" style="max-height: 120px; max-width: 300px; object-fit: contain; background-color: #f8fafc;">
                         </div>
                     @else
                         <div class="mb-3 d-inline-flex align-items-center justify-content-center bg-light text-muted rounded-3 shadow-sm border" style="width: 120px; height: 120px; font-size: 2.5rem;">
@@ -72,7 +72,7 @@
 
                 <div class="col-md-12">
                     <label class="form-label fw-bold small text-danger">{{ __('erp.employee_pin_submission_form') }}</label>
-                    <input type="text" name="employee_pin" inputmode="numeric" pattern="[0-9]*" class="form-control font-monospace" value="{{ $profile->employee_pin ?? '' }}" placeholder="{{ __('erp.enter_numeric_pin') }}">
+                    <input type="text" name="employee_pin" inputmode="numeric" pattern="[0-9]*" class="form-control font-monospace" value="{{ $profile->employee_pin ?? '' }}" placeholder="Masukkan PIN numerik untuk otorisasi karyawan">
                     <small class="text-muted d-block mt-1 text-start" style="font-size: 0.75rem;"><i class="fa-solid fa-triangle-exclamation me-1"></i> Hanya Administrator yang dapat mengubah PIN ini. PIN ini digunakan di form pengajuan karyawan.</small>
                 </div>
 

@@ -21,14 +21,14 @@
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
             <strong><i class="fas fa-check-circle"></i> {{ __('erp.success_excl') }}</strong> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
             <strong><i class="fas fa-exclamation-triangle"></i> {{ __('erp.error_occurred_excl') }}</strong> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
@@ -60,13 +60,13 @@
                                 </td>
                                 <td class="text-center py-2">
                                     <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-outline-warning" title="{{ __('erp.edit_btn') }}" onclick="editCategory('{{ $category->id }}', '{{ $category->name }}', '{{ $category->slug }}', '{{ $category->description }}', {{ $category->is_active ? 'true' : 'false' }})" data-bs-toggle="modal" data-bs-target="#modalEdit">
+                                        <button type="button" class="btn btn-sm btn-outline-warning" title="Edit" onclick="editCategory('{{ $category->id }}', '{{ $category->name }}', '{{ $category->slug }}', '{{ $category->description }}', {{ $category->is_active ? 'true' : 'false' }})" data-bs-toggle="modal" data-bs-target="#modalEdit">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         <form action="{{ route('payment-category.destroy', $category->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus kategori ini? Data yang sudah menggunakan kategori ini tidak akan terhapus.')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('erp.delete_btn') }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -100,7 +100,7 @@
             <div class="modal-body bg-light p-4">
                 <div class="mb-3">
                     <label class="form-label fw-bold">{{ __('erp.category_name') }} <span class="text-danger">*</span></label>
-                    <input type="text" name="name" class="form-control" placeholder="{{ __('erp.eg_payment_cat_name') }}" required>
+                    <input type="text" name="name" class="form-control" placeholder="PEMBELIAN PERSEDIAAN (PEMBAYARAN HUTANG)" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">{{ __('erp.slug_label') }} <span class="text-danger">*</span></label>
@@ -108,7 +108,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">{{ __('erp.description_label') }}</label>
-                    <textarea name="description" class="form-control" rows="2" placeholder="{{ __('erp.category_description_ph') }}"></textarea>
+                    <textarea name="description" class="form-control" rows="2" placeholder="Keterangan kategori..."></textarea>
                 </div>
                 <div class="form-check">
                     <input type="checkbox" name="is_active" class="form-check-input" id="is_active_create" checked>

@@ -40,7 +40,7 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title fw-bold" id="importModalLabel">{{ __('erp.import_fixed_asset') }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('erp.close_btn') }}"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="alert alert-info py-3 small mb-4" style="background-color: #e0f2fe; color: #0369a1; border-color: #bae6fd; border-radius: 8px;">
@@ -92,21 +92,21 @@
             @foreach($errors->all() as $error)
                 {{ $error }}<br>
             @endforeach
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show shadow-sm fw-bold" role="alert">
             <i class="fa-solid fa-triangle-exclamation me-2"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm fw-bold" role="alert">
             <i class="fa-solid fa-circle-check me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
@@ -134,12 +134,12 @@
                 <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_asset_code_name') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="{{ __('erp.search_asset') }}" value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari Kode Aset / Nama Aset..." value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
-                <a href="{{ route('aset.index') }}" class="btn btn-sm btn-danger fw-bold" title="{{ __('erp.reset_filter') }}"><i class="fa-solid fa-sync"></i></a>
+                <a href="{{ route('aset.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
     </div>
@@ -203,7 +203,7 @@
                             <td class="text-center">
                                 <button type="button" onclick="toggleAssetStatus({{ $asset->id }}, this)"
                                     class="btn btn-sm shadow-sm {{ $asset->is_active ? 'btn-success' : 'btn-secondary' }}"
-                                    title="{{ __('erp.toggle_status') }}">
+                                    title="Klik untuk toggle status">
                                     @if($asset->is_active)
                                         <i class="fa-solid fa-toggle-on me-1"></i> Aktif
                                     @else
@@ -213,16 +213,16 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                    <button type="button" onclick="showEntityLog('{{ $asset->asset_code }}')" class="btn btn-sm btn-outline-info shadow-sm" title="{{ __('erp.activity_log') }}">
+                                    <button type="button" onclick="showEntityLog('{{ $asset->asset_code }}')" class="btn btn-sm btn-outline-info shadow-sm" title="Jejak Log Aktivitas">
                                         <i class="fa-solid fa-clock-rotate-left"></i>
                                     </button>
-                                    <a href="{{ route('aset.create') }}" class="btn btn-sm btn-outline-primary shadow-sm" title="{{ __('erp.duplicate') }}">
+                                    <a href="{{ route('aset.create') }}" class="btn btn-sm btn-outline-primary shadow-sm" title="Duplikat/Duplicate">
                                         <i class="fa-solid fa-copy"></i>
                                     </a>
                                     <form id="delete-form-{{ $asset->id }}" action="{{ route('aset.destroy', $asset->id) }}" method="POST" style="display: none;">
                                         @csrf @method('DELETE')
                                     </form>
-                                    <button type="button" onclick="if(confirm('Hapus aset ini? Aset yang sudah terhubung ke jurnal tidak akan memengaruhi jurnal.')) document.getElementById('delete-form-{{ $asset->id }}').submit();" class="btn btn-sm btn-outline-danger shadow-sm" title="{{ __('erp.delete_asset') }}">
+                                    <button type="button" onclick="if(confirm('Hapus aset ini? Aset yang sudah terhubung ke jurnal tidak akan memengaruhi jurnal.')) document.getElementById('delete-form-{{ $asset->id }}').submit();" class="btn btn-sm btn-outline-danger shadow-sm" title="Hapus Aset">
                                         <i class="fa-solid fa-trash-can"></i>
                                     </button>
                                 </div>
@@ -295,7 +295,7 @@ function toggleAssetStatus(assetId, btnElement) {
             // Tampilkan notifikasi sukses
             const alertHtml = '<div class="alert alert-success alert-dismissible fade show shadow-sm fw-bold" role="alert">' +
                 '<i class="fa-solid fa-circle-check me-2"></i> ' + data.message +
-                '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button></div>';
+                '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
             document.querySelector('.container-fluid.px-0').insertAdjacentHTML('afterbegin', alertHtml);
         } else {
             btnElement.innerHTML = originalContent;

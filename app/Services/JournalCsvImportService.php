@@ -17,7 +17,7 @@ class JournalCsvImportService
 {
     /**
      * Akun untuk menampung selisih pembulatan jurnal
-     * Menggunakan akun '88068' (Pembulatan Transaksi) yang sudah ditetapkan di Master COA Jubelio
+     * Menggunakan akun '88068' (Pembulatan Transaksi) yang sudah ditetapkan di Master COA
      * Saldo Normal: DEBET (Biaya/Beban Operasional)
      */
     protected $roundingAccountCode = '88068';

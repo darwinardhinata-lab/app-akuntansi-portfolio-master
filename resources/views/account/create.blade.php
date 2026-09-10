@@ -17,11 +17,11 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label fw-bold small text-muted">{{ __('erp.account_code_required') }}</label>
-                    <input type="text" name="account_code" class="form-control fw-bold" placeholder="{{ __('erp.eg_account_code') }}" required>
+                    <input type="text" name="account_code" class="form-control fw-bold" placeholder="Contoh: 11101" required>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold small text-muted">{{ __('erp.account_name_required') }}</label>
-                    <input type="text" name="account_name" class="form-control" placeholder="{{ __('erp.eg_kas_besar') }}" required>
+                    <input type="text" name="account_name" class="form-control" placeholder="Contoh: Kas Besar" required>
                 </div>
                 
                 <div class="col-md-6">

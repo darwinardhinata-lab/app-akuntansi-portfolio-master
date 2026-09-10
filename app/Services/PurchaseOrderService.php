@@ -32,7 +32,7 @@ class PurchaseOrderService
                 ->where('kategori_payment', 'PEMBELIAN PERSEDIAAN (UANG MUKA)')
                 ->first();
 
-            // 2. Fallback: cek by ref_po_number (real PO from Jubelio) — Fix #5
+            // 2. Fallback: cek by ref_po_number (real PO dari sumber eksternal) — Fix #5
             if (!$paymentPlan && !empty($po->ref_po_number)) {
                 $paymentPlan = DB::table('transaksi_payment_plan')
                     ->where('ref_po_number', $po->po_number)

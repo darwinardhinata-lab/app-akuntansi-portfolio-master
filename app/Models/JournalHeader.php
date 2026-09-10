@@ -21,7 +21,7 @@ class JournalHeader extends Model
         'transaction_date',
         'evidence_number',
         'jj_id',
-        // --- Kolom Tambahan dari Jubelio ---
+        // --- Kolom Tambahan (sinkronisasi data eksternal) ---
         'journal_no',
         'source_doc_no',
         'payment_id',
@@ -105,7 +105,7 @@ class JournalHeader extends Model
      *
      * Opening-balance entries are internal setup/corrective entries that
      * must NOT be counted as current-period revenue/expense — they cause
-     * discrepancies vs. Jubelio which never sees these entries.
+     * discrepancies vs. the external source system which never sees these entries.
      *
      * NOTE: This scope is ONLY for P&L queries (account prefix 4–9).
      * For Balance Sheet opening rows (prefix 1–3), opening-balance

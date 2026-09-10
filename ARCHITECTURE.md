@@ -1,4 +1,4 @@
-# ARCHITECTURE.md — Sistem ERP Akuntansi
+﻿# ARCHITECTURE.md — Sistem ERP Akuntansi
 
 > Status: **REVISI** (dokumen sebelumnya belum ada dalam bentuk terpisah — hanya tersirat di RULES.md lama). Disusun berdasarkan pembacaan penuh terhadap ±221 file kode sumber (Controllers, Services, Models, Jobs, Imports, Exports, Migrations, Views, Routes) per 25 Juli 2026.
 
@@ -6,7 +6,7 @@
 
 Aplikasi ini adalah **ERP Akuntansi berbasis Laravel 11 (PHP)**, dengan pola *server-rendered* Blade + jQuery/AJAX (bukan SPA/Inertia). Basis data diasumsikan **MySQL/MariaDB** (terlihat dari `DB::raw`, `whereMonth/whereYear`, penanganan `DATE_FORMAT` khusus MariaDB pada `BudgetingService`, dan batas *placeholder* 65.535 pada `FIX_SUMMARY.md`).
 
-Sistem ini adalah **turunan/sinkronisasi dari data Jubelio** (platform omnichannel commerce pihak ketiga) yang diselaraskan ke buku besar akuntansi standar Indonesia (Debit/Kredit, COA berbasis prefix angka).
+Sistem ini adalah **turunan/sinkronisasi dari data [External Platform]** (platform omnichannel commerce pihak ketiga) yang diselaraskan ke buku besar akuntansi standar Indonesia (Debit/Kredit, COA berbasis prefix angka).
 
 ## 2. Gaya Arsitektur
 
@@ -40,7 +40,7 @@ Bukan seluruh modul konsisten menerapkan pola ini — lihat §7 "Temuan Arsitekt
 
 - Auth Laravel standar (`LoginController`, guard `auth`, `guest`).
 - `SetLocaleMiddleware` kustom untuk multi-bahasa (ID/EN).
-- Endpoint publik tanpa login: `/form-pengajuan` (portal pengajuan Payment Plan karyawan) dan webhook Jubelio (`/jubelio/webhook/sales`) — **CSRF dimatikan khusus untuk webhook ini** (perlu API-key/signature verification, lihat §7).
+- Endpoint publik tanpa login: `/form-pengajuan` (portal pengajuan Payment Plan karyawan) dan webhook [External Platform] (`/[External Platform]/webhook/sales`) — **CSRF dimatikan khusus untuk webhook ini** (perlu API-key/signature verification, lihat §7).
 - Rate limiting (`throttle:`) dipakai konsisten pada endpoint import & form publik.
 
 ## 3. Modul Fungsional (Bounded Contexts)
@@ -60,7 +60,7 @@ Bukan seluruh modul konsisten menerapkan pola ini — lihat §7 "Temuan Arsitekt
 | Payment Plan (Kas Kecil/Bank/Reimburse) | `PaymentPlanController`, `PaymentPlanService` | payment plan (tabel `transaksi_payment_plan`, belum ada Model Eloquent — akses via `DB::table`) |
 | Budgeting & Forecast | `BudgetingController`, `BudgetingService` | agregasi `journal_details` |
 | Master Data pendukung | `DivisiController`, `TaxController`, `CompanyProfileController`, `PaymentCategoryController`, `UserController` | `CompanyProfile`, `Tax`, `PaymentCategory`, `User` |
-| Integrasi Jubelio | `Api\JubelioWebhookController`, `FastSyncJurnal`, `FastImportJurnal`, `FastImportPO`, `FastImportProduct`, `ImportHistoricalSales` | — |
+| Integrasi [External Platform] | `Api\[External Platform]WebhookController`, `FastSyncJurnal`, `FastImportJurnal`, `FastImportPO`, `FastImportProduct`, `ImportHistoricalSales` | — |
 | Audit/Log Sistem | `SystemLogController` | `SystemLog` |
 | Penelusuran Dokumen | `DocumentTraceController` ("Smart Redirector") | lintas-modul |
 
@@ -99,7 +99,7 @@ PurchaseOrder (PO) --create--> [status: DRAFT/APPROVED]
 ```
 JournalController::store()  → validasi Debit==Kredit → insert JournalHeader+Detail (id = JRN-YYYYMMDD-000001, sequence per-hari, lockForUpdate)
 JournalCsvImportService / JournalImport / FastImportJurnal / FastSyncJurnal
-   → parsing CSV besar (Jubelio export) → deteksi format tanggal & angka (Indonesia vs US)
+   → parsing CSV besar ([External Platform] export) → deteksi format tanggal & angka (Indonesia vs US)
    → chunking (500 baris) untuk menghindari limit 65.535 placeholder MySQL
    → deteksi evidence_number prefix (GJ, INV, BIL, dst.) untuk pelaporan asal transaksi
 ```
@@ -126,10 +126,10 @@ Portal publik (/form-pengajuan) ATAU internal → PaymentPlanService::generateNo
    → Bisa memicu pembuatan PurchaseOrder otomatis (uang muka pembelian) — lihat §7.4
 ```
 
-### 4.7 Sinkronisasi Jubelio
+### 4.7 Sinkronisasi [External Platform]
 ```
-Jubelio (sumber eksternal) --webhook/CSV export-->
-   JubelioWebhookController / FastImportJurnal / FastSyncJurnal / ImportHistoricalSales
+[External Platform] (sumber eksternal) --webhook/CSV export-->
+   [External Platform]WebhookController / FastImportJurnal / FastSyncJurnal / ImportHistoricalSales
    --> tabel temp_* (staging) --> Job (ProcessPendingTempJob, SyncDashboardToTempJob, dst.)
    --> tabel final (journal_headers, purchase_orders, sales_orders, dst.)
 ```
@@ -176,7 +176,7 @@ PaymentPlan (kode nomor tersendiri, bukan prefix huruf) ──posting──► J
 - **Row locking** (`lockForUpdate()`) diterapkan konsisten di titik-titik kritis: `SalesOrder`, `PurchaseOrder`, `Product` (stok/HPP), `JournalHeader::generateNextId()`.
 - **DB Transaction wrapping** (`DB::beginTransaction/commit/rollBack`) diterapkan di semua Service inti (`SalesOrderService`, `PurchaseOrderService`, `PaymentPlanService`).
 - **Guard balance mutlak**: setiap kumpulan `journalLines` divalidasi `round(sumDebet,2) == round(sumKredit,2)` sebelum `insert()`; jika tidak, `Exception` dilempar dan transaksi di-rollback — pola ini **diulang mandiri di 3 tempat berbeda** (`JournalController`, `JournalImport`, `SalesOrderService`) — lihat risiko duplikasi logika di §7.2.
-- **Batch insert/chunking** dipakai luas untuk operasi big-data (CSV import Jubelio, sinkronisasi bulk) guna menghindari limit *placeholder* MySQL (65.535) dan N+1 query.
+- **Batch insert/chunking** dipakai luas untuk operasi big-data (CSV import [External Platform], sinkronisasi bulk) guna menghindari limit *placeholder* MySQL (65.535) dan N+1 query.
 
 ## 7. Temuan Arsitektur (Isu & Risiko)
 
@@ -186,7 +186,7 @@ PaymentPlan (kode nomor tersendiri, bukan prefix huruf) ──posting──► J
 4. **Skema migrasi tidak sinkron dengan kondisi database aktual.** Tabel `journal_details` di migration awal (`2026_05_05_043810`) hanya punya kolom `journal_detail_id`, `debit`, `credit` — namun seluruh kode aplikasi (`JournalDetail` model, semua Service) memakai kolom `id`, `position`, `amount` yang **tidak pernah dibuat oleh migration manapun** dalam snapshot ini. Demikian pula `journal_headers.evidence_number` diberi index oleh migration `2026_06_20_031249` padahal kolom tersebut **tidak pernah di-`Schema::create`/`Schema::table`-kan**. Ini mengindikasikan riwayat migrasi di repo **tidak lagi merepresentasikan skema produksi sebenarnya** (kemungkinan ada migration yang hilang dari export, atau skema diubah manual di server). **Ini adalah temuan kritis** — lihat SCHEMA.md yang mendokumentasikan skema *efektif* (dari pemakaian kode), bukan hanya migration file.
 5. **`$guarded = []` pada beberapa model transaksi** (`PurchaseBill`, `PurchaseBillDetail`, `PurchaseReturn` — dan kemungkinan `SalesReturn` perlu diverifikasi ulang) membuka mass-assignment penuh, termasuk kemungkinan menimpa primary key/foreign key dari request tanpa sengaja. Sudah teridentifikasi sebagai `BUG-05` di audit internal, **status: belum diperbaiki** pada snapshot ini.
 6. **Model Eloquent tidak lengkap untuk `transaksi_payment_plan`.** `PaymentPlanService` mengakses tabel ini murni lewat `DB::table()`, tanpa Model Eloquent — tidak konsisten dengan pola modul lain (yang punya Model dedicated). Ini mempersulit reuse relasi/casting/observer.
-7. **Webhook publik tanpa middleware CSRF** (`/jubelio/webhook/sales`) — perlu dipastikan ada mekanisme verifikasi lain (signature/secret token) di dalam `JubelioWebhookController`, karena pengecualian CSRF pada endpoint publik adalah titik rawan jika tidak diverifikasi ketat.
+7. **Webhook publik tanpa middleware CSRF** (`/[External Platform]/webhook/sales`) — perlu dipastikan ada mekanisme verifikasi lain (signature/secret token) di dalam `[External Platform]WebhookController`, karena pengecualian CSRF pada endpoint publik adalah titik rawan jika tidak diverifikasi ketat.
 8. **Inkonsistensi klasifikasi akun antar-modul laporan.** `ProfitLossController::determineAccountGroup()` sudah diperbaiki menjadi dinamis (berbasis `normal_balance` dari master COA) untuk prefix 7/8/9, tetapi `BudgetingService::ACCOUNT_CATEGORIES` **masih statis** dan memperlakukan seluruh prefix 6–9 sebagai "Beban Operasional" tanpa mempertimbangkan saldo normal. Modul Budgeting berpotensi menghasilkan angka proyeksi yang berbeda dari Laporan Laba Rugi resmi untuk akun prefix 7–9.
 
 Detail lengkap tiap temuan beserta rekomendasi teknis: lihat **RULES.md §7 "Catatan Konsistensi & Isu Terbuka"**.
@@ -195,5 +195,5 @@ Detail lengkap tiap temuan beserta rekomendasi teknis: lihat **RULES.md §7 "Cat
 
 - Command `php artisan jurnal:check-balance {start} {end}` untuk audit rutin balance jurnal.
 - Command `asset:cleanup-orphan`, `asset:process-existing`, `asset:sync` untuk pemeliharaan data aset.
-- Command `import:po-fast`, `import:product-fast`, `jurnal:fast-import`, `jurnal:fast-sync`, `sales:import-historical` untuk migrasi data awal/besar dari Jubelio, dengan `ini_set('memory_limit', -1)` dan `DB::disableQueryLog()` wajib.
+- Command `import:po-fast`, `import:product-fast`, `jurnal:fast-import`, `jurnal:fast-sync`, `sales:import-historical` untuk migrasi data awal/besar dari [External Platform], dengan `ini_set('memory_limit', -1)` dan `DB::disableQueryLog()` wajib.
 - Queue Job untuk sinkronisasi dashboard (`SyncDashboardToTempJob` dan varian per-modul: Bill/Inv/PO/SO) — pola *cache warm-up* ke tabel temp agar Dashboard tidak query berat tiap load.

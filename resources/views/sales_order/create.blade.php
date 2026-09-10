@@ -42,11 +42,11 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.customer_label') }} <span class="text-danger">*</span></label>
-                                <input type="text" name="contact_name" class="form-control" placeholder="{{ __('erp.customer_name') }}" required>
+                                <input type="text" name="contact_name" class="form-control" placeholder="Nama Pelanggan / Customer" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.ref_no_optional') }}</label>
-                                <input type="text" name="ref_number" class="form-control" placeholder="{{ __('erp.external_reference') }}">
+                                <input type="text" name="ref_number" class="form-control" placeholder="Referensi Eksternal">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.salesman_label') }}</label>
@@ -58,7 +58,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.store_label') }}</label>
-                                <input type="text" name="store_name" class="form-control" placeholder="{{ __('erp.branch_store_name') }}">
+                                <input type="text" name="store_name" class="form-control" placeholder="Nama Toko Cabang">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.warehouse_location') }}</label>
@@ -95,7 +95,7 @@
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.full_address') }}</label>
-                                <textarea name="receiver_address" class="form-control" rows="2" placeholder="{{ __('erp.enter_dest_address') }}"></textarea>
+                                <textarea name="receiver_address" class="form-control" rows="2" placeholder="Masukkan Alamat Tujuan"></textarea>
                             </div>
                             <div class="col-12"><hr class="my-2"></div>
                             <div class="col-md-4">
@@ -106,8 +106,8 @@
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-bold small text-muted">{{ __('erp.jubelio_shipment') }}</label>
-                                <select name="is_jubelio_shipment" class="form-select">
+                                <label class="form-label fw-bold small text-muted">{{ __('erp.marketplace_shipment') }}</label>
+                                <select name="is_marketplace_shipment" class="form-select">
                                     <option value="0">{{ __('erp.no_word') }}</option>
                                     <option value="1">{{ __('erp.yes_label') }}</option>
                                 </select>
@@ -121,7 +121,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.expedition_courier') }}</label>
-                                <input type="text" name="courier" class="form-control" placeholder="{{ __('erp.courier_ph') }}">
+                                <input type="text" name="courier" class="form-control" placeholder="JNE / J&T / Sicepat">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.tracking_no') }}</label>

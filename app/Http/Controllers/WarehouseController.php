@@ -57,7 +57,7 @@ class WarehouseController extends Controller
         $tab = $request->get('tab', 'picking');
         $query = \App\Models\SalesOrder::query();
 
-        // Filter Logic WMS Jubelio / Pipeline Internal
+        // Filter Logic WMS / Pipeline Internal
         if ($tab == 'picking') {
             $query->whereIn('wms_status', ['PICK', 'FINISH_PICK', 'PRINT_PICK'])
                   ->orWhere(function($q) {

@@ -185,9 +185,9 @@ class ImportHistoricalSales extends Command
                         'grand_total'      => 0, 
                         'status'           => 'APPROVED', 
                         
-                        // 👇 INJEKSI KODE JUBELIO DI SINI 👇
+                        // 👇 INJEKSI KODE IMPORT DI SINI 👇
                         'store_name'       => $lokasi, 
-                        'source_name'      => 'Jubelio CSV Import',
+                        'source_name'      => 'CSV Import',
                         // 👆 ---------------------------- 👆
                     ]);
                     $stats['baru']++;
@@ -200,7 +200,7 @@ class ImportHistoricalSales extends Command
                         'location_name'    => $lokasi,
                         'status'           => 'APPROVED', 
 
-                        // 👇 INJEKSI KODE JUBELIO DI SINI 👇
+                        // 👇 INJEKSI KODE IMPORT DI SINI 👇
                         'store_name'       => $lokasi,
                         // 👆 ---------------------------- 👆
                     ]);

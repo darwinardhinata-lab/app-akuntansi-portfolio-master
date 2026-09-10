@@ -9,23 +9,36 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('journal_details', function (Blueprint $table) {
-            // Primary Key detail dari Jubelio
-            $table->integer('journal_detail_id')->primary(); 
-            
+            // Auto-increment primary key
+            $table->id();
+
             // Foreign Key yang menghubungkan ke tabel journal_headers
-            $table->string('journal_id', 50)->nullable();       
-            
+            $table->string('journal_id', 50)->nullable();
+
             $table->string('account_code', 50)->nullable();
             $table->string('account_name', 250)->nullable();
+            $table->unsignedInteger('account_id')->nullable();
             $table->text('description')->nullable();
-            
-            // Nilai debet & kredit per baris akun
+
+            // Position: 'debit' or 'credit'
+            $table->string('position', 10)->nullable();
+
+            // Amount for this journal line
+            $table->float('amount', 16, 4)->nullable();
+
+            // Journal number reference
+            $table->string('journal_no', 150)->nullable();
+
+            // Nilai debet & kredit per baris akun (legacy)
             $table->float('debit', 16, 4)->nullable();
             $table->float('credit', 16, 4)->nullable();
-            
+
+            // Helper code
+            $table->string('helper_code', 50)->nullable();
+
             $table->timestamps();
 
-            // Membuat index agar laporan Buku Besar & Laba Rugi berjalan secepat kilat
+            // Index untuk performa
             $table->index('journal_id');
             $table->index('account_code');
         });

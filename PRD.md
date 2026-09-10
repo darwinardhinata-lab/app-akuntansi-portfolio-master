@@ -1,12 +1,12 @@
-# PRD.md — Product Requirements Document: ERP Akuntansi
+﻿# PRD.md — Product Requirements Document: ERP Akuntansi
 
 > Status: **BARU** (disusun retroaktif dari kode yang sudah berjalan — *reverse-engineered PRD*, bukan dokumen perencanaan awal). Tujuannya menjadi rujukan tunggal "apa yang seharusnya dilakukan sistem ini" berdasarkan perilaku aktual kode per 25 Juli 2026.
 
 ## 1. Latar Belakang & Tujuan Produk
 
-Perusahaan menjalankan bisnis multi-channel (marketplace/Tokopedia dkk, toko fisik beberapa cabang — lihat data seed `master_divisi`: DESAIN & KREATIF, MP, LIVE, Toko Pakel, Toko Mojosongo, Toko Pajang, Toko Banguntapan, CS, IT) yang operasional harian dikelola di **Jubelio** (platform commerce pihak ketiga). Sistem ini adalah **ERP Akuntansi internal** yang:
-1. Menyerap data transaksi dari Jubelio (jurnal, PO, SO, dsb.) via impor CSV/webhook.
-2. Menyediakan modul transaksi akuntansi **native** (PO, SO, Invoice, Bill, Retur, Jurnal manual) untuk kasus yang tidak sepenuhnya tercakup Jubelio, atau untuk transaksi internal murni (Payment Plan/kas kecil).
+Perusahaan menjalankan bisnis multi-channel (marketplace/Tokopedia dkk, toko fisik beberapa cabang — lihat data seed `master_divisi`: DESAIN & KREATIF, MP, LIVE, Toko Pakel, Toko Mojosongo, Toko Pajang, Toko Banguntapan, CS, IT) yang operasional harian dikelola di **[External Platform]** (platform commerce pihak ketiga). Sistem ini adalah **ERP Akuntansi internal** yang:
+1. Menyerap data transaksi dari [External Platform] (jurnal, PO, SO, dsb.) via impor CSV/webhook.
+2. Menyediakan modul transaksi akuntansi **native** (PO, SO, Invoice, Bill, Retur, Jurnal manual) untuk kasus yang tidak sepenuhnya tercakup [External Platform], atau untuk transaksi internal murni (Payment Plan/kas kecil).
 3. Menghasilkan laporan keuangan standar (Laba Rugi, Neraca, Arus Kas, Buku Besar) yang akurat dan bisa diaudit.
 4. Mengelola aset tetap dan depresiasinya.
 5. Mengelola pengajuan & pembayaran kas kecil/bank karyawan lintas divisi dengan alur approval.
@@ -15,7 +15,7 @@ Perusahaan menjalankan bisnis multi-channel (marketplace/Tokopedia dkk, toko fis
 
 | Peran | Kebutuhan Utama |
 |---|---|
-| Staf Akuntansi/Finance | Input jurnal manual, rekonsiliasi data Jubelio, cetak laporan keuangan |
+| Staf Akuntansi/Finance | Input jurnal manual, rekonsiliasi data [External Platform], cetak laporan keuangan |
 | Staf Gudang/Warehouse | Input penerimaan barang (inbound), pengeluaran barang (outbound), retur |
 | Staf Penjualan/CS | Buat Sales Order, proses pengiriman/invoice |
 | Staf Pembelian | Buat Purchase Order, terima barang, catat tagihan |
@@ -46,7 +46,7 @@ Perusahaan menjalankan bisnis multi-channel (marketplace/Tokopedia dkk, toko fis
 - **Master Data Pendukung** — Divisi, Pajak (Tax), Kategori Payment, Profil Perusahaan (termasuk PIN karyawan & logo).
 - **Smart Document Tracing** — navigasi lintas modul dari satu nomor bukti (lihat RULES.md §8).
 - **Audit/System Log** — pencatatan aktivitas user per entitas.
-- **Integrasi Jubelio** — webhook penjualan real-time + command sinkronisasi/impor massal terjadwal (fast import/sync untuk jurnal, PO, produk, histori penjualan).
+- **Integrasi [External Platform]** — webhook penjualan real-time + command sinkronisasi/impor massal terjadwal (fast import/sync untuk jurnal, PO, produk, histori penjualan).
 - **Multi-bahasa (ID/EN)**.
 
 ### 3.2 Modul yang DIRUJUK tapi BELUM Diimplementasikan Penuh
@@ -62,7 +62,7 @@ Perusahaan menjalankan bisnis multi-channel (marketplace/Tokopedia dkk, toko fis
 5. Jika penerimaan salah input, staf dapat **void** penerimaan (mengembalikan stok & menghapus jurnal).
 
 ### 4.2 Siklus Penjualan
-1. Staf Penjualan/CS membuat **SO** (manual, impor, atau dari sinkronisasi channel/Jubelio, termasuk kanal **POS**).
+1. Staf Penjualan/CS membuat **SO** (manual, impor, atau dari sinkronisasi channel/[External Platform], termasuk kanal **POS**).
 2. Saat barang dikirim, sistem membuat **Invoice** otomatis: validasi ulang total, cek & kurangi stok, **posting jurnal** (Piutang Dr / Penjualan Cr / HPP Dr / Persediaan Cr, plus pos diskon/ongkir/pajak sesuai mapping COA).
 3. Jika pelanggan mengembalikan barang, staf memproses **Retur Penjualan**.
 4. Pengiriman yang salah dapat di-**void**.
@@ -74,11 +74,11 @@ Perusahaan menjalankan bisnis multi-channel (marketplace/Tokopedia dkk, toko fis
 4. Untuk kategori "Pembelian Persediaan (Uang Muka)", transaksi ini terhubung ke pembuatan **PO** dan mempengaruhi pemilihan akun kredit saat penerimaan barang nanti (Uang Muka vs Hutang Usaha biasa).
 
 ### 4.4 Siklus Pelaporan
-1. Semua transaksi (PO/SO/Invoice/Bill/Retur/Payment Plan/Aset/Jurnal manual/Impor Jubelio) bermuara ke `journal_headers`+`journal_details`.
+1. Semua transaksi (PO/SO/Invoice/Bill/Retur/Payment Plan/Aset/Jurnal manual/Impor [External Platform]) bermuara ke `journal_headers`+`journal_details`.
 2. Laporan Laba Rugi, Neraca, Arus Kas, Buku Besar, dan laporan lanjutan (AR/AP, Tag, COGS) semuanya membaca dari sumber tunggal ini — **satu sumber kebenaran (single source of truth) untuk angka keuangan.**
 3. Budgeting membaca sumber yang sama untuk proyeksi (namun dengan logika klasifikasi akun yang sedikit berbeda — lihat RULES.md §7.5, perlu diselaraskan).
 
-### 4.5 Siklus Sinkronisasi Jubelio
+### 4.5 Siklus Sinkronisasi [External Platform]
 1. Data masuk via webhook real-time (penjualan) atau command terjadwal/manual (jurnal, PO, produk, histori).
 2. Data besar masuk ke tabel staging (`temp_*`), diproses Job di background agar tidak membebani request HTTP.
 3. Dashboard menyimpan cache hasil sinkronisasi lewat Job terpisah per modul (Bill/Inv/PO/SO) agar loading cepat.
@@ -120,7 +120,7 @@ Perusahaan menjalankan bisnis multi-channel (marketplace/Tokopedia dkk, toko fis
 3. Sentralisasi mapping `account_code` hardcoded ke satu file konfigurasi.
 4. Rekonsiliasi migration vs skema produksi aktual (`journal_headers.evidence_number`, kolom `journal_details.id/position/amount`).
 5. Standarisasi strategi penomoran dokumen ke pola row-lock sequence (saat ini `BIL-`/`PR-`/`SR-` masih memakai `uniqid()`/counter tanpa lock).
-6. Verifikasi mekanisme keamanan webhook Jubelio (di luar CSRF, perlu signature/secret token).
+6. Verifikasi mekanisme keamanan webhook [External Platform] (di luar CSRF, perlu signature/secret token).
 7. Bangun Model Eloquent resmi untuk `transaksi_payment_plan` dan `master_divisi`.
 
 ## 9. Definisi Sukses Produk
@@ -129,4 +129,4 @@ Sistem dianggap berjalan sesuai tujuan jika:
 - Semua laporan keuangan (Laba Rugi/Neraca/Arus Kas) menghasilkan angka yang konsisten satu sama lain karena berasal dari sumber jurnal tunggal yang sama.
 - Tidak ada jurnal yang tidak balance lolos ke Buku Besar (dijamin oleh guard di 3 titik input: manual, import, dan otomatis dari transaksi).
 - Setiap nomor dokumen dapat ditelusuri lintas modul dalam satu klik (`DocumentTraceController`).
-- Operasi impor data besar dari Jubelio tidak membuat sistem timeout/kehabisan memori.
+- Operasi impor data besar dari [External Platform] tidak membuat sistem timeout/kehabisan memori.

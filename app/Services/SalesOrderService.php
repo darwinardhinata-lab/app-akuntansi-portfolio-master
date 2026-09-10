@@ -31,7 +31,7 @@ class SalesOrderService
                 throw new Exception("Sales Order ini sudah selesai dan fakturnya sudah tercetak.");
             }
 
-            // FIX ANTI-DOBEL: Gunakan nomor invoice asli dari Jubelio jika disediakan.
+            // FIX ANTI-DOBEL: Gunakan nomor invoice asli dari sumber eksternal jika disediakan.
             // Ini menyatukan sumber kebenaran nomor faktur antara jalur webhook dan import:inv,
             // sehingga import:inv otomatis idempoten terhadap data yang sudah masuk lewat webhook.
             // Jika tidak ada (jalur manual UI / import:sales), generate sendiri seperti sebelumnya.

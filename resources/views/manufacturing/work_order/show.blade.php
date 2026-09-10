@@ -244,7 +244,7 @@
                                         <form action="{{ route('mfg.cutting-orders.void', $co->id) }}" method="POST" class="d-inline"
                                               onsubmit="return confirm('Void Cutting Order {{ $co->cutting_order_number }}? Jurnal WIP & stok kain akan dibalik.')">
                                             @csrf
-                                            <button type="submit" class="btn btn-xs btn-outline-danger" title="{{ __('erp.void_cutting_order') }}"><i class="fa-solid fa-rotate-left"></i></button>
+                                            <button type="submit" class="btn btn-xs btn-outline-danger" title="Void Cutting Order"><i class="fa-solid fa-rotate-left"></i></button>
                                         </form>
                                     @elseif($co->status === 'CHECKED')
                                         <button class="btn btn-xs btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalStitchingOrder{{ $co->id }}">{{ __('erp.create_stitching') }}</button>
@@ -333,7 +333,7 @@
                                         <form action="{{ route('mfg.stitching-orders.void', $so->id) }}" method="POST" class="d-inline"
                                               onsubmit="return confirm('Void Stitching Order {{ $so->stitching_order_number }}? Jurnal biaya CMT akan dibalik.')">
                                             @csrf
-                                            <button type="submit" class="btn btn-xs btn-outline-danger" title="{{ __('erp.void_stitching_order') }}"><i class="fa-solid fa-rotate-left"></i></button>
+                                            <button type="submit" class="btn btn-xs btn-outline-danger" title="Void Stitching Order"><i class="fa-solid fa-rotate-left"></i></button>
                                         </form>
                                     @endif
                                 </td>

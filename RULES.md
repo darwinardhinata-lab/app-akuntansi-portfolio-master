@@ -1,4 +1,4 @@
-# RULES.md - Panduan Standar Pengembangan Sistem ERP Akuntansi
+﻿# RULES.md - Panduan Standar Pengembangan Sistem ERP Akuntansi
 
 > Status: **REVISI**. Dokumen `RULES.md` versi asli sudah ditemukan tertanam di riwayat percakapan proyek (ditulis ±2026‑07‑20). Isinya secara umum masih **valid dan dipatuhi oleh sebagian besar kode**, namun beberapa poin perlu koreksi/tambahan setelah verifikasi ulang terhadap kode sumber terbaru (25 Juli 2026). Perubahan terhadap versi asli ditandai **[BARU]** atau **[KOREKSI]**.
 
@@ -50,7 +50,7 @@ protected $keyType = 'string';
 
 ## 4. Standar Manajemen Memori & Big Data (Imports / Export)
 
-Sistem ini sering memproses ratusan ribu baris data CSV (Jubelio/Sistem Eksternal). Untuk Command Terminal (`app/Console/Commands/`) atau Controller yang menangani Import/Report Matriks:
+Sistem ini sering memproses ratusan ribu baris data CSV ([External Platform]/Sistem Eksternal). Untuk Command Terminal (`app/Console/Commands/`) atau Controller yang menangani Import/Report Matriks:
 
 * **Matikan Limit di Awal Method:**
 ```php
@@ -349,7 +349,7 @@ Ini adalah **kamus resmi** seluruh awalan (prefix) nomor dokumen yang dikenali s
 | `SPK` | Surat Perintah Kerja | *(alias dari MFG)* | — | — | Manufaktur |
 | `SA` | Saldo Awal (Setup) | *(tidak ada dokumen sumber fisik)* | — | — | Setup Awal |
 | `OB` | Opening Balance | *(alias dari SA)* | — | — | Setup Awal |
-| `GJ` | General Journal (dari Jubelio) | `journal_headers` | `evidence_number` | Berasal dari sinkronisasi Jubelio (jurnal manual yang diinput langsung, tanpa dokumen operasional sumber) | Jurnal / Sinkronisasi |
+| `GJ` | General Journal (dari [External Platform]) | `journal_headers` | `evidence_number` | Berasal dari sinkronisasi [External Platform] (jurnal manual yang diinput langsung, tanpa dokumen operasional sumber) | Jurnal / Sinkronisasi |
 | `JRN` | Jurnal Manual (internal) | `journal_headers` | `journal_id` (PK) | `JRN-YYYYMMDD-000001` (sequence harian, 6 digit, dengan row-lock anti race condition) | Jurnal Umum |
 | `PP` | Payment Plan | `journal_headers` (hasil posting) | `journal_id` = `JRN-PP-<slug no_transaksi>` | Nomor transaksi asli: `{MMYY}.{KodeDivisi}.{KodeJenis}.{tgl}.{urutan}` (BUKAN prefix `PP-`, melainu dipetakan ke `JRN-PP-` hanya saat posting ke jurnal) | Payment Plan (Kas Kecil/Bank) |
 
@@ -368,7 +368,7 @@ Ini adalah **kamus resmi** seluruh awalan (prefix) nomor dokumen yang dikenali s
 
 **C. Domain Jurnal & Pembukuan (General Ledger)**
 - `JRN` — Jurnal manual buatan user internal aplikasi
-- `GJ` — Jurnal hasil sinkronisasi dari Jubelio (general journal eksternal)
+- `GJ` — Jurnal hasil sinkronisasi dari [External Platform] (general journal eksternal)
 - `SA` / `OB` — Saldo Awal / Opening Balance (entry non-transaksional, murni setup)
 
 **D. Domain Manufaktur (belum diimplementasikan penuh — hanya placeholder routing)**

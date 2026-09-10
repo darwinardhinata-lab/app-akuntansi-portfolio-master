@@ -95,7 +95,7 @@ class CashFlowController extends Controller
                 ->where('journal_headers.transaction_date', '>=', $rangeStart . ' 00:00:00')
                 ->where('journal_headers.transaction_date', '<=', $rangeEnd . ' 23:59:59')
                 ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
-                // BLOCKIR JURNAL SALDO AWAL JUBELIO MASUK KE MUTASI JULI
+                // BLOKIR JURNAL SALDO AWAL MASUK KE MUTASI JULI
                 ->where(function($q) {
                     $q->whereNull('journal_headers.is_opening_balance')
                       ->orWhere('journal_headers.is_opening_balance', 0);
@@ -154,7 +154,7 @@ class CashFlowController extends Controller
                 ->where('journal_headers.transaction_date', '>=', $rangeStart . ' 00:00:00')
                 ->where('journal_headers.transaction_date', '<=', $rangeEnd . ' 23:59:59')
                 ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
-                // BLOCKIR JURNAL SALDO AWAL JUBELIO MASUK KE MUTASI JULI
+                // BLOKIR JURNAL SALDO AWAL MASUK KE MUTASI JULI
                 ->where(function($q) {
                     $q->whereNull('journal_headers.is_opening_balance')
                       ->orWhere('journal_headers.is_opening_balance', 0);

@@ -122,7 +122,7 @@ class DocumentTraceController extends Controller
             case 'OB':
                 return back()->with('info', 'Dokumen ' . $evidence . ' adalah Setup Saldo Awal (Opening Balance). Tidak ada dokumen sumber fisik.');
 
-            // --- JURNAL MANUAL (GJ / GJ-XXXX dari Jubelio) ---
+            // --- JURNAL MANUAL (GJ / GJ-XXXX) ---
             case 'GJ':
                 $journal = JournalHeader::where('evidence_number', $evidence)->first();
                 if ($journal) {
@@ -130,7 +130,7 @@ class DocumentTraceController extends Controller
                 }
                 break;
 
-            // --- PREFIX SINKRONISASI JUBELIO / TRANSAKSI KHUSUS TANPA MODUL FISIK ERP ---
+            // --- PREFIX SINKRONISASI DATA EKSTERNAL / TRANSAKSI KHUSUS TANPA MODUL FISIK ERP ---
             case 'ADJ':
             case 'REFF':
             case 'RET':   // Pengembalian Uang Pemasok
@@ -145,7 +145,7 @@ class DocumentTraceController extends Controller
                 $journal = JournalHeader::where('evidence_number', $evidence)->first();
                 if ($journal) {
                     return redirect()->route('jurnal.index', ['search' => $evidence])
-                        ->with('info', "Dokumen {$evidence} belum punya modul operasional tersendiri di ERP ini (data hanya tersedia sebagai jurnal hasil sinkronisasi Jubelio).");
+                        ->with('info', "Dokumen {$evidence} belum punya modul operasional tersendiri di ERP ini (data hanya tersedia sebagai jurnal hasil sinkronisasi data eksternal).");
                 }
                 break;
 

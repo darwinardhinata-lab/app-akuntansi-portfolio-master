@@ -29,7 +29,7 @@ class PaymentCategory extends Model
 
     public function scopeKasBank($query)
     {
-        return $query->where('cash_bank_flow', 'CASH_BANK');
+        return $query->where('cash_bank_flow', 'KAS_BANK');
     }
 
     public function scopeManualHutang($query)

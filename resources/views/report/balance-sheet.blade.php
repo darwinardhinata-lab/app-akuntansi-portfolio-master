@@ -126,9 +126,9 @@
                 </div>
 
                 <div class="btn-group shadow-sm">
-                    <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-secondary fw-bold px-3" title="{{ __('erp.print') }}"><i class="fa-solid fa-print"></i></button>
-                    <button type="button" onclick="exportPDF()" class="btn btn-sm btn-outline-danger fw-bold px-3" title="{{ __('erp.export_pdf') }}"><i class="fa-solid fa-file-pdf"></i></button>
-                    <button type="submit" name="export" value="excel" class="btn btn-sm btn-outline-success fw-bold px-3" title="{{ __('erp.export_excel') }}"><i class="fa-solid fa-file-excel"></i></button>
+                    <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-secondary fw-bold px-3" title="Cetak"><i class="fa-solid fa-print"></i></button>
+                    <button type="button" onclick="exportPDF()" class="btn btn-sm btn-outline-danger fw-bold px-3" title="Export PDF"><i class="fa-solid fa-file-pdf"></i></button>
+                    <button type="submit" name="export" value="excel" class="btn btn-sm btn-outline-success fw-bold px-3" title="Export Excel"><i class="fa-solid fa-file-excel"></i></button>
                 </div>
             </form>
         </div>
@@ -140,7 +140,7 @@
         @if($tab == 'bulanan')
             <div style="position: relative; min-height: 80px; border-bottom: 2px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 25px; display: flex; align-items: center; justify-content: center;">
                 @if($company && $company->logo)
-                    <img src="{{ asset('storage/' . $company->logo) }}" alt="{{ __('erp.logo_alt') }}" style="position: absolute; left: 0; top: 0; height: 70px; width: auto; max-width: 200px; object-fit: contain;">
+                    <img src="{{ asset('storage/' . $company->logo) }}" alt="Logo" style="position: absolute; left: 0; top: 0; height: 70px; width: auto; max-width: 200px; object-fit: contain;">
                 @endif
                 <div style="text-align: center; width: 100%;">
                     <h4 style="margin: 0 0 4px 0; font-weight: 800; color: #4f46e5; text-transform: uppercase;">{{ $company?->company_name ?? 'BBW' }}</h4>
@@ -237,7 +237,7 @@
         @elseif($tab == 'periode')
             <div style="position: relative; min-height: 80px; border-bottom: 2px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 25px; display: flex; align-items: center; justify-content: center;">
                 @if($company && $company->logo)
-                    <img src="{{ asset('storage/' . $company->logo) }}" alt="{{ __('erp.logo_alt') }}" style="position: absolute; left: 0; top: 0; height: 70px; width: auto; max-width: 200px; object-fit: contain;">
+                    <img src="{{ asset('storage/' . $company->logo) }}" alt="Logo" style="position: absolute; left: 0; top: 0; height: 70px; width: auto; max-width: 200px; object-fit: contain;">
                 @endif
                 <div style="text-align: center; width: 100%;">
                     <h4 style="margin: 0 0 4px 0; font-weight: 800; color: #4f46e5; text-transform: uppercase;">{{ $company?->company_name ?? 'BBW' }}</h4>

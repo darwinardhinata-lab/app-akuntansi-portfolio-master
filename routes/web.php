@@ -32,7 +32,7 @@ Route::post('/form-pengajuan/kirim', [App\Http\Controllers\PaymentPlanController
     ->middleware('throttle:5,1')
     ->name('payment.public_store');
 
-// Webhook endpoint dipindahkan ke routes/api.php (lebih tepat untuk webhook eksternal)
+// (Webhook eksternal sebelumnya untuk integrasi Jubelio sudah dihapus — integrasi tidak lagi dipakai)
 
 // ── Authenticated ERP routes ──────────────────────────────────
 Route::middleware(['auth'])->group(function () {
@@ -151,6 +151,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/payment-plan/{id}/set-coa', [PaymentPlanController::class, 'setCoa'])->name('payment.set_coa');
     Route::post('/payment-plan/{id}/set-rekening', [PaymentPlanController::class, 'setRekening'])->name('payment.set_rekening');
     Route::post('/payment-plan/{id}/update-status', [PaymentPlanController::class, 'updateStatus'])->name('payment.update_status');
+    Route::get('/payment-plan/export/worklist', [PaymentPlanController::class, 'exportManualWorklist'])->name('payment.export.worklist');
+    Route::get('/payment-plan/export/kasbank', [PaymentPlanController::class, 'exportKasBank'])->name('payment.export.kasbank');
+
     Route::get('/payment-plan/export/worklist', [PaymentPlanController::class, 'exportManualWorklist'])->name('payment.export.worklist');
     
     // --- MASTER KATEGORI PAYMENT ---

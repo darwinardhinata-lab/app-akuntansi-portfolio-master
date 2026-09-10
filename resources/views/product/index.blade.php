@@ -18,7 +18,7 @@
 
             <form action="{{ route('product.sync_dashboard') }}" method="POST" class="d-inline" onsubmit="return confirm('Sinkronkan data produk dari Dashboard?')">
                 @csrf
-                <button type="submit" class="btn btn-warning text-dark fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" title="{{ __('erp.sync_products_dashboard') }}">
+                <button type="submit" class="btn btn-warning text-dark fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" title="Sinkronkan data produk dari Dashboard">
                     <i class="fa-solid fa-rotate me-1"></i> Sync Dashboard
                 </button>
             </form>
@@ -55,7 +55,7 @@
                 <div class="modal-body bg-light p-4">
                     <div class="alert alert-info py-2 small mb-3 border-info">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span><i class="fa-solid fa-info-circle me-1"></i> {{ __('erp.use_jubelio_csv_format') }}</span>
+                            <span><i class="fa-solid fa-info-circle me-1"></i> {{ __('erp.use_standard_csv_format') }}</span>
                             <a href="{{ route('product.template') }}" class="btn btn-sm btn-light border-primary text-primary fw-bold shadow-sm">
                                 <i class="fa-solid fa-download me-1"></i> Download Template
                             </a>
@@ -89,12 +89,12 @@
                 <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number_desc') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="{{ __('erp.search_product') }}" value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik SKU, Nama Barang, atau Kategori..." value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
-                <a href="{{ route('product.index') }}" class="btn btn-sm btn-danger fw-bold" title="{{ __('erp.reset_filter') }}"><i class="fa-solid fa-sync"></i></a>
+                <a href="{{ route('product.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
     </div>
@@ -127,12 +127,12 @@
                         </td>
                         <td class="text-center pe-4">
                             <div class="btn-group">
-                                <button type="button" onclick="showEntityLog('{{ $p->sku }}')" class="btn btn-sm btn-outline-info shadow-sm" title="{{ __('erp.activity_log') }}"><i class="fa-solid fa-clock-rotate-left"></i></button>
-                                <a href="{{ route('product.edit', $p->id) }}" class="btn btn-sm btn-outline-primary shadow-sm" title="{{ __('erp.edit_btn') }}"><i class="fa-solid fa-pen"></i></a>
+                                <button type="button" onclick="showEntityLog('{{ $p->sku }}')" class="btn btn-sm btn-outline-info shadow-sm" title="Jejak Log Aktivitas"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                                <a href="{{ route('product.edit', $p->id) }}" class="btn btn-sm btn-outline-primary shadow-sm" title="Edit"><i class="fa-solid fa-pen"></i></a>
                                 <form action="{{ route('product.destroy', $p->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus barang ini secara permanen?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" title="{{ __('erp.delete_btn') }}"><i class="fa-solid fa-trash-can"></i></button>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>
                                 </form>
                             </div>
                         </td>
@@ -141,7 +141,7 @@
                     <tr>
                         <td colspan="6" class="text-center py-5 text-muted">
                             <i class="fa-solid fa-box-open fa-2x mb-2 d-block text-secondary"></i>
-                            Belum ada data barang. Silakan import CSV Jubelio atau Tambah Manual.
+                            Belum ada data barang. Silakan import CSV atau Tambah Manual.
                         </td>
                     </tr>
                     @endforelse

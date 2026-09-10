@@ -59,11 +59,11 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">{{ __('erp.evidence_no') }}</label>
-                    <input type="text" name="evidence_number" class="form-control input-header" placeholder="{{ __('erp.eg_evidence_no') }}">
+                    <input type="text" name="evidence_number" class="form-control input-header" placeholder="Misal: BKM-01">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">{{ __('erp.journal_description') }}</label>
-                    <input type="text" name="description" class="form-control input-header" placeholder="{{ __('erp.eg_electricity_payment') }}" required>
+                    <input type="text" name="description" class="form-control input-header" placeholder="Contoh: Pembayaran listrik bulan ini" required>
                 </div>
             </div>
         </div>

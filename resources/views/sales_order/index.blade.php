@@ -41,13 +41,13 @@
             <form action="{{ route('so.import') }}" method="POST" enctype="multipart/form-data" class="modal-content border-0 shadow-lg">
                 @csrf
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold">{{ __('erp.import_csv_sales_jubelio') }}</h5>
+                    <h5 class="modal-title fw-bold">{{ __('erp.import_csv_sales') }}</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body bg-light p-4">
                     <div class="alert alert-info py-2 small mb-3 border-info">
                         <div class="d-flex justify-content-between align-items-center">
-                            <span><i class="fa-solid fa-info-circle me-1"></i> {{ __('erp.use_jubelio_csv_format') }}</span>
+                            <span><i class="fa-solid fa-info-circle me-1"></i> {{ __('erp.use_standard_csv_format') }}</span>
                             <a href="{{ route('so.template') }}" class="btn btn-sm btn-light border-primary text-primary fw-bold shadow-sm">
                                 <i class="fa-solid fa-download me-1"></i> Download Template
                             </a>
@@ -80,17 +80,17 @@
                 <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number_desc') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="{{ __('erp.search_placeholder') }}" value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik kata kunci..." value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
-                <a href="{{ route('so.index') }}" class="btn btn-sm btn-danger fw-bold" title="{{ __('erp.reset_filter') }}"><i class="fa-solid fa-sync"></i></a>
+                <a href="{{ route('so.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
     </div>
 
-    {{-- NAV TABS WMS JUBELIO STYLE --}}
+    {{-- NAV TABS WMS STYLE --}}
     <ul class="nav nav-pills mb-3 bg-white p-2 rounded border shadow-sm flex-nowrap overflow-auto" style="white-space: nowrap;">
         <li class="nav-item">
             <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'analisa') ? 'active bg-info text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'analisa']) }}">{{ __('erp.pivot_analysis') }}</a>
@@ -137,7 +137,7 @@
                     <th class="text-center py-3">{{ __('erp.items_ordered') }}</th>
                     <th class="text-end py-3">{{ __('erp.estimated_total') }}</th>
                     <th class="text-center py-3">{{ __('erp.status') }}</th>
-                    <th class="text-center py-3">{{ __('erp.jubelio_status') }}</th>
+                    <th class="text-center py-3">{{ __('erp.marketplace_status') }}</th>
                     <th class="text-end pe-4 py-3">{{ __('erp.action') }}</th>
                 </tr>
                 </thead>
@@ -209,19 +209,19 @@
                                 @else
                                     <form action="{{ route('so.rollback', $o->id) }}" method="POST" class="m-0 me-2" onsubmit="return confirm('PERINGATAN: Membatalkan faktur ini akan MENGHAPUS jurnal akuntansi dan MENGEMBALIKAN stok barang ke gudang. Lanjutkan?')">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-danger fw-bold shadow-sm" title="{{ __('erp.void_invoice_btn') }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger fw-bold shadow-sm" title="Batal / Void Faktur">
                                             <i class="fa-solid fa-rotate-left me-1"></i> Batal / Void
                                         </button>
                                     </form>
                                 @endif
 
-                                <button type="button" onclick="showEntityLog('{{ $o->so_number }}')" class="btn btn-sm btn-outline-info shadow-sm" title="{{ __('erp.activity_log') }}"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                                <button type="button" onclick="showEntityLog('{{ $o->so_number }}')" class="btn btn-sm btn-outline-info shadow-sm" title="Jejak Log Aktivitas"><i class="fa-solid fa-clock-rotate-left"></i></button>
                                 
                                 @if(!$o->invoice_no)
-                                    <a href="{{ route('so.edit', $o->id) }}" class="btn btn-sm btn-outline-primary shadow-sm" title="{{ __('erp.edit_btn') }}"><i class="fa-solid fa-pen"></i></a>
+                                    <a href="{{ route('so.edit', $o->id) }}" class="btn btn-sm btn-outline-primary shadow-sm" title="Edit"><i class="fa-solid fa-pen"></i></a>
                                     <form action="{{ route('so.destroy', $o->id) }}" method="POST" class="m-0 d-inline" onsubmit="return confirm('Batalkan dan Hapus SO ini secara permanen?')">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" title="{{ __('erp.delete_btn') }}"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>
                                     </form>
                                 @endif
                             </div>

@@ -9,13 +9,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('journal_headers', function (Blueprint $table) {
-            // Primary Key menggunakan journal_id asli dari Jubelio (Contoh: 1399694)
-            $table->string('journal_id', 50)->primary(); 
+            // Primary Key menggunakan journal_id (Contoh: JRN-20260101-000001)
+            $table->string('journal_id', 50)->primary();
+
+            // Internal tracking ID (dummy timestamp-based for MySQL compatibility)
+            $table->unsignedInteger('jj_id')->nullable();
+
             $table->string('journal_no', 150)->nullable();
             $table->datetime('transaction_date')->nullable();
             $table->string('source_doc_no', 150)->nullable();
-            
-            // Kolom tracking asal dokumen pelacak dari Jubelio (Bisa null)
+            $table->string('evidence_number', 150)->nullable();
+
+            // Kolom tracking asal dokumen (Bisa null)
             $table->integer('payment_id')->nullable();
             $table->integer('invoice_id')->nullable();
             $table->integer('bill_id')->nullable();

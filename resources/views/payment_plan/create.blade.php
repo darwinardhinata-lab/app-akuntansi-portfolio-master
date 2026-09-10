@@ -58,7 +58,7 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold text-dark">{{ __('erp.tx_date_required') }}</label>
-                        <input type="date" name="tgl_transaksi" id="tgl_transaksi" class="form-control" placeholder="{{ __('erp.select_transaction_date') }}">
+                        <input type="date" name="tgl_transaksi" id="tgl_transaksi" class="form-control" placeholder="Pilih tanggal transaksi">
                         <small class="text-muted">{{ __('erp.tx_date_journal_required_hint') }}</small>
                     </div>
 
@@ -83,17 +83,17 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold text-dark">{{ __('erp.account_virtual_account') }}</label>
-                        <input type="text" name="rekening_va" class="form-control" placeholder="{{ __('erp.eg_bank_account_format') }}">
+                        <input type="text" name="rekening_va" class="form-control" placeholder="CONTOH: BCA - 123456 - NAMA">
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold text-dark">{{ __('erp.store_name_link') }}</label>
-                        <input type="text" name="nama_toko_link" class="form-control" placeholder="{{ __('erp.eg_store_link') }}">
+                        <input type="text" name="nama_toko_link" class="form-control" placeholder="Contoh: Shopee, Tokopedia, atau link toko">
                     </div>
 
                     <div class="col-md-12 mb-3">
                         <label class="form-label fw-bold text-dark">{{ __('erp.general_notes_optional') }}</label>
-                        <textarea name="keterangan" id="keterangan" class="form-control" rows="2" placeholder="{{ __('erp.submission_summary_ph') }}"></textarea>
+                        <textarea name="keterangan" id="keterangan" class="form-control" rows="2" placeholder="Ringkasan pengajuan, misal: Belanja ATK & Operasional Bulan Ini"></textarea>
                         <small class="text-muted">{{ __('erp.leave_blank_auto_summary_hint') }}</small>
                     </div>
 
@@ -121,10 +121,10 @@
                         </div>
                     </div>
 
-                    <!-- PO DETAILS for UANG MUKA (rincian ke Jubelio PO, TERPISAH dari item Payment Plan di bawah) -->
+                    <!-- PO DETAILS for UANG MUKA (rincian ke PO terkait, TERPISAH dari item Payment Plan di bawah) -->
                     <div class="col-md-12 mb-3" id="po_detail_area" style="display: none;">
                         <div class="bg-light p-3 border border-info rounded">
-                            <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-list me-1"></i> {{ __('erp.po_item_detail_jubelio') }}</h6>
+                            <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-list me-1"></i> {{ __('erp.po_item_detail') }}</h6>
                             <div class="table-responsive">
                                 <table class="table table-sm table-bordered align-middle bg-white">
                                     <thead class="table-secondary text-muted small text-center">
@@ -137,8 +137,8 @@
                                     </thead>
                                     <tbody id="baris-po">
                                         <tr>
-                                            <td><input type="text" name="po_details[0][item_code]" class="form-control form-control-sm po-input" placeholder="{{ __('erp.sku_ph') }}"></td>
-                                            <td><input type="text" name="po_details[0][description]" class="form-control form-control-sm po-input" placeholder="{{ __('erp.item_name_ph') }}"></td>
+                                            <td><input type="text" name="po_details[0][item_code]" class="form-control form-control-sm po-input" placeholder="SKU..."></td>
+                                            <td><input type="text" name="po_details[0][description]" class="form-control form-control-sm po-input" placeholder="Nama Barang..."></td>
                                             <td><input type="number" name="po_details[0][price]" class="form-control form-control-sm text-end po-input" value="0"></td>
                                             <td><input type="number" name="po_details[0][qty]" class="form-control form-control-sm text-center po-input" value="0"></td>
                                         </tr>
@@ -202,8 +202,8 @@
 
 <template id="template-item-row">
     <tr class="baris-item-row">
-        <td><input type="text" name="items[__IDX__][nama_item]" class="form-control form-control-sm" placeholder="{{ __('erp.item_service_name') }}"></td>
-        <td><input type="text" name="items[__IDX__][keterangan]" class="form-control form-control-sm item-keterangan" placeholder="{{ __('erp.item_description_ph') }}" required></td>
+        <td><input type="text" name="items[__IDX__][nama_item]" class="form-control form-control-sm" placeholder="Nama barang/jasa"></td>
+        <td><input type="text" name="items[__IDX__][keterangan]" class="form-control form-control-sm item-keterangan" placeholder="Uraian item" required></td>
         <td><input type="number" step="0.01" min="0.01" name="items[__IDX__][qty]" class="form-control form-control-sm text-center item-qty" value="1"></td>
         <td><input type="text" name="items[__IDX__][satuan]" class="form-control form-control-sm text-center item-satuan" value="Pcs"></td>
         <td>
@@ -507,8 +507,8 @@
         const tbody = document.getElementById('baris-po');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input type="text" name="po_details[${barisCount}][item_code]" class="form-control form-control-sm po-input" placeholder="{{ __('erp.sku_ph') }}" required></td>
-            <td><input type="text" name="po_details[${barisCount}][description]" class="form-control form-control-sm po-input" placeholder="{{ __('erp.item_name_ph') }}"></td>
+            <td><input type="text" name="po_details[${barisCount}][item_code]" class="form-control form-control-sm po-input" placeholder="SKU..." required></td>
+            <td><input type="text" name="po_details[${barisCount}][description]" class="form-control form-control-sm po-input" placeholder="Nama Barang..."></td>
             <td><input type="number" name="po_details[${barisCount}][price]" class="form-control form-control-sm text-end po-input" value="0"></td>
             <td><input type="number" name="po_details[${barisCount}][qty]" class="form-control form-control-sm text-center po-input" value="0"></td>
         `;

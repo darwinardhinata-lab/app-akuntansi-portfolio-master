@@ -18,7 +18,7 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label fw-bold small text-muted">{{ __('erp.tax_name_required') }}</label>
-                    <input type="text" name="tax_name" class="form-control fw-bold" placeholder="{{ __('erp.eg_tax_name') }}" required>
+                    <input type="text" name="tax_name" class="form-control fw-bold" placeholder="Contoh: PPN 11%" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-bold small text-muted">{{ __('erp.tax_type_required') }}</label>

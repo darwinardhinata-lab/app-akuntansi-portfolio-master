@@ -37,7 +37,7 @@ class AccountImport implements ToCollection, WithStartRow
             // =================================================================
             // PERBAIKAN: Akun dengan prefix 8 adalah PENDAPATAN LAIN (KREDIT)
             // Sesuai RULES.md: 8 = Pendapatan Lain (Saldo Normal: KREDIT)
-            // Koreksi otomatis prefix 8 DIHAPUS untuk mengizinkan data Jubelio tetap
+            // Koreksi otomatis prefix 8 DIHAPUS untuk mengizinkan data import tetap
             // =================================================================
             // Jika perlu koreksi khusus untuk akun tertentu, tambahkan di sini:
             // contoh: if ($kode == '88004') { $tipe = 'Biaya'; $posSaldo = 'KREDIT'; }

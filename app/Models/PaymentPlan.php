@@ -82,7 +82,7 @@ class PaymentPlan extends Model
         ])->saveQuietly();
     }
 
-    // TOTAL (Rp): nilai final yang dipakai untuk export.
+    // TOTAL (Rp): nilai final yang dipakai untuk keperluan export data pembayaran.
     public function getNominalAktualEfektifAttribute()
     {
         return $this->nominal_aktual !== null ? (float) $this->nominal_aktual : (float) $this->nominal;

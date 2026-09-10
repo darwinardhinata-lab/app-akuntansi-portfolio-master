@@ -1117,7 +1117,7 @@ class PaymentPlanController extends Controller
     }
 
     /**
-     * Query dasar untuk export ke Jubelio.
+     * Query dasar untuk export data Payment Plan.
      * Mode cepat (default, all=0): HANYA status PENGAJUAN, mengabaikan filter status lain.
      * Mode custom (all=1): pakai seluruh filter dari modal (tanggal, divisi, kategori, status).
      */
@@ -1147,14 +1147,8 @@ class PaymentPlanController extends Controller
 
     public function exportManualWorklist(Request $request)
     {
-        $manualHutangCategories = [
-            'PEMBELIAN PERSEDIAAN (PEMBAYARAN HUTANG)',
-            'PEMBELIAN PERSEDIAAN (UANG MUKA)',
-            'DEPOSIT',
-        ];
-
         $rows = $this->resolveExportBaseQuery($request)
-            ->whereHas('paymentCategory', function ($q) use ($manualHutangCategories) {
+            ->whereHas('paymentCategory', function ($q) {
                 $q->where('cash_bank_flow', 'MANUAL_HUTANG');
             })
             ->get();
@@ -1168,6 +1162,30 @@ class PaymentPlanController extends Controller
         return \Maatwebsite\Excel\Facades\Excel::download(
             new \App\Exports\PaymentPlanManualWorklistExport($rows),
             'Worklist_Manual_Hutang_' . date('Ymd_His') . '.xlsx'
+        );
+    }
+
+    /**
+     * Export Payment Plan dengan kategori Kas & Bank (cash_bank_flow = 'KAS_BANK').
+     * Mengembalikan file Excel dengan kolom yang sama seperti worklist manual.
+     */
+    public function exportKasBank(Request $request)
+    {
+        $rows = $this->resolveExportBaseQuery($request)
+            ->whereHas('paymentCategory', function ($q) {
+                $q->where('cash_bank_flow', 'KAS_BANK');
+            })
+            ->get();
+
+        if ($rows->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ada data kategori Kas & Bank yang bisa diekspor sesuai filter.');
+        }
+
+        SystemLog::record('EXPORT', 'Payment Plan', 'Export Kas & Bank: ' . $rows->count() . ' data.');
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\PaymentPlanKasBankExport($rows),
+            'Payment_Plan_KasBank_' . date('Ymd_His') . '.xlsx'
         );
     }
 }

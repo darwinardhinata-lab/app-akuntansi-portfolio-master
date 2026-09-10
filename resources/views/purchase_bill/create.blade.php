@@ -28,11 +28,11 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold small text-muted">{{ __('erp.supplier_store_required') }}</label>
-                    <input type="text" name="vendor_name" class="form-control" placeholder="{{ __('erp.store_supplier_name') }}" required>
+                    <input type="text" name="vendor_name" class="form-control" placeholder="Nama Toko atau Supplier" required>
                 </div>
                 <div class="col-md-8">
                     <label class="form-label fw-bold small text-muted">{{ __('erp.additional_notes') }}</label>
-                    <input type="text" name="notes" class="form-control" placeholder="{{ __('erp.eg_buy_atk') }}">
+                    <input type="text" name="notes" class="form-control" placeholder="Contoh: Beli ATK untuk bulan ini">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label fw-bold small text-muted">{{ __('erp.payment_source_credit_account_required') }}</label>

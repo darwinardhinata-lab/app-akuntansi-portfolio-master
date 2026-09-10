@@ -1,4 +1,4 @@
-# LAPORAN ANALISIS FLOW DATA: PO & SO KE SEMUA MENU
+﻿# LAPORAN ANALISIS FLOW DATA: PO & SO KE SEMUA MENU
 
 ## Ringkasan Flow Data End-to-End
 
@@ -96,7 +96,7 @@ Berikut adalah analisis lengkap alur data dari **Purchase Order (PO)** dan **Sal
 ┌─────────────────────────────────────────────────────────────────┐
 │                     SALES ORDER (SO)                             │
 └─────────────────────────────────────────────────────────────────┘
-                 ↓ (JubelioWebhook / createInvoiceAndShip)
+                 ↓ ([External Platform]Webhook / createInvoiceAndShip)
 ┌─────────────────────────────────────────────────────────────────┐
 │                        SALES INVOICE                             │
 │                       (Faktur Penjualan)                         │
@@ -175,7 +175,7 @@ Berikut adalah analisis lengkap alur data dari **Purchase Order (PO)** dan **Sal
 
 | Menu | Status | Keterangan |
 |------|--------|------------|
-| **Retur Channel Online (Warehouse Inbound)** | ⚠️ Partial | Hanya retur dari Jubelio yang masuk via webhook |
+| **Retur Channel Online (Warehouse Inbound)** | ⚠️ Partial | Hanya retur dari [External Platform] yang masuk via webhook |
 | **AR Subledger** | ✅ Auto | Dari SalesInvoice |
 | **AP Subledger** | ✅ Auto | Dari PurchaseBill |
 
