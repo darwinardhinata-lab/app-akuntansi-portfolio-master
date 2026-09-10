@@ -82,7 +82,7 @@ class PaymentPlan extends Model
         ])->saveQuietly();
     }
 
-    // TOTAL (Rp): nilai final yang dipakai untuk export ke Jubelio.
+    // TOTAL (Rp): nilai final yang dipakai untuk export.
     public function getNominalAktualEfektifAttribute()
     {
         return $this->nominal_aktual !== null ? (float) $this->nominal_aktual : (float) $this->nominal;

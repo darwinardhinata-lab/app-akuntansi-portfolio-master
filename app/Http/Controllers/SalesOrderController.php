@@ -531,7 +531,7 @@ class SalesOrderController extends Controller
                 'is_cod'              => $request->is_cod ? 1 : 0,
                 'tracking_number'     => $request->tracking_number,
                 'total_weight'        => $request->total_weight ?? 0,
-                'is_jubelio_shipment' => $request->is_jubelio_shipment ? 1 : 0,
+                'is_marketplace_shipment' => $request->is_marketplace_shipment ? 1 : 0,
                 'courier'             => $request->courier,
                 
                 'status'              => 'APPROVED',
@@ -699,7 +699,7 @@ class SalesOrderController extends Controller
                 'is_cod'              => $request->is_cod ? 1 : 0,
                 'tracking_number'     => $request->tracking_number,
                 'total_weight'        => $request->total_weight ?? 0,
-                'is_jubelio_shipment' => $request->is_jubelio_shipment ? 1 : 0,
+                'is_marketplace_shipment' => $request->is_marketplace_shipment ? 1 : 0,
                 'courier'             => $request->courier,
                 
                 'is_paid'             => $request->is_paid ? 1 : 0,

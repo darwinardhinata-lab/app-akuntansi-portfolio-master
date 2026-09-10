@@ -28,7 +28,7 @@ class ProcessPendingTempJob implements ShouldQueue
         try {
             // ── FIX: ACCOUNT_ID MAPPING ────────────────────────────────────────────────────
             // `accounts` table menggunakan `account_code` (string) sebagai PRIMARY KEY dan `account_id` (int).
-            // `jd_temp.coa_id` adalah INTEGER ID milik Jubelio yang berelasi ke `accounts.account_id`.
+            // `jd_temp.coa_id` adalah INTEGER ID dari sistem eksternal yang berelasi ke `accounts.account_id`.
             // Kita tarik `account_code` dengan key `account_id` dari tabel `accounts` agar lookup:
             // $detail->coa_id (int) → $accountsCache[$detail->coa_id] → account_code (string) berfungsi.
             // ────────────────────────────────────────────────────────────────────────────
