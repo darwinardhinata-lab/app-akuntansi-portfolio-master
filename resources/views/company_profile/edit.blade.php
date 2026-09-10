@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Pengaturan' => '#', 'Profil Perusahaan' => null]" />
+    <x-breadcrumb :links="[__('erp.bc_settings') => '#', __('erp.bc_company_profile') => null]" />
 @endsection
 
 @section('content')
@@ -18,7 +18,7 @@
                 <i class="fa-solid fa-building"></i>
             </div>
             <div>
-                <h5 class="fw-bold mb-0">Identitas Profil Perusahaan</h5>
+                <h5 class="fw-bold mb-0">{{ __('erp.company_profile_identity') }}</h5>
                 <p class="text-muted small mb-0 text-white-50">Informasi ini otomatis dicetak di kop atas lembar print/export Excel seluruh laporan keuangan.</p>
             </div>
         </div>
@@ -39,39 +39,39 @@
                     @endif
                     
                     <div class="mx-auto" style="max-width: 400px;">
-                        <label class="form-label fw-bold small text-muted text-start d-block">Upload Logo Baru (Opsional)</label>
+                        <label class="form-label fw-bold small text-muted text-start d-block">{{ __('erp.upload_new_logo_optional') }}</label>
                         <input type="file" name="logo" class="form-control" accept=".jpg,.jpeg,.png">
-                        <small class="text-muted d-block mt-1 text-start" style="font-size: 0.75rem;"><i class="fa-solid fa-paperclip"></i> Format: JPG, PNG (Maks. 2MB). Rekomendasi rasio Landscape/Kotak transparan.</small>
+                        <small class="text-muted d-block mt-1 text-start" style="font-size: 0.75rem;"><i class="fa-solid fa-paperclip"></i> {{ __('erp.logo_format_hint') }}</small>
                     </div>
                 </div>
             </div>
 
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label fw-bold small text-muted">Nama Perusahaan *</label>
+                    <label class="form-label fw-bold small text-muted">{{ __('erp.company_name_required') }}</label>
                     <input type="text" name="company_name" class="form-control fw-bold" value="{{ $profile->company_name }}" required>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold small text-muted">NPWP</label>
+                    <label class="form-label fw-bold small text-muted">{{ __('erp.npwp_label') }}</label>
                     <input type="text" name="npwp" class="form-control font-monospace" value="{{ $profile->npwp }}">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold small text-muted">Website</label>
+                    <label class="form-label fw-bold small text-muted">{{ __('erp.website_label') }}</label>
                     <input type="text" name="website" class="form-control" value="{{ $profile->website }}">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label fw-bold small text-muted">No. Telepon / Kontak *</label>
+                    <label class="form-label fw-bold small text-muted">{{ __('erp.phone_contact_required') }}</label>
                     <input type="text" name="phone" class="form-control fw-bold" value="{{ $profile->phone }}" required>
                 </div>
                 <div class="col-md-12">
-                    <label class="form-label fw-bold small text-muted">Email Perusahaan</label>
+                    <label class="form-label fw-bold small text-muted">{{ __('erp.company_email') }}</label>
                     <input type="email" name="email" class="form-control" value="{{ $profile->email }}">
                 </div>
 
                 <div class="col-12"><hr class="my-2 text-muted opacity-25"></div>
 
                 <div class="col-md-12">
-                    <label class="form-label fw-bold small text-danger">PIN Karyawan (Form Pengajuan)</label>
+                    <label class="form-label fw-bold small text-danger">{{ __('erp.employee_pin_submission_form') }}</label>
                     <input type="text" name="employee_pin" inputmode="numeric" pattern="[0-9]*" class="form-control font-monospace" value="{{ $profile->employee_pin ?? '' }}" placeholder="Masukkan PIN numerik untuk otorisasi karyawan">
                     <small class="text-muted d-block mt-1 text-start" style="font-size: 0.75rem;"><i class="fa-solid fa-triangle-exclamation me-1"></i> Hanya Administrator yang dapat mengubah PIN ini. PIN ini digunakan di form pengajuan karyawan.</small>
                 </div>
@@ -79,29 +79,29 @@
                 <div class="col-12"><hr class="my-2 text-muted opacity-25"></div>
 
                 <div class="col-md-12">
-                    <label class="form-label fw-bold small text-muted">Detail Alamat Jalan</label>
+                    <label class="form-label fw-bold small text-muted">{{ __('erp.street_address_detail') }}</label>
                     <textarea name="address" class="form-control" rows="2">{{ $profile->address }}</textarea>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label fw-bold small text-muted">Provinsi</label>
+                    <label class="form-label fw-bold small text-muted">{{ __('erp.province_label') }}</label>
                     <input type="text" name="province" class="form-control" value="{{ $profile->province }}">
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label fw-bold small text-muted">Kota / Kabupaten</label>
+                    <label class="form-label fw-bold small text-muted">{{ __('erp.city_regency') }}</label>
                     <input type="text" name="city" class="form-control" value="{{ $profile->city }}">
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label fw-bold small text-muted">Kode Pos</label>
+                    <label class="form-label fw-bold small text-muted">{{ __('erp.postal_code') }}</label>
                     <input type="text" name="postal_code" class="form-control font-monospace" value="{{ $profile->postal_code }}">
                 </div>
                 <div class="col-md-12">
-                    <label class="form-label fw-bold small text-muted">Negara</label>
+                    <label class="form-label fw-bold small text-muted">{{ __('erp.country_label') }}</label>
                     <input type="text" name="country" class="form-control" value="{{ $profile->country }}">
                 </div>
             </div>
 
             <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-                <button type="submit" class="btn btn-primary fw-bold px-4 py-2" style="border-radius: 10px;"><i class="fa-solid fa-floppy-disk me-1"></i> Simpan Perubahan Profil</button>
+                <button type="submit" class="btn btn-primary fw-bold px-4 py-2" style="border-radius: 10px;"><i class="fa-solid fa-floppy-disk me-1"></i> {{ __('erp.save_profile_changes') }}</button>
             </div>
         </form>
     </div>

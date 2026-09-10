@@ -2,9 +2,8 @@
 
 @section('top_bar_left')
     <a href="{{ route('jurnal.index') }}" class="btn btn-sm btn-white border fw-bold shadow-sm text-secondary me-3" style="border-radius: 8px;">
-        <i class="fa-solid fa-arrow-left me-1"></i> Kembali
-    </a>
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Jurnal Umum' => route('jurnal.index'), 'Buat Baru' => null]" />
+        <i class="fa-solid fa-arrow-left me-1"></i> {{ __('erp.back_btn') }}</a>
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.general_journal') => route('jurnal.index'), __('erp.bc_create_new') => null]" />
 @endsection
 
 @section('content')
@@ -35,8 +34,8 @@
 
 <div class="journal-wrapper mt-4 mb-5">
     <div class="mb-4">
-        <h3 class="fw-bold mb-1 text-dark">Jurnal Umum Baru</h3>
-        <p class="text-muted small">Catat transaksi akuntansi secara manual</p>
+        <h3 class="fw-bold mb-1 text-dark">{{ __('erp.new_general_journal') }}</h3>
+        <p class="text-muted small">{{ __('erp.record_manual_accounting_tx') }}</p>
     </div>
 
     @if ($errors->any())
@@ -55,15 +54,15 @@
         <div class="card-modern mb-4">
             <div class="row g-4">
                 <div class="col-md-3">
-                    <label class="form-label">Tanggal</label>
+                    <label class="form-label">{{ __('erp.date') }}</label>
                     <input type="date" name="transaction_date" class="form-control input-header" value="{{ date('Y-m-d') }}" required>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">No. Bukti</label>
+                    <label class="form-label">{{ __('erp.evidence_no') }}</label>
                     <input type="text" name="evidence_number" class="form-control input-header" placeholder="Misal: BKM-01">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Deskripsi Jurnal</label>
+                    <label class="form-label">{{ __('erp.journal_description') }}</label>
                     <input type="text" name="description" class="form-control input-header" placeholder="Contoh: Pembayaran listrik bulan ini" required>
                 </div>
             </div>
@@ -74,10 +73,10 @@
                 <table class="table table-clean mb-0">
                     <thead>
                         <tr>
-                            <th width="35%">KODE AKUN</th>
-                            <th width="25%">KODE BANTU (OPSIONAL)</th>
-                            <th width="15%">POSISI</th>
-                            <th width="20%" class="text-end">NOMINAL (Rp)</th>
+                            <th width="35%">{{ __('erp.account_code_caps') }}</th>
+                            <th width="25%">{{ __('erp.helper_code_optional_caps') }}</th>
+                            <th width="15%">{{ __('erp.position_caps') }}</th>
+                            <th width="20%" class="text-end">{{ __('erp.amount_rp_caps') }}</th>
                             <th width="5%" class="text-center"></th>
                         </tr>
                     </thead>
@@ -85,7 +84,7 @@
                         <tr>
                             <td data-label="Kode Akun">
                                 <select name="details[0][account_code]" class="input-transparent select-account" required>
-                                    <option value="">Pilih Akun...</option>
+                                    <option value="">{{ __('erp.select_account_ph') }}</option>
                                     @foreach($accounts as $akun)
                                         <option value="{{ $akun->account_code }}">{{ $akun->account_code }} - {{ $akun->account_name }}</option>
                                     @endforeach
@@ -93,7 +92,7 @@
                             </td>
                             <td data-label="Kode Bantu">
                                 <select name="details[0][helper_code]" class="input-transparent select-helper">
-                                    <option value="">- Kosong -</option>
+                                    <option value="">{{ __('erp.empty_dash') }}</option>
                                     @foreach($helpers as $helper)
                                         <option value="{{ $helper->helper_code }}">{{ $helper->helper_code }} - {{ $helper->entity_name }}</option>
                                     @endforeach
@@ -101,8 +100,8 @@
                             </td>
                             <td data-label="Posisi">
                                 <select name="details[0][position]" class="input-transparent position-select" required>
-                                    <option value="DEBET" selected>DEBET</option>
-                                    <option value="KREDIT">KREDIT</option>
+                                    <option value="DEBET" selected>{{ __('erp.debit_caps') }}</option>
+                                    <option value="KREDIT">{{ __('erp.credit_caps') }}</option>
                                 </select>
                             </td>
                             <td data-label="Nominal (Rp)">
@@ -116,7 +115,7 @@
                         <tr>
                             <td>
                                 <select name="details[1][account_code]" class="input-transparent select-account" required>
-                                    <option value="">Pilih Akun...</option>
+                                    <option value="">{{ __('erp.select_account_ph') }}</option>
                                     @foreach($accounts as $akun)
                                         <option value="{{ $akun->account_code }}">{{ $akun->account_code }} - {{ $akun->account_name }}</option>
                                     @endforeach
@@ -124,7 +123,7 @@
                             </td>
                             <td>
                                 <select name="details[1][helper_code]" class="input-transparent select-helper">
-                                    <option value="">- Kosong -</option>
+                                    <option value="">{{ __('erp.empty_dash') }}</option>
                                     @foreach($helpers as $helper)
                                         <option value="{{ $helper->helper_code }}">{{ $helper->helper_code }} - {{ $helper->entity_name }}</option>
                                     @endforeach
@@ -132,8 +131,8 @@
                             </td>
                             <td>
                                 <select name="details[1][position]" class="input-transparent position-select" required>
-                                    <option value="DEBET">DEBET</option>
-                                    <option value="KREDIT" selected>KREDIT</option>
+                                    <option value="DEBET">{{ __('erp.debit_caps') }}</option>
+                                    <option value="KREDIT" selected>{{ __('erp.credit_caps') }}</option>
                                 </select>
                             </td>
                             <td>
@@ -147,20 +146,20 @@
                 </table>
             </div>
             
-            <button type="button" class="btn-tambah mt-3" id="btn-tambah">+ Tambah Baris Jurnal</button>
+            <button type="button" class="btn-tambah mt-3" id="btn-tambah">{{ __('erp.add_journal_row') }}</button>
 
             <div class="summary-box mt-4 d-flex justify-content-between align-items-center">
-                <div id="statusIndicator" class="badge rounded-pill p-2 px-3 bg-danger text-white">✕ TIDAK SEIMBANG</div>
+                <div id="statusIndicator" class="badge rounded-pill p-2 px-3 bg-danger text-white">{{ __('erp.unbalanced_mark') }}</div>
                 <div class="d-flex gap-4 align-items-center">
                     <div class="text-end">
-                        <small class="fw-bold text-muted">TOTAL DEBET</small>
+                        <small class="fw-bold text-muted">{{ __('erp.total_debit_caps') }}</small>
                         <div id="textDebet" class="fw-bold text-success fs-5">0</div>
                     </div>
                     <div class="text-end">
-                        <small class="fw-bold text-muted">TOTAL KREDIT</small>
+                        <small class="fw-bold text-muted">{{ __('erp.total_credit_caps') }}</small>
                         <div id="textKredit" class="fw-bold text-dark fs-5">0</div>
                     </div>
-                    <button type="submit" class="btn btn-primary fw-bold px-4 py-2" id="btnSimpan" disabled>Simpan Jurnal</button>
+                    <button type="submit" class="btn btn-primary fw-bold px-4 py-2" id="btnSimpan" disabled>{{ __('erp.save_journal') }}</button>
                 </div>
             </div>
         </div>

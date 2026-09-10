@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Aset Management' => route('aset.index'), 'Setting Umur Penyusutan' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.bc_asset_management') => route('aset.index'), __('erp.bc_depreciation_life_setting') => null]" />
 @endsection
 
 @section('content')
@@ -9,12 +9,11 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Setting Umur Penyusutan Aset</h3>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.asset_depreciation_life_setting') }}</h3>
             <p class="text-muted small mb-0">Pilih aset yang belum mengalami penyusutan untuk mengatur lama masa pakai (umur penyusutan).</p>
         </div>
         <a href="{{ route('aset.index') }}" class="btn btn-outline-secondary btn-sm fw-bold shadow-sm">
-            <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Aset
-        </a>
+            <i class="fa-solid fa-arrow-left me-1"></i> {{ __('erp.back_to') }} {{ __('erp.bc_asset_list') }}</a>
     </div>
 
     @if(session('error'))
@@ -48,17 +47,17 @@
                     <table class="table table-hover mb-0" style="font-size: 0.85rem;">
                         <thead class="table-light text-uppercase text-muted" style="font-size: 0.75rem;">
                             <tr>
-                                <th width="3%">No</th>
-                                <th width="8%">Tgl Beli</th>
-                                <th width="12%">Kode Aset</th>
-                                <th width="18%">Nama Aset</th>
-                                <th width="12%">Harga Perolehan</th>
-                                <th width="10%" class="text-end">Nilai Sisa</th>
-                                <th width="10%" class="text-center">Umur (Bulan)</th>
-                                <th width="12%">Penyusutan / Bln</th>
-                                <th width="13%">Akumulasi Depresiasi</th>
-                                <th width="15%">Nilai Saldo Akhir</th>
-                                <th width="10%" class="text-center">Aksi</th>
+                                <th width="3%">{{ __('erp.no_abbr') }}</th>
+                                <th width="8%">{{ __('erp.purchase_date_short') }}</th>
+                                <th width="12%">{{ __('erp.asset_code') }}</th>
+                                <th width="18%">{{ __('erp.asset_name') }}</th>
+                                <th width="12%">{{ __('erp.purchase_price') }}</th>
+                                <th width="10%" class="text-end">{{ __('erp.residual_value') }}</th>
+                                <th width="10%" class="text-center">{{ __('erp.useful_life') }}</th>
+                                <th width="12%">{{ __('erp.depreciation_per_month_v2') }}</th>
+                                <th width="13%">{{ __('erp.accumulated_depreciation_v2') }}</th>
+                                <th width="15%">{{ __('erp.ending_book_value') }}</th>
+                                <th width="10%" class="text-center">{{ __('erp.action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -88,7 +87,7 @@
                                             Rp {{ number_format($asset->book_value ?? $asset->purchase_price, 2, ',', '.') }}
                                         </td>
                                         <td class="text-center">
-                                            <button type="submit" class="btn btn-sm btn-primary fw-bold">Simpan</button>
+                                            <button type="submit" class="btn btn-sm btn-primary fw-bold">{{ __('erp.save_btn') }}</button>
                                         </td>
                                     </form>
                                 </tr>

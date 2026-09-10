@@ -2,9 +2,8 @@
 
 @section('top_bar_left')
     <a href="{{ route('payment.index') }}" class="btn btn-sm btn-white border fw-bold shadow-sm text-secondary me-3" style="border-radius: 8px;">
-        <i class="fa-solid fa-arrow-left me-1"></i> Kembali
-    </a>
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Payment Plan' => route('payment.index'), 'Edit' => null]" />
+        <i class="fa-solid fa-arrow-left me-1"></i> {{ __('erp.back_btn') }}</a>
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.payment_plan') => route('payment.index'), __('erp.bc_edit') => null]" />
 @endsection
 
 @section('content')
@@ -20,7 +19,7 @@
         <div class="card-body">
             @if($statusTerkunci)
                 <div class="alert alert-danger fw-bold">
-                    <i class="fa-solid fa-lock me-1"></i> Status sudah <strong>{{ $data->status_payment }}</strong>. Nominal item tidak dapat diubah/ditambah/dihapus lagi (sudah diposting ke Jurnal). Anda tetap bisa mengubah data non-nominal (vendor, keterangan header, dsb).
+                    <i class="fa-solid fa-lock me-1"></i> {{ __('erp.status_already') }} <strong>{{ $data->status_payment }}</strong>. Nominal item tidak dapat diubah/ditambah/dihapus lagi (sudah diposting ke Jurnal). Anda tetap bisa mengubah data non-nominal (vendor, keterangan header, dsb).
                 </div>
             @endif
 
@@ -30,7 +29,7 @@
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Pilih Bagian / Divisi *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.select_division_required') }}</label>
                         <select name="id_divisi" class="form-select" required>
                             @foreach($divisi as $div)
                                 <option value="{{ $div->id_divisi }}" {{ $data->id_divisi == $div->id_divisi ? 'selected' : '' }}>
@@ -41,26 +40,26 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Rekening Ops *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.ops_account_required') }}</label>
                         <select name="jenis_transaksi" class="form-select" required>
-                            <option value="BCA BBW OPS" {{ $data->jenis_transaksi == 'BCA BBW OPS' ? 'selected' : '' }}>BCA BBW OPS</option>
-                            <option value="BCA BBB OPS" {{ $data->jenis_transaksi == 'BCA BBB OPS' ? 'selected' : '' }}>BCA BBB OPS</option>
-                            <option value="BCA KOI OPS" {{ $data->jenis_transaksi == 'BCA KOI OPS' ? 'selected' : '' }}>BCA KOI OPS</option>
-                            <option value="BCA GBB OPS" {{ $data->jenis_transaksi == 'BCA GBB OPS' ? 'selected' : '' }}>BCA GBB OPS</option>
-                            <option value="BCA BBW" {{ $data->jenis_transaksi == 'BCA BBW' ? 'selected' : '' }}>BCA BBW</option>
-                            <option value="BCA BBB" {{ $data->jenis_transaksi == 'BCA BBB' ? 'selected' : '' }}>BCA BBB</option>
-                            <option value="BCA KOI" {{ $data->jenis_transaksi == 'BCA KOI' ? 'selected' : '' }}>BCA KOI</option>
-                            <option value="BCA GBB" {{ $data->jenis_transaksi == 'BCA GBB' ? 'selected' : '' }}>BCA GBB</option>
-                            <option value="MANDIRI BBW" {{ $data->jenis_transaksi == 'MANDIRI BBW' ? 'selected' : '' }}>MANDIRI BBW</option>
-                            <option value="MANDIRI KOI" {{ $data->jenis_transaksi == 'MANDIRI KOI' ? 'selected' : '' }}>MANDIRI KOI</option>
-                            <option value="MANDIRI BBB" {{ $data->jenis_transaksi == 'MANDIRI BBB' ? 'selected' : '' }}>MANDIRI BBB</option>
-                            <option value="XENDIT" {{ $data->jenis_transaksi == 'XENDIT' ? 'selected' : '' }}>XENDIT</option>
-                            <option value="BRI BBW" {{ $data->jenis_transaksi == 'BRI BBW' ? 'selected' : '' }}>BRI BBW</option>
+                            <option value="BCA BBW OPS" {{ $data->jenis_transaksi == 'BCA BBW OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_bbw_ops') }}</option>
+                            <option value="BCA BBB OPS" {{ $data->jenis_transaksi == 'BCA BBB OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_bbb_ops') }}</option>
+                            <option value="BCA KOI OPS" {{ $data->jenis_transaksi == 'BCA KOI OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_koi_ops') }}</option>
+                            <option value="BCA GBB OPS" {{ $data->jenis_transaksi == 'BCA GBB OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_gbb_ops') }}</option>
+                            <option value="BCA BBW" {{ $data->jenis_transaksi == 'BCA BBW' ? 'selected' : '' }}>{{ __('erp.bank_bca_bbw') }}</option>
+                            <option value="BCA BBB" {{ $data->jenis_transaksi == 'BCA BBB' ? 'selected' : '' }}>{{ __('erp.bank_bca_bbb') }}</option>
+                            <option value="BCA KOI" {{ $data->jenis_transaksi == 'BCA KOI' ? 'selected' : '' }}>{{ __('erp.bank_bca_koi') }}</option>
+                            <option value="BCA GBB" {{ $data->jenis_transaksi == 'BCA GBB' ? 'selected' : '' }}>{{ __('erp.bank_bca_gbb') }}</option>
+                            <option value="MANDIRI BBW" {{ $data->jenis_transaksi == 'MANDIRI BBW' ? 'selected' : '' }}>{{ __('erp.bank_mandiri_bbw') }}</option>
+                            <option value="MANDIRI KOI" {{ $data->jenis_transaksi == 'MANDIRI KOI' ? 'selected' : '' }}>{{ __('erp.bank_mandiri_koi') }}</option>
+                            <option value="MANDIRI BBB" {{ $data->jenis_transaksi == 'MANDIRI BBB' ? 'selected' : '' }}>{{ __('erp.bank_mandiri_bbb') }}</option>
+                            <option value="XENDIT" {{ $data->jenis_transaksi == 'XENDIT' ? 'selected' : '' }}>{{ __('erp.bank_xendit') }}</option>
+                            <option value="BRI BBW" {{ $data->jenis_transaksi == 'BRI BBW' ? 'selected' : '' }}>{{ __('erp.bank_bri_bbw') }}</option>
                         </select>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Kategori Payment *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.payment_category_required') }}</label>
                         <select name="kategori_payment" class="form-select" required>
                             @if(isset($payment_categories))
                                 @foreach($payment_categories as $cat)
@@ -74,43 +73,43 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Tgl Pengajuan *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.submission_date_required') }}</label>
                         <input type="date" name="tgl_pengajuan" class="form-control" value="{{ $data->tgl_pengajuan }}" required>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Tgl Transaksi *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.tx_date_required') }}</label>
                         <input type="date" name="tgl_transaksi" class="form-control" value="{{ $data->tgl_transaksi ?? $data->tgl_pengajuan }}" required>
-                        <small class="text-muted">Tanggal transaksi yang akan muncul di jurnal</small>
+                        <small class="text-muted">{{ __('erp.tx_date_journal_hint') }}</small>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Jatuh Tempo</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.due_date') }}</label>
                         <input type="date" name="jatuh_tempo" class="form-control" value="{{ $data->jatuh_tempo }}">
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Vendor / Toko *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.vendor_store_required') }}</label>
                         <input type="text" name="vendor_toko" class="form-control" value="{{ $data->vendor_toko }}" required>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Penanggung Jawab (PJ) *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.person_in_charge_required') }}</label>
                         <input type="text" name="penerima_pj" class="form-control" value="{{ $data->penerima_pj }}" required>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Rekening / Virtual Account</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.account_virtual_account') }}</label>
                         <input type="text" name="rekening_va" class="form-control" value="{{ $data->rekening_va }}">
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Nama Toko / Link</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.store_name_link') }}</label>
                         <input type="text" name="nama_toko_link" class="form-control" value="{{ $data->nama_toko_link ?? '' }}" placeholder="Contoh: Shopee, Tokopedia, atau link toko">
                     </div>
 
                     <div class="col-md-12 mb-3">
-                        <label class="form-label fw-bold text-dark">Keterangan Umum</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.general_notes') }}</label>
                         <textarea name="keterangan" class="form-control" rows="2">{{ $data->keterangan }}</textarea>
                     </div>
 
@@ -118,7 +117,7 @@
                     <div class="col-md-12 mb-3">
                         <div class="bg-light p-3 border border-warning rounded">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="fw-bold text-warning mb-0"><i class="fa-solid fa-cart-shopping me-1"></i> Rincian Item Pembayaran</h6>
+                                <h6 class="fw-bold text-warning mb-0"><i class="fa-solid fa-cart-shopping me-1"></i> {{ __('erp.payment_item_detail') }}</h6>
                                 @unless($statusTerkunci)
                                 <button type="button" class="btn btn-warning btn-sm fw-bold text-dark" onclick="tambahItem()">
                                     <i class="fa-solid fa-plus me-1"></i> Tambah Item
@@ -130,14 +129,14 @@
                                 <table class="table table-sm table-bordered align-middle bg-white" id="tabel-item">
                                     <thead class="table-secondary text-muted small text-center">
                                         <tr>
-                                            <th width="16%">Nama Item</th>
-                                            <th width="19%">Keterangan *</th>
-                                            <th width="8%">Qty</th>
-                                            <th width="8%">Satuan</th>
-                                            <th width="12%">Harga Satuan (Rp)</th>
-                                            <th width="12%">Nominal (Rp)</th>
-                                            <th width="12%">Nominal Aktual (Rp)</th>
-                                            <th width="9%">Bukti</th>
+                                            <th width="16%">{{ __('erp.item_name') }}</th>
+                                            <th width="19%">{{ __('erp.notes_required') }}</th>
+                                            <th width="8%">{{ __('erp.qty') }}</th>
+                                            <th width="8%">{{ __('erp.unit') }}</th>
+                                            <th width="12%">{{ __('erp.unit_price_rp') }}</th>
+                                            <th width="12%">{{ __('erp.amount_rp') }}</th>
+                                            <th width="12%">{{ __('erp.actual_amount_rp') }}</th>
+                                            <th width="9%">{{ __('erp.proof_label') }}</th>
                                             <th width="4%"></th>
                                         </tr>
                                     </thead>
@@ -166,7 +165,7 @@
                                             <td>
                                                 <input type="file" name="items[{{ $i }}][bukti_file]" class="form-control form-control-sm" accept=".jpg,.jpeg,.png,.pdf">
                                                 @if($d->bukti_file)
-                                                    <a href="{{ asset('storage/' . $d->bukti_file) }}" target="_blank" class="small d-block mt-1"><i class="fa-solid fa-paperclip"></i> Lihat</a>
+                                                    <a href="{{ asset('storage/' . $d->bukti_file) }}" target="_blank" class="small d-block mt-1"><i class="fa-solid fa-paperclip"></i> {{ __('erp.view') }}</a>
                                                 @endif
                                             </td>
                                             <td class="text-center">
@@ -181,7 +180,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr class="table-light">
-                                            <td colspan="5" class="text-end fw-bold">TOTAL NOMINAL</td>
+                                            <td colspan="5" class="text-end fw-bold">{{ __('erp.total_amount_caps') }}</td>
                                             <td class="fw-bold text-primary text-end" id="total-nominal-display">Rp {{ number_format($data->nominal, 0, ',', '.') }}</td>
                                             <td class="fw-bold text-success text-end" id="total-aktual-display">
                                                 Rp {{ number_format($data->nominal_aktual ?? 0, 0, ',', '.') }}
@@ -202,7 +201,7 @@
                 <button type="submit" class="btn btn-warning px-4 py-2 fw-bold text-dark">
                     <i class="fas fa-save me-2"></i> Update Perubahan Data
                 </button>
-                <a href="{{ route('payment.index') }}" class="btn btn-secondary px-4 py-2 fw-bold ms-2">Batal</a>
+                <a href="{{ route('payment.index') }}" class="btn btn-secondary px-4 py-2 fw-bold ms-2">{{ __('erp.cancel') }}</a>
             </form>
         </div>
     </div>

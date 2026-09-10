@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Manufaktur' => '#', 'Material Receipt (MRN)' => route('mfg.material-receipts.index'), $receipt->receipt_number => null]" />
+    <x-breadcrumb :links="[__('erp.mfg_module') => '#', __('erp.bc_material_receipt_mrn') => route('mfg.material-receipts.index'), $receipt->receipt_number => null]" />
 @endsection
 
 @push('styles')
@@ -37,7 +37,7 @@
                         <form action="{{ route('mfg.material-receipts.void', $receipt->id) }}" method="POST" class="mt-2 no-print"
                               onsubmit="return confirm('Yakin void MRN ini? Jurnal & kartu stok akan dibalik. Hanya bisa jika stoknya belum terpakai.')">
                             @csrf
-                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-rotate-left me-1"></i>Void MRN</button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-rotate-left me-1"></i>{{ __('erp.void_mrn') }}</button>
                         </form>
                     @endif
                 </div>
@@ -46,11 +46,11 @@
     </div>
 
     <div class="card shadow-sm border-0 mb-4">
-        <div class="card-header bg-white"><b>Item Bahan Baku</b></div>
+        <div class="card-header bg-white"><b>{{ __('erp.raw_material_item') }}</b></div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-bordered mb-0" style="font-size: 13.5px;">
-                    <thead class="table-light"><tr><th>Tipe</th><th>Item</th><th>Qty</th><th>Satuan</th><th>Rate</th><th>Jumlah</th><th>Lot</th></tr></thead>
+                    <thead class="table-light"><tr><th>{{ __('erp.type_label') }}</th><th>{{ __('erp.item_label') }}</th><th>{{ __('erp.qty') }}</th><th>{{ __('erp.unit') }}</th><th>{{ __('erp.rate_label') }}</th><th>{{ __('erp.amount_label') }}</th><th>{{ __('erp.lot_label') }}</th></tr></thead>
                     <tbody>
                         @foreach($receipt->details as $d)
                             <tr>
@@ -75,7 +75,7 @@
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-bordered mb-0" style="font-size: 13.5px;">
-                    <thead class="table-light"><tr><th>Akun</th><th>Posisi</th><th>Jumlah</th></tr></thead>
+                    <thead class="table-light"><tr><th>{{ __('erp.account_count') }}</th><th>{{ __('erp.position_label') }}</th><th>{{ __('erp.amount_label') }}</th></tr></thead>
                     <tbody>
                         @foreach($receipt->journal->details as $jd)
                             <tr>

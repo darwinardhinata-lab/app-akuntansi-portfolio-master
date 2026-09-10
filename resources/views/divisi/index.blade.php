@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Pengaturan' => '#', 'Divisi' => null]" />
+    <x-breadcrumb :links="[__('erp.bc_settings') => '#', __('erp.division_label') => null]" />
 @endsection
 
 @section('content')
@@ -9,7 +9,7 @@
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Master Divisi</h3>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.master_division') }}</h3>
             <p class="text-muted small mb-0">Kelola daftar divisi/bagian untuk struktur organisasi dan pengajuan Payment Plan.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
@@ -27,17 +27,17 @@
     @endif
 
     <div class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
-        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> Filter Analitik Pencarian</div>
+        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.filter_analytics_search') }}</div>
         <form action="{{ route('divisi.index') }}" method="GET" id="filterForm" class="row g-2 align-items-end">
             <div class="col-12 col-sm-12 col-md-8">
-                <label class="form-label small fw-bold text-muted mb-1">Pencarian Nomor / Keterangan</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number_desc') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                     <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik nama divisi..." value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> Cari</button>
+                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
                 <a href="{{ route('divisi.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
@@ -48,10 +48,10 @@
             <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size: 0.85rem;">
                 <thead class="table-light text-uppercase text-muted">
                     <tr>
-                        <th class="ps-4 py-3">Kode</th>
-                        <th class="py-3">Nama Divisi</th>
-                        <th class="text-center py-3">Total Plot Akun</th>
-                        <th class="text-center pe-4 py-3">Aksi</th>
+                        <th class="ps-4 py-3">{{ __('erp.code_label') }}</th>
+                        <th class="py-3">{{ __('erp.division_name') }}</th>
+                        <th class="text-center py-3">{{ __('erp.total_account_plots') }}</th>
+                        <th class="text-center pe-4 py-3">{{ __('erp.action') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -72,7 +72,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="4" class="text-center py-5 text-muted">Belum ada data divisi.</td></tr>
+                    <tr><td colspan="4" class="text-center py-5 text-muted">{{ __('erp.no_division_data') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

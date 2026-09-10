@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Manufaktur' => '#', 'Material Receipt (MRN)' => route('mfg.material-receipts.index'), 'Buat Baru' => null]" />
+    <x-breadcrumb :links="[__('erp.mfg_module') => '#', __('erp.bc_material_receipt_mrn') => route('mfg.material-receipts.index'), __('erp.bc_create_new') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-0">
-    <h3 class="fw-bold mb-1 text-dark">Buat MRN Baru</h3>
+    <h3 class="fw-bold mb-1 text-dark">{{ __('erp.create_new_mrn') }}</h3>
     <p class="text-muted small mb-4">Penerimaan bahan baku dari supplier — akan langsung memposting Jurnal #1 (Debit Persediaan Bahan Baku, Kredit Hutang Usaha Maklun).</p>
 
     @if ($errors->any())
@@ -19,46 +19,46 @@
                 @csrf
                 <div class="row g-3 mb-3">
                     <div class="col-md-3">
-                        <label class="form-label">Tanggal Terima</label>
+                        <label class="form-label">{{ __('erp.receive_date') }}</label>
                         <input type="date" name="receipt_date" class="form-control" value="{{ date('Y-m-d') }}" required>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Supplier</label>
+                        <label class="form-label">{{ __('erp.supplier_label') }}</label>
                         <select name="supplier_id" class="form-select" required>
-                            <option value="">-- Pilih Supplier --</option>
+                            <option value="">{{ __('erp.select_supplier_ph') }}</option>
                             @foreach($suppliers as $s)<option value="{{ $s->id }}">{{ $s->supplier_code }} - {{ $s->supplier_name }}</option>@endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">No. Dokumen Supplier</label>
+                        <label class="form-label">{{ __('erp.supplier_document_no') }}</label>
                         <input type="text" name="supplier_doc_no" class="form-control">
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">Pajak (Rp)</label>
+                        <label class="form-label">{{ __('erp.tax_rp') }}</label>
                         <input type="number" step="0.01" name="tax_amount" class="form-control" value="0">
                     </div>
                 </div>
 
-                <h6 class="fw-bold mt-4 mb-2">Item Bahan Baku</h6>
+                <h6 class="fw-bold mt-4 mb-2">{{ __('erp.raw_material_item') }}</h6>
                 <table class="table table-bordered align-middle" id="itemsTable">
                     <thead class="table-light">
-                        <tr><th>Tipe</th><th>Kode Item</th><th>Nama Item</th><th>Qty</th><th>Satuan</th><th>Rate</th><th></th></tr>
+                        <tr><th>{{ __('erp.type_label') }}</th><th>{{ __('erp.item_code_label') }}</th><th>{{ __('erp.item_name') }}</th><th>{{ __('erp.qty') }}</th><th>{{ __('erp.unit') }}</th><th>{{ __('erp.rate_label') }}</th><th></th></tr>
                     </thead>
                     <tbody>
                         <tr class="item-row">
                             <td>
                                 <select name="items[0][item_type]" class="form-select item-type" required>
-                                    <option value="YARN">YARN</option>
-                                    <option value="FABRIC">FABRIC</option>
+                                    <option value="YARN">{{ __('erp.material_yarn_caps') }}</option>
+                                    <option value="FABRIC">{{ __('erp.material_fabric_caps') }}</option>
                                 </select>
                             </td>
                             <td>
                                 <select name="items[0][yarn_id]" class="form-select yarn-select">
-                                    <option value="">-- Pilih Yarn --</option>
+                                    <option value="">{{ __('erp.select_yarn_ph') }}</option>
                                     @foreach($yarns as $y)<option value="{{ $y->id }}">{{ $y->yarn_code }}</option>@endforeach
                                 </select>
                                 <select name="items[0][fabric_id]" class="form-select fabric-select d-none">
-                                    <option value="">-- Pilih Fabric --</option>
+                                    <option value="">{{ __('erp.select_fabric_ph') }}</option>
                                     @foreach($fabrics as $f)<option value="{{ $f->id }}">{{ $f->fabric_code }}</option>@endforeach
                                 </select>
                             </td>
@@ -70,15 +70,15 @@
                         </tr>
                     </tbody>
                 </table>
-                <button type="button" class="btn btn-sm btn-outline-primary mb-3" id="addRow"><i class="fa-solid fa-plus"></i> Tambah Item</button>
+                <button type="button" class="btn btn-sm btn-outline-primary mb-3" id="addRow"><i class="fa-solid fa-plus"></i> {{ __('erp.add_item_btn2') }}</button>
 
                 <div class="mb-3">
-                    <label class="form-label">Catatan</label>
+                    <label class="form-label">{{ __('erp.notes_label') }}</label>
                     <textarea name="remarks" class="form-control" rows="2"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary fw-bold px-4"><i class="fa-solid fa-save me-1"></i> Simpan & Posting Jurnal</button>
-                <a href="{{ route('mfg.material-receipts.index') }}" class="btn btn-outline-secondary px-4">Batal</a>
+                <button type="submit" class="btn btn-primary fw-bold px-4"><i class="fa-solid fa-save me-1"></i> {{ __('erp.save_post_journal') }}</button>
+                <a href="{{ route('mfg.material-receipts.index') }}" class="btn btn-outline-secondary px-4">{{ __('erp.cancel') }}</a>
             </form>
         </div>
     </div>

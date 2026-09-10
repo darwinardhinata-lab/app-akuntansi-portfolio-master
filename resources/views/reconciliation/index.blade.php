@@ -5,7 +5,7 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3 main-header-compact">
     <div>
-        <h4 class="mb-0 fw-bold"><i class="fa-solid fa-arrows-left-right me-2 text-primary"></i>Rekonsiliasi Jubelio vs ERP</h4>
+        <h4 class="mb-0 fw-bold"><i class="fa-solid fa-arrows-left-right me-2 text-primary"></i>{{ __('erp.jubelio_vs_erp_reconciliation') }}</h4>
         <small class="text-muted">Bandingkan saldo per akun antara sumber Jubelio dan ledger ERP untuk periode yang sama.</small>
     </div>
 </div>
@@ -19,30 +19,30 @@
         <form action="{{ route('reconciliation.compare') }}" method="POST" enctype="multipart/form-data" class="row g-3">
             @csrf
             <div class="col-md-4">
-                <label class="form-label fw-bold">File Sumber Jubelio (CSV)</label>
+                <label class="form-label fw-bold">{{ __('erp.jubelio_source_file') }}</label>
                 <input type="file" name="jubelio_file" class="form-control" accept=".csv,.txt" required>
-                <div class="form-text">Kolom: kode akun, (nama akun), nominal. Delimiter koma/titik-koma.</div>
+                <div class="form-text">{{ __('erp.column_account_code_name_amount_hint') }}</div>
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-bold">Tanggal Awal</label>
+                <label class="form-label fw-bold">{{ __('erp.start_date_full') }}</label>
                 <input type="date" name="start_date" class="form-control" value="{{ $startDate ?? old('start_date') }}" required>
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-bold">Tanggal Akhir</label>
+                <label class="form-label fw-bold">{{ __('erp.end_date_full') }}</label>
                 <input type="date" name="end_date" class="form-control" value="{{ $endDate ?? old('end_date') }}" required>
             </div>
             <div class="col-md-2">
-                <label class="form-label fw-bold">Toleransi (Rp)</label>
+                <label class="form-label fw-bold">{{ __('erp.tolerance_rp') }}</label>
                 <input type="number" name="tolerance" class="form-control" value="{{ $tolerance ?? 1000 }}" min="0" step="1">
             </div>
             <div class="col-md-2">
-                <label class="form-label fw-bold">Format File</label>
+                <label class="form-label fw-bold">{{ __('erp.file_format') }}</label>
                 <select name="format" class="form-select">
-                    <option value="auto" {{ ($format ?? 'auto') == 'auto' ? 'selected' : '' }}>Auto Detect</option>
-                    <option value="coded" {{ ($format ?? 'auto') == 'coded' ? 'selected' : '' }}>Berkode (ada kode akun)</option>
-                    <option value="native" {{ ($format ?? 'auto') == 'native' ? 'selected' : '' }}>Native Jubelio (tanpa kode)</option>
+                    <option value="auto" {{ ($format ?? 'auto') == 'auto' ? 'selected' : '' }}>{{ __('erp.auto_detect') }}</option>
+                    <option value="coded" {{ ($format ?? 'auto') == 'coded' ? 'selected' : '' }}>{{ __('erp.coded_with_account_code') }}</option>
+                    <option value="native" {{ ($format ?? 'auto') == 'native' ? 'selected' : '' }}>{{ __('erp.native_jubelio_no_code') }}</option>
                 </select>
-                <div class="form-text">Pilih "Native" jika file tidak memiliki kolom kode akun.</div>
+                <div class="form-text">{{ __('erp.select_native_hint') }}</div>
             </div>
             <div class="col-12 text-end">
                 <button type="submit" class="btn btn-primary px-4">
@@ -63,7 +63,7 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
                 <div class="card-body">
-                    <div class="text-muted small fw-bold">Total Akun</div>
+                    <div class="text-muted small fw-bold">{{ __('erp.total_accounts') }}</div>
                     <div class="fs-4 fw-bold">{{ $summary['total_akun'] }}</div>
                 </div>
             </div>
@@ -71,7 +71,7 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
                 <div class="card-body">
-                    <div class="text-muted small fw-bold">Cocok</div>
+                    <div class="text-muted small fw-bold">{{ __('erp.matched_label') }}</div>
                     <div class="fs-4 fw-bold text-success">{{ $summary['match_count'] }}</div>
                 </div>
             </div>
@@ -79,7 +79,7 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
                 <div class="card-body">
-                    <div class="text-muted small fw-bold">Tidak Cocok</div>
+                    <div class="text-muted small fw-bold">{{ __('erp.not_matched') }}</div>
                     <div class="fs-4 fw-bold text-danger">{{ $summary['mismatch_count'] }}</div>
                 </div>
             </div>
@@ -87,7 +87,7 @@
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
                 <div class="card-body">
-                    <div class="text-muted small fw-bold">Belum di ERP</div>
+                    <div class="text-muted small fw-bold">{{ __('erp.not_in_erp_yet') }}</div>
                     <div class="fs-4 fw-bold text-warning">{{ $summary['missing_in_erp_count'] }}</div>
                 </div>
             </div>
@@ -98,7 +98,7 @@
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
                 <div class="card-body">
-                    <div class="text-muted small fw-bold">Grand Total Jubelio</div>
+                    <div class="text-muted small fw-bold">{{ __('erp.grand_total_jubelio') }}</div>
                     <div class="fs-5 fw-bold">Rp {{ number_format($summary['jubelio_grand_total'], 2, ',', '.') }}</div>
                 </div>
             </div>
@@ -106,7 +106,7 @@
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
                 <div class="card-body">
-                    <div class="text-muted small fw-bold">Grand Total ERP</div>
+                    <div class="text-muted small fw-bold">{{ __('erp.grand_total_erp') }}</div>
                     <div class="fs-5 fw-bold">Rp {{ number_format($summary['erp_grand_total'], 2, ',', '.') }}</div>
                 </div>
             </div>
@@ -123,7 +123,7 @@
     @if(!empty($summary['control_warnings']))
         <div class="alert alert-danger">
             <i class="fa-solid fa-circle-exclamation me-2"></i>
-            <strong>Peringatan Kontrol:</strong>
+            <strong>{{ __('erp.control_warning_colon') }}</strong>
             <ul class="mb-0 mt-2">
                 @foreach($summary['control_warnings'] as $warning)
                     <li>{{ $warning }}</li>
@@ -140,7 +140,7 @@
     @endif
 
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <div class="fw-bold">Detail Rekonsiliasi</div>
+        <div class="fw-bold">{{ __('erp.reconciliation_detail') }}</div>
         <div class="d-flex gap-2">
             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportCsv()">
                 <i class="fa-solid fa-download me-1"></i>Unduh CSV
@@ -153,22 +153,22 @@
             <table class="table table-hover mb-0" id="reconTable">
                 <thead class="table-light">
                     <tr>
-                        <th>Kode Akun</th>
-                        <th>Nama Akun</th>
-                        <th class="text-end">Jubelio</th>
-                        <th class="text-end">ERP</th>
-                        <th class="text-end">Selisih</th>
-                        <th>Status</th>
+                        <th>{{ __('erp.account_code') }}</th>
+                        <th>{{ __('erp.account') }}</th>
+                        <th class="text-end">{{ __('erp.jubelio_label') }}</th>
+                        <th class="text-end">{{ __('erp.erp_label') }}</th>
+                        <th class="text-end">{{ __('erp.difference_label') }}</th>
+                        <th>{{ __('erp.status') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                 @foreach($rows as $r)
                     @php
                         $badge = match($r['status']) {
-                            'MATCH' => '<span class="badge bg-success">Cocok</span>',
-                            'MISMATCH' => '<span class="badge bg-danger">Nominal Beda</span>',
-                            'TIDAK_ADA_DI_ERP' => '<span class="badge bg-warning text-dark">Belum di ERP</span>',
-                            'TIDAK_ADA_DI_JUBELIO' => '<span class="badge bg-white text-dark border">Tidak di Sumber</span>',
+                            'MATCH' => '<span class="badge bg-success">{{ __('erp.matched_label') }}</span>',
+                            'MISMATCH' => '<span class="badge bg-danger">{{ __('erp.amount_difference') }}</span>',
+                            'TIDAK_ADA_DI_ERP' => '<span class="badge bg-warning text-dark">{{ __('erp.not_in_erp_yet') }}</span>',
+                            'TIDAK_ADA_DI_JUBELIO' => '<span class="badge bg-white text-dark border">{{ __('erp.not_in_source') }}</span>',
                             default => '<span class="badge bg-secondary">'.e($r['status']).'</span>'
                         };
                     @endphp

@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Penjualan' => '#', 'Retur Penjualan' => null]" />
+    <x-breadcrumb :links="[__('erp.bc_sales') => '#', __('erp.sales_return') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Retur Penjualan</h3>
-            <p class="text-muted small mb-0">Pemeriksaan fisik barang retur dan resolusi jurnal akuntansi.</p>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.sales_return') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.physical_check_return_journal_resolution') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <button type="submit" form="filterForm" name="export" value="excel" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
@@ -35,34 +35,34 @@
     @endif
 
     <div class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
-        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> Filter Analitik Pencarian</div>
+        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.filter_analytics_search') }}</div>
         <form action="{{ route('sales-returns.index') }}" method="GET" id="filterForm" class="row g-2 align-items-end">
             <div class="col-12 col-sm-6 col-md-3">
-                <label class="form-label small fw-bold text-muted mb-1">Mulai Tgl</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.start_date_short') }}</label>
                 <input type="date" name="start_date" class="form-control form-control-sm" value="{{ request('start_date') }}">
             </div>
             <div class="col-12 col-sm-6 col-md-3">
-                <label class="form-label small fw-bold text-muted mb-1">Sampai Tgl</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.end_date_short') }}</label>
                 <input type="date" name="end_date" class="form-control form-control-sm" value="{{ request('end_date') }}">
             </div>
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Status Retur</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.return_status') }}</label>
                 <select name="status" class="form-select form-select-sm">
-                    <option value="">Semua Status</option>
-                    <option value="PENDING_INSPECTION" {{ request('status') == 'PENDING_INSPECTION' ? 'selected' : '' }}>Pending (Gudang)</option>
-                    <option value="APPROVED" {{ request('status') == 'APPROVED' ? 'selected' : '' }}>Disetujui</option>
-                    <option value="REJECTED" {{ request('status') == 'REJECTED' ? 'selected' : '' }}>Ditolak</option>
+                    <option value="">{{ __('erp.all_status') }}</option>
+                    <option value="PENDING_INSPECTION" {{ request('status') == 'PENDING_INSPECTION' ? 'selected' : '' }}>{{ __('erp.pending_warehouse') }}</option>
+                    <option value="APPROVED" {{ request('status') == 'APPROVED' ? 'selected' : '' }}>{{ __('erp.approved_label') }}</option>
+                    <option value="REJECTED" {{ request('status') == 'REJECTED' ? 'selected' : '' }}>{{ __('erp.rejected_label') }}</option>
                 </select>
             </div>
             <div class="col-12 col-sm-12 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Pencarian Nomor</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                     <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik No Retur..." value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> Cari</button>
+                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
                 <a href="{{ route('sales-returns.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
@@ -70,17 +70,17 @@
 
     <div class="card border-0 shadow-sm rounded-3">
         <div class="card-header bg-white p-3 border-bottom">
-            <h5 class="fw-bold mb-0"><i class="fa-solid fa-boxes-return text-danger me-2"></i> Daftar Retur Penjualan</h5>
+            <h5 class="fw-bold mb-0"><i class="fa-solid fa-boxes-return text-danger me-2"></i> {{ __('erp.sales_return_list') }}</h5>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size: 0.85rem;">
                 <thead class="table-dark">
                     <tr>
-                        <th class="ps-4 py-3">Tanggal</th>
-                        <th class="py-3">No. Retur</th>
-                        <th class="py-3">Ref. Faktur</th>
-                        <th class="text-center py-3">Status</th>
-                        <th class="text-center py-3">Aksi</th>
+                        <th class="ps-4 py-3">{{ __('erp.date') }}</th>
+                        <th class="py-3">{{ __('erp.return_no') }}</th>
+                        <th class="py-3">{{ __('erp.ref_invoice') }}</th>
+                        <th class="text-center py-3">{{ __('erp.status') }}</th>
+                        <th class="text-center py-3">{{ __('erp.action') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -109,7 +109,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">Belum ada data retur penjualan.</td>
+                        <td colspan="5" class="text-center py-5 text-muted">{{ __('erp.no_sales_return_data') }}</td>
                     </tr>
                     @endforelse
                 </tbody>

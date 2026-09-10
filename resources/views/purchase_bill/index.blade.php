@@ -1,13 +1,13 @@
 @extends('layouts.app')
 @section('top_bar_left')
-    <x-breadcrumb :links="['Pembelian' => '#', 'Tagihan (Bills)' => null]" />
+    <x-breadcrumb :links="[__('erp.bc_purchasing') => '#', __('erp.bc_bills') => null]" />
 @endsection
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Tagihan Pembelian (Bills)</h3>
-            <p class="text-muted small mb-0">Catat tagihan supplier, biaya operasional harian, dan ATK secara langsung.</p>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.purchase_bills_module') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.record_supplier_bill_daily_cost_hint') }}</p>
         </div>
         <div class="d-flex gap-2">
             <form action="{{ route('purchase-bills.sync_temp') }}" method="POST" class="d-inline">
@@ -29,12 +29,12 @@
             <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size: 0.85rem;">
                 <thead class="table-dark text-uppercase">
                     <tr>
-                        <th class="ps-4 py-3">Tanggal</th>
-                        <th>No. Tagihan</th>
-                        <th>Supplier / Vendor</th>
-                        <th class="text-end">Total Tagihan (Rp)</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center pe-4">Aksi</th>
+                        <th class="ps-4 py-3">{{ __('erp.date') }}</th>
+                        <th>{{ __('erp.bill_no') }}</th>
+                        <th>{{ __('erp.supplier_vendor') }}</th>
+                        <th class="text-end">{{ __('erp.total_bill_rp') }}</th>
+                        <th class="text-center">{{ __('erp.status') }}</th>
+                        <th class="text-center pe-4">{{ __('erp.action') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,8 +45,8 @@
                         <td class="fw-bold text-dark">{{ $b->contact_name }}</td>
                         <td class="text-end fw-bold text-danger">Rp {{ number_format($b->grand_total, 0, ',', '.') }}</td>
                         <td class="text-center">
-                            @if($b->payment_status == 'PAID') <span class="badge bg-success">LUNAS</span>
-                            @else <span class="badge bg-warning text-dark">BELUM LUNAS</span> @endif
+                            @if($b->payment_status == 'PAID') <span class="badge bg-success">{{ __('erp.status_paid_off') }}</span>
+                            @else <span class="badge bg-warning text-dark">{{ __('erp.status_unpaid') }}</span> @endif
                         </td>
                         <td class="text-center pe-4">
                             <div class="btn-group">
@@ -59,7 +59,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="text-center py-5 text-muted">Belum ada tagihan pembelian.</td></tr>
+                    <tr><td colspan="6" class="text-center py-5 text-muted">{{ __('erp.no_purchase_bill_data') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

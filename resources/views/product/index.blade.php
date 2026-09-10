@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Master Data' => '#', 'Produk' => null]" />
+    <x-breadcrumb :links="[__('erp.master_data') => '#', __('erp.bc_product') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Master Barang (Products)</h3>
-            <p class="text-muted small mb-0">Database SKU dan Harga Modal untuk automasi HPP.</p>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.product_master_module') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.sku_cogs_db_automation_hint') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <a href="{{ route('inventory.ledger') }}" class="btn btn-outline-info fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
@@ -49,51 +49,51 @@
             <form action="{{ route('product.import') }}" method="POST" enctype="multipart/form-data" class="modal-content border-0 shadow-lg">
                 @csrf
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold">Import CSV Master Barang</h5>
+                    <h5 class="modal-title fw-bold">{{ __('erp.import_csv_product_master') }}</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body bg-light p-4">
                     <div class="alert alert-info py-2 small mb-3 border-info">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span><i class="fa-solid fa-info-circle me-1"></i> Gunakan format CSV standar Jubelio.</span>
+                            <span><i class="fa-solid fa-info-circle me-1"></i> {{ __('erp.use_jubelio_csv_format') }}</span>
                             <a href="{{ route('product.template') }}" class="btn btn-sm btn-light border-primary text-primary fw-bold shadow-sm">
                                 <i class="fa-solid fa-download me-1"></i> Download Template
                             </a>
                         </div>
-                        <span class="text-muted"><i class="fa-solid fa-bolt text-warning"></i> Tip: Untuk data > 10.000 baris, gunakan fitur Import via Command Line VS Code agar bebas dari limit <em>timeout</em> server.</span>
+                        <span class="text-muted"><i class="fa-solid fa-bolt text-warning"></i> {{ __('erp.import_timeout_tip') }}</span>
                     </div>
 
-                    <label class="fw-bold text-dark">Pilih File CSV Master Barang</label>
+                    <label class="fw-bold text-dark">{{ __('erp.choose_csv_product_master') }}</label>
                     <input type="file" name="file_csv" accept=".csv" class="form-control mt-2" required>
                 </div>
                 <div class="modal-footer bg-white">
-                    <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">Mulai Import</button>
+                    <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">{{ __('erp.start_import') }}</button>
                 </div>
             </form>
         </div>
     </div>
 
     <div class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
-        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> Filter Analitik Pencarian</div>
+        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.filter_analytics_search') }}</div>
         <form action="{{ route('product.index') }}" method="GET" id="filterForm" class="row g-2 align-items-end">
             <div class="col-12 col-sm-6 col-md-4">
-                <label class="form-label small fw-bold text-muted mb-1">Status / Kategori</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.status_category') }}</label>
                 <select name="stock_status" class="form-select form-select-sm">
-                    <option value="">Semua Stok</option>
+                    <option value="">{{ __('erp.all_stock') }}</option>
                     <option value="tersedia" {{ request('stock_status') == 'tersedia' ? 'selected' : '' }}>Stok Tersedia (> 0)</option>
-                    <option value="kosong" {{ request('stock_status') == 'kosong' ? 'selected' : '' }}>Stok Kosong / Habis</option>
+                    <option value="kosong" {{ request('stock_status') == 'kosong' ? 'selected' : '' }}>{{ __('erp.out_of_stock_empty') }}</option>
                 </select>
             </div>
             <div class="col-12 col-sm-12 col-md-6">
-                <label class="form-label small fw-bold text-muted mb-1">Pencarian Nomor / Keterangan</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number_desc') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                     <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik SKU, Nama Barang, atau Kategori..." value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> Cari</button>
+                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
                 <a href="{{ route('product.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
@@ -104,12 +104,12 @@
             <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size: 0.85rem;">
                 <thead class="table-light text-muted text-uppercase">
                     <tr>
-                        <th class="ps-4 py-3">SKU / Item Code</th>
-                        <th class="py-3">Nama Produk & Varian</th>
-                        <th class="text-center py-3">Kategori</th>
-                        <th class="text-end py-3">Harga Jual (Rp)</th>
-                        <th class="text-center pe-4 py-3">Stok Akhir</th>
-                        <th class="text-center pe-4 py-3">Aksi</th>
+                        <th class="ps-4 py-3">{{ __('erp.sku_item_code') }}</th>
+                        <th class="py-3">{{ __('erp.product_name_variant') }}</th>
+                        <th class="text-center py-3">{{ __('erp.category') }}</th>
+                        <th class="text-end py-3">{{ __('erp.selling_price_rp') }}</th>
+                        <th class="text-center pe-4 py-3">{{ __('erp.ending_stock') }}</th>
+                        <th class="text-center pe-4 py-3">{{ __('erp.action') }}</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Payment Plan' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.payment_plan') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Data Payment Plan</h3>
-            <p class="text-muted small mb-0">Kelola pengajuan pembayaran dan posting jurnal akuntansi otomatis.</p>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.payment_plan_data') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.manage_payment_submission_journal') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <div class="btn-group flex-grow-1 flex-md-grow-0">
@@ -17,13 +17,13 @@
                     <i class="fa-solid fa-file-export me-1"></i> Export Jubelio
                 </button>
                 <ul class="dropdown-menu shadow-sm">
-                    <li><h6 class="dropdown-header">Cepat (Hanya Status PENGAJUAN)</h6></li>
-                    <li><a class="dropdown-item" href="{{ route('payment.export.kasbank') }}"><i class="fa-solid fa-building-columns me-1 text-primary"></i> Kas & Bank (Siap Import Jubelio)</a></li>
-                    <li><a class="dropdown-item" href="{{ route('payment.export.worklist') }}"><i class="fa-solid fa-list-check me-1 text-warning"></i> Worklist Manual Hutang/UM/Deposit</a></li>
+                    <li><h6 class="dropdown-header">{{ __('erp.quick_submitted_only') }}</h6></li>
+                    <li><a class="dropdown-item" href="{{ route('payment.export.kasbank') }}"><i class="fa-solid fa-building-columns me-1 text-primary"></i> {{ __('erp.cash_bank_ready_import') }}</a></li>
+                    <li><a class="dropdown-item" href="{{ route('payment.export.worklist') }}"><i class="fa-solid fa-list-check me-1 text-warning"></i> {{ __('erp.worklist_manual_ap_dp_deposit') }}</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><h6 class="dropdown-header">Custom (Semua Data + Filter)</h6></li>
-                    <li><a class="dropdown-item" href="#" data-target="{{ route('payment.export.kasbank') }}" onclick="openExportModal(event, this)"><i class="fa-solid fa-sliders me-1 text-primary"></i> Kas & Bank - Custom Filter</a></li>
-                    <li><a class="dropdown-item" href="#" data-target="{{ route('payment.export.worklist') }}" onclick="openExportModal(event, this)"><i class="fa-solid fa-sliders me-1 text-warning"></i> Worklist Manual - Custom Filter</a></li>
+                    <li><h6 class="dropdown-header">{{ __('erp.custom_all_data_filter') }}</h6></li>
+                    <li><a class="dropdown-item" href="#" data-target="{{ route('payment.export.kasbank') }}" onclick="openExportModal(event, this)"><i class="fa-solid fa-sliders me-1 text-primary"></i> {{ __('erp.cash_bank_custom_filter') }}</a></li>
+                    <li><a class="dropdown-item" href="#" data-target="{{ route('payment.export.worklist') }}" onclick="openExportModal(event, this)"><i class="fa-solid fa-sliders me-1 text-warning"></i> {{ __('erp.worklist_manual_custom_filter') }}</a></li>
                 </ul>
             </div>
             <form action="{{ route('payment.post_journal') }}" method="POST" id="form-posting" class="m-0 flex-grow-1 flex-md-grow-0">
@@ -47,14 +47,14 @@
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <strong><i class="fas fa-check-circle"></i> Berhasil!</strong> {{ session('success') }}
+            <strong><i class="fas fa-check-circle"></i> {{ __('erp.success_excl') }}</strong> {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-            <strong><i class="fas fa-exclamation-triangle"></i> Terjadi Kesalahan!</strong> {{ session('error') }}
+            <strong><i class="fas fa-exclamation-triangle"></i> {{ __('erp.error_occurred_excl') }}</strong> {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
@@ -65,7 +65,7 @@
             <div class="card border-0 shadow-sm rounded-3 bg-white h-100 border-start border-primary border-4 p-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-muted small fw-bold text-uppercase">Total Pengajuan (Bulan Ini)</div>
+                        <div class="text-muted small fw-bold text-uppercase">{{ __('erp.total_submission_this_month') }}</div>
                         <div class="fs-4 fw-bolder text-primary mt-1">Rp {{ number_format($stats['total_nominal_bulan'] ?? 0, 0, ',', '.') }}</div>
                     </div>
                     <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle">
@@ -78,7 +78,7 @@
             <div class="card border-0 shadow-sm rounded-3 bg-white h-100 border-start border-success border-4 p-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-muted small fw-bold text-uppercase">Disetujui / Lunas</div>
+                        <div class="text-muted small fw-bold text-uppercase">{{ __('erp.approved_paid_off') }}</div>
                         <div class="fs-4 fw-bolder text-success mt-1">Rp {{ number_format($stats['total_approved'] ?? 0, 0, ',', '.') }}</div>
                     </div>
                     <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle">
@@ -91,7 +91,7 @@
             <div class="card border-0 shadow-sm rounded-3 bg-white h-100 border-start border-warning border-4 p-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-muted small fw-bold text-uppercase">Menunggu Approval</div>
+                        <div class="text-muted small fw-bold text-uppercase">{{ __('erp.pending_approval') }}</div>
                         <div class="fs-4 fw-bolder text-warning mt-1">Rp {{ number_format($stats['total_pending'] ?? 0, 0, ',', '.') }}</div>
                     </div>
                     <div class="bg-warning bg-opacity-10 text-warning p-3 rounded-circle">
@@ -104,7 +104,7 @@
             <div class="card border-0 shadow-sm rounded-3 bg-white h-100 border-start border-info border-4 p-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-muted small fw-bold text-uppercase">Total Pengajuan</div>
+                        <div class="text-muted small fw-bold text-uppercase">{{ __('erp.total_submission') }}</div>
                         <div class="fs-4 fw-bolder text-info mt-1">{{ number_format($stats['total_count'] ?? 0, 0, ',', '.') }} Transaksi</div>
                     </div>
                     <div class="bg-info bg-opacity-10 text-info p-3 rounded-circle">
@@ -116,47 +116,47 @@
     </div>
 
     <div class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
-        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> Filter Analitik Pencarian</div>
+        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.filter_analytics_search') }}</div>
         <form action="{{ route('payment.index') }}" method="GET" id="filterForm" class="row g-2 align-items-end">
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Mulai Tgl</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.start_date_short') }}</label>
                 <input type="date" name="start_date" class="form-control form-control-sm" value="{{ request('start_date') }}">
             </div>
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Sampai Tgl</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.end_date_short') }}</label>
                 <input type="date" name="end_date" class="form-control form-control-sm" value="{{ request('end_date') }}">
             </div>
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Divisi</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.division_label') }}</label>
                 <select name="id_divisi" class="form-select form-select-sm">
-                    <option value="">Semua Divisi</option>
+                    <option value="">{{ __('erp.all_divisions') }}</option>
                     @foreach($master_divisi ?? [] as $div)
                         <option value="{{ $div->id_divisi }}" {{ request('id_divisi') == $div->id_divisi ? 'selected' : '' }}>{{ $div->nama_divisi }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Kategori</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.category') }}</label>
                 <select name="kategori_payment" class="form-select form-select-sm">
-                    <option value="">Semua Kategori</option>
+                    <option value="">{{ __('erp.all_categories') }}</option>
                     @foreach($payment_categories as $cat)
                         <option value="{{ $cat->name }}" {{ request('kategori_payment') == $cat->name ? 'selected' : '' }}>{{ $cat->name }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="col-12 col-sm-6 col-md-1">
-                <label class="form-label small fw-bold text-muted mb-1">Status</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.status') }}</label>
                 <select name="status_payment" class="form-select form-select-sm">
-                    <option value="">Semua</option>
-                    <option value="PENGAJUAN" {{ request('status_payment') == 'PENGAJUAN' ? 'selected' : '' }}>PENGAJUAN</option>
-                    <option value="APPROVED" {{ request('status_payment') == 'APPROVED' ? 'selected' : '' }}>APPROVED</option>
-                    <option value="REJECTED" {{ request('status_payment') == 'REJECTED' ? 'selected' : '' }}>REJECTED</option>
-                    <option value="PAID" {{ request('status_payment') == 'PAID' ? 'selected' : '' }}>PAID</option>
-                    <option value="POSTED" {{ request('status_payment') == 'POSTED' ? 'selected' : '' }}>POSTED</option>
+                    <option value="">{{ __('erp.all_menu') }}</option>
+                    <option value="PENGAJUAN" {{ request('status_payment') == 'PENGAJUAN' ? 'selected' : '' }}>{{ __('erp.status_submitted') }}</option>
+                    <option value="APPROVED" {{ request('status_payment') == 'APPROVED' ? 'selected' : '' }}>{{ __('erp.status_approved') }}</option>
+                    <option value="REJECTED" {{ request('status_payment') == 'REJECTED' ? 'selected' : '' }}>{{ __('erp.status_rejected') }}</option>
+                    <option value="PAID" {{ request('status_payment') == 'PAID' ? 'selected' : '' }}>{{ __('erp.status_paid') }}</option>
+                    <option value="POSTED" {{ request('status_payment') == 'POSTED' ? 'selected' : '' }}>{{ __('erp.status_posted') }}</option>
                 </select>
             </div>
             <div class="col-12 col-sm-12 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Pencarian</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_label') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                     <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik No / Vendor..." value="{{ request('search') }}">
@@ -179,23 +179,23 @@
                                 <input type="checkbox" id="checkAll" style="transform: scale(1.1); cursor: pointer;">
                             </th>
                             <th width="3%"></th>
-                            <th>NO PP</th>
-                            <th>Tanggal</th>
-                            <th>Kategori Payment</th>
-                            <th>Rekening Ops</th>
-                            <th style="min-width: 140px;">Status Payment</th>
-                            <th>Nama (PJ)</th>
-                            <th>Divisi</th>
-                            <th>Pemasok/Toko</th>
-                            <th>Nama Toko / Link</th>
-                            <th style="min-width: 220px; white-space: normal;">Keterangan</th>
-                            <th>No VA/Rekening/Kode Bayar</th>
-                            <th style="min-width: 200px;">Detil Akun</th>
-                            <th>Item</th>
-                            <th class="text-end">Pengajuan (Rp)</th>
-                            <th class="text-end">Aktual (Rp)</th>
-                            <th class="text-end">Total (Rp)</th>
-                            <th>Aksi</th>
+                            <th>{{ __('erp.no_pp_caps') }}</th>
+                            <th>{{ __('erp.date') }}</th>
+                            <th>{{ __('erp.payment_category') }}</th>
+                            <th>{{ __('erp.ops_account') }}</th>
+                            <th style="min-width: 140px;">{{ __('erp.payment_status_label') }}</th>
+                            <th>{{ __('erp.name_pic') }}</th>
+                            <th>{{ __('erp.division_label') }}</th>
+                            <th>{{ __('erp.supplier_store') }}</th>
+                            <th>{{ __('erp.store_name_link') }}</th>
+                            <th style="min-width: 220px; white-space: normal;">{{ __('erp.description') }}</th>
+                            <th>{{ __('erp.va_account_payment_code') }}</th>
+                            <th style="min-width: 200px;">{{ __('erp.account_detail') }}</th>
+                            <th>{{ __('erp.item_label') }}</th>
+                            <th class="text-end">{{ __('erp.submission_rp') }}</th>
+                            <th class="text-end">{{ __('erp.actual_rp') }}</th>
+                            <th class="text-end">{{ __('erp.total_rp') }}</th>
+                            <th>{{ __('erp.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -220,12 +220,12 @@
                                     <form action="{{ route('payment.set_rekening', $item->id_payment) }}" method="POST" class="m-0">
                                         @csrf
                                         <select name="jenis_transaksi" style="font-size: 12.5px; min-width: 140px;" class="form-select form-select-sm {{ $item->jenis_transaksi != 'PENDING' ? 'border-info text-primary fw-bold' : 'border-danger animate-pulse' }}" onchange="this.form.submit()" required>
-                                            <option value="PENDING" {{ $item->jenis_transaksi == 'PENDING' ? 'selected' : '' }}>-- Belum Set Keuangan --</option>
-                                            <option value="BCA BBW OPS" {{ $item->jenis_transaksi == 'BCA BBW OPS' ? 'selected' : '' }}>BCA BBW OPS</option>
-                                            <option value="BCA BBB OPS" {{ $item->jenis_transaksi == 'BCA BBB OPS' ? 'selected' : '' }}>BCA BBB OPS</option>
-                                            <option value="BCA KOI OPS" {{ $item->jenis_transaksi == 'BCA KOI OPS' ? 'selected' : '' }}>BCA KOI OPS</option>
-                                            <option value="BCA GBB OPS" {{ $item->jenis_transaksi == 'BCA GBB OPS' ? 'selected' : '' }}>BCA GBB OPS</option>
-                                            <option value="MANDIRI BBW" {{ $item->jenis_transaksi == 'MANDIRI BBW' ? 'selected' : '' }}>MANDIRI BBW</option>
+                                            <option value="PENDING" {{ $item->jenis_transaksi == 'PENDING' ? 'selected' : '' }}>{{ __('erp.finance_not_set') }}</option>
+                                            <option value="BCA BBW OPS" {{ $item->jenis_transaksi == 'BCA BBW OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_bbw_ops') }}</option>
+                                            <option value="BCA BBB OPS" {{ $item->jenis_transaksi == 'BCA BBB OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_bbb_ops') }}</option>
+                                            <option value="BCA KOI OPS" {{ $item->jenis_transaksi == 'BCA KOI OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_koi_ops') }}</option>
+                                            <option value="BCA GBB OPS" {{ $item->jenis_transaksi == 'BCA GBB OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_gbb_ops') }}</option>
+                                            <option value="MANDIRI BBW" {{ $item->jenis_transaksi == 'MANDIRI BBW' ? 'selected' : '' }}>{{ __('erp.bank_mandiri_bbw') }}</option>
                                         </select>
                                     </form>
                                 </td>
@@ -233,11 +233,11 @@
                                     <form action="{{ route('payment.update_status', $item->id_payment) }}" method="POST" class="m-0">
                                         @csrf
                                         <select name="status_payment" style="font-size: 12.5px;" class="form-select form-select-sm fw-bold text-center {{ $item->status_payment == 'POSTED' ? 'bg-info text-white' : ($item->status_payment == 'PAID' ? 'bg-success text-white' : ($item->status_payment == 'APPROVED' ? 'bg-primary text-white' : ($item->status_payment == 'REJECTED' ? 'bg-danger text-white' : 'bg-warning text-dark'))) }}" onchange="this.form.submit()">
-                                            <option value="PENGAJUAN" {{ $item->status_payment == 'PENGAJUAN' ? 'selected' : '' }}>PENGAJUAN</option>
-                                            <option value="APPROVED" {{ $item->status_payment == 'APPROVED' ? 'selected' : '' }}>APPROVED</option>
-                                            <option value="REJECTED" {{ $item->status_payment == 'REJECTED' ? 'selected' : '' }}>REJECTED</option>
-                                            <option value="PAID" {{ $item->status_payment == 'PAID' ? 'selected' : '' }}>PAID</option>
-                                            <option value="POSTED" {{ $item->status_payment == 'POSTED' ? 'selected' : '' }}>POSTED</option>
+                                            <option value="PENGAJUAN" {{ $item->status_payment == 'PENGAJUAN' ? 'selected' : '' }}>{{ __('erp.status_submitted') }}</option>
+                                            <option value="APPROVED" {{ $item->status_payment == 'APPROVED' ? 'selected' : '' }}>{{ __('erp.status_approved') }}</option>
+                                            <option value="REJECTED" {{ $item->status_payment == 'REJECTED' ? 'selected' : '' }}>{{ __('erp.status_rejected') }}</option>
+                                            <option value="PAID" {{ $item->status_payment == 'PAID' ? 'selected' : '' }}>{{ __('erp.status_paid') }}</option>
+                                            <option value="POSTED" {{ $item->status_payment == 'POSTED' ? 'selected' : '' }}>{{ __('erp.status_posted') }}</option>
                                         </select>
                                     </form>
                                 </td>
@@ -312,14 +312,14 @@
                                             <table class="table table-sm table-bordered bg-white mb-0" style="font-size: 12.5px;">
                                                 <thead class="table-light text-center text-muted">
                                                     <tr>
-                                                        <th style="min-width: 160px;">Nama Item</th>
-                                                        <th style="min-width: 220px; white-space: normal;">Keterangan</th>
-                                                        <th>Qty</th>
-                                                        <th>Satuan</th>
-                                                        <th class="text-end">Harga Satuan (Rp)</th>
-                                                        <th class="text-end">Nominal (Rp)</th>
-                                                        <th class="text-end">Nominal Aktual (Rp)</th>
-                                                        <th>Bukti</th>
+                                                        <th style="min-width: 160px;">{{ __('erp.item_name') }}</th>
+                                                        <th style="min-width: 220px; white-space: normal;">{{ __('erp.description') }}</th>
+                                                        <th>{{ __('erp.qty') }}</th>
+                                                        <th>{{ __('erp.unit') }}</th>
+                                                        <th class="text-end">{{ __('erp.unit_price_rp') }}</th>
+                                                        <th class="text-end">{{ __('erp.amount_rp') }}</th>
+                                                        <th class="text-end">{{ __('erp.actual_amount_rp') }}</th>
+                                                        <th>{{ __('erp.proof_label') }}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -348,7 +348,7 @@
                                                 </tbody>
                                                 <tfoot>
                                                     <tr class="table-light">
-                                                        <td colspan="5" class="text-end fw-bold">TOTAL</td>
+                                                        <td colspan="5" class="text-end fw-bold">{{ __('erp.total_caps') }}</td>
                                                         <td class="text-end fw-bold text-primary">{{ number_format($details->sum('nominal'), 0, ',', '.') }}</td>
                                                         <td class="text-end fw-bold text-success">{{ number_format($details->sum(fn($d) => $d->nominal_aktual ?? $d->nominal), 0, ',', '.') }}</td>
                                                         <td></td>
@@ -387,25 +387,25 @@
             <form action="{{ route('payment.import') }}" method="POST" enctype="multipart/form-data" class="modal-content border-0 shadow-lg">
                 @csrf
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold">Import CSV Payment Plan</h5>
+                    <h5 class="modal-title fw-bold">{{ __('erp.import_csv_payment_plan') }}</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body bg-light p-4">
                     <div class="alert alert-info py-2 small mb-3 border-info">
                         <div class="d-flex justify-content-between align-items-center">
-                            <span><i class="fa-solid fa-info-circle me-1"></i> Struktur kolom wajib sesuai template.</span>
+                            <span><i class="fa-solid fa-info-circle me-1"></i> {{ __('erp.column_structure_must_match_template') }}</span>
                             <a href="{{ route('payment.template') }}" class="btn btn-sm btn-light border-primary text-primary fw-bold shadow-sm">
                                 <i class="fa-solid fa-download me-1"></i> Download Template
                             </a>
                         </div>
                     </div>
 
-                    <label class="fw-bold text-dark">Pilih File CSV Payment Plan</label>
+                    <label class="fw-bold text-dark">{{ __('erp.choose_csv_payment_plan') }}</label>
                     <input type="file" name="file_csv" accept=".csv" class="form-control mt-2" required>
                 </div>
                 <div class="modal-footer bg-white">
-                    <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">Mulai Import</button>
+                    <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">{{ __('erp.start_import') }}</button>
                 </div>
             </form>
         </div>
@@ -416,43 +416,43 @@
         <form id="formExportCustom" method="GET" class="modal-content border-0 shadow-lg" target="_blank">
             <input type="hidden" name="all" value="1">
             <div class="modal-header bg-success text-white">
-                <h5 class="modal-title fw-bold">Export Custom (Semua Data + Filter)</h5>
+                <h5 class="modal-title fw-bold">{{ __('erp.export_custom_all_filter') }}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body bg-light p-4">
                 <div class="row g-2">
                     <div class="col-6">
-                        <label class="form-label small fw-bold">Mulai Tgl</label>
+                        <label class="form-label small fw-bold">{{ __('erp.start_date_short') }}</label>
                         <input type="date" name="start_date" class="form-control form-control-sm">
                     </div>
                     <div class="col-6">
-                        <label class="form-label small fw-bold">Sampai Tgl</label>
+                        <label class="form-label small fw-bold">{{ __('erp.end_date_short') }}</label>
                         <input type="date" name="end_date" class="form-control form-control-sm">
                     </div>
                     <div class="col-6">
-                        <label class="form-label small fw-bold">Divisi</label>
+                        <label class="form-label small fw-bold">{{ __('erp.division_label') }}</label>
                         <select name="id_divisi" class="form-select form-select-sm">
-                            <option value="">Semua Divisi</option>
+                            <option value="">{{ __('erp.all_divisions') }}</option>
                             @foreach($master_divisi ?? [] as $div)
                                 <option value="{{ $div->id_divisi }}">{{ $div->nama_divisi }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-6">
-                        <label class="form-label small fw-bold">Status</label>
+                        <label class="form-label small fw-bold">{{ __('erp.status') }}</label>
                         <select name="status_payment" class="form-select form-select-sm">
-                            <option value="">Semua Status</option>
-                            <option value="PENGAJUAN">PENGAJUAN</option>
-                            <option value="APPROVED">APPROVED</option>
-                            <option value="REJECTED">REJECTED</option>
-                            <option value="PAID">PAID</option>
-                            <option value="POSTED">POSTED</option>
+                            <option value="">{{ __('erp.all_status') }}</option>
+                            <option value="PENGAJUAN">{{ __('erp.status_submitted') }}</option>
+                            <option value="APPROVED">{{ __('erp.status_approved') }}</option>
+                            <option value="REJECTED">{{ __('erp.status_rejected') }}</option>
+                            <option value="PAID">{{ __('erp.status_paid') }}</option>
+                            <option value="POSTED">{{ __('erp.status_posted') }}</option>
                         </select>
                     </div>
                     <div class="col-12">
-                        <label class="form-label small fw-bold">Kategori Payment</label>
+                        <label class="form-label small fw-bold">{{ __('erp.payment_category') }}</label>
                         <select name="kategori_payment" class="form-select form-select-sm">
-                            <option value="">Semua Kategori</option>
+                            <option value="">{{ __('erp.all_categories') }}</option>
                             @foreach($payment_categories as $cat)
                                 <option value="{{ $cat->name }}">{{ $cat->name }}</option>
                             @endforeach
@@ -461,8 +461,8 @@
                 </div>
             </div>
             <div class="modal-footer bg-white">
-                <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm">Export</button>
+                <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
+                <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm">{{ __('erp.export_btn') }}</button>
             </div>
         </form>
     </div>
@@ -562,7 +562,7 @@
                     })
                     .catch(() => {
                         isLoading = false;
-                        optionsContainer.innerHTML = '<div class="px-2 py-1 small text-muted">Gagal memuat data</div>';
+                        optionsContainer.innerHTML = '<div class="px-2 py-1 small text-muted">{{ __('erp.failed_load_data') }}</div>';
                     });
             }
 
@@ -571,7 +571,7 @@
                 optionsContainer.innerHTML = '';
                 
                 if (accounts.length === 0 && !hiddenInput.value) {
-                    optionsContainer.innerHTML = '<div class="px-2 py-1 small text-muted">COA tidak ditemukan</div>';
+                    optionsContainer.innerHTML = '<div class="px-2 py-1 small text-muted">{{ __('erp.coa_not_found') }}</div>';
                     return;
                 }
                 

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Manufaktur' => '#', 'Laporan HPP Manufaktur' => null]" />
+    <x-breadcrumb :links="[__('erp.mfg_module') => '#', __('erp.mfg_report_hpp') => null]" />
 @endsection
 
 @push('styles')
@@ -17,7 +17,7 @@
 <div class="container-fluid px-0">
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-1">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Laporan Harga Pokok Produksi (HPP) Manufaktur</h3>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.mfg_cogs_report_title') }}</h3>
             <p class="text-muted small mb-0">Rekap SPK yang sudah COMPLETED (selesai & masuk stok barang jadi) dalam periode terpilih, berdasarkan tanggal jurnal penyelesaian.</p>
         </div>
         <div class="d-flex gap-2 no-print">
@@ -35,15 +35,15 @@
         <div class="card-body py-3">
             <form method="GET" class="row g-2 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label small mb-1">Dari Tanggal</label>
+                    <label class="form-label small mb-1">{{ __('erp.from_date') }}</label>
                     <input type="date" name="start_date" class="form-control form-control-sm" value="{{ $startDate }}">
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label small mb-1">Sampai Tanggal</label>
+                    <label class="form-label small mb-1">{{ __('erp.to_date') }}</label>
                     <input type="date" name="end_date" class="form-control form-control-sm" value="{{ $endDate }}">
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-sm btn-primary w-100">Tampilkan</button>
+                    <button type="submit" class="btn btn-sm btn-primary w-100">{{ __('erp.show_label') }}</button>
                 </div>
             </form>
         </div>
@@ -53,37 +53,37 @@
     <div class="row g-3 mb-4">
         <div class="col-md-2">
             <div class="card border-0 shadow-sm h-100"><div class="card-body text-center">
-                <div class="small text-muted">Jumlah SPK</div>
+                <div class="small text-muted">{{ __('erp.total_work_orders') }}</div>
                 <div class="fs-4 fw-bold">{{ $summary->total_spk }}</div>
             </div></div>
         </div>
         <div class="col-md-2">
             <div class="card border-0 shadow-sm h-100"><div class="card-body text-center">
-                <div class="small text-muted">Biaya Bahan</div>
+                <div class="small text-muted">{{ __('erp.material_cost') }}</div>
                 <div class="fs-6 fw-bold">Rp {{ number_format($summary->total_material, 0) }}</div>
             </div></div>
         </div>
         <div class="col-md-2">
             <div class="card border-0 shadow-sm h-100"><div class="card-body text-center">
-                <div class="small text-muted">Biaya Proses</div>
+                <div class="small text-muted">{{ __('erp.process_cost') }}</div>
                 <div class="fs-6 fw-bold">Rp {{ number_format($summary->total_process, 0) }}</div>
             </div></div>
         </div>
         <div class="col-md-2">
             <div class="card border-0 shadow-sm h-100 border-danger-subtle"><div class="card-body text-center">
-                <div class="small text-muted">Kerugian Wastage</div>
+                <div class="small text-muted">{{ __('erp.wastage_loss') }}</div>
                 <div class="fs-6 fw-bold text-danger">Rp {{ number_format($summary->total_wastage, 0) }}</div>
             </div></div>
         </div>
         <div class="col-md-2">
             <div class="card border-0 shadow-sm h-100"><div class="card-body text-center">
-                <div class="small text-muted">Total HPP (WIP)</div>
+                <div class="small text-muted">{{ __('erp.total_cogs_wip') }}</div>
                 <div class="fs-6 fw-bold text-primary">Rp {{ number_format($summary->total_wip, 0) }}</div>
             </div></div>
         </div>
         <div class="col-md-2">
             <div class="card border-0 shadow-sm h-100"><div class="card-body text-center">
-                <div class="small text-muted">Total Pcs Jadi</div>
+                <div class="small text-muted">{{ __('erp.total_pcs_finished') }}</div>
                 <div class="fs-4 fw-bold">{{ number_format($summary->total_qty) }}</div>
             </div></div>
         </div>
@@ -95,9 +95,9 @@
                 <table class="table table-bordered table-striped table-hover align-middle mb-0 text-nowrap" style="font-size: 13.5px;">
                     <thead class="bg-primary text-white text-center align-middle">
                         <tr>
-                            <th>No. SPK</th><th>Selesai</th><th>Garmen / Style</th><th>Produk (SKU)</th>
-                            <th>Biaya Bahan</th><th>Biaya Proses</th><th>Wastage</th><th>Total HPP</th>
-                            <th>Qty Jadi</th><th>HPP/Pcs</th>
+                            <th>{{ __('erp.work_order_no') }}</th><th>{{ __('erp.mfg_status_completed') }}</th><th>{{ __('erp.garment_style') }}</th><th>{{ __('erp.product_sku_label') }}</th>
+                            <th>{{ __('erp.material_cost') }}</th><th>{{ __('erp.process_cost') }}</th><th>{{ __('erp.wastage_label') }}</th><th>{{ __('erp.total_cogs') }}</th>
+                            <th>{{ __('erp.qty_finished') }}</th><th>{{ __('erp.cogs_per_pcs') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -117,13 +117,13 @@
                                 <td class="text-end py-2 fw-bold text-primary">Rp {{ number_format($row->unit_cost, 2) }}</td>
                             </tr>
                         @empty
-                            <tr><td colspan="10" class="text-center py-5 text-muted">Tidak ada SPK yang selesai pada periode ini.</td></tr>
+                            <tr><td colspan="10" class="text-center py-5 text-muted">{{ __('erp.no_completed_work_orders_period') }}</td></tr>
                         @endforelse
                     </tbody>
                     @if($workOrders->count() > 0)
                         <tfoot>
                             <tr class="fw-bold bg-light">
-                                <td colspan="4" class="text-end">TOTAL</td>
+                                <td colspan="4" class="text-end">{{ __('erp.total_caps') }}</td>
                                 <td class="text-end">Rp {{ number_format($summary->total_material, 2) }}</td>
                                 <td class="text-end">Rp {{ number_format($summary->total_process, 2) }}</td>
                                 <td class="text-end text-danger">Rp {{ number_format($summary->total_wastage, 2) }}</td>

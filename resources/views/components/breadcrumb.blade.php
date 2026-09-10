@@ -5,7 +5,7 @@
         {{-- Link Statis ke Home / Dashboard --}}
         <li class="breadcrumb-item">
             <a href="{{ route('dashboard') }}" class="text-decoration-none text-primary">
-                <i class="fa-solid fa-home me-1"></i> Home
+                <i class="fa-solid fa-home me-1"></i> {{ __('erp.breadcrumb_home') }}
             </a>
         </li>
         

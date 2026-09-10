@@ -1,13 +1,13 @@
 @extends('layouts.app')
 @section('top_bar_left')
-    <x-breadcrumb :links="['Warehouse' => '#', 'Barang Masuk' => null]" />
+    <x-breadcrumb :links="[__('erp.bc_warehouse') => '#', __('erp.bc_goods_in') => null]" />
 @endsection
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-arrow-right-to-bracket text-success me-2"></i>Barang Masuk (Inbound)</h3>
-            <p class="text-muted small mb-0">Riwayat penerimaan barang dan mutasi masuk lainnya.</p>
+            <h3 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-arrow-right-to-bracket text-success me-2"></i>{{ __('erp.goods_in_inbound') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.goods_receipt_history_hint') }}</p>
         </div>
         <div>
             <a href="{{ route('warehouse.inbound.create') }}" class="btn btn-primary fw-bold shadow-sm">
@@ -19,19 +19,19 @@
     {{-- SUB-SUB-MENU / NAV PILLS --}}
     <ul class="nav nav-pills mb-4 bg-white p-2 rounded border shadow-sm flex-nowrap overflow-auto" style="white-space: nowrap;">
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ $tab == 'penerimaan_barang' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.inbound', ['tab' => 'penerimaan_barang']) }}">Penerimaan Barang (BIL)</a>
+            <a class="nav-link fw-bold px-3 {{ $tab == 'penerimaan_barang' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.inbound', ['tab' => 'penerimaan_barang']) }}">{{ __('erp.goods_receipt_bil') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ $tab == 'pesanan_pembelian' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.inbound', ['tab' => 'pesanan_pembelian']) }}">Pesanan Pembelian (PO)</a>
+            <a class="nav-link fw-bold px-3 {{ $tab == 'pesanan_pembelian' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.inbound', ['tab' => 'pesanan_pembelian']) }}">{{ __('erp.purchase_order_po_label') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ $tab == 'retur_online' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.inbound', ['tab' => 'retur_online']) }}">Retur Channel Online</a>
+            <a class="nav-link fw-bold px-3 {{ $tab == 'retur_online' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.inbound', ['tab' => 'retur_online']) }}">{{ __('erp.online_channel_return') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ $tab == 'transfer_masuk' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.inbound', ['tab' => 'transfer_masuk']) }}">Transfer Masuk</a>
+            <a class="nav-link fw-bold px-3 {{ $tab == 'transfer_masuk' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.inbound', ['tab' => 'transfer_masuk']) }}">{{ __('erp.transfer_in') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ $tab == 'penempatan_barang' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.inbound', ['tab' => 'penempatan_barang']) }}">Penempatan Barang</a>
+            <a class="nav-link fw-bold px-3 {{ $tab == 'penempatan_barang' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.inbound', ['tab' => 'penempatan_barang']) }}">{{ __('erp.goods_placement') }}</a>
         </li>
     </ul>
 
@@ -43,11 +43,11 @@
             <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size: 0.85rem;">
                 <thead class="table-dark text-uppercase">
                     <tr>
-                        <th class="ps-4 py-3">Tanggal</th>
-                        <th class="py-3">No. Referensi</th>
-                        <th class="py-3">Produk / SKU</th>
-                        <th class="text-center py-3">Qty Masuk</th>
-                        <th class="text-end pe-4 py-3">HPP / Unit (Rp)</th>
+                        <th class="ps-4 py-3">{{ __('erp.date') }}</th>
+                        <th class="py-3">{{ __('erp.ref_no') }}</th>
+                        <th class="py-3">{{ __('erp.product_sku') }}</th>
+                        <th class="text-center py-3">{{ __('erp.qty_in') }}</th>
+                        <th class="text-end pe-4 py-3">{{ __('erp.cogs_per_unit_rp') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -60,7 +60,7 @@
                         <td class="text-end pe-4 font-monospace">{{ number_format($l->unit_cost, 0, ',', '.') }}</td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" class="text-center py-5 text-muted">Belum ada riwayat barang masuk.</td></tr>
+                    <tr><td colspan="5" class="text-center py-5 text-muted">{{ __('erp.no_goods_in_history') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

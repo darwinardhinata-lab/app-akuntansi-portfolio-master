@@ -1,15 +1,15 @@
 @extends('layouts.app') {{-- Sesuaikan dengan nama master layout Anda --}}
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Penjualan' => '#', 'Faktur Penjualan' => null]" />
+    <x-breadcrumb :links="[__('erp.bc_sales') => '#', __('erp.sales_invoice') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-4 py-3">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h4 class="fw-bold text-dark mb-0"><i class="fa-solid fa-file-invoice-dollar text-success me-2"></i> Modul Faktur Penjualan (Invoices)</h4>
-            <p class="text-muted small mb-0">Arsip dokumen sah pengubah stok gudang dan dasar posting keuangan.</p>
+            <h4 class="fw-bold text-dark mb-0"><i class="fa-solid fa-file-invoice-dollar text-success me-2"></i> {{ __('erp.sales_invoice_module') }}</h4>
+            <p class="text-muted small mb-0">{{ __('erp.invoice_archive_hint') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <button type="button" class="btn btn-warning fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" id="btnSyncTemp">
@@ -25,25 +25,25 @@
     </div>
 
     <div class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
-        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> Filter Analitik Pencarian</div>
+        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.filter_analytics_search') }}</div>
         <form action="{{ route('invoice.index') }}" method="GET" id="filterForm" class="row g-2 align-items-end">
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Mulai Tgl</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.start_date_short') }}</label>
                 <input type="date" name="start_date" class="form-control form-control-sm" value="{{ request('start_date', $start_date) }}">
             </div>
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Sampai Tgl</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.end_date_short') }}</label>
                 <input type="date" name="end_date" class="form-control form-control-sm" value="{{ request('end_date', $end_date) }}">
             </div>
             <div class="col-12 col-sm-12 col-md-6">
-                <label class="form-label small fw-bold text-muted mb-1">Pencarian Nomor / Keterangan</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number_desc') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                     <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari No. Faktur / Pelanggan..." value="{{ request('search', $search) }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> Cari</button>
+                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
                 <a href="{{ route('invoice.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
@@ -51,10 +51,10 @@
 
     <ul class="nav nav-pills mb-3 bg-white p-2 rounded border shadow-sm" id="pills-tab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-bold px-4" id="pills-daftar-tab" data-bs-toggle="pill" data-bs-target="#pills-daftar" type="button" role="tab"><i class="fa-solid fa-table-list me-1"></i> Daftar Arsip Faktur</button>
+            <button class="nav-link active fw-bold px-4" id="pills-daftar-tab" data-bs-toggle="pill" data-bs-target="#pills-daftar" type="button" role="tab"><i class="fa-solid fa-table-list me-1"></i> {{ __('erp.invoice_archive_list') }}</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold px-4 btn-analytics" id="pills-pivot-tab" data-bs-toggle="pill" data-bs-target="#pills-pivot" type="button" role="tab" style="color: #4f46e5;"><i class="fa-solid fa-chart-pie me-1"></i> Analisa Pivot (Analytic Matrix)</button>
+            <button class="nav-link fw-bold px-4 btn-analytics" id="pills-pivot-tab" data-bs-toggle="pill" data-bs-target="#pills-pivot" type="button" role="tab" style="color: #4f46e5;"><i class="fa-solid fa-chart-pie me-1"></i> {{ __('erp.pivot_analysis_matrix') }}</button>
         </li>
     </ul>
 
@@ -66,14 +66,14 @@
                     <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size: 0.85rem;">
                         <thead class="table-dark">
                             <tr>
-                                <th class="ps-4 py-3">Tanggal Faktur</th>
-                                <th class="py-3">No. Faktur (Invoice)</th>
-                                <th class="py-3">Ref. Pesanan (SO)</th>
-                                <th class="py-3">Nama Pelanggan</th>
-                                <th class="py-3">Asal Toko / Gudang</th>
-                                <th class="text-end py-3">Total Nilai</th>
-                                <th class="text-center py-3">Status Bayar</th>
-                                <th class="text-center pe-4 py-3">Aksi</th>
+                                <th class="ps-4 py-3">{{ __('erp.invoice_date') }}</th>
+                                <th class="py-3">{{ __('erp.invoice_no_paren') }}</th>
+                                <th class="py-3">{{ __('erp.ref_order_so') }}</th>
+                                <th class="py-3">{{ __('erp.customer_name') }}</th>
+                                <th class="py-3">{{ __('erp.origin_store_warehouse') }}</th>
+                                <th class="text-end py-3">{{ __('erp.total_value') }}</th>
+                                <th class="text-center py-3">{{ __('erp.payment_status') }}</th>
+                                <th class="text-center pe-4 py-3">{{ __('erp.action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -104,7 +104,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="8" class="text-center py-5 text-muted">Belum ada faktur yang diterbitkan atau kecocokan filter tidak ditemukan.</td>
+                                <td colspan="8" class="text-center py-5 text-muted">{{ __('erp.no_invoice_issued_or_filter_match') }}</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -119,29 +119,29 @@
                 <div class="card-header bg-light border-bottom p-3">
                     <div class="row g-2 align-items-center">
                         <div class="col-md-3">
-                            <small class="fw-bold text-muted d-block mb-1">Dimensi Baris (Rows)</small>
+                            <small class="fw-bold text-muted d-block mb-1">{{ __('erp.row_dimension') }}</small>
                             <select id="pivotRow" class="form-select form-select-sm border-primary fw-bold" onchange="renderPivotMatrix()">
-                                <option value="lokasi">Asal Toko / Lokasi Gudang</option>
-                                <option value="sku">Kode Produk (SKU)</option>
-                                <option value="pelanggan">Nama Pelanggan (Customer)</option>
+                                <option value="lokasi">{{ __('erp.store_origin_warehouse') }}</option>
+                                <option value="sku">{{ __('erp.product_code_sku') }}</option>
+                                <option value="pelanggan">{{ __('erp.customer_name_label') }}</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <small class="fw-bold text-muted d-block mb-1">Dimensi Kolom (Columns)</small>
+                            <small class="fw-bold text-muted d-block mb-1">{{ __('erp.column_dimension') }}</small>
                             <select id="pivotCol" class="form-select form-select-sm border-primary fw-bold" onchange="renderPivotMatrix()">
-                                <option value="bulan">Periode Waktu (Bulan Transaksi)</option>
-                                <option value="lokasi">Asal Toko / Lokasi Gudang</option>
+                                <option value="bulan">{{ __('erp.time_period_month') }}</option>
+                                <option value="lokasi">{{ __('erp.store_origin_warehouse') }}</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <small class="fw-bold text-muted d-block mb-1">Metrik Nilai (Values)</small>
+                            <small class="fw-bold text-muted d-block mb-1">{{ __('erp.value_metric') }}</small>
                             <select id="pivotVal" class="form-select form-select-sm border-primary fw-bold" onchange="renderPivotMatrix()">
-                                <option value="total_omset">Total Nilai Omset Penjualan (Rupiah)</option>
-                                <option value="total_qty">Kuantitas Barang Terjual (Pcs)</option>
+                                <option value="total_omset">{{ __('erp.total_sales_revenue_rp') }}</option>
+                                <option value="total_qty">{{ __('erp.qty_sold_pcs') }}</option>
                             </select>
                         </div>
                         <div class="col-md-3 text-md-end pt-3">
-                            <span class="badge bg-info text-dark border p-2 small"><i class="fa-solid fa-bolt"></i> Real-time Aggregated Grid</span>
+                            <span class="badge bg-info text-dark border p-2 small"><i class="fa-solid fa-bolt"></i> {{ __('erp.realtime_aggregated_grid') }}</span>
                         </div>
                     </div>
                 </div>
@@ -188,7 +188,7 @@
         uniqueCols.forEach(col => {
             headerHtml += `<th class="text-end py-3">${formatColumnHeader(col, colDim)}</th>`;
         });
-        headerHtml += `<th class="text-end pe-3 py-3 bg-dark text-white">GRAND TOTAL</th>`;
+        headerHtml += `<th class="text-end pe-3 py-3 bg-dark text-white">{{ __('erp.grand_total_caps') }}</th>`;
         headerHtml += `</tr></thead>`;
 
         // 2. MEMBUAT ISI BARIS DATA MATRIX
@@ -222,7 +222,7 @@
 
         // 3. MEMBUAT BARIS TOTAL DI PALING BAWAH
         bodyHtml += `<tr class="table-dark fw-bold border-top border-dark">`;
-        bodyHtml += `<td class="ps-3">TOTAL KESELURUHAN</td>`;
+        bodyHtml += `<td class="ps-3">{{ __('erp.grand_total_overall_caps') }}</td>`;
         uniqueCols.forEach(colKey => {
             bodyHtml += `<td class="text-end">${formatValue(colTotals[colKey], valDim)}</td>`;
         });

@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Penjualan' => '#', 'Sales Orders' => null]" />
+    <x-breadcrumb :links="[__('erp.bc_sales') => '#', __('erp.bc_sales_orders') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Pesanan Penjualan (Sales Orders)</h3>
-            <p class="text-muted small mb-0">Database mutasi penjualan produk terintegrasi otomatisasi akuntansi keuangan.</p>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.sales_orders_module') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.sales_db_accounting_automation_hint') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <button type="submit" form="filterForm" name="export" value="excel" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
@@ -41,50 +41,50 @@
             <form action="{{ route('so.import') }}" method="POST" enctype="multipart/form-data" class="modal-content border-0 shadow-lg">
                 @csrf
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold">Import CSV Penjualan (Jubelio)</h5>
+                    <h5 class="modal-title fw-bold">{{ __('erp.import_csv_sales_jubelio') }}</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body bg-light p-4">
                     <div class="alert alert-info py-2 small mb-3 border-info">
                         <div class="d-flex justify-content-between align-items-center">
-                            <span><i class="fa-solid fa-info-circle me-1"></i> Gunakan format CSV standar Jubelio.</span>
+                            <span><i class="fa-solid fa-info-circle me-1"></i> {{ __('erp.use_jubelio_csv_format') }}</span>
                             <a href="{{ route('so.template') }}" class="btn btn-sm btn-light border-primary text-primary fw-bold shadow-sm">
                                 <i class="fa-solid fa-download me-1"></i> Download Template
                             </a>
                         </div>
                     </div>
 
-                    <label class="fw-bold text-dark">Pilih File CSV Penjualan</label>
+                    <label class="fw-bold text-dark">{{ __('erp.choose_csv_sales') }}</label>
                     <input type="file" name="file_csv" accept=".csv" class="form-control mt-2" required>
                 </div>
                 <div class="modal-footer bg-white">
-                    <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">Mulai Sinkronisasi</button>
+                    <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">{{ __('erp.start_sync') }}</button>
                 </div>
             </form>
         </div>
     </div>
 
     <div class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
-        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> Filter Analitik Pencarian</div>
+        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.filter_analytics_search') }}</div>
         <form action="{{ route('so.index') }}" method="GET" id="filterForm" class="row g-2 align-items-end">
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Mulai Tgl</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.start_date_short') }}</label>
                 <input type="date" name="start_date" class="form-control form-control-sm" value="{{ request('start_date') }}">
             </div>
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Sampai Tgl</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.end_date_short') }}</label>
                 <input type="date" name="end_date" class="form-control form-control-sm" value="{{ request('end_date') }}">
             </div>
             <div class="col-12 col-sm-12 col-md-3">
-                <label class="form-label small fw-bold text-muted mb-1">Pencarian Nomor / Keterangan</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number_desc') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                     <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik kata kunci..." value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> Cari</button>
+                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
                 <a href="{{ route('so.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
@@ -93,34 +93,34 @@
     {{-- NAV TABS WMS JUBELIO STYLE --}}
     <ul class="nav nav-pills mb-3 bg-white p-2 rounded border shadow-sm flex-nowrap overflow-auto" style="white-space: nowrap;">
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'analisa') ? 'active bg-info text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'analisa']) }}">Analisa Pivot</a>
+            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'analisa') ? 'active bg-info text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'analisa']) }}">{{ __('erp.pivot_analysis') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ (!isset($tab) || $tab == 'semua') ? 'active' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'semua']) }}">Semua</a>
+            <a class="nav-link fw-bold px-3 {{ (!isset($tab) || $tab == 'semua') ? 'active' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'semua']) }}">{{ __('erp.all_menu') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'belum_dibayar') ? 'active bg-warning text-dark' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'belum_dibayar']) }}">Belum Dibayar</a>
+            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'belum_dibayar') ? 'active bg-warning text-dark' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'belum_dibayar']) }}">{{ __('erp.not_yet_paid') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'gagal_download') ? 'active bg-danger text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'gagal_download']) }}">Gagal Download</a>
+            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'gagal_download') ? 'active bg-danger text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'gagal_download']) }}">{{ __('erp.download_failed') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'siap_proses') ? 'active bg-info text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'siap_proses']) }}">Siap Proses</a>
+            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'siap_proses') ? 'active bg-info text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'siap_proses']) }}">{{ __('erp.ready_to_process') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'stok_kosong') ? 'active bg-danger text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'stok_kosong']) }}">Stok Kosong</a>
+            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'stok_kosong') ? 'active bg-danger text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'stok_kosong']) }}">{{ __('erp.out_of_stock') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'gagal_picking') ? 'active bg-danger text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'gagal_picking']) }}">Gagal Picking</a>
+            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'gagal_picking') ? 'active bg-danger text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'gagal_picking']) }}">{{ __('erp.picking_failed') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'request_batal') ? 'active bg-secondary text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'request_batal']) }}">Request Batal</a>
+            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'request_batal') ? 'active bg-secondary text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'request_batal']) }}">{{ __('erp.cancel_requested') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'batal') ? 'active bg-secondary text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'batal']) }}">Batal</a>
+            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'batal') ? 'active bg-secondary text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'batal']) }}">{{ __('erp.cancel') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'diretur') ? 'active bg-dark text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'diretur']) }}">Diretur</a>
+            <a class="nav-link fw-bold px-3 {{ (isset($tab) && $tab == 'diretur') ? 'active bg-dark text-white' : 'text-muted' }}" href="{{ route('so.index', ['tab' => 'diretur']) }}">{{ __('erp.returned_label') }}</a>
         </li>
     </ul>
 
@@ -130,15 +130,15 @@
             <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size: 0.85rem;">
                 <thead class="table-dark text-uppercase">
                 <tr>
-                    <th class="ps-4 py-3">Tgl SO</th>
-                    <th class="py-3">No. Pesanan Penjualan</th>
-                    <th class="py-3">No. Invoice</th>
-                    <th class="py-3">Pelanggan / Customer</th>
-                    <th class="text-center py-3">Item Dipesan</th>
-                    <th class="text-end py-3">Estimasi Total</th>
-                    <th class="text-center py-3">Status</th>
-                    <th class="text-center py-3">Jubelio Status</th>
-                    <th class="text-end pe-4 py-3">Aksi</th>
+                    <th class="ps-4 py-3">{{ __('erp.so_date') }}</th>
+                    <th class="py-3">{{ __('erp.sales_order_no') }}</th>
+                    <th class="py-3">{{ __('erp.invoice_no_short') }}</th>
+                    <th class="py-3">{{ __('erp.customer_slash') }}</th>
+                    <th class="text-center py-3">{{ __('erp.items_ordered') }}</th>
+                    <th class="text-end py-3">{{ __('erp.estimated_total') }}</th>
+                    <th class="text-center py-3">{{ __('erp.status') }}</th>
+                    <th class="text-center py-3">{{ __('erp.jubelio_status') }}</th>
+                    <th class="text-end pe-4 py-3">{{ __('erp.action') }}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -231,39 +231,39 @@
                                     <form action="{{ route('so.ship', $o->id) }}" method="POST" class="modal-content border-0 shadow-lg">
                                         @csrf
                                         <div class="modal-header bg-success text-white py-3">
-                                            <h5 class="modal-title fw-bold"><i class="fa-solid fa-boxes-packing me-2"></i> Terbitkan Faktur Penjualan (Kirim Aktual)</h5>
+                                            <h5 class="modal-title fw-bold"><i class="fa-solid fa-boxes-packing me-2"></i> {{ __('erp.issue_sales_invoice_actual_ship') }}</h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body bg-light p-4">
                                             
                                             <div class="row mb-3 bg-white p-3 rounded border">
                                                 <div class="col-md-4">
-                                                    <small class="text-muted fw-bold d-block">REF. PESANAN (SO)</small>
+                                                    <small class="text-muted fw-bold d-block">{{ __('erp.ref_order_so_caps') }}</small>
                                                     <span class="fs-6 fw-bold text-primary">{{ $o->so_number }}</span>
                                                 </div>
                                                 <div class="col-md-4">
-                                                    <small class="text-muted fw-bold d-block">PELANGGAN</small>
+                                                    <small class="text-muted fw-bold d-block">{{ __('erp.customer_caps') }}</small>
                                                     <span class="fs-6 fw-bold text-dark">{{ $o->contact_name }}</span>
                                                 </div>
                                                 <div class="col-md-4 text-md-end">
-                                                    <small class="text-muted fw-bold d-block mb-1">TGL AKTUAL PENGIRIMAN</small>
+                                                    <small class="text-muted fw-bold d-block mb-1">{{ __('erp.actual_shipping_date_caps') }}</small>
                                                     <input type="date" name="ship_date" class="form-control form-control-sm fw-bold d-inline-block w-auto" value="{{ date('Y-m-d') }}" required>
                                                 </div>
                                             </div>
 
                                             <div class="alert alert-warning py-2 small mb-3 border-warning text-dark">
-                                                <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> <strong>PENTING:</strong> Sistem akan menjurnal & memotong stok berdasarkan angka yang Anda input di tabel ini, <strong>BUKAN</strong> berdasarkan pesanan awal. Silakan ubah Qty jika ada selisih, atau tambah barang pengganti jika ada substitusi.
+                                                <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> <strong>{{ __('erp.important_colon') }}</strong> Sistem akan menjurnal & memotong stok berdasarkan angka yang Anda input di tabel ini, <strong>{{ __('erp.not_label_caps') }}</strong> berdasarkan pesanan awal. Silakan ubah Qty jika ada selisih, atau tambah barang pengganti jika ada substitusi.
                                             </div>
 
                                             <div class="table-responsive bg-white border rounded mb-3">
                                                 <table class="table table-sm align-middle mb-0" style="font-size: 0.85rem;" id="tblFaktur{{ $o->id }}">
                                                     <thead class="table-light text-muted">
                                                         <tr>
-                                                            <th class="ps-3 py-2" width="30%">Produk / Item Code</th>
-                                                            <th class="text-center" width="15%">Harga Satuan</th>
-                                                            <th class="text-center" width="10%">Qty Pesan</th>
-                                                            <th class="text-center" width="15%">Qty Aktual</th>
-                                                            <th class="text-end pe-3" width="25%">Subtotal Aktual</th>
+                                                            <th class="ps-3 py-2" width="30%">{{ __('erp.product_item_code') }}</th>
+                                                            <th class="text-center" width="15%">{{ __('erp.unit_price') }}</th>
+                                                            <th class="text-center" width="10%">{{ __('erp.qty_order') }}</th>
+                                                            <th class="text-center" width="15%">{{ __('erp.qty_actual') }}</th>
+                                                            <th class="text-end pe-3" width="25%">{{ __('erp.subtotal_actual') }}</th>
                                                             <th width="5%"></th>
                                                         </tr>
                                                     </thead>
@@ -301,46 +301,46 @@
                                             <div class="row justify-content-end">
                                                 <div class="col-md-5 bg-white p-3 rounded border">
                                                     <div class="d-flex justify-content-between mb-2">
-                                                        <span class="small fw-bold text-muted">Subtotal Barang</span>
+                                                        <span class="small fw-bold text-muted">{{ __('erp.subtotal_goods') }}</span>
                                                         <input type="hidden" name="sub_total" class="inp-subtotal" value="0">
-                                                        <span class="fw-bold text-dark txt-subtotal">Rp 0</span>
+                                                        <span class="fw-bold text-dark txt-subtotal">{{ __('erp.rp_zero') }}</span>
                                                     </div>
                                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                                        <span class="small fw-bold text-muted">Diskon (Gabungan)</span>
+                                                        <span class="small fw-bold text-muted">{{ __('erp.discount_combined') }}</span>
                                                         <input type="number" name="disc_amount" class="form-control form-control-sm w-50 text-end trigger-calc inp-disc" value="{{ (int)$o->disc_amount + (int)$o->other_discount }}">
                                                     </div>
                                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                                        <span class="small fw-bold text-muted">Pajak / PPN</span>
+                                                        <span class="small fw-bold text-muted">{{ __('erp.tax_vat_slash') }}</span>
                                                         <input type="number" name="tax_amount" class="form-control form-control-sm w-50 text-end trigger-calc inp-tax" value="{{ (int)$o->tax_amount }}">
                                                     </div>
                                                     <div class="d-flex justify-content-between align-items-center mb-3">
-                                                        <span class="small fw-bold text-muted">Ongkos Kirim</span>
+                                                        <span class="small fw-bold text-muted">{{ __('erp.shipping_cost') }}</span>
                                                         <input type="number" name="shipping_cost" class="form-control form-control-sm w-50 text-end trigger-calc inp-ship" value="{{ (int)$o->shipping_cost }}">
                                                     </div>
                                                     <div class="d-flex justify-content-between align-items-center mb-3">
-                                                        <span class="small fw-bold text-muted">Disc. Ongkos Kirim</span>
+                                                        <span class="small fw-bold text-muted">{{ __('erp.shipping_discount') }}</span>
                                                         <input type="number" name="shipping_discount" class="form-control form-control-sm w-50 text-end trigger-calc inp-ship-disc" value="{{ (int)$o->shipping_discount }}">
                                                     </div>
                                                     <div class="d-flex justify-content-between align-items-center mb-3">
-                                                        <span class="small fw-bold text-muted">Biaya Lainnya</span>
+                                                        <span class="small fw-bold text-muted">{{ __('erp.other_costs') }}</span>
                                                         <input type="number" name="other_cost" class="form-control form-control-sm w-50 text-end trigger-calc inp-other-cost" value="{{ (int)$o->other_cost }}">
                                                     </div>
                                                     <div class="d-flex justify-content-between align-items-center mb-3">
-                                                        <span class="small fw-bold text-muted">Sisa Retur</span>
+                                                        <span class="small fw-bold text-muted">{{ __('erp.remaining_return') }}</span>
                                                         <input type="number" name="return_remaining" class="form-control form-control-sm w-50 text-end trigger-calc inp-return" value="{{ (int)$o->return_remaining }}">
                                                     </div>
                                                     <hr class="my-2">
                                                     <div class="d-flex justify-content-between align-items-center">
-                                                        <span class="fw-bold text-uppercase text-dark">GRAND TOTAL AKTUAL</span>
+                                                        <span class="fw-bold text-uppercase text-dark">{{ __('erp.grand_total_actual_caps') }}</span>
                                                         <input type="hidden" name="grand_total" class="inp-grand" value="0">
-                                                        <h5 class="fw-bold text-success mb-0 txt-grand">Rp 0</h5>
+                                                        <h5 class="fw-bold text-success mb-0 txt-grand">{{ __('erp.rp_zero') }}</h5>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="modal-footer bg-white">
-                                            <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Batal</button>
-                                            <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm"><i class="fa-solid fa-file-invoice me-1"></i> Terbitkan Faktur & Jurnal</button>
+                                            <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
+                                            <button type="submit" class="btn btn-success fw-bold px-4 shadow-sm"><i class="fa-solid fa-file-invoice me-1"></i> {{ __('erp.issue_invoice_journal') }}</button>
                                         </div>
                                     </form>
                                 </div>
@@ -349,7 +349,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" class="text-center py-5 text-muted">Belum ada transaksi penjualan terdeteksi. Silakan import CSV.</td>
+                        <td colspan="9" class="text-center py-5 text-muted">{{ __('erp.no_sales_tx_detected') }}</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -364,29 +364,29 @@
         <div class="card-header bg-light border-bottom p-3">
             <div class="row g-2 align-items-center">
                 <div class="col-md-3">
-                    <small class="fw-bold text-muted d-block">Dimensi Baris (Rows)</small>
+                    <small class="fw-bold text-muted d-block">{{ __('erp.row_dimension') }}</small>
                     <select id="pivotRow" class="form-select form-select-sm border-primary fw-bold" onchange="renderPivotMatrix()">
-                        <option value="lokasi">Asal Toko / Lokasi Gudang</option>
-                        <option value="sku">Kode Produk (SKU)</option>
-                        <option value="pelanggan">Nama Pelanggan (Customer)</option>
+                        <option value="lokasi">{{ __('erp.store_origin_warehouse') }}</option>
+                        <option value="sku">{{ __('erp.product_code_sku') }}</option>
+                        <option value="pelanggan">{{ __('erp.customer_name_label') }}</option>
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <small class="fw-bold text-muted d-block">Dimensi Kolom (Columns)</small>
+                    <small class="fw-bold text-muted d-block">{{ __('erp.column_dimension') }}</small>
                     <select id="pivotCol" class="form-select form-select-sm border-primary fw-bold" onchange="renderPivotMatrix()">
-                        <option value="bulan">Periode Waktu (Bulan Transaksi)</option>
-                        <option value="lokasi">Asal Toko / Lokasi Gudang</option>
+                        <option value="bulan">{{ __('erp.time_period_month') }}</option>
+                        <option value="lokasi">{{ __('erp.store_origin_warehouse') }}</option>
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <small class="fw-bold text-muted d-block">Metrik Nilai (Values)</small>
+                    <small class="fw-bold text-muted d-block">{{ __('erp.value_metric') }}</small>
                     <select id="pivotVal" class="form-select form-select-sm border-primary fw-bold" onchange="renderPivotMatrix()">
-                        <option value="total_omset">Total Nilai Omset Penjualan (Rupiah)</option>
-                        <option value="total_qty">Kuantitas Barang Terjual (Pcs)</option>
+                        <option value="total_omset">{{ __('erp.total_sales_revenue_rp') }}</option>
+                        <option value="total_qty">{{ __('erp.qty_sold_pcs') }}</option>
                     </select>
                 </div>
                 <div class="col-md-3 text-md-end pt-3">
-                    <span class="badge bg-info text-dark border p-2 small"><i class="fa-solid fa-bolt"></i> Real-time Aggregated Grid</span>
+                    <span class="badge bg-info text-dark border p-2 small"><i class="fa-solid fa-bolt"></i> {{ __('erp.realtime_aggregated_grid') }}</span>
                 </div>
             </div>
         </div>
@@ -415,7 +415,7 @@
     }));
 
     function tambahSubstitusi(soId) {
-        let optionsHtml = '<option value="">Pilih Produk Pengganti...</option>';
+        let optionsHtml = '<option value="">{{ __('erp.select_replacement_product') }}</option>';
         productList.forEach(p => {
             optionsHtml += `<option value="${p.sku}" data-price="${p.price}">${p.sku} - ${p.name}</option>`;
         });
@@ -426,7 +426,7 @@
                     <select name="items[${newRowIndex}][item_code]" class="form-select select2-subs product-picker" required>
                         ${optionsHtml}
                     </select>
-                    <span class="badge bg-warning text-dark mt-1" style="font-size:0.6rem;">Barang Pengganti</span>
+                    <span class="badge bg-warning text-dark mt-1" style="font-size:0.6rem;">{{ __('erp.replacement_item') }}</span>
                     <input type="hidden" name="items[${newRowIndex}][is_substitution]" value="1">
                 </td>
                 <td class="text-center">
@@ -540,7 +540,7 @@
             uniqueCols.forEach(col => {
                 headerHtml += `<th class="text-end py-3">${formatColumnHeader(col, colDim)}</th>`;
             });
-            headerHtml += `<th class="text-end pe-3 py-3 bg-dark text-white">GRAND TOTAL</th>`;
+            headerHtml += `<th class="text-end pe-3 py-3 bg-dark text-white">{{ __('erp.grand_total_caps') }}</th>`;
             headerHtml += `</tr></thead>`;
 
             let bodyHtml = `<tbody>`;
@@ -570,7 +570,7 @@
             });
 
             bodyHtml += `<tr class="table-dark fw-bold border-top border-dark">`;
-            bodyHtml += `<td class="ps-3">TOTAL KESELURUHAN</td>`;
+            bodyHtml += `<td class="ps-3">{{ __('erp.grand_total_overall_caps') }}</td>`;
             uniqueCols.forEach(colKey => {
                 bodyHtml += `<td class="text-end">${formatValue(colTotals[colKey], valDim)}</td>`;
             });

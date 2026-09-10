@@ -2,9 +2,8 @@
 
 @section('top_bar_left')
     <a href="{{ route('payment.index') }}" class="btn btn-sm btn-white border fw-bold shadow-sm text-secondary me-3" style="border-radius: 8px;">
-        <i class="fa-solid fa-arrow-left me-1"></i> Kembali
-    </a>
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Payment Plan' => route('payment.index'), 'Buat Baru' => null]" />
+        <i class="fa-solid fa-arrow-left me-1"></i> {{ __('erp.back_btn') }}</a>
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.payment_plan') => route('payment.index'), __('erp.bc_create_new') => null]" />
 @endsection
 
 @section('content')
@@ -13,7 +12,7 @@
 <div class="container-fluid px-0">
     <div class="card shadow-sm border-primary">
         <div class="card-header bg-primary text-white">
-            <h5 class="m-0 fw-bold"><i class="fas fa-file-invoice-dollar me-2"></i> Form Pengajuan Payment Plan (Terintegrasi PO)</h5>
+            <h5 class="m-0 fw-bold"><i class="fas fa-file-invoice-dollar me-2"></i> {{ __('erp.payment_plan_form_title') }}</h5>
         </div>
         <div class="card-body">
             <form action="{{ route('payment.store') }}" method="POST" enctype="multipart/form-data" id="form-payment">
@@ -21,9 +20,9 @@
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Pilih Bagian / Divisi *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.select_division_required') }}</label>
                         <select name="id_divisi" class="form-select" required>
-                            <option value="">-- Pilih Divisi --</option>
+                            <option value="">{{ __('erp.select_division_ph') }}</option>
                             @foreach($divisi as $div)
                                 <option value="{{ $div->id_divisi }}">{{ $div->nama_divisi }}</option>
                             @endforeach
@@ -31,21 +30,21 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Rekening Ops *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.ops_account_required') }}</label>
                         <select name="jenis_transaksi" class="form-select" required>
-                            <option value="">-- Pilih Rekening --</option>
-                            <option value="BCA BBW OPS">BCA BBW OPS</option>
-                            <option value="BCA BBB OPS">BCA BBB OPS</option>
-                            <option value="BCA KOI OPS">BCA KOI OPS</option>
-                            <option value="BCA GBB OPS">BCA GBB OPS</option>
-                            <option value="MANDIRI BBW">MANDIRI BBW</option>
+                            <option value="">{{ __('erp.select_account_bank_ph') }}</option>
+                            <option value="BCA BBW OPS">{{ __('erp.bank_bca_bbw_ops') }}</option>
+                            <option value="BCA BBB OPS">{{ __('erp.bank_bca_bbb_ops') }}</option>
+                            <option value="BCA KOI OPS">{{ __('erp.bank_bca_koi_ops') }}</option>
+                            <option value="BCA GBB OPS">{{ __('erp.bank_bca_gbb_ops') }}</option>
+                            <option value="MANDIRI BBW">{{ __('erp.bank_mandiri_bbw') }}</option>
                         </select>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Kategori Payment *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.payment_category_required') }}</label>
                         <select name="kategori_payment" id="kategori_payment" class="form-select fw-bold text-primary" required>
-                            <option value="">-- Pilih Kategori --</option>
+                            <option value="">{{ __('erp.select_category_ph') }}</option>
                             @foreach($payment_categories as $cat)
                                 <option value="{{ $cat->name }}">{{ $cat->name }}</option>
                             @endforeach
@@ -53,87 +52,87 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Tgl Pengajuan *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.submission_date_required') }}</label>
                         <input type="date" name="tgl_pengajuan" id="tgl_pengajuan" class="form-control" value="{{ date('Y-m-d') }}" required>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Tgl Transaksi *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.tx_date_required') }}</label>
                         <input type="date" name="tgl_transaksi" id="tgl_transaksi" class="form-control" placeholder="Pilih tanggal transaksi">
-                        <small class="text-muted">Tanggal transaksi yang akan muncul di jurnal (wajib diisi sebelum posting)</small>
+                        <small class="text-muted">{{ __('erp.tx_date_journal_required_hint') }}</small>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Jatuh Tempo</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.due_date') }}</label>
                         <input type="date" name="jatuh_tempo" class="form-control">
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Vendor / Pemasok *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.vendor_supplier_required') }}</label>
                         <select name="vendor_toko" id="vendor_toko" class="form-select" required>
-                            <option value="">-- Pilih Vendor --</option>
+                            <option value="">{{ __('erp.select_vendor_ph') }}</option>
                         </select>
                         <input type="hidden" name="ref_bill_number" id="ref_bill_number">
                         <input type="hidden" name="ref_po_number" id="ref_po_number">
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Penanggung Jawab (PJ) *</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.person_in_charge_required') }}</label>
                         <input type="text" name="penerima_pj" class="form-control" required>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Rekening / Virtual Account</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.account_virtual_account') }}</label>
                         <input type="text" name="rekening_va" class="form-control" placeholder="CONTOH: BCA - 123456 - NAMA">
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">Nama Toko / Link</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.store_name_link') }}</label>
                         <input type="text" name="nama_toko_link" class="form-control" placeholder="Contoh: Shopee, Tokopedia, atau link toko">
                     </div>
 
                     <div class="col-md-12 mb-3">
-                        <label class="form-label fw-bold text-dark">Keterangan Umum (Opsional)</label>
+                        <label class="form-label fw-bold text-dark">{{ __('erp.general_notes_optional') }}</label>
                         <textarea name="keterangan" id="keterangan" class="form-control" rows="2" placeholder="Ringkasan pengajuan, misal: Belanja ATK & Operasional Bulan Ini"></textarea>
-                        <small class="text-muted">Kosongkan jika ingin otomatis diringkas dari jumlah item.</small>
+                        <small class="text-muted">{{ __('erp.leave_blank_auto_summary_hint') }}</small>
                     </div>
 
                     <!-- PEMBAYARAN HUTANG: Dropdown Bills by Vendor -->
                     <div class="col-md-12 mb-3" id="bill_area" style="display: none;">
                         <div class="bg-light p-3 border border-warning rounded">
-                            <h6 class="fw-bold text-warning mb-3"><i class="fa-solid fa-file-invoice-dollar me-1"></i> Pilih Nomor Bill (Pembayaran Hutang)</h6>
-                            <label class="form-label fw-bold text-dark">Cari & Pilih Bill *</label>
+                            <h6 class="fw-bold text-warning mb-3"><i class="fa-solid fa-file-invoice-dollar me-1"></i> {{ __('erp.select_bill_no_ap_payment') }}</h6>
+                            <label class="form-label fw-bold text-dark">{{ __('erp.search_select_bill_required') }}</label>
                             <select name="selected_bill" id="selected_bill" class="form-select">
-                                <option value="">-- Pilih Bill --</option>
+                                <option value="">{{ __('erp.select_bill_ph') }}</option>
                             </select>
-                            <small class="text-muted mt-2 d-block">Pilih vendor terlebih dahulu, lalu pilih Bill yang akan dibayar.</small>
+                            <small class="text-muted mt-2 d-block">{{ __('erp.select_vendor_then_bill_hint') }}</small>
                         </div>
                     </div>
 
                     <!-- UANG MUKA: Dropdown POs by Vendor -->
                     <div class="col-md-12 mb-3" id="po_area" style="display: none;">
                         <div class="bg-light p-3 border border-info rounded">
-                            <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-boxes-stacked me-1"></i> Pilih Nomor PO (Uang Muka Pembelian)</h6>
-                            <label class="form-label fw-bold text-dark">Cari & Pilih PO *</label>
+                            <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-boxes-stacked me-1"></i> {{ __('erp.select_po_no_dp') }}</h6>
+                            <label class="form-label fw-bold text-dark">{{ __('erp.search_select_po_required') }}</label>
                             <select name="selected_po" id="selected_po" class="form-select">
-                                <option value="">-- Pilih PO --</option>
+                                <option value="">{{ __('erp.select_po_placeholder') }}</option>
                             </select>
-                            <small class="text-muted mt-2 d-block">Pilih vendor terlebih dahulu, lalu pilih PO untuk uang muka.</small>
+                            <small class="text-muted mt-2 d-block">{{ __('erp.select_vendor_then_po_hint') }}</small>
                         </div>
                     </div>
 
                     <!-- PO DETAILS for UANG MUKA (rincian ke Jubelio PO, TERPISAH dari item Payment Plan di bawah) -->
                     <div class="col-md-12 mb-3" id="po_detail_area" style="display: none;">
                         <div class="bg-light p-3 border border-info rounded">
-                            <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-list me-1"></i> Rincian Barang Purchase Order (Jubelio)</h6>
+                            <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-list me-1"></i> {{ __('erp.po_item_detail_jubelio') }}</h6>
                             <div class="table-responsive">
                                 <table class="table table-sm table-bordered align-middle bg-white">
                                     <thead class="table-secondary text-muted small text-center">
                                         <tr>
-                                            <th width="30%">SKU / Item Code</th>
-                                            <th width="30%">Deskripsi Barang</th>
-                                            <th width="20%">Harga Satuan (Rp)</th>
-                                            <th width="15%">QTY Pesan</th>
+                                            <th width="30%">{{ __('erp.sku_item_code') }}</th>
+                                            <th width="30%">{{ __('erp.item_description') }}</th>
+                                            <th width="20%">{{ __('erp.unit_price_rp') }}</th>
+                                            <th width="15%">{{ __('erp.qty_ordered_caps') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody id="baris-po">
@@ -146,7 +145,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <button type="button" class="btn btn-outline-primary btn-sm fw-bold mt-2" onclick="tambahBarisPO()">+ Tambah Baris Barang</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm fw-bold mt-2" onclick="tambahBarisPO()">{{ __('erp.add_item_row_btn') }}</button>
                         </div>
                     </div>
 
@@ -154,7 +153,7 @@
                     <div class="col-md-12 mb-3">
                         <div class="bg-light p-3 border border-primary rounded">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="fw-bold text-primary m-0"><i class="fa-solid fa-cart-shopping me-1"></i> Rincian Item Pembayaran</h6>
+                                <h6 class="fw-bold text-primary m-0"><i class="fa-solid fa-cart-shopping me-1"></i> {{ __('erp.payment_item_detail') }}</h6>
                                 <button type="button" class="btn btn-primary btn-sm fw-bold" onclick="tambahItem()">
                                     <i class="fa-solid fa-plus me-1"></i> Tambah Item
                                 </button>
@@ -164,21 +163,21 @@
                                 <table class="table table-sm table-bordered align-middle bg-white" id="tabel-item">
                                     <thead class="table-secondary text-muted small text-center">
                                         <tr>
-                                            <th width="18%">Nama Item</th>
-                                            <th width="22%">Keterangan *</th>
-                                            <th width="9%">Qty</th>
-                                            <th width="9%">Satuan</th>
-                                            <th width="14%">Harga Satuan (Rp)</th>
-                                            <th width="14%">Nominal (Rp)</th>
-                                            <th width="10%">Bukti</th>
+                                            <th width="18%">{{ __('erp.item_name') }}</th>
+                                            <th width="22%">{{ __('erp.notes_required') }}</th>
+                                            <th width="9%">{{ __('erp.qty') }}</th>
+                                            <th width="9%">{{ __('erp.unit') }}</th>
+                                            <th width="14%">{{ __('erp.unit_price_rp') }}</th>
+                                            <th width="14%">{{ __('erp.amount_rp') }}</th>
+                                            <th width="10%">{{ __('erp.proof_label') }}</th>
                                             <th width="4%"></th>
                                         </tr>
                                     </thead>
                                     <tbody id="baris-item"></tbody>
                                     <tfoot>
                                         <tr class="table-light">
-                                            <td colspan="5" class="text-end fw-bold">TOTAL NOMINAL</td>
-                                            <td class="fw-bold text-primary text-end" id="total-nominal-display">Rp 0</td>
+                                            <td colspan="5" class="text-end fw-bold">{{ __('erp.total_amount_caps') }}</td>
+                                            <td class="fw-bold text-primary text-end" id="total-nominal-display">{{ __('erp.rp_zero') }}</td>
                                             <td colspan="2"></td>
                                         </tr>
                                     </tfoot>
@@ -195,7 +194,7 @@
                 <button type="submit" class="btn btn-success px-4 py-2 fw-bold">
                     <i class="fas fa-save me-2"></i> Simpan Pengajuan
                 </button>
-                <a href="{{ route('payment.index') }}" class="btn btn-secondary px-4 py-2 fw-bold ms-2">Batal</a>
+                <a href="{{ route('payment.index') }}" class="btn btn-secondary px-4 py-2 fw-bold ms-2">{{ __('erp.cancel') }}</a>
             </form>
         </div>
     </div>

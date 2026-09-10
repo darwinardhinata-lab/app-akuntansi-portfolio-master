@@ -338,7 +338,7 @@
         @else
             <div class="icon"><i class="fa-solid fa-layer-group"></i></div>
         @endif
-        <div><div class="name">{{ $companyProfile->nama_perusahaan ?? 'ERP Accounting' }}</div><div class="sub">System</div></div>
+        <div><div class="name">{{ $companyProfile->nama_perusahaan ?? 'ERP Accounting' }}</div><div class="sub">{{ __('erp.system_word') }}</div></div>
     </a>
     <button class="btn-hamburger" onclick="window.history.back()"><i class="fa-solid fa-arrow-left"></i></button>
 </div>
@@ -351,7 +351,7 @@
         @else
             <div class="sidebar-brand-icon"><i class="fa-solid fa-layer-group"></i></div>
         @endif
-        <div class="sidebar-brand-text"><div class="name">{{ $companyProfile->nama_perusahaan ?? 'ERP Accounting' }}</div><div class="sub">System</div></div>
+        <div class="sidebar-brand-text"><div class="name">{{ $companyProfile->nama_perusahaan ?? 'ERP Accounting' }}</div><div class="sub">{{ __('erp.system_word') }}</div></div>
     </a>
 
     <div class="sidebar-inner custom-scrollbar">
@@ -369,7 +369,7 @@
             </a>
             <a href="{{ route('logs.index') }}" class="nav-link {{ request()->routeIs('logs.*') ? 'active' : '' }}">
                 <span class="nav-icon"><i class="fa-solid fa-clock-rotate-left text-warning"></i></span>
-                <span class="nav-text text-warning fw-bold">System Activity Logs</span>
+                <span class="nav-text text-warning fw-bold">{{ __('erp.system_activity_logs') }}</span>
             </a>
             @endif
         </div>
@@ -386,7 +386,7 @@
             <div class="collapse section-collapse {{ request()->routeIs('product.*') || Request::is('divisi*') || request()->routeIs('budgeting.*') || request()->routeIs('company.*') || request()->routeIs('payment-category.*') ? 'show' : '' }}" id="sectionMaster">
                 <a href="{{ route('company.edit') }}" class="nav-link {{ request()->routeIs('company.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-building text-info"></i></span>
-                    <span class="nav-text">Profil Perusahaan</span>
+                    <span class="nav-text">{{ __('erp.bc_company_profile') }}</span>
                 </a>
                 <a href="{{ route('product.index') }}" class="nav-link {{ request()->routeIs('product.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-box-open text-info"></i></span>
@@ -402,7 +402,7 @@
                 </a>
                 <a href="{{ route('payment-category.index') }}" class="nav-link {{ request()->routeIs('payment-category.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-tags text-success"></i></span>
-                    <span class="nav-text">Kategori Payment</span>
+                    <span class="nav-text">{{ __('erp.payment_category') }}</span>
                 </a>
             </div>
         </div>
@@ -413,21 +413,21 @@
         <div class="nav-section">
             <a href="#sectionWarehouse" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('warehouse.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('warehouse.*') ? 'true' : 'false' }}">
                 <span class="section-icon"><i class="fa-solid fa-warehouse text-secondary"></i></span>
-                <span class="section-text">Warehouse (Gudang)</span>
+                <span class="section-text">{{ __('erp.warehouse_gudang') }}</span>
                 <i class="fa-solid fa-chevron-down section-chevron"></i>
             </a>
             <div class="collapse section-collapse {{ request()->routeIs('warehouse.*') ? 'show' : '' }}" id="sectionWarehouse">
                 <a href="{{ route('warehouse.process-orders') }}" class="nav-link {{ request()->routeIs('warehouse.process-orders') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-boxes-packing text-primary"></i></span>
-                    <span class="nav-text">Proses Pesanan</span>
+                    <span class="nav-text">{{ __('erp.bc_process_orders') }}</span>
                 </a>
                 <a href="{{ route('warehouse.inbound') }}" class="nav-link {{ request()->routeIs('warehouse.inbound') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-arrow-right-to-bracket text-success"></i></span>
-                    <span class="nav-text">Barang Masuk</span>
+                    <span class="nav-text">{{ __('erp.bc_goods_in') }}</span>
                 </a>
                 <a href="{{ route('warehouse.outbound') }}" class="nav-link {{ request()->routeIs('warehouse.outbound') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-arrow-right-from-bracket text-danger"></i></span>
-                    <span class="nav-text">Barang Keluar</span>
+                    <span class="nav-text">{{ __('erp.bc_goods_out') }}</span>
                 </a>
             </div>
         </div>
@@ -452,7 +452,7 @@
                 </a>
                 <a href="{{ route('sales-returns.index') }}" class="nav-link {{ request()->routeIs('sales-returns.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-arrow-rotate-left text-danger"></i></span>
-                    <span class="nav-text">Retur Penjualan</span>
+                    <span class="nav-text">{{ __('erp.sales_return') }}</span>
                 </a>
 
                 <a href="#menuArPiutang" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('reports.ar_dp') || request()->routeIs('reports.ar_subledger') ? 'active' : '' }}">
@@ -493,11 +493,11 @@
                 </a>
                 <a href="{{ route('purchase-bills.index') }}" class="nav-link {{ request()->routeIs('purchase-bills.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-file-invoice text-warning"></i></span>
-                    <span class="nav-text">Tagihan Pembelian (BIL)</span>
+                    <span class="nav-text">{{ __('erp.purchase_bill') }}</span>
                 </a>
                 <a href="{{ route('purchase-returns.index') }}" class="nav-link {{ request()->routeIs('purchase-returns.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-arrow-rotate-right text-warning"></i></span>
-                    <span class="nav-text">Retur Pembelian</span>
+                    <span class="nav-text">{{ __('erp.purchase_return') }}</span>
                 </a>
 
                 <a href="#menuApHutang" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('reports.ap_dp') || request()->routeIs('reports.ap_subledger') ? 'active' : '' }}">
@@ -524,40 +524,40 @@
         <div class="nav-section">
             <a href="#sectionManufaktur" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('mfg.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('mfg.*') ? 'true' : 'false' }}">
                 <span class="section-icon"><i class="fa-solid fa-industry text-primary"></i></span>
-                <span class="section-text">Manufaktur</span>
+                <span class="section-text">{{ __('erp.mfg_module') }}</span>
                 <i class="fa-solid fa-chevron-down section-chevron"></i>
             </a>
             <div class="collapse section-collapse {{ request()->routeIs('mfg.*') ? 'show' : '' }}" id="sectionManufaktur">
                 <a href="{{ route('mfg.work-orders.index') }}" class="nav-link {{ request()->routeIs('mfg.work-orders.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-clipboard-list text-primary"></i></span>
-                    <span class="nav-text">SPK (Surat Perintah Kerja)</span>
+                    <span class="nav-text">{{ __('erp.spk_work_order_label') }}</span>
                 </a>
                 <a href="{{ route('mfg.material-receipts.index') }}" class="nav-link {{ request()->routeIs('mfg.material-receipts.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-truck-loading text-warning"></i></span>
-                    <span class="nav-text">Material Receipt (MRN)</span>
+                    <span class="nav-text">{{ __('erp.bc_material_receipt_mrn') }}</span>
                 </a>
                 <a href="{{ route('mfg.reports.hpp') }}" class="nav-link {{ request()->routeIs('mfg.reports.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-chart-line text-success"></i></span>
-                    <span class="nav-text">Laporan HPP Manufaktur</span>
+                    <span class="nav-text">{{ __('erp.mfg_report_hpp') }}</span>
                 </a>
 
                 <a href="#menuMfgMaster" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('mfg.yarns.*') || request()->routeIs('mfg.fabrics.*') || request()->routeIs('mfg.suppliers.*') || request()->routeIs('mfg.processes.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-database text-secondary"></i></span>
-                    <span class="nav-text">Master Data Manufaktur</span>
+                    <span class="nav-text">{{ __('erp.mfg_master_data') }}</span>
                     <i class="fa-solid fa-chevron-down nav-chevron"></i>
                 </a>
                 <div class="collapse nav-submenu {{ request()->routeIs('mfg.yarns.*') || request()->routeIs('mfg.fabrics.*') || request()->routeIs('mfg.suppliers.*') || request()->routeIs('mfg.processes.*') ? 'show' : '' }}" id="menuMfgMaster">
                     <a href="{{ route('mfg.yarns.index') }}" class="nav-link {{ request()->routeIs('mfg.yarns.*') ? 'active' : '' }}">
-                        <span class="nav-text">Master Yarn</span>
+                        <span class="nav-text">{{ __('erp.master_yarn_menu') }}</span>
                     </a>
                     <a href="{{ route('mfg.fabrics.index') }}" class="nav-link {{ request()->routeIs('mfg.fabrics.*') ? 'active' : '' }}">
-                        <span class="nav-text">Master Fabric</span>
+                        <span class="nav-text">{{ __('erp.master_fabric_menu') }}</span>
                     </a>
                     <a href="{{ route('mfg.suppliers.index') }}" class="nav-link {{ request()->routeIs('mfg.suppliers.*') ? 'active' : '' }}">
-                        <span class="nav-text">Master Supplier/Vendor</span>
+                        <span class="nav-text">{{ __('erp.mfg_master_supplier') }}</span>
                     </a>
                     <a href="{{ route('mfg.processes.index') }}" class="nav-link {{ request()->routeIs('mfg.processes.*') ? 'active' : '' }}">
-                        <span class="nav-text">Master Rate Proses</span>
+                        <span class="nav-text">{{ __('erp.mfg_master_process') }}</span>
                     </a>
                 </div>
             </div>
@@ -621,7 +621,7 @@
 
                 <a href="{{ route('reconciliation.index') }}" class="nav-link {{ request()->routeIs('reconciliation.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-arrows-left-right text-info"></i></span>
-                    <span class="nav-text">Rekonsiliasi Jubelio</span>
+                    <span class="nav-text">{{ __('erp.jubelio_reconciliation_menu') }}</span>
                 </a>
 
                 <a href="#menuLabaRugi" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('laba-rugi.*') ? 'active' : '' }}">
@@ -763,7 +763,7 @@
 // Fungsi global yang bisa dipanggil dari seluruh tombol di semua menu
 function showEntityLog(keyword) {
     document.getElementById('logKeywordTitle').innerText = keyword;
-    document.getElementById('globalLogContent').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><div class="small mt-2 text-muted fw-bold">Memuat riwayat transaksi...</div></div>';
+    document.getElementById('globalLogContent').innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><div class="small mt-2 text-muted fw-bold">{{ __('erp.loading_tx_history') }}</div></div>';
     
     var logModal = new bootstrap.Modal(document.getElementById('globalLogModal'));
     logModal.show();
@@ -778,7 +778,7 @@ function showEntityLog(keyword) {
             }
         })
         .catch(error => {
-            document.getElementById('globalLogContent').innerHTML = '<div class="alert alert-danger fw-bold"><i class="fa-solid fa-circle-exclamation me-1"></i> Gagal mengambil data. Pastikan koneksi internet stabil.</div>';
+            document.getElementById('globalLogContent').innerHTML = '<div class="alert alert-danger fw-bold"><i class="fa-solid fa-circle-exclamation me-1"></i> {{ __('erp.failed_fetch_check_connection') }}</div>';
         });
 }
 </script>

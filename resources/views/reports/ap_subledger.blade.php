@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Subledger AP' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.bc_ap_subledger') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-4 mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-file-invoice text-danger me-2"></i>Manajemen Hutang Pembelian</h4>
+            <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-file-invoice text-danger me-2"></i>{{ __('erp.ap_management') }}</h4>
             <p class="text-muted small mb-0">Buku Besar Pembantu Hutang, pemantauan tagihan supplier, pelunasan, dan retur material.</p>
         </div>
     </div>
@@ -41,8 +41,8 @@
             $accountName = \App\Models\Account::where('account_code', $accountCode)->value('account_name') ?? 'Nama Akun Tidak Ditemukan';
         @endphp
         <div class="alert alert-danger py-2 shadow-sm fw-bold small mb-3 d-flex justify-content-between align-items-center" style="border-radius: 8px; background-color: #fdf2f2; border-color: #f8d7da;">
-            <span class="text-danger"><i class="fa-solid fa-filter me-2"></i> Menampilkan rincian khusus Akun: <span class="badge bg-danger text-white fw-bold fs-6">{{ $accountCode }} - {{ $accountName }}</span></span>
-            <a href="{{ route('reports.ap_subledger', ['tab' => $tab]) }}" class="btn btn-sm btn-outline-danger bg-white fw-bold">Hapus Filter <i class="fa-solid fa-circle-xmark ms-1"></i></a>
+            <span class="text-danger"><i class="fa-solid fa-filter me-2"></i> {{ __('erp.filter_active') }} <span class="badge bg-danger text-white fw-bold fs-6">{{ $accountCode }} - {{ $accountName }}</span></span>
+            <a href="{{ route('reports.ap_subledger', ['tab' => $tab]) }}" class="btn btn-sm btn-outline-danger bg-white fw-bold">{{ __('erp.clear_filter') }} <i class="fa-solid fa-circle-xmark ms-1"></i></a>
         </div>
     @endif
 
@@ -51,14 +51,14 @@
             <table class="table table-hover align-middle mb-0 text-nowrap">
                 <thead class="table-dark text-uppercase" style="font-size: 0.85rem;">
                     <tr>
-                        <th class="ps-4 py-3">Tanggal</th>
-                        <th class="py-3">No. Bukti Jurnal / PO</th>
-                        <th class="py-3">Deskripsi Transaksi / Supplier</th>
+                        <th class="ps-4 py-3">{{ __('erp.date') }}</th>
+                        <th class="py-3">{{ __('erp.journal_proof_po_no') }}</th>
+                        <th class="py-3">{{ __('erp.tx_description_supplier') }}</th>
                         @if($tab == 'tagihan')
-                            <th class="text-end py-3">Total Nilai Tagihan</th>
-                            <th class="text-end pe-4 py-3 text-danger">Sisa Hutang Kita</th>
+                            <th class="text-end py-3">{{ __('erp.total_bill_value') }}</th>
+                            <th class="text-end pe-4 py-3 text-danger">{{ __('erp.our_remaining_debt') }}</th>
                         @else
-                            <th class="text-end pe-4 py-3">Nominal Transaksi (Rp)</th>
+                            <th class="text-end pe-4 py-3">{{ __('erp.transaction_amount') }}</th>
                         @endif
                     </tr>
                 </thead>
@@ -109,19 +109,19 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content border-0 shadow">
       <div class="modal-header bg-danger text-white border-bottom-0 rounded-top">
-        <h5 class="modal-title fw-bold" id="journalDetailModalLabel"><i class="fa-solid fa-file-invoice me-2"></i>Detail Transaksi</h5>
+        <h5 class="modal-title fw-bold" id="journalDetailModalLabel"><i class="fa-solid fa-file-invoice me-2"></i>{{ __('erp.transaction_detail') }}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-4" id="journalDetailModalBody">
         <div class="text-center py-4">
             <div class="spinner-border text-danger" role="status">
-                <span class="visually-hidden">Loading...</span>
+                <span class="visually-hidden">{{ __('erp.loading_text') }}</span>
             </div>
-            <p class="mt-2 text-muted small">Mengambil rincian mutasi jurnal...</p>
+            <p class="mt-2 text-muted small">{{ __('erp.fetching_journal_mutation') }}</p>
         </div>
       </div>
       <div class="modal-footer bg-light border-top-0 rounded-bottom">
-        <button type="button" class="btn btn-secondary fw-bold shadow-sm" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-secondary fw-bold shadow-sm" data-bs-dismiss="modal">{{ __('erp.close') }}</button>
       </div>
     </div>
   </div>
@@ -136,9 +136,9 @@ function showJournalDetail(evidenceNumber) {
     modalBody.innerHTML = `
         <div class="text-center py-4">
             <div class="spinner-border text-danger" role="status">
-                <span class="visually-hidden">Loading...</span>
+                <span class="visually-hidden">{{ __('erp.loading_text') }}</span>
             </div>
-            <p class="mt-2 text-muted small">Mengambil rincian mutasi jurnal...</p>
+            <p class="mt-2 text-muted small">{{ __('erp.fetching_journal_mutation') }}</p>
         </div>
     `;
     
@@ -159,7 +159,7 @@ function showJournalDetail(evidenceNumber) {
             }
         })
         .catch(error => {
-            modalBody.innerHTML = '<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Terjadi kesalahan sistem saat mengambil data jurnal.</div>';
+            modalBody.innerHTML = '<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>{{ __('erp.system_error_fetch_journal') }}</div>';
         });
 }
 </script>

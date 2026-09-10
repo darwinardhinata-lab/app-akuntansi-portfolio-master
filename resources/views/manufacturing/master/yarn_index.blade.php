@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Manufaktur' => '#', 'Master Yarn (Benang)' => null]" />
+    <x-breadcrumb :links="[__('erp.mfg_module') => '#', __('erp.bc_master_yarn') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Master Yarn (Benang)</h3>
-            <p class="text-muted small mb-0">Data induk benang beserta stok & HPP moving average.</p>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.bc_master_yarn') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.yarn_master_stock_cogs_hint') }}</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('mfg.yarns.index', ['export' => 'excel']) }}" class="btn btn-success fw-bold px-3 shadow-sm">
@@ -41,7 +41,7 @@
                 <div class="col-md-4">
                     <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari Kode/Jenis Yarn" value="{{ $search ?? '' }}">
                 </div>
-                <div class="col-md-2"><button type="submit" class="btn btn-sm btn-outline-primary w-100">Cari</button></div>
+                <div class="col-md-2"><button type="submit" class="btn btn-sm btn-outline-primary w-100">{{ __('erp.search_btn') }}</button></div>
             </form>
         </div>
     </div>
@@ -52,8 +52,8 @@
                 <table class="table table-bordered table-striped table-hover align-middle mb-0 text-nowrap" style="font-size: 13.5px;">
                     <thead class="bg-primary text-white text-center align-middle">
                         <tr>
-                            <th>Kode</th><th>Jenis</th><th>Count</th><th>Komposisi</th><th>Warna</th>
-                            <th>Satuan</th><th>Stok</th><th>HPP Rata-rata</th><th>Status</th><th>Aksi</th>
+                            <th>{{ __('erp.code_label') }}</th><th>{{ __('erp.kind_label') }}</th><th>{{ __('erp.count_label') }}</th><th>{{ __('erp.mfg_composition') }}</th><th>{{ __('erp.color_label') }}</th>
+                            <th>{{ __('erp.unit') }}</th><th>{{ __('erp.stock_label') }}</th><th>{{ __('erp.average_cogs') }}</th><th>{{ __('erp.status') }}</th><th>{{ __('erp.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -89,35 +89,35 @@
                                     <form action="{{ route('mfg.yarns.update', $yarn->id) }}" method="POST">
                                         @csrf @method('PUT')
                                         <div class="modal-content">
-                                            <div class="modal-header"><h5 class="modal-title">Edit Yarn</h5>
+                                            <div class="modal-header"><h5 class="modal-title">{{ __('erp.edit_yarn') }}</h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                                             <div class="modal-body">
-                                                <div class="mb-2"><label class="form-label">Kode Yarn</label>
+                                                <div class="mb-2"><label class="form-label">{{ __('erp.yarn_code') }}</label>
                                                     <input type="text" name="yarn_code" class="form-control" value="{{ $yarn->yarn_code }}" required></div>
-                                                <div class="mb-2"><label class="form-label">Jenis</label>
+                                                <div class="mb-2"><label class="form-label">{{ __('erp.kind_label') }}</label>
                                                     <input type="text" name="yarn_type" class="form-control" value="{{ $yarn->yarn_type }}" required></div>
-                                                <div class="mb-2"><label class="form-label">Count</label>
+                                                <div class="mb-2"><label class="form-label">{{ __('erp.count_label') }}</label>
                                                     <input type="text" name="yarn_count" class="form-control" value="{{ $yarn->yarn_count }}"></div>
-                                                <div class="mb-2"><label class="form-label">Komposisi</label>
+                                                <div class="mb-2"><label class="form-label">{{ __('erp.mfg_composition') }}</label>
                                                     <input type="text" name="composition" class="form-control" value="{{ $yarn->composition }}"></div>
-                                                <div class="mb-2"><label class="form-label">Warna</label>
+                                                <div class="mb-2"><label class="form-label">{{ __('erp.color_label') }}</label>
                                                     <input type="text" name="color" class="form-control" value="{{ $yarn->color }}"></div>
-                                                <div class="mb-2"><label class="form-label">Satuan</label>
+                                                <div class="mb-2"><label class="form-label">{{ __('erp.unit') }}</label>
                                                     <input type="text" name="unit" class="form-control" value="{{ $yarn->unit }}" required></div>
                                                 <div class="form-check">
                                                     <input type="checkbox" name="is_active" class="form-check-input" value="1" {{ $yarn->is_active ? 'checked' : '' }}>
-                                                    <label class="form-check-label">Aktif</label>
+                                                    <label class="form-check-label">{{ __('erp.active_label') }}</label>
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="submit" class="btn btn-primary">Simpan</button>
+                                                <button type="submit" class="btn btn-primary">{{ __('erp.save_btn') }}</button>
                                             </div>
                                         </div>
                                     </form>
                                 </div>
                             </div>
                         @empty
-                            <tr><td colspan="10" class="text-center py-5 text-muted">Belum ada data yarn.</td></tr>
+                            <tr><td colspan="10" class="text-center py-5 text-muted">{{ __('erp.no_yarn_data') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -133,23 +133,23 @@
         <form action="{{ route('mfg.yarns.store') }}" method="POST">
             @csrf
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Tambah Yarn</h5>
+                <div class="modal-header"><h5 class="modal-title">{{ __('erp.add_yarn') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
-                    <div class="mb-2"><label class="form-label">Kode Yarn</label>
+                    <div class="mb-2"><label class="form-label">{{ __('erp.yarn_code') }}</label>
                         <input type="text" name="yarn_code" class="form-control" required placeholder="Y-COTTON-30S"></div>
-                    <div class="mb-2"><label class="form-label">Jenis</label>
+                    <div class="mb-2"><label class="form-label">{{ __('erp.kind_label') }}</label>
                         <input type="text" name="yarn_type" class="form-control" required placeholder="Cotton Combed"></div>
-                    <div class="mb-2"><label class="form-label">Count</label>
+                    <div class="mb-2"><label class="form-label">{{ __('erp.count_label') }}</label>
                         <input type="text" name="yarn_count" class="form-control" placeholder="30s"></div>
-                    <div class="mb-2"><label class="form-label">Komposisi</label>
+                    <div class="mb-2"><label class="form-label">{{ __('erp.mfg_composition') }}</label>
                         <input type="text" name="composition" class="form-control" placeholder="100% Cotton"></div>
-                    <div class="mb-2"><label class="form-label">Warna</label>
+                    <div class="mb-2"><label class="form-label">{{ __('erp.color_label') }}</label>
                         <input type="text" name="color" class="form-control"></div>
-                    <div class="mb-2"><label class="form-label">Satuan</label>
+                    <div class="mb-2"><label class="form-label">{{ __('erp.unit') }}</label>
                         <input type="text" name="unit" class="form-control" value="KGS" required></div>
                 </div>
-                <div class="modal-footer"><button type="submit" class="btn btn-primary">Simpan</button></div>
+                <div class="modal-footer"><button type="submit" class="btn btn-primary">{{ __('erp.save_btn') }}</button></div>
             </div>
         </form>
     </div>
@@ -161,20 +161,20 @@
         <form action="{{ route('mfg.yarns.import') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Import Master Yarn</h5>
+                <div class="modal-header"><h5 class="modal-title">{{ __('erp.import_yarn_master') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <div class="alert alert-info small">
                         <i class="fa-solid fa-info-circle me-1"></i> Gunakan susunan kolom template.
-                        <a href="{{ route('mfg.yarns.download-template') }}" class="fw-bold">Download Template</a>
+                        <a href="{{ route('mfg.yarns.download-template') }}" class="fw-bold">{{ __('erp.download_template') }}</a>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label">Pilih File (.xlsx/.xls/.csv)</label>
+                        <label class="form-label">{{ __('erp.choose_file_xlsx') }}</label>
                         <input type="file" name="file_excel" class="form-control" required accept=".xlsx,.xls,.csv">
                     </div>
-                    <div class="form-text">Stok & HPP tidak ikut diimport — hanya berubah lewat transaksi MRN.</div>
+                    <div class="form-text">{{ __('erp.stock_cogs_not_imported_hint') }}</div>
                 </div>
-                <div class="modal-footer"><button type="submit" class="btn btn-primary fw-bold">Mulai Import</button></div>
+                <div class="modal-footer"><button type="submit" class="btn btn-primary fw-bold">{{ __('erp.start_import') }}</button></div>
             </div>
         </form>
     </div>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Portal Pengajuan Dana — Internal Employee</title>
+    <title>{{ __('erp.fund_request_portal_title') }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -153,9 +153,9 @@
             <p class="brand-subtitle">Sistem formulir terintegrasi otomatis untuk permohonan pencairan kas operasional, reimbursement, dan pembayaran ke vendor.</p>
             
             <ul class="feature-list">
-                <li><i class="fa-solid fa-bolt"></i> Tersinkronisasi langsung ke Dashboard Finance</li>
-                <li><i class="fa-solid fa-shield-halved"></i> Audit trail aman dan terdokumentasi</li>
-                <li><i class="fa-solid fa-clock-rotate-left"></i> Pemrosesan instan dan transparan</li>
+                <li><i class="fa-solid fa-bolt"></i> {{ __('erp.synced_finance_dashboard') }}</li>
+                <li><i class="fa-solid fa-shield-halved"></i> {{ __('erp.secure_audit_trail') }}</li>
+                <li><i class="fa-solid fa-clock-rotate-left"></i> {{ __('erp.instant_transparent_processing') }}</li>
             </ul>
         </div>
         <div class="mt-4 pt-4 border-top border-light border-opacity-25" style="font-size: 0.85rem; font-weight: 600; opacity: 0.8;">
@@ -169,7 +169,7 @@
             <div class="alert alert-success border-0 shadow-sm rounded-3 mb-4 p-3 d-flex align-items-center gap-3" style="background-color: #ecfdf5; color: #065f46;">
                 <i class="fa-solid fa-circle-check fs-2 text-success"></i>
                 <div>
-                    <h6 class="fw-bold mb-1">Pengajuan Terekam!</h6>
+                    <h6 class="fw-bold mb-1">{{ __('erp.submission_recorded') }}</h6>
                     <p class="mb-0 small">{{ session('success') }}</p>
                 </div>
             </div>
@@ -184,7 +184,7 @@
         @if(isset($errors) && $errors->any())
             <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4 p-3" style="background-color: #fef2f2; color: #991b1b;">
                 <div class="d-flex align-items-center mb-1">
-                    <i class="fa-solid fa-triangle-exclamation me-2"></i> <strong>Mohon periksa kembali input Anda:</strong>
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i> <strong>{{ __('erp.please_check_input_again') }}</strong>
                 </div>
                 <ul class="mb-0 ps-3 small">
                     @foreach($errors->all() as $error)
@@ -200,30 +200,30 @@
             <div class="row g-3">
                 
                 <div class="col-md-6">
-                    <label class="form-label">Tgl Pengajuan <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('erp.submission_date') }} <span class="text-danger">*</span></label>
                     <input type="date" name="tgl_pengajuan" class="form-control" value="{{ old('tgl_pengajuan', date('Y-m-d')) }}" required>
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Tgl Transaksi <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('erp.tx_date_short') }} <span class="text-danger">*</span></label>
                     <input type="date" name="tgl_transaksi" class="form-control" value="{{ old('tgl_transaksi', date('Y-m-d')) }}" required>
-                    <small class="text-muted" style="font-size: 0.8rem;">Tanggal transaksi yang akan muncul di jurnal</small>
+                    <small class="text-muted" style="font-size: 0.8rem;">{{ __('erp.tx_date_journal_hint') }}</small>
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Jatuh Tempo Bayar <span class="text-muted text-lowercase" style="font-weight: 500;">(Opsional)</span></label>
+                    <label class="form-label">{{ __('erp.payment_due_date') }} <span class="text-muted text-lowercase" style="font-weight: 500;">{{ __('erp.optional_paren') }}</span></label>
                     <input type="date" name="jatuh_tempo" class="form-control" value="{{ old('jatuh_tempo') }}">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Pemohon (PIC) <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('erp.requester_pic') }} <span class="text-danger">*</span></label>
                     <input type="text" name="penerima_pj" class="form-control" placeholder="Nama Lengkap Karyawan" value="{{ old('penerima_pj') }}" required>
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Divisi / Bagian <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('erp.division_department') }} <span class="text-danger">*</span></label>
                     <select name="id_divisi" class="form-select" required>
-                        <option value="">Pilih Divisi...</option>
+                        <option value="">{{ __('erp.select_division_dots') }}</option>
                         @foreach($divisi as $div)
                             <option value="{{ $div->id_divisi }}" {{ old('id_divisi') == $div->id_divisi ? 'selected' : '' }}>{{ $div->nama_divisi }}</option>
                         @endforeach
@@ -231,9 +231,9 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Kategori Pengeluaran <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('erp.expense_category') }} <span class="text-danger">*</span></label>
                     <select name="kategori_payment" class="form-select" required>
-                        <option value="">Pilih Kategori...</option>
+                        <option value="">{{ __('erp.select_category_dots') }}</option>
                         @if(isset($payment_categories))
                             @foreach($payment_categories as $cat)
                                 <option value="{{ $cat->name }}" {{ old('kategori_payment') == $cat->name ? 'selected' : '' }}>{{ $cat->name }}</option>
@@ -243,40 +243,40 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Toko / Vendor Tujuan <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('erp.destination_store_vendor') }} <span class="text-danger">*</span></label>
                     <input type="text" name="vendor_toko" class="form-control" placeholder="Nama Toko atau Supplier" value="{{ old('vendor_toko') }}" required>
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">No. Rekening / VA <span class="text-muted text-lowercase" style="font-weight: 500;">(Opsional)</span></label>
+                    <label class="form-label">{{ __('erp.account_no_va') }} <span class="text-muted text-lowercase" style="font-weight: 500;">{{ __('erp.optional_paren') }}</span></label>
                     <input type="text" name="rekening_va" class="form-control" placeholder="Nama Bank - Nomor - Atas Nama" value="{{ old('rekening_va') }}">
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label">Keperluan Pengajuan <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('erp.submission_purpose') }} <span class="text-danger">*</span></label>
                     <textarea name="keterangan" class="form-control" rows="2" placeholder="Jelaskan secara rinci detail item dan tujuan penggunaan dana..." required>{{ old('keterangan') }}</textarea>
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label">Total Nominal <span class="text-danger">*</span></label>
+                    <label class="form-label">{{ __('erp.total_amount_label') }} <span class="text-danger">*</span></label>
                     <div class="input-group">
-                        <span class="input-group-text">Rp</span>
+                        <span class="input-group-text">{{ __('erp.rp_symbol') }}</span>
                         <input type="text" id="nominal_mask" class="form-control form-control-lg fw-bold text-primary" placeholder="0" value="{{ old('nominal') ? number_format((float)old('nominal'), 0, ',', '.') : '' }}" required>
                         <input type="hidden" name="nominal" id="nominal_asli" value="{{ old('nominal') }}" required>
                     </div>
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label">Upload Bukti / Nota <span class="text-muted text-lowercase" style="font-weight: 500;">(Opsional)</span></label>
+                    <label class="form-label">{{ __('erp.upload_proof_receipt') }} <span class="text-muted text-lowercase" style="font-weight: 500;">{{ __('erp.optional_paren') }}</span></label>
                     <input type="file" name="bukti_file" class="form-control" accept=".jpg,.jpeg,.png,.pdf">
-                    <small class="text-muted mt-1 d-block" style="font-size: 0.8rem;"><i class="fa-solid fa-paperclip"></i> Format yang diizinkan: JPG, PNG, PDF (Maks. 5 MB)</small>
+                    <small class="text-muted mt-1 d-block" style="font-size: 0.8rem;"><i class="fa-solid fa-paperclip"></i> {{ __('erp.allowed_format_jpg_png_pdf') }}</small>
                 </div>
 
                 <div class="col-12 mt-2">
                     <div class="p-3 rounded-3 border" style="background-color: #f8fafc; border-color: #cbd5e1;">
-                        <label class="form-label text-primary"><i class="fa-solid fa-lock me-1"></i> Otorisasi Keamanan <span class="text-danger">*</span></label>
+                        <label class="form-label text-primary"><i class="fa-solid fa-lock me-1"></i> {{ __('erp.security_authorization') }} <span class="text-danger">*</span></label>
                         <input type="password" name="pin_perusahaan" inputmode="numeric" pattern="[0-9]*" class="form-control" placeholder="Masukkan PIN Perusahaan" required>
-                        <small class="text-muted mt-1 d-block" style="font-size: 0.8rem;">PIN verifikasi karyawan internal.</small>
+                        <small class="text-muted mt-1 d-block" style="font-size: 0.8rem;">{{ __('erp.internal_employee_pin_hint') }}</small>
                     </div>
                 </div>
 

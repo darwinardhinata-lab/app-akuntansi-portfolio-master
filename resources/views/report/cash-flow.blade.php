@@ -2,7 +2,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Arus Kas' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.cash_flow') => null]" />
 @endsection
 
 @section('content')
@@ -59,7 +59,7 @@
 <div class="report-wrapper mt-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4 no-print">
         <div>
-            <h3 class="fw-bold mb-1" style="color: #0f172a;">Laporan Arus Kas (Statement of Cash Flows)</h3>
+            <h3 class="fw-bold mb-1" style="color: #0f172a;">{{ __('erp.cash_flow_report_title') }}</h3>
             <p class="text-muted small mb-0">Rekapitulasi aliran kas masuk dan keluar berbasis matriks interval tersinkronisasi.</p>
         </div>
         <ul class="nav nav-pills bg-white p-1 rounded-3 border shadow-sm" role="tablist">
@@ -81,7 +81,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Export Arus Kas</title>
+    <title>{{ __('erp.export_cash_flow') }}</title>
     <style>
         table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 11px; }
         th, td { border: 1px solid #000; padding: 5px; }
@@ -102,7 +102,7 @@
                 <input type="hidden" name="tab" value="{{ $tab }}">
                 
                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <label class="fw-bold text-muted small mb-0 text-nowrap">Interval:</label>
+                    <label class="fw-bold text-muted small mb-0 text-nowrap">{{ __('erp.interval_colon') }}</label>
                     <select name="interval" class="form-select form-select-sm fw-bold" style="width: 140px;" onchange="this.form.submit()">
                         @foreach(\App\Support\ReportInterval::OPTIONS as $key => $label)
                             <option value="{{ $key }}" {{ $interval == $key ? 'selected' : '' }}>{{ $label }}</option>
@@ -110,7 +110,7 @@
                     </select>
 
                     @if($interval == 'harian')
-                        <label class="fw-bold text-muted small mb-0 text-nowrap">Bulan:</label>
+                        <label class="fw-bold text-muted small mb-0 text-nowrap">{{ __('erp.month_colon') }}</label>
                         <select name="month" class="form-select form-select-sm fw-bold" style="width: 130px;">
                             @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $mi => $mn)
                                 <option value="{{ $mi+1 }}" {{ $month == ($mi+1) ? 'selected' : '' }}>{{ $mn }}</option>
@@ -118,9 +118,9 @@
                         </select>
                     @endif
 
-                    <label class="fw-bold text-muted small mb-0 text-nowrap">Tahun Buku:</label>
+                    <label class="fw-bold text-muted small mb-0 text-nowrap">{{ __('erp.fiscal_year_colon') }}</label>
                     <input type="number" name="year" class="form-control form-control-sm fw-bold w-auto" style="width: 100px;" value="{{ $year }}">
-                    <button type="submit" class="btn btn-sm btn-primary fw-bold ms-1"><i class="fa-solid fa-filter"></i> Tampilkan</button>
+                    <button type="submit" class="btn btn-sm btn-primary fw-bold ms-1"><i class="fa-solid fa-filter"></i> {{ __('erp.show_label') }}</button>
                 </div>
 
                 <div class="btn-group shadow-sm">
@@ -142,7 +142,7 @@
             <div style="text-align: center; width: 100%;">
                 <h4 style="margin: 0 0 4px 0; font-weight: 800; color: #4f46e5; text-transform: uppercase;">{{ $company?->company_name ?? 'BBW' }}</h4>
                 <h5 style="margin: 0 0 4px 0; font-weight: 800; color: #0f172a; letter-spacing: 0.5px;">LAPORAN ARUS KAS ({{ strtoupper($tab) }} METHOD)</h5>
-                <p style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 500;">Periode: <span class="text-primary fw-bold">{{ \App\Support\ReportInterval::rangeLabel($interval, $year, $month) }} &middot; {{ \App\Support\ReportInterval::OPTIONS[$interval] ?? 'Bulanan' }}</span></p>
+                <p style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 500;">{{ __('erp.period_colon') }} <span class="text-primary fw-bold">{{ \App\Support\ReportInterval::rangeLabel($interval, $year, $month) }} &middot; {{ \App\Support\ReportInterval::OPTIONS[$interval] ?? 'Bulanan' }}</span></p>
             </div>
         </div>
 
@@ -150,17 +150,17 @@
             <table class="table table-report mb-0 align-middle" style="min-width: 1300px;" {!! (isset($isExport) && $isExport) ? 'border="1"' : '' !!}>
                 <thead>
                     <tr>
-                        <th class="col-fixed ps-3" style="width: 350px; min-width: 350px;">Keterangan Aktivitas</th>
+                        <th class="col-fixed ps-3" style="width: 350px; min-width: 350px;">{{ __('erp.activity_description') }}</th>
                         @foreach($periods as $p)
                             <th class="text-end" style="width: 85px; min-width: 85px;">{{ $p['label'] }}</th>
                         @endforeach
-                        <th class="text-end pe-3" style="background: #e2e8f0; color: #0f172a; width: 120px; min-width: 120px;">TOTAL (Rp)</th>
+                        <th class="text-end pe-3" style="background: #e2e8f0; color: #0f172a; width: 120px; min-width: 120px;">{{ __('erp.total_rp_caps') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if($tab == 'direct')
                         <tr class="category-title">
-                            <td class="col-fixed ps-3 text-primary">I. ARUS KAS MASUK (PENERIMAAN KAS)</td>
+                            <td class="col-fixed ps-3 text-primary">{{ __('erp.cash_inflow_section') }}</td>
                             @foreach($periods as $p)<td style="background-color: #ffffff;"></td>@endforeach
                             <td style="background-color: #ffffff;"></td>
                         </tr>
@@ -180,7 +180,7 @@
                             </tr>
                         @endforeach
                         <tr class="line-total">
-                            <td class="col-fixed ps-3 text-uppercase text-muted small">TOTAL PENERIMAAN KAS</td>
+                            <td class="col-fixed ps-3 text-uppercase text-muted small">{{ __('erp.total_cash_receipts') }}</td>
                             @foreach($periods as $p)
                                 <td class="num-cell fw-bold text-success">{{ $report['inflows']['totals'][$p['key']] == 0 ? '-' : number_format($report['inflows']['totals'][$p['key']], 2, ',', '.') }}</td>
                             @endforeach
@@ -188,7 +188,7 @@
                         </tr>
 
                         <tr class="category-title">
-                            <td class="col-fixed ps-3 text-primary mt-2">II. ARUS KAS KELUAR (PENGELUARAN KAS)</td>
+                            <td class="col-fixed ps-3 text-primary mt-2">{{ __('erp.cash_outflow_section') }}</td>
                             @foreach($periods as $p)<td style="background-color: #ffffff;"></td>@endforeach
                             <td style="background-color: #ffffff;"></td>
                         </tr>
@@ -208,7 +208,7 @@
                             </tr>
                         @endforeach
                         <tr class="line-total">
-                            <td class="col-fixed ps-3 text-uppercase text-muted small">TOTAL PENGELUARAN KAS</td>
+                            <td class="col-fixed ps-3 text-uppercase text-muted small">{{ __('erp.total_cash_disbursements') }}</td>
                             @foreach($periods as $p)
                                 <td class="num-cell fw-bold text-danger">{{ $report['outflows']['totals'][$p['key']] == 0 ? '-' : number_format($report['outflows']['totals'][$p['key']], 2, ',', '.') }}</td>
                             @endforeach
@@ -257,7 +257,7 @@
                     @endif
 
                     <tr class="line-summary mt-3">
-                        <td class="col-fixed ps-3 text-uppercase py-3">KENAIKAN (PENURUNAN) KAS BERSIH</td>
+                        <td class="col-fixed ps-3 text-uppercase py-3">{{ __('erp.net_increase_decrease_cash') }}</td>
                         @php $runningMovement = 0; @endphp
                         @foreach($periods as $p)
                             @php 
@@ -274,7 +274,7 @@
                     </tr>
 
                     <tr class="line-total bg-light">
-                        <td class="col-fixed ps-3 text-uppercase text-muted small">SALDO AWAL KAS & BANK</td>
+                        <td class="col-fixed ps-3 text-uppercase text-muted small">{{ __('erp.beginning_cash_bank_balance') }}</td>
                         @php $currentAwal = $saldoAwalTahun; @endphp
                         @foreach($periods as $p)
                             <td class="num-cell fw-bold text-secondary">{{ number_format($currentAwal, 2, ',', '.') }}</td>
@@ -291,7 +291,7 @@
                     </tr>
 
                     <tr class="line-grand-total">
-                        <td class="col-fixed ps-3 text-uppercase py-3" style="background-color: #0f172a;">SALDO AKHIR KAS & BANK</td>
+                        <td class="col-fixed ps-3 text-uppercase py-3" style="background-color: #0f172a;">{{ __('erp.ending_cash_bank_balance') }}</td>
                         @php $endingBalance = $saldoAwalTahun; @endphp
                         @foreach($periods as $p)
                             @php 

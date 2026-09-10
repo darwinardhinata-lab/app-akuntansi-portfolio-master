@@ -3,7 +3,7 @@
 @section('title', __('erp.dashboard'))
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Dashboard' => null]" />
+    <x-breadcrumb :links="[__('erp.dashboard') => null]" />
 @endsection
 
 @section('content')
@@ -111,7 +111,7 @@
     <div class="col-xl-6 col-lg-12 col-12">
         <div class="dash-card">
             <div class="dash-header d-flex justify-content-between align-items-center">
-                <h5 class="m-0"><i class="fas fa-money-bill-trend-up me-2 text-success"></i> Grafik Arus Kas</h5>
+                <h5 class="m-0"><i class="fas fa-money-bill-trend-up me-2 text-success"></i> {{ __('erp.cash_flow_chart') }}</h5>
                 <div class="d-flex gap-2">
                     <select id="filterYear" class="form-select form-select-sm" onchange="loadChartData()">
                         @for($y = date('Y'); $y >= date('Y') - 4; $y--)
@@ -119,8 +119,8 @@
                         @endfor
                     </select>
                     <select id="filterInterval" class="form-select form-select-sm" onchange="loadChartData()">
-                        <option value="bulanan" selected>Bulanan</option>
-                        <option value="kuartal">Kuartal</option>
+                        <option value="bulanan" selected>{{ __('erp.monthly_label') }}</option>
+                        <option value="kuartal">{{ __('erp.quarterly_label') }}</option>
                     </select>
                 </div>
             </div>
@@ -136,8 +136,8 @@
     <div class="col-xl-6 col-lg-12 col-12">
         <div class="dash-card">
             <div class="dash-header d-flex justify-content-between align-items-center">
-                <h5 class="m-0"><i class="fas fa-chart-line me-2 text-primary"></i> Grafik Laba Rugi</h5>
-                <a href="{{ route('laba-rugi.index') }}"><span class="badge bg-primary">Detail <i class="fas fa-arrow-right ms-1"></i></span></a>
+                <h5 class="m-0"><i class="fas fa-chart-line me-2 text-primary"></i> {{ __('erp.profit_loss_chart') }}</h5>
+                <a href="{{ route('laba-rugi.index') }}"><span class="badge bg-primary">{{ __('erp.bc_detail') }} <i class="fas fa-arrow-right ms-1"></i></span></a>
             </div>
             <div class="dash-body-pad">
                 <div style="position: relative; height: 280px; width: 100%;">
@@ -166,9 +166,9 @@
                             <div class="text-end">
                                 <div style="font-size: 0.85rem; font-weight: 700;">Rp {{ number_format($pp->nominal, 0, ',', '.') }}</div>
                                 @if($pp->status_payment == 'PAID')
-                                    <span class="badge bg-success text-white">PAID</span>
+                                    <span class="badge bg-success text-white">{{ __('erp.status_paid') }}</span>
                                 @elseif($pp->status_payment == 'APPROVED')
-                                    <span class="badge bg-primary text-white">APPROVED</span>
+                                    <span class="badge bg-primary text-white">{{ __('erp.status_approved') }}</span>
                                 @else
                                     <span class="badge bg-warning text-dark">{{ $pp->status_payment }}</span>
                                 @endif

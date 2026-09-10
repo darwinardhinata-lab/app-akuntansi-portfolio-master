@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('top_bar_left')
-    <a href="{{ route('warehouse.outbound') }}" class="btn btn-sm btn-white border fw-bold text-secondary me-3"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
-    <x-breadcrumb :links="['Warehouse' => '#', 'Barang Keluar' => route('warehouse.outbound'), 'Manual' => null]" />
+    <a href="{{ route('warehouse.outbound') }}" class="btn btn-sm btn-white border fw-bold text-secondary me-3"><i class="fa-solid fa-arrow-left"></i> {{ __('erp.back_btn') }}</a>
+    <x-breadcrumb :links="[__('erp.bc_warehouse') => '#', __('erp.bc_goods_out') => route('warehouse.outbound'), __('erp.bc_manual') => null]" />
 @endsection
 @section('content')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -11,18 +11,18 @@
     <form action="{{ route('warehouse.outbound.store') }}" method="POST">
         @csrf
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold mb-0 text-dark">Pengeluaran Barang Manual</h4>
-            <button type="submit" class="btn btn-danger fw-bold px-4"><i class="fa-solid fa-save me-1"></i> Simpan Data</button>
+            <h4 class="fw-bold mb-0 text-dark">{{ __('erp.manual_goods_issue') }}</h4>
+            <button type="submit" class="btn btn-danger fw-bold px-4"><i class="fa-solid fa-save me-1"></i> {{ __('erp.save') }}</button>
         </div>
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body row g-3">
-                <div class="col-md-3"><label class="form-label fw-bold small text-muted">No. Referensi *</label><input type="text" name="evidence_number" class="form-control fw-bold text-danger" value="{{ $autoNumber }}" required></div>
-                <div class="col-md-3"><label class="form-label fw-bold small text-muted">Tgl Transaksi *</label><input type="date" name="transaction_date" class="form-control" value="{{ date('Y-m-d') }}" required></div>
-                <div class="col-md-6"><label class="form-label fw-bold small text-muted">Keterangan / Alasan</label><input type="text" name="description" class="form-control" placeholder="Contoh: Barang Rusak / Kadaluarsa" required></div>
+                <div class="col-md-3"><label class="form-label fw-bold small text-muted">{{ __('erp.ref_no_required') }}</label><input type="text" name="evidence_number" class="form-control fw-bold text-danger" value="{{ $autoNumber }}" required></div>
+                <div class="col-md-3"><label class="form-label fw-bold small text-muted">{{ __('erp.tx_date_required') }}</label><input type="date" name="transaction_date" class="form-control" value="{{ date('Y-m-d') }}" required></div>
+                <div class="col-md-6"><label class="form-label fw-bold small text-muted">{{ __('erp.notes_reason') }}</label><input type="text" name="description" class="form-control" placeholder="Contoh: Barang Rusak / Kadaluarsa" required></div>
                 <div class="col-md-12">
-                    <label class="form-label fw-bold small text-muted">Akun Penyeimbang Jurnal (DEBET) *</label>
+                    <label class="form-label fw-bold small text-muted">{{ __('erp.journal_balancing_account_debit_required') }}</label>
                     <select name="offset_account" class="form-select select2" required>
-                        <option value="">-- Pilih Akun --</option>
+                        <option value="">{{ __('erp.select_account_placeholder') }}</option>
                         @foreach($accounts as $acc) <option value="{{ $acc->account_code }}">{{ $acc->account_code }} - {{ $acc->account_name }}</option> @endforeach
                     </select>
                     <small class="text-danger d-block mt-1"><i class="fa-solid fa-info-circle"></i> Nilai aset akan mengkredit Persediaan (11200), pilih akun penyeimbangnya (Misal: Beban Kerusakan / Penyesuaian Stok).</small>
@@ -32,13 +32,13 @@
         <div class="card border-0 shadow-sm">
             <table class="table table-bordered align-middle mb-0" style="font-size: 0.85rem;">
                 <thead class="table-light text-center">
-                    <tr><th width="70%">Pilih Barang Tersedia</th><th width="25%">Qty Keluar</th><th width="5%"></th></tr>
+                    <tr><th width="70%">{{ __('erp.select_available_item') }}</th><th width="25%">{{ __('erp.qty_out') }}</th><th width="5%"></th></tr>
                 </thead>
                 <tbody id="baris-outbound">
                     <tr>
                         <td>
                             <select name="items[0][product_id]" class="form-select select2" required>
-                                <option value="">Pilih Produk...</option>
+                                <option value="">{{ __('erp.select_product_ph') }}</option>
                                 @foreach($products as $p) <option value="{{ $p->id }}">{{ $p->sku }} - {{ $p->name }} (Stok: {{ $p->stock_quantity }})</option> @endforeach
                             </select>
                         </td>
@@ -48,7 +48,7 @@
                 </tbody>
             </table>
             <div class="card-footer bg-white p-2">
-                <button type="button" class="btn btn-sm btn-outline-danger fw-bold" onclick="tambahBaris('outbound')">+ Tambah Barang</button>
+                <button type="button" class="btn btn-sm btn-outline-danger fw-bold" onclick="tambahBaris('outbound')">{{ __('erp.add_item_btn') }}</button>
             </div>
         </div>
     </form>

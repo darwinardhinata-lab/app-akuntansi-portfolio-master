@@ -2,9 +2,8 @@
 
 @section('top_bar_left')
     <a href="{{ route('purchase-returns.index') }}" class="btn btn-sm btn-white border fw-bold shadow-sm text-secondary me-3" style="border-radius: 8px;">
-        <i class="fa-solid fa-arrow-left me-1"></i> Kembali
-    </a>
-    <x-breadcrumb :links="['Pembelian' => '#', 'Retur Pembelian' => route('purchase-returns.index'), 'Pemeriksaan Gudang' => null]" />
+        <i class="fa-solid fa-arrow-left me-1"></i> {{ __('erp.back_btn') }}</a>
+    <x-breadcrumb :links="[__('erp.bc_purchasing') => '#', __('erp.purchase_return') => route('purchase-returns.index'), __('erp.bc_warehouse_check') => null]" />
 @endsection
 
 @section('content')
@@ -26,19 +25,19 @@
             <div class="card-body p-4">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <small class="text-muted fw-bold d-block">No. Retur</small>
+                        <small class="text-muted fw-bold d-block">{{ __('erp.return_no') }}</small>
                         <span class="fw-bold text-warning fs-5">{{ $return->return_number }}</span>
                     </div>
                     <div class="col-md-3">
-                        <small class="text-muted fw-bold d-block">Tanggal Retur</small>
+                        <small class="text-muted fw-bold d-block">{{ __('erp.return_date') }}</small>
                         <span class="fw-bold">{{ date('d M Y', strtotime($return->return_date)) }}</span>
                     </div>
                     <div class="col-md-3">
-                        <small class="text-muted fw-bold d-block">Ref. PO</small>
+                        <small class="text-muted fw-bold d-block">{{ __('erp.ref_po') }}</small>
                         <span class="fw-bold text-primary">{{ $return->purchaseOrder?->po_number ?? '-' }}</span>
                     </div>
                     <div class="col-md-3">
-                        <small class="text-muted fw-bold d-block">Status</small>
+                        <small class="text-muted fw-bold d-block">{{ __('erp.status') }}</small>
                         @php
                             $badge = match($return->status) {
                                 'PENDING_INSPECTION' => 'bg-warning text-dark',
@@ -57,17 +56,17 @@
         {{-- Detail Barang Retur --}}
         <div class="card border-0 shadow-sm rounded-3 mb-3">
             <div class="card-header bg-white p-3 border-bottom">
-                <h5 class="fw-bold mb-0"><i class="fa-solid fa-clipboard-list me-2"></i> Detail Barang Retur</h5>
+                <h5 class="fw-bold mb-0"><i class="fa-solid fa-clipboard-list me-2"></i> {{ __('erp.return_item_detail') }}</h5>
             </div>
             <div class="table-responsive">
                 <table class="table table-bordered align-middle mb-0" style="font-size: 0.85rem;">
                     <thead class="table-dark">
                         <tr>
-                            <th class="ps-3 py-3">Kode Barang</th>
-                            <th class="py-3">Deskripsi</th>
-                            <th class="text-center py-3">Qty Returned</th>
-                            <th class="text-center py-3">Qty Approved</th>
-                            <th class="text-center py-3">Condition</th>
+                            <th class="ps-3 py-3">{{ __('erp.product_code') }}</th>
+                            <th class="py-3">{{ __('erp.description_label') }}</th>
+                            <th class="text-center py-3">{{ __('erp.qty_returned_en') }}</th>
+                            <th class="text-center py-3">{{ __('erp.qty_approved') }}</th>
+                            <th class="text-center py-3">{{ __('erp.condition_label') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -88,14 +87,14 @@
                                 <select name="items[{{ $detail->id }}][condition]"
                                     class="form-select form-select-sm"
                                     {{ $canProcess ? '' : 'disabled' }}>
-                                    <option value="GOOD" {{ ($detail->condition ?? 'GOOD') === 'GOOD' ? 'selected' : '' }}>GOOD</option>
-                                    <option value="DEFECTIVE" {{ ($detail->condition ?? '') === 'DEFECTIVE' ? 'selected' : '' }}>DEFECTIVE</option>
+                                    <option value="GOOD" {{ ($detail->condition ?? 'GOOD') === 'GOOD' ? 'selected' : '' }}>{{ __('erp.condition_good') }}</option>
+                                    <option value="DEFECTIVE" {{ ($detail->condition ?? '') === 'DEFECTIVE' ? 'selected' : '' }}>{{ __('erp.condition_defective') }}</option>
                                 </select>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">Tidak ada detail barang untuk retur ini.</td>
+                            <td colspan="5" class="text-center py-4 text-muted">{{ __('erp.no_item_detail_for_return') }}</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -106,22 +105,22 @@
         {{-- Keputusan Final & Financial --}}
         <div class="card border-0 shadow-sm rounded-3 mb-3">
             <div class="card-header bg-white p-3 border-bottom">
-                <h5 class="fw-bold mb-0"><i class="fa-solid fa-file-signature me-2"></i> Keputusan Final</h5>
+                <h5 class="fw-bold mb-0"><i class="fa-solid fa-file-signature me-2"></i> {{ __('erp.final_decision') }}</h5>
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
                     <div class="col-md-6">
-                        <label class="fw-bold text-muted d-block mb-1">Keputusan</label>
+                        <label class="fw-bold text-muted d-block mb-1">{{ __('erp.decision_label') }}</label>
                         <select name="decision" class="form-select fw-bold" {{ $canProcess ? '' : 'disabled' }}>
-                            <option value="APPROVE" {{ ($return->final_decision ?? '') === 'APPROVE' ? 'selected' : '' }}>APPROVE (Disetujui)</option>
-                            <option value="REJECT" {{ ($return->final_decision ?? '') === 'REJECT' ? 'selected' : '' }}>REJECT (Ditolak)</option>
-                            <option value="FAILED_DELIVERY" {{ ($return->final_decision ?? '') === 'FAILED_DELIVERY' ? 'selected' : '' }}>FAILED DELIVERY (Gagal Kirim / RTS)</option>
+                            <option value="APPROVE" {{ ($return->final_decision ?? '') === 'APPROVE' ? 'selected' : '' }}>{{ __('erp.approve_decision') }}</option>
+                            <option value="REJECT" {{ ($return->final_decision ?? '') === 'REJECT' ? 'selected' : '' }}>{{ __('erp.reject_decision') }}</option>
+                            <option value="FAILED_DELIVERY" {{ ($return->final_decision ?? '') === 'FAILED_DELIVERY' ? 'selected' : '' }}>{{ __('erp.failed_delivery_decision') }}</option>
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="fw-bold text-muted d-block mb-1">Refund Shipping Cost (Ongkir dikembalikan)</label>
+                        <label class="fw-bold text-muted d-block mb-1">{{ __('erp.refund_shipping_cost') }}</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light fw-bold">Rp</span>
+                            <span class="input-group-text bg-light fw-bold">{{ __('erp.rp_symbol') }}</span>
                             <input type="number" name="refund_shipping_cost"
                                 class="form-control fw-bold"
                                 value="{{ old('refund_shipping_cost', $return->refund_shipping_cost ?? 0) }}"
@@ -130,9 +129,9 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="fw-bold text-muted d-block mb-1">Return Shipping Cost (Biaya tarik retur)</label>
+                        <label class="fw-bold text-muted d-block mb-1">{{ __('erp.return_shipping_cost') }}</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light fw-bold">Rp</span>
+                            <span class="input-group-text bg-light fw-bold">{{ __('erp.rp_symbol') }}</span>
                             <input type="number" name="return_shipping_cost"
                                 class="form-control fw-bold"
                                 value="{{ old('return_shipping_cost', $return->return_shipping_cost ?? 0) }}"
@@ -155,7 +154,7 @@
         <div class="alert alert-info border-start border-info border-4" role="alert">
             <i class="fa-solid fa-lock me-2"></i>
             Retur ini sudah diproses dan tidak dapat diubah lagi.
-            <a href="{{ route('purchase-returns.index') }}" class="alert-link fw-bold ms-2">Kembali ke daftar</a>.
+            <a href="{{ route('purchase-returns.index') }}" class="alert-link fw-bold ms-2">{{ __('erp.back_to_list') }}</a>.
         </div>
         @endif
     </form>

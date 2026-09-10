@@ -2,9 +2,8 @@
 
 @section('top_bar_left')
     <a href="{{ route('jurnal.index') }}" class="btn btn-sm btn-white border fw-bold shadow-sm text-secondary me-3" style="border-radius: 8px;">
-        <i class="fa-solid fa-arrow-left me-1"></i> Kembali
-    </a>
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Jurnal Umum' => route('jurnal.index'), 'Edit' => null]" />
+        <i class="fa-solid fa-arrow-left me-1"></i> {{ __('erp.back_btn') }}</a>
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.general_journal') => route('jurnal.index'), __('erp.bc_edit') => null]" />
 @endsection
 
 @section('content')
@@ -25,8 +24,8 @@
 
 <div class="journal-wrapper mt-4 mb-5">
     <div class="mb-4">
-        <h3 class="fw-bold mb-1">Edit Jurnal Umum</h3>
-        <p class="text-muted small">Mengubah transaksi: <strong>{{ $journal->journal_id }}</strong></p>
+        <h3 class="fw-bold mb-1">{{ __('erp.edit_general_journal') }}</h3>
+        <p class="text-muted small">{{ __('erp.editing_transaction_colon') }} <strong>{{ $journal->journal_id }}</strong></p>
     </div>
 
     <form action="{{ route('jurnal.update', $journal->journal_id) }}" method="POST">
@@ -36,15 +35,15 @@
         <div class="card-modern mb-4">
             <div class="row g-4">
                 <div class="col-md-3">
-                    <label class="form-label">Tanggal</label>
+                    <label class="form-label">{{ __('erp.date') }}</label>
                     <input type="date" name="transaction_date" class="form-control input-header" value="{{ $journal->transaction_date }}" required>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">No. Bukti</label>
+                    <label class="form-label">{{ __('erp.evidence_no') }}</label>
                     <input type="text" name="evidence_number" class="form-control input-header" value="{{ $journal->evidence_number }}">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Deskripsi</label>
+                    <label class="form-label">{{ __('erp.description_label') }}</label>
                     <input type="text" name="description" class="form-control input-header" value="{{ $journal->description }}" required>
                 </div>
             </div>
@@ -55,10 +54,10 @@
             <table class="table table-clean mb-0">
                 <thead>
                     <tr class="text-muted small fw-bold">
-                        <th width="35%">KODE AKUN</th>
-                        <th width="25%">KODE BANTU</th>
-                        <th width="15%">POSISI</th>
-                        <th width="20%" class="text-end">NOMINAL (Rp)</th>
+                        <th width="35%">{{ __('erp.account_code_caps') }}</th>
+                        <th width="25%">{{ __('erp.helper_code_caps') }}</th>
+                        <th width="15%">{{ __('erp.position_caps') }}</th>
+                        <th width="20%" class="text-end">{{ __('erp.amount_rp_caps') }}</th>
                         <th width="5%"></th>
                     </tr>
                 </thead>
@@ -76,7 +75,7 @@
                         </td>
                         <td data-label="Kode Bantu">
                             <select name="details[{{ $index }}][helper_code]" class="input-transparent">
-                                <option value="">- Kosong -</option>
+                                <option value="">{{ __('erp.empty_dash') }}</option>
                                 @foreach($helpers as $helper)
                                     <option value="{{ $helper->helper_code }}" {{ $detail->helper_code == $helper->helper_code ? 'selected' : '' }}>
                                         {{ $helper->helper_code }} - {{ $helper->entity_name }}
@@ -86,8 +85,8 @@
                         </td>
                         <td data-label="Posisi">
                             <select name="details[{{ $index }}][position]" class="input-transparent position-select" required>
-                                <option value="DEBET" {{ $detail->position == 'DEBET' ? 'selected' : '' }}>DEBET</option>
-                                <option value="KREDIT" {{ $detail->position == 'KREDIT' ? 'selected' : '' }}>KREDIT</option>
+                                <option value="DEBET" {{ $detail->position == 'DEBET' ? 'selected' : '' }}>{{ __('erp.debit_caps') }}</option>
+                                <option value="KREDIT" {{ $detail->position == 'KREDIT' ? 'selected' : '' }}>{{ __('erp.credit_caps') }}</option>
                             </select>
                         </td>
                         <td data-label="Nominal (Rp)">
@@ -102,20 +101,20 @@
             </table>
             </div>
 
-            <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="btn-tambah">+ Tambah Baris</button>
+            <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="btn-tambah">{{ __('erp.add_row') }}</button>
 
             <div class="summary-box mt-4 d-flex justify-content-between align-items-center">
                 <div id="statusIndicator" class="badge rounded-pill p-2 px-3"></div>
                 <div class="d-flex gap-4 align-items-center">
                     <div class="text-end">
-                        <small class="fw-bold text-muted">TOTAL DEBET</small>
+                        <small class="fw-bold text-muted">{{ __('erp.total_debit_caps') }}</small>
                         <div id="textDebet" class="fw-bold text-success fs-5">0</div>
                     </div>
                     <div class="text-end">
-                        <small class="fw-bold text-muted">TOTAL KREDIT</small>
+                        <small class="fw-bold text-muted">{{ __('erp.total_credit_caps') }}</small>
                         <div id="textKredit" class="fw-bold fs-5">0</div>
                     </div>
-                    <button type="submit" class="btn btn-primary fw-bold" id="btnSimpan">Simpan Perubahan</button>
+                    <button type="submit" class="btn btn-primary fw-bold" id="btnSimpan">{{ __('erp.save_changes') }}</button>
                 </div>
             </div>
         </div>

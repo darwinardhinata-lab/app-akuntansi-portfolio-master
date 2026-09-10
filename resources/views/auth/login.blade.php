@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — ERP Accounting System</title>
+    <title>{{ __('erp.login_page_title') }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -58,8 +58,8 @@
     <div class="login-card">
         <div class="login-header">
             <div class="login-icon"><i class="fa-solid fa-layer-group"></i></div>
-            <h1 class="h4 fw-bold mb-1" style="color:#0f172a;">ERP Accounting</h1>
-            <p class="text-muted small mb-0">Masuk untuk melanjutkan</p>
+            <h1 class="h4 fw-bold mb-1" style="color:#0f172a;">{{ __('erp.erp_accounting_brand') }}</h1>
+            <p class="text-muted small mb-0">{{ __('erp.login_to_continue') }}</p>
         </div>
 
         <div class="login-body">
@@ -74,18 +74,18 @@
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
+                    <label for="email" class="form-label">{{ __('erp.email_label') }}</label>
                     <input type="email" name="email" id="email" class="form-control"
                            value="{{ old('email') }}" required autofocus autocomplete="username">
                 </div>
                 <div class="mb-3">
-                    <label for="password" class="form-label">Kata Sandi</label>
+                    <label for="password" class="form-label">{{ __('erp.password_indo') }}</label>
                     <input type="password" name="password" id="password" class="form-control"
                            required autocomplete="current-password">
                 </div>
                 <div class="mb-4 form-check">
                     <input type="checkbox" name="remember" id="remember" class="form-check-input" value="1">
-                    <label class="form-check-label small text-muted" for="remember">Ingat saya</label>
+                    <label class="form-check-label small text-muted" for="remember">{{ __('erp.remember_me') }}</label>
                 </div>
                 <button type="submit" class="btn btn-primary btn-login w-100">
                     <i class="fa-solid fa-right-to-bracket me-2"></i> Masuk

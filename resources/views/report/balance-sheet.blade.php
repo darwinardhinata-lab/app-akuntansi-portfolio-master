@@ -2,7 +2,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Neraca' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.balance_sheet') => null]" />
 @endsection
 
 @section('content')
@@ -56,8 +56,8 @@
 <div class="report-wrapper mt-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4 no-print">
         <div>
-            <h3 class="fw-bold mb-1" style="color: #0f172a;">NERACA</h3>
-            <p class="text-muted small mb-0">Laporan Posisi Keuangan dengan presisi sen mutlak dan sinkronisasi penuh.</p>
+            <h3 class="fw-bold mb-1" style="color: #0f172a;">{{ __('erp.balance_sheet_caps') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.financial_position_precision_hint') }}</p>
         </div>
         <ul class="nav nav-pills bg-white p-1 rounded-3 border shadow-sm" role="tablist">
             <li class="nav-item me-1">
@@ -78,7 +78,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Export Neraca</title>
+    <title>{{ __('erp.export_balance_sheet') }}</title>
     <style>
         table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 10px; }
         th, td { border: 1px solid #000; padding: 4px; }
@@ -100,7 +100,7 @@
                 
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     @if($tab == 'bulanan')
-                        <label class="fw-bold text-muted small mb-0 text-nowrap">Interval:</label>
+                        <label class="fw-bold text-muted small mb-0 text-nowrap">{{ __('erp.interval_colon') }}</label>
                         <select name="interval" class="form-select form-select-sm fw-bold" style="width: 140px;" onchange="this.form.submit()">
                             @foreach(\App\Support\ReportInterval::OPTIONS as $key => $label)
                                 <option value="{{ $key }}" {{ $interval == $key ? 'selected' : '' }}>{{ $label }}</option>
@@ -108,7 +108,7 @@
                         </select>
 
                         @if($interval == 'harian')
-                            <label class="fw-bold text-muted small mb-0 text-nowrap">Bulan:</label>
+                            <label class="fw-bold text-muted small mb-0 text-nowrap">{{ __('erp.month_colon') }}</label>
                             <select name="month" class="form-select form-select-sm fw-bold" style="width: 130px;">
                                 @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $mi => $mn)
                                     <option value="{{ $mi+1 }}" {{ $month == ($mi+1) ? 'selected' : '' }}>{{ $mn }}</option>
@@ -116,13 +116,13 @@
                             </select>
                         @endif
 
-                        <label class="fw-bold text-muted small mb-0 text-nowrap">Tahun:</label>
+                        <label class="fw-bold text-muted small mb-0 text-nowrap">{{ __('erp.year_colon') }}</label>
                         <input type="number" name="year" class="form-control form-control-sm fw-bold" style="width: 100px;" value="{{ $year }}">
                     @else
-                        <label class="fw-bold text-muted small mb-0 text-nowrap">Per Tanggal:</label>
+                        <label class="fw-bold text-muted small mb-0 text-nowrap">{{ __('erp.as_of_date_colon') }}</label>
                         <input type="date" name="date" class="form-control form-control-sm fw-bold" value="{{ $date }}">
                     @endif
-                    <button type="submit" class="btn btn-sm btn-primary fw-bold px-3 shadow-sm"><i class="fa-solid fa-filter me-1"></i> Tampilkan</button>
+                    <button type="submit" class="btn btn-sm btn-primary fw-bold px-3 shadow-sm"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.show_label') }}</button>
                 </div>
 
                 <div class="btn-group shadow-sm">
@@ -153,7 +153,7 @@
                 <table class="table table-report mb-0 align-middle" style="min-width: 1300px;" {!! (isset($isExport) && $isExport) ? 'border="1"' : '' !!}>
                     <thead>
                         <tr>
-                            <th class="col-fixed ps-3" width="250px">Nama Akun</th>
+                            <th class="col-fixed ps-3" width="250px">{{ __('erp.account') }}</th>
                             @foreach($periods as $p)
                                 <th class="text-end" width="85px">{{ $p['label'] }}</th>
                             @endforeach
@@ -188,7 +188,7 @@
 
                             @if($key == 'modal')
                             <tr>
-                                <td class="col-fixed ps-3 item-name italic">Laba (Rugi) Akumulatif</td>
+                                <td class="col-fixed ps-3 item-name italic">{{ __('erp.cumulative_profit_loss') }}</td>
                                 @foreach($periods as $p) 
                                     @php 
                                         $labaVal = $report['laba_berjalan'][$p['key']] ?? null; 
@@ -218,7 +218,7 @@
                         @endforeach
 
                         <tr class="line-grand-total">
-                            <td class="col-fixed ps-3 text-uppercase py-3" style="background-color: #0f172a;">TOTAL KEWAJIBAN + MODAL</td>
+                            <td class="col-fixed ps-3 text-uppercase py-3" style="background-color: #0f172a;">{{ __('erp.total_liabilities_equity_caps') }}</td>
                             @foreach($periods as $p)
                                 @php 
                                     $kVal = $report['kewajiban']['totals'][$p['key']] ?? null;
@@ -241,8 +241,8 @@
                 @endif
                 <div style="text-align: center; width: 100%;">
                     <h4 style="margin: 0 0 4px 0; font-weight: 800; color: #4f46e5; text-transform: uppercase;">{{ $company?->company_name ?? 'BBW' }}</h4>
-                    <h5 style="margin: 0 0 4px 0; font-weight: 800; color: #0f172a; letter-spacing: 0.5px;">NERACA PERIODE</h5>
-                    <p style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 500;">Per Tanggal: <span class="text-primary fw-bold">{{ date('d M Y', strtotime($date)) }}</span></p>
+                    <h5 style="margin: 0 0 4px 0; font-weight: 800; color: #0f172a; letter-spacing: 0.5px;">{{ __('erp.period_balance_sheet_caps') }}</h5>
+                    <p style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 500;">{{ __('erp.as_of_date_colon') }} <span class="text-primary fw-bold">{{ date('d M Y', strtotime($date)) }}</span></p>
                 </div>
             </div>
 
@@ -266,7 +266,7 @@
                             
                             @if($key == 'modal')
                             <tr>
-                                <td class="ps-4 item-name italic">Laba (Rugi) Akumulatif</td>
+                                <td class="ps-4 item-name italic">{{ __('erp.cumulative_profit_loss') }}</td>
                                 <td class="num-cell pe-4 {{ $report['laba_berjalan'] < 0 ? 'text-negative' : '' }}">
                                     Rp {{ number_format($report['laba_berjalan'], 2, ',', '.') }}
                                 </td>
@@ -284,7 +284,7 @@
                         @endforeach
                         
                         <tr class="line-grand-total">
-                            <td class="ps-4 py-3 text-uppercase">TOTAL KEWAJIBAN + MODAL</td>
+                            <td class="ps-4 py-3 text-uppercase">{{ __('erp.total_liabilities_equity_caps') }}</td>
                             <td class="num-cell pe-4 py-3 fs-6 text-white">
                                 Rp {{ number_format($report['kewajiban']['total'] + $report['modal']['total'], 2, ',', '.') }}
                             </td>

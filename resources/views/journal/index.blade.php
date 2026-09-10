@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Jurnal Umum' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.general_journal') => null]" />
 @endsection
 
 @section('content')
@@ -9,7 +9,7 @@
     
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Jurnal Umum</h3>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.general_journal') }}</h3>
             <p class="text-muted small mb-0">Pencatatan mutasi transaksi harian dengan kaidah pembukuan berpasangan (Double-Entry).</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
@@ -38,14 +38,14 @@
                 <form action="{{ route('jurnal.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title fw-bold" id="importModalLabel">Import Jurnal Umum</h5>
+                        <h5 class="modal-title fw-bold" id="importModalLabel">{{ __('erp.import_general_journal') }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         
                         <div class="alert alert-info py-3 small mb-4" style="background-color: #e0f2fe; color: #0369a1; border-color: #bae6fd; border-radius: 8px;">
                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="fw-bold mb-0"><i class="fa-solid fa-circle-info"></i> Format CSV Jubelio (9 Kolom):</h6>
+                                <h6 class="fw-bold mb-0"><i class="fa-solid fa-circle-info"></i> {{ __('erp.csv_format_jubelio_9col') }}</h6>
                                 <a href="{{ route('jurnal.download-template') }}" class="btn btn-sm btn-light border-primary text-primary fw-bold shadow-sm" style="font-size: 0.75rem;">
                                     <i class="fa-solid fa-download me-1"></i> Download Template
                                 </a>
@@ -54,8 +54,8 @@
                             Kolom 2: No. Jurnal (GJ-xxxx)<br>
                             Kolom 3: No. Bukti (INV-xxxx / Lainnya)<br>
                             Kolom 4: Deskripsi / Tipe<br>
-                            Kolom 5: Total Debet <em class="text-muted">(Akan diabaikan)</em><br>
-                            Kolom 6: Total Kredit <em class="text-muted">(Akan diabaikan)</em><br>
+                            Kolom 5: Total Debet <em class="text-muted">{{ __('erp.will_be_ignored') }}</em><br>
+                            Kolom 6: Total Kredit <em class="text-muted">{{ __('erp.will_be_ignored') }}</em><br>
                             Kolom 7: Nilai Debet (Nominal bersih)<br>
                             Kolom 8: Nilai Kredit (Nominal bersih)<br>
                             Kolom 9: Akun (Contoh: 5-5000 - Harga Pokok Penjualan)<br>
@@ -65,12 +65,12 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label for="file_excel" class="form-label fw-bold">Pilih File (CSV / Excel)</label>
+                            <label for="file_excel" class="form-label fw-bold">{{ __('erp.choose_file_csv_excel') }}</label>
                             <input type="file" class="form-control" name="file_excel" id="file_excel" accept=".csv, .xls, .xlsx" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
                         <button type="submit" class="btn btn-primary fw-bold">
                             <i class="fa-solid fa-upload me-1"></i> Proses Import
                         </button>
@@ -113,18 +113,18 @@
     @endif
 
     <div class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
-        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> Filter Analitik Pencarian</div>
+        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.filter_analytics_search') }}</div>
         <form action="{{ route('jurnal.index') }}" method="GET" id="filterForm" class="row g-2 align-items-end">
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Mulai Tgl</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.start_date_short') }}</label>
                 <input type="date" name="start_date" class="form-control form-control-sm" value="{{ request('start_date') }}">
             </div>
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Sampai Tgl</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.end_date_short') }}</label>
                 <input type="date" name="end_date" class="form-control form-control-sm" value="{{ request('end_date') }}">
             </div>
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Baris</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.row_label') }}</label>
                 <select name="per_page" class="form-select form-select-sm">
                     <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
                     <option value="50" {{ request('per_page', 50) == 50 ? 'selected' : '' }}>50</option>
@@ -132,14 +132,14 @@
                 </select>
             </div>
             <div class="col-12 col-sm-12 col-md-4">
-                <label class="form-label small fw-bold text-muted mb-1">Pencarian Nomor / Keterangan</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number_desc') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                     <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari No. Bukti / Keterangan..." value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> Cari</button>
+                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
                 <a href="{{ route('jurnal.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
@@ -162,13 +162,13 @@
                             <th width="4%" class="text-center ps-2">
                                 <input type="checkbox" class="form-check-input" onclick="document.querySelectorAll('.journal-checkbox').forEach(cb => cb.checked = this.checked)">
                             </th>
-                            <th width="11%" class="ps-2">Tanggal</th>
-                            <th width="14%">No. Bukti</th>
-                            <th width="23%">Keterangan</th>
-                            <th width="24%">Nama Akun & Ref</th>
-                            <th width="11%" class="text-end">Debet (Rp)</th>
-                            <th width="11%" class="text-end pe-3">Kredit (Rp)</th>
-                            <th width="8%" class="text-center pe-4">Aksi</th>
+                            <th width="11%" class="ps-2">{{ __('erp.date') }}</th>
+                            <th width="14%">{{ __('erp.evidence_no') }}</th>
+                            <th width="23%">{{ __('erp.description') }}</th>
+                            <th width="24%">{{ __('erp.account_name_ref') }}</th>
+                            <th width="11%" class="text-end">{{ __('erp.debit_rp') }}</th>
+                            <th width="11%" class="text-end pe-3">{{ __('erp.credit_rp') }}</th>
+                            <th width="8%" class="text-center pe-4">{{ __('erp.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -256,7 +256,7 @@
                                     @endforeach
                                     
                                     <tr class="bg-light border-bottom border-secondary">
-                                        <td class="text-end fw-bold text-muted small text-uppercase">TOTAL:</td>
+                                        <td class="text-end fw-bold text-muted small text-uppercase">{{ __('erp.total_colon') }}</td>
                                         <td class="text-end fw-bold text-success">Rp {{ number_format($totDebet, 2, ',', '.') }}</td>
                                         <td class="text-end pe-3 fw-bold text-danger">Rp {{ number_format($totKredit, 2, ',', '.') }}</td>
                                     </tr>
@@ -264,7 +264,7 @@
                                     <tr style="border-bottom: 2px solid #cbd5e1;"><td colspan="8" class="p-0"></td></tr>
                                 @endif
                             @empty
-                                <tr><td colspan="8" class="text-center py-5 text-muted">Tidak ada data ditemukan.</td></tr>
+                                <tr><td colspan="8" class="text-center py-5 text-muted">{{ __('erp.no_data_found') }}</td></tr>
                             @endforelse
                         @endif
                     </tbody>

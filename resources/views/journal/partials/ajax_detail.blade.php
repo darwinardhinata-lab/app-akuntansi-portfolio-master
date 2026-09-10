@@ -12,9 +12,9 @@
     <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.85rem;">
         <thead class="table-light text-muted">
             <tr>
-                <th>Akun</th>
-                <th class="text-end">Debet (Rp)</th>
-                <th class="text-end">Kredit (Rp)</th>
+                <th>{{ __('erp.account_count') }}</th>
+                <th class="text-end">{{ __('erp.debit_rp') }}</th>
+                <th class="text-end">{{ __('erp.credit_rp') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -45,7 +45,7 @@
         </tbody>
         <tfoot class="table-light fw-bold">
             <tr>
-                <td class="text-end text-uppercase">Total</td>
+                <td class="text-end text-uppercase">{{ __('erp.total') }}</td>
                 <td class="text-end text-success">Rp {{ number_format($totalDebet, 2, ',', '.') }}</td>
                 <td class="text-end text-danger">Rp {{ number_format($totalKredit, 2, ',', '.') }}</td>
             </tr>

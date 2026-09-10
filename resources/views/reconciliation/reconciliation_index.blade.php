@@ -8,7 +8,7 @@
 <div class="container-fluid">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">🔍 Rekonsiliasi Laporan: Jubelio vs ERP</h4>
+        <h4 class="mb-0">{{ __('erp.reconciliation_report_title_emoji') }}</h4>
     </div>
 
     <p class="text-muted">
@@ -37,27 +37,27 @@
                 @csrf
                 <div class="row g-3 align-items-end">
                     <div class="col-md-4">
-                        <label class="form-label">File Sumber Jubelio (CSV)</label>
+                        <label class="form-label">{{ __('erp.jubelio_source_file') }}</label>
                         <input type="file" name="jubelio_file" class="form-control" accept=".csv,.txt" required>
-                        <small class="text-muted">Kolom minimal: Kode Akun, Nama Akun, Nominal (Rp).</small>
+                        <small class="text-muted">{{ __('erp.min_columns_hint') }}</small>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">Tanggal Awal</label>
+                        <label class="form-label">{{ __('erp.start_date_full') }}</label>
                         <input type="date" name="start_date" class="form-control"
                                value="{{ old('start_date', $startDate ?? date('Y-m-01')) }}" required>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">Tanggal Akhir</label>
+                        <label class="form-label">{{ __('erp.end_date_full') }}</label>
                         <input type="date" name="end_date" class="form-control"
                                value="{{ old('end_date', $endDate ?? date('Y-m-t')) }}" required>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">Toleransi Selisih (Rp)</label>
+                        <label class="form-label">{{ __('erp.difference_tolerance_rp') }}</label>
                         <input type="number" step="0.01" name="tolerance" class="form-control"
                                value="{{ old('tolerance', $tolerance ?? 1000) }}">
                     </div>
                     <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">Bandingkan</button>
+                        <button type="submit" class="btn btn-primary w-100">{{ __('erp.compare_btn') }}</button>
                     </div>
                 </div>
             </form>
@@ -78,7 +78,7 @@
                 <div class="card text-center">
                     <div class="card-body">
                         <div class="fs-4 fw-bold">{{ $summary['total_akun'] }}</div>
-                        <div class="text-muted small">Total Akun Dibandingkan</div>
+                        <div class="text-muted small">{{ __('erp.total_accounts_compared') }}</div>
                     </div>
                 </div>
             </div>
@@ -86,7 +86,7 @@
                 <div class="card text-center border-success">
                     <div class="card-body">
                         <div class="fs-4 fw-bold text-success">{{ $summary['match_count'] }}</div>
-                        <div class="text-muted small">Cocok (MATCH)</div>
+                        <div class="text-muted small">{{ __('erp.matched_paren') }}</div>
                     </div>
                 </div>
             </div>
@@ -94,7 +94,7 @@
                 <div class="card text-center border-danger">
                     <div class="card-body">
                         <div class="fs-4 fw-bold text-danger">{{ $summary['mismatch_count'] }}</div>
-                        <div class="text-muted small">Nominal Beda</div>
+                        <div class="text-muted small">{{ __('erp.amount_difference') }}</div>
                     </div>
                 </div>
             </div>
@@ -102,7 +102,7 @@
                 <div class="card text-center border-warning">
                     <div class="card-body">
                         <div class="fs-4 fw-bold text-warning">{{ $summary['missing_in_erp_count'] }}</div>
-                        <div class="text-muted small">Belum Ada di ERP</div>
+                        <div class="text-muted small">{{ __('erp.not_yet_in_erp') }}</div>
                     </div>
                 </div>
             </div>
@@ -110,7 +110,7 @@
                 <div class="card text-center border-warning">
                     <div class="card-body">
                         <div class="fs-4 fw-bold text-warning">{{ $summary['missing_in_jub_count'] }}</div>
-                        <div class="text-muted small">Tidak Ada di Sumber</div>
+                        <div class="text-muted small">{{ __('erp.not_in_source_2') }}</div>
                     </div>
                 </div>
             </div>
@@ -118,7 +118,7 @@
                 <div class="card text-center">
                     <div class="card-body">
                         <div class="fs-6 fw-bold">{{ $fmt($summary['total_abs_selisih']) }}</div>
-                        <div class="text-muted small">Total Selisih Absolut</div>
+                        <div class="text-muted small">{{ __('erp.total_absolute_difference') }}</div>
                     </div>
                 </div>
             </div>
@@ -132,7 +132,7 @@
         @endif
 
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <h5 class="mb-0">Detail per Akun</h5>
+            <h5 class="mb-0">{{ __('erp.detail_per_account') }}</h5>
             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportSelisihToCsv()">
                 ⬇ Unduh CSV (khusus yang bermasalah)
             </button>
@@ -142,12 +142,12 @@
             <table class="table table-sm table-bordered table-hover align-middle" id="reconTable">
                 <thead class="table-light">
                     <tr>
-                        <th>Kode Akun</th>
-                        <th>Nama Akun</th>
-                        <th class="text-end">Jubelio</th>
-                        <th class="text-end">ERP</th>
-                        <th class="text-end">Selisih</th>
-                        <th class="text-center">Status</th>
+                        <th>{{ __('erp.account_code') }}</th>
+                        <th>{{ __('erp.account') }}</th>
+                        <th class="text-end">{{ __('erp.jubelio_label') }}</th>
+                        <th class="text-end">{{ __('erp.erp_label') }}</th>
+                        <th class="text-end">{{ __('erp.difference_label') }}</th>
+                        <th class="text-center">{{ __('erp.status') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -184,7 +184,7 @@
                 </tbody>
                 <tfoot>
                     <tr class="fw-bold table-light">
-                        <td colspan="2">TOTAL</td>
+                        <td colspan="2">{{ __('erp.total_caps') }}</td>
                         <td class="text-end">{{ $fmt($summary['jubelio_grand_total']) }}</td>
                         <td class="text-end">{{ $fmt($summary['erp_grand_total']) }}</td>
                         <td class="text-end">{{ $fmt($summary['erp_grand_total'] - $summary['jubelio_grand_total']) }}</td>

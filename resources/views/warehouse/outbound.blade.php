@@ -1,13 +1,13 @@
 @extends('layouts.app')
 @section('top_bar_left')
-    <x-breadcrumb :links="['Warehouse' => '#', 'Barang Keluar' => null]" />
+    <x-breadcrumb :links="[__('erp.bc_warehouse') => '#', __('erp.bc_goods_out') => null]" />
 @endsection
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-arrow-right-from-bracket text-danger me-2"></i>Barang Keluar (Outbound)</h3>
-            <p class="text-muted small mb-0">Riwayat pengeluaran barang dan mutasi keluar lainnya.</p>
+            <h3 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-arrow-right-from-bracket text-danger me-2"></i>{{ __('erp.goods_out_outbound') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.goods_issue_history_hint') }}</p>
         </div>
         <div>
             <a href="{{ route('warehouse.outbound.create') }}" class="btn btn-danger fw-bold shadow-sm">
@@ -19,10 +19,10 @@
     {{-- SUB-SUB-MENU / NAV PILLS --}}
     <ul class="nav nav-pills mb-4 bg-white p-2 rounded border shadow-sm flex-nowrap overflow-auto" style="white-space: nowrap;">
         <li class="nav-item">
-            <a class="nav-link fw-bold px-4 {{ $tab == 'transfer_keluar' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.outbound', ['tab' => 'transfer_keluar']) }}">Transfer Keluar</a>
+            <a class="nav-link fw-bold px-4 {{ $tab == 'transfer_keluar' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.outbound', ['tab' => 'transfer_keluar']) }}">{{ __('erp.transfer_out') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-4 {{ $tab == 'retur_pembelian' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.outbound', ['tab' => 'retur_pembelian']) }}">Retur Pembelian</a>
+            <a class="nav-link fw-bold px-4 {{ $tab == 'retur_pembelian' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.outbound', ['tab' => 'retur_pembelian']) }}">{{ __('erp.purchase_return') }}</a>
         </li>
     </ul>
 
@@ -34,11 +34,11 @@
             <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size: 0.85rem;">
                 <thead class="table-dark text-uppercase">
                     <tr>
-                        <th class="ps-4 py-3">Tanggal</th>
-                        <th class="py-3">No. Referensi</th>
-                        <th class="py-3">Produk / SKU</th>
-                        <th class="text-center py-3">Qty Keluar</th>
-                        <th class="text-end pe-4 py-3">HPP / Unit (Rp)</th>
+                        <th class="ps-4 py-3">{{ __('erp.date') }}</th>
+                        <th class="py-3">{{ __('erp.ref_no') }}</th>
+                        <th class="py-3">{{ __('erp.product_sku') }}</th>
+                        <th class="text-center py-3">{{ __('erp.qty_out') }}</th>
+                        <th class="text-end pe-4 py-3">{{ __('erp.cogs_per_unit_rp') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,7 +51,7 @@
                         <td class="text-end pe-4 font-monospace">{{ number_format($l->unit_cost, 0, ',', '.') }}</td>
                     </tr>
                     @empty
-                    <tr><td colspan="5" class="text-center py-5 text-muted">Belum ada riwayat barang keluar.</td></tr>
+                    <tr><td colspan="5" class="text-center py-5 text-muted">{{ __('erp.no_goods_out_history') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

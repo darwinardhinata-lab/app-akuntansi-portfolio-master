@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Laporan Tag' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.bc_tag_report') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-4">
-    <h4 class="fw-bold mb-4">Laporan Laba/Rugi per Tag (Proyek/Cabang)</h4>
+    <h4 class="fw-bold mb-4">{{ __('erp.profit_loss_by_tag_report') }}</h4>
     
     <form method="GET" class="mb-4 d-flex gap-2 w-50">
         <input type="text" name="tag" class="form-control" placeholder="Ketik nama tag / proyek..." value="{{ request('tag') }}" required>
-        <button type="submit" class="btn btn-primary fw-bold">Cari Tag</button>
+        <button type="submit" class="btn btn-primary fw-bold">{{ __('erp.search_tag') }}</button>
     </form>
 
     @if($tag)
@@ -19,12 +19,12 @@
             <table class="table table-hover mb-0 text-nowrap">
                 <thead class="table-dark">
                     <tr>
-                        <th>Tanggal</th>
-                        <th>No. Bukti</th>
-                        <th>Nama Akun</th>
-                        <th>Deskripsi / Tag</th>
-                        <th class="text-end text-success">Debit (Rp)</th>
-                        <th class="text-end text-danger">Kredit (Rp)</th>
+                        <th>{{ __('erp.date') }}</th>
+                        <th>{{ __('erp.evidence_no') }}</th>
+                        <th>{{ __('erp.account') }}</th>
+                        <th>{{ __('erp.description_tag') }}</th>
+                        <th class="text-end text-success">{{ __('erp.debit_rp_en') }}</th>
+                        <th class="text-end text-danger">{{ __('erp.credit_rp') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,7 +44,7 @@
                         </tr>
                     @endforeach
                     <tr class="table-light fw-bold text-end">
-                        <td colspan="4">TOTAL</td>
+                        <td colspan="4">{{ __('erp.total_caps') }}</td>
                         <td class="text-success">{{ number_format($totDebit, 0, ',', '.') }}</td>
                         <td class="text-danger">{{ number_format($totKredit, 0, ',', '.') }}</td>
                     </tr>

@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Manufaktur' => '#', 'Material Receipt (MRN)' => null]" />
+    <x-breadcrumb :links="[__('erp.mfg_module') => '#', __('erp.bc_material_receipt_mrn') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Material Receipt Note (MRN)</h3>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.material_receipt_note_title') }}</h3>
             <p class="text-muted small mb-0">Penerimaan bahan baku (yarn/kain) dari supplier — otomatis posting jurnal Persediaan.</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
@@ -39,7 +39,7 @@
                 <div class="col-md-4">
                     <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari No. MRN" value="{{ $search }}">
                 </div>
-                <div class="col-md-2"><button type="submit" class="btn btn-sm btn-outline-primary w-100">Filter</button></div>
+                <div class="col-md-2"><button type="submit" class="btn btn-sm btn-outline-primary w-100">{{ __('erp.filter_label') }}</button></div>
             </form>
         </div>
     </div>
@@ -49,7 +49,7 @@
             <div class="table-responsive">
                 <table class="table table-bordered table-striped table-hover align-middle mb-0 text-nowrap" style="font-size: 13.5px;">
                     <thead class="bg-primary text-white text-center align-middle">
-                        <tr><th>No. MRN</th><th>Tanggal</th><th>Supplier</th><th>Bruto</th><th>Pajak</th><th>Neto</th><th>Status</th><th>Aksi</th></tr>
+                        <tr><th>{{ __('erp.mrn_no') }}</th><th>{{ __('erp.date') }}</th><th>{{ __('erp.supplier_label') }}</th><th>{{ __('erp.gross_weight') }}</th><th>{{ __('erp.bc_tax') }}</th><th>{{ __('erp.net_weight') }}</th><th>{{ __('erp.status') }}</th><th>{{ __('erp.action') }}</th></tr>
                     </thead>
                     <tbody>
                         @forelse ($receipts as $r)
@@ -64,7 +64,7 @@
                                 <td class="text-center py-2"><a href="{{ route('mfg.material-receipts.show', $r->id) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a></td>
                             </tr>
                         @empty
-                            <tr><td colspan="8" class="text-center py-5 text-muted">Belum ada MRN.</td></tr>
+                            <tr><td colspan="8" class="text-center py-5 text-muted">{{ __('erp.no_mrn_yet') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -79,20 +79,20 @@
         <form action="{{ route('mfg.material-receipts.import') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Import MRN Massal</h5>
+                <div class="modal-header"><h5 class="modal-title">{{ __('erp.import_bulk_mrn') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <div class="alert alert-info small">
                         <i class="fa-solid fa-info-circle me-1"></i> Setiap baris tetap diposting lewat proses & validasi yang sama
                         dengan input manual (bisa gagal sebagian jika data salah).
-                        <a href="{{ route('mfg.material-receipts.download-template') }}" class="fw-bold">Download Template</a>
+                        <a href="{{ route('mfg.material-receipts.download-template') }}" class="fw-bold">{{ __('erp.download_template') }}</a>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label">Pilih File (.xlsx/.xls/.csv)</label>
+                        <label class="form-label">{{ __('erp.choose_file_xlsx') }}</label>
                         <input type="file" name="file_excel" class="form-control" required accept=".xlsx,.xls,.csv">
                     </div>
                 </div>
-                <div class="modal-footer"><button type="submit" class="btn btn-primary fw-bold">Mulai Import</button></div>
+                <div class="modal-footer"><button type="submit" class="btn btn-primary fw-bold">{{ __('erp.start_import') }}</button></div>
             </div>
         </form>
     </div>

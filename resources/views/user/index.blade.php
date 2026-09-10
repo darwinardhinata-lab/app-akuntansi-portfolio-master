@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Pengaturan' => '#', 'Manajemen Pengguna' => null]" />
+    <x-breadcrumb :links="[__('erp.bc_settings') => '#', __('erp.bc_user_management') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Manajemen Pengguna</h3>
-            <p class="text-muted small mb-0">Kontrol hak akses, jabatan, dan divisi pengguna sistem ERP.</p>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.bc_user_management') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.control_user_access_hint') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <button type="submit" form="filterForm" name="export" value="excel" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
@@ -29,26 +29,26 @@
     @endif
 
     <div class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
-        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> Filter Analitik Pencarian</div>
+        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.filter_analytics_search') }}</div>
         <form action="{{ route('users.index') }}" method="GET" id="filterForm" class="row g-2 align-items-end">
             <div class="col-12 col-sm-6 col-md-4">
-                <label class="form-label small fw-bold text-muted mb-1">Role / Hak Akses</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.role_access') }}</label>
                 <select name="role" class="form-select form-select-sm">
-                    <option value="">Semua Role</option>
-                    <option value="ADMIN" {{ request('role') == 'ADMIN' ? 'selected' : '' }}>ADMIN</option>
-                    <option value="FINANCE" {{ request('role') == 'FINANCE' ? 'selected' : '' }}>FINANCE</option>
-                    <option value="STAFF" {{ request('role') == 'STAFF' ? 'selected' : '' }}>STAFF</option>
+                    <option value="">{{ __('erp.all_roles') }}</option>
+                    <option value="ADMIN" {{ request('role') == 'ADMIN' ? 'selected' : '' }}>{{ __('erp.role_admin') }}</option>
+                    <option value="FINANCE" {{ request('role') == 'FINANCE' ? 'selected' : '' }}>{{ __('erp.role_finance') }}</option>
+                    <option value="STAFF" {{ request('role') == 'STAFF' ? 'selected' : '' }}>{{ __('erp.role_staff') }}</option>
                 </select>
             </div>
             <div class="col-12 col-sm-12 col-md-6">
-                <label class="form-label small fw-bold text-muted mb-1">Pencarian Nomor / Keterangan</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number_desc') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                     <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik nama atau email..." value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> Cari</button>
+                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
                 <a href="{{ route('users.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
@@ -59,11 +59,11 @@
             <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size: 0.85rem;">
                 <thead class="table-light text-muted text-uppercase" style="font-size: 0.75rem;">
                     <tr>
-                        <th class="ps-4 py-3">Nama Lengkap</th>
-                        <th>Email Login</th>
-                        <th class="text-center">Hak Akses (Role)</th>
-                        <th class="text-center">Bagian / Divisi</th>
-                        <th class="text-center pe-4">Aksi</th>
+                        <th class="ps-4 py-3">{{ __('erp.full_name') }}</th>
+                        <th>{{ __('erp.login_email') }}</th>
+                        <th class="text-center">{{ __('erp.access_right_role') }}</th>
+                        <th class="text-center">{{ __('erp.department_division') }}</th>
+                        <th class="text-center pe-4">{{ __('erp.action') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -72,9 +72,9 @@
                         <td class="ps-4 py-3 fw-bold text-dark">{{ $u->name }}</td>
                         <td class="text-muted">{{ $u->email }}</td>
                         <td class="text-center">
-                            @if($u->role == 'ADMIN') <span class="badge bg-danger">ADMINISTRATOR</span>
-                            @elseif($u->role == 'FINANCE') <span class="badge bg-primary">FINANCE</span>
-                            @else <span class="badge bg-secondary">STAFF BIASA</span> @endif
+                            @if($u->role == 'ADMIN') <span class="badge bg-danger">{{ __('erp.role_administrator') }}</span>
+                            @elseif($u->role == 'FINANCE') <span class="badge bg-primary">{{ __('erp.role_finance') }}</span>
+                            @else <span class="badge bg-secondary">{{ __('erp.role_regular_staff') }}</span> @endif
                         </td>
                         <td class="text-center fw-medium">{{ $u->nama_divisi ?? 'SEMUA DIVISI (ALL)' }}</td>
                         <td class="text-center pe-4">

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Subledger AR' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.bc_ar_subledger') => null]" />
 @endsection
 
 @section('content')
@@ -51,9 +51,9 @@
             <table class="table table-hover align-middle mb-0 text-nowrap">
                 <thead class="table-dark text-uppercase" style="font-size: 0.85rem;">
                     <tr>
-                        <th class="ps-4 py-3">{{ __('erp.date') }}</th>
+                        <th class="ps-4 py-3">{{ __('erp.ar_sub_date') }}</th>
                         <th class="py-3">{{ __('erp.invoice_no') }}</th>
-                        <th class="py-3">{{ __('erp.description') }}</th>
+                        <th class="py-3">{{ __('erp.ar_sub_description') }}</th>
                         @if($tab == 'tagihan')
                             <th class="text-end py-3">{{ __('erp.total_invoice_value') }}</th>
                             <th class="text-end pe-4 py-3 text-warning">{{ __('erp.remaining_balance') }}</th>
@@ -88,7 +88,7 @@
                         <tr>
                             <td colspan="5" class="text-center py-5 text-muted">
                                 <i class="fa-solid fa-folder-open fs-2 mb-2 d-block text-light"></i>
-                                {{ __('erp.no_data') }}
+                                {{ __('erp.ar_sub_no_data') }}
                             </td>
                         </tr>
                     @endforelse
@@ -109,19 +109,19 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content border-0 shadow">
       <div class="modal-header bg-primary text-white border-bottom-0 rounded-top">
-        <h5 class="modal-title fw-bold" id="journalDetailModalLabel"><i class="fa-solid fa-file-invoice me-2"></i>Detail Transaksi</h5>
+        <h5 class="modal-title fw-bold" id="journalDetailModalLabel"><i class="fa-solid fa-file-invoice me-2"></i>{{ __('erp.transaction_detail') }}</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-4" id="journalDetailModalBody">
         <div class="text-center py-4">
             <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+                <span class="visually-hidden">{{ __('erp.loading_text') }}</span>
             </div>
-            <p class="mt-2 text-muted small">Mengambil rincian mutasi jurnal...</p>
+            <p class="mt-2 text-muted small">{{ __('erp.fetching_journal_mutation') }}</p>
         </div>
       </div>
       <div class="modal-footer bg-light border-top-0 rounded-bottom">
-        <button type="button" class="btn btn-secondary fw-bold shadow-sm" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-secondary fw-bold shadow-sm" data-bs-dismiss="modal">{{ __('erp.close') }}</button>
       </div>
     </div>
   </div>
@@ -136,9 +136,9 @@ function showJournalDetail(evidenceNumber) {
     modalBody.innerHTML = `
         <div class="text-center py-4">
             <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+                <span class="visually-hidden">{{ __('erp.loading_text') }}</span>
             </div>
-            <p class="mt-2 text-muted small">Mengambil rincian mutasi jurnal...</p>
+            <p class="mt-2 text-muted small">{{ __('erp.fetching_journal_mutation') }}</p>
         </div>
     `;
     
@@ -159,7 +159,7 @@ function showJournalDetail(evidenceNumber) {
             }
         })
         .catch(error => {
-            modalBody.innerHTML = '<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Terjadi kesalahan sistem saat mengambil data jurnal.</div>';
+            modalBody.innerHTML = '<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>{{ __('erp.system_error_fetch_journal') }}</div>';
         });
 }
 </script>

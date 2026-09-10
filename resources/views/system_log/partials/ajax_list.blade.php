@@ -1,7 +1,7 @@
 @if($logs->isEmpty())
     <div class="text-center py-4 text-muted">
         <i class="fa-solid fa-clock-rotate-left fa-2x mb-2 opacity-50 d-block"></i>
-        Belum ada riwayat aktivitas yang tercatat untuk data ini.
+        {{ __('erp.no_activity_history') }}
     </div>
 @else
     <div class="position-relative" style="padding-left: 20px;">
@@ -16,7 +16,7 @@
                     <small class="text-muted fw-bold" style="font-size: 0.75rem;"><i class="fa-regular fa-clock me-1"></i>{{ \Carbon\Carbon::parse($log->created_at)->format('d/m/Y H:i:s') }}</small>
                 </div>
                 <div class="fw-medium text-dark small" style="line-height: 1.4;">{{ $log->description }}</div>
-                <div class="text-muted mt-1" style="font-size: 0.7rem;"><i class="fa-solid fa-user me-1"></i>Oleh: <span class="fw-bold">{{ $log->user->name ?? 'System/Robot' }}</span></div>
+                <div class="text-muted mt-1" style="font-size: 0.7rem;"><i class="fa-solid fa-user me-1"></i>{{ __('erp.by_label') }}: <span class="fw-bold">{{ $log->user->name ?? __('erp.system_robot') }}</span></div>
             </div>
         @endforeach
     </div>

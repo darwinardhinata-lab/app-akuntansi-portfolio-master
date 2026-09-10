@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Master Data' => '#', 'Helper Code' => null]" />
+    <x-breadcrumb :links="[__('erp.master_data') => '#', __('erp.bc_helper_code') => null]" />
 @endsection
 
 @section('content')
@@ -27,11 +27,11 @@
     
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Master Kode Bantu (Relasi)</h3>
-            <p class="text-muted small mb-0">Kelola daftar entitas untuk otomatisasi laporan</p>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.helper_code_master_relation') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.manage_entity_list_report_automation') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
-            <button type="button" class="btn btn-danger fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" id="btnTriggerDelete" style="display:none;">Hapus Terpilih</button>
+            <button type="button" class="btn btn-danger fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" id="btnTriggerDelete" style="display:none;">{{ __('erp.delete_selected') }}</button>
 
             <button type="button" class="btn btn-info text-white fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importHelper">
                 <i class="fa-solid fa-file-import me-1"></i> Import CSV
@@ -47,25 +47,25 @@
             <form action="{{ route('helper.import') }}" method="POST" enctype="multipart/form-data" class="modal-content border-0 shadow-lg">
                 @csrf
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold">Import CSV Kode Bantu (Relasi)</h5>
+                    <h5 class="modal-title fw-bold">{{ __('erp.import_csv_helper_code') }}</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body bg-light p-4">
                     <div class="alert alert-info py-2 small mb-3 border-info">
                         <div class="d-flex justify-content-between align-items-center">
-                            <span><i class="fa-solid fa-info-circle me-1"></i> Gunakan susunan kolom template CSV.</span>
+                            <span><i class="fa-solid fa-info-circle me-1"></i> {{ __('erp.use_csv_template_column_arrangement') }}</span>
                             <a href="{{ route('helper.download-template') }}" class="btn btn-sm btn-light border-primary text-primary fw-bold shadow-sm">
                                 <i class="fa-solid fa-download me-1"></i> Download Template
                             </a>
                         </div>
                     </div>
 
-                    <label class="fw-bold text-dark">Pilih File CSV Kode Bantu</label>
+                    <label class="fw-bold text-dark">{{ __('erp.choose_csv_helper_code') }}</label>
                     <input type="file" name="file_excel" accept=".csv, .xls, .xlsx" class="form-control mt-2" required>
                 </div>
                 <div class="modal-footer bg-white">
-                    <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">Mulai Import</button>
+                    <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">{{ __('erp.start_import') }}</button>
                 </div>
             </form>
         </div>
@@ -75,17 +75,17 @@
     @if(session('error')) <div class="alert alert-danger border-0 shadow-sm mb-4">{{ session('error') }}</div> @endif
 
     <div class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
-        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> Filter Analitik Pencarian</div>
+        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.filter_analytics_search') }}</div>
         <form action="{{ route('helper.index') }}" method="GET" id="filterForm" class="row g-2 align-items-end">
             <div class="col-12 col-sm-12 col-md-8">
-                <label class="form-label small fw-bold text-muted mb-1">Pencarian Nomor / Keterangan</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number_desc') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                     <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik Kode atau Nama Entitas / Kategori..." value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> Cari</button>
+                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
                 <a href="{{ route('helper.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
@@ -99,11 +99,11 @@
                     <thead>
                         <tr>
                             <th width="5%"><input type="checkbox" class="form-check-input" id="masterCheckbox"></th>
-                            <th width="15%">Kode Bantu</th>
-                            <th width="35%">Nama Entitas</th>
-                            <th width="15%">Kategori</th>
-                            <th width="15%">Pos Saldo</th>
-                            <th width="15%" class="text-center">Aksi</th>
+                            <th width="15%">{{ __('erp.helper_code') }}</th>
+                            <th width="35%">{{ __('erp.entity_name') }}</th>
+                            <th width="15%">{{ __('erp.category') }}</th>
+                            <th width="15%">{{ __('erp.balance_position') }}</th>
+                            <th width="15%" class="text-center">{{ __('erp.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -120,14 +120,14 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex gap-2 justify-content-center">
-                                        <a href="#" class="btn-action" style="color: #3b82f6; border-color: #dbeafe;">Edit</a>
+                                        <a href="#" class="btn-action" style="color: #3b82f6; border-color: #dbeafe;">{{ __('erp.bc_edit') }}</a>
                                         
-                                        <button type="button" class="btn-action" style="color: #ef4444; border-color: #fee2e2;" onclick="deleteItem('{{ $helper->helper_code }}', '{{ $helper->entity_name }}')">Hapus</button>
+                                        <button type="button" class="btn-action" style="color: #ef4444; border-color: #fee2e2;" onclick="deleteItem('{{ $helper->helper_code }}', '{{ $helper->entity_name }}')">{{ __('erp.delete') }}</button>
                                     </div>
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="text-center py-5">Data masih kosong atau tidak ditemukan.</td></tr>
+                            <tr><td colspan="6" class="text-center py-5">{{ __('erp.data_empty_or_not_found') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
