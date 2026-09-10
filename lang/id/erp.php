@@ -707,9 +707,7 @@ return [
     'worklist_kas_bank' => 'Worklist Kas & Bank',
     'cash_bank_custom_filter' => 'Kas & Bank - Custom Filter',
 
-    'worklist_manual_ap_dp_deposit' => 'Worklist Manual Hutang/UM/Deposit',
     'custom_all_data_filter' => 'Custom (Semua Data + Filter)',
-    'cash_bank_custom_filter' => 'Kas & Bank - Custom Filter',
     'worklist_manual_custom_filter' => 'Worklist Manual - Custom Filter',
     'total_submission_this_month' => 'Total Pengajuan (Bulan Ini)',
     'approved_paid_off' => 'Disetujui / Lunas',
