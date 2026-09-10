@@ -342,7 +342,7 @@ class BalanceSheetController extends Controller
     private function calculateSplitProfits($date, $year)
     {
         $data = JournalDetail::join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
-                ->select('position', DB::raw("STRFTIME('%Y', journal_headers.transaction_date) as year"), DB::raw('SUM(amount) as total'))
+                ->select('position', DB::raw("YEAR(journal_headers.transaction_date) as year"), DB::raw('SUM(amount) as total'))
                 ->where('journal_headers.transaction_date', '<=', $date . ' 23:59:59')
                 ->whereIn(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), ['4', '5', '6', '7', '8', '9'])
                 ->where('journal_headers.notes', 'NOT LIKE', '%SETUP SALDO AWAL%')
@@ -351,7 +351,7 @@ class BalanceSheetController extends Controller
                     $q->whereNull('journal_headers.is_opening_balance')
                       ->orWhere('journal_headers.is_opening_balance', 0);
                 })
-                ->groupBy('position', DB::raw("STRFTIME('%Y', journal_headers.transaction_date)"))
+                ->groupBy('position', DB::raw("YEAR(journal_headers.transaction_date)"))
                 ->get();
 
         $totalLabaDitahan = 0;
