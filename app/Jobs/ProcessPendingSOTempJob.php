@@ -75,10 +75,10 @@ class ProcessPendingSOTempJob implements ShouldQueue
                                     'is_cod' => $tempSo->is_cod ? 1 : 0,
                                     'tracking_number' => $tempSo->tracking_number,
                                     'total_weight' => $weightGram,
-                                    'is_jubelio_shipment' => $tempSo->is_jubelio_shipment ? 1 : 0,
+                                    'is_marketplace_shipment' => $tempSo->is_marketplace_shipment ? 1 : 0,
                                     'courier' => $tempSo->courier,
                                     'status' => 'APPROVED', // Status akuntansi mutlak
-                                    'wms_status' => $tempSo->wms_status ?? null, // Status operasional gudang Jubelio
+                                    'wms_status' => $tempSo->wms_status ?? null, // Status operasional gudang marketplace
                                     'is_paid' => $tempSo->is_paid ? 1 : 0,
 
                                     'sub_total' => $tempSo->sub_total ?? 0,

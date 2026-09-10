@@ -619,11 +619,6 @@
                     <span class="nav-text">{{ __('erp.general_ledger') }}</span>
                 </a>
 
-                <a href="{{ route('reconciliation.index') }}" class="nav-link {{ request()->routeIs('reconciliation.*') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-arrows-left-right text-info"></i></span>
-                    <span class="nav-text">{{ __('erp.jubelio_reconciliation_menu') }}</span>
-                </a>
-
                 <a href="#menuLabaRugi" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('laba-rugi.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
                     <span class="nav-text">{{ __('erp.profit_loss') }}</span>

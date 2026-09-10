@@ -1,25 +1,99 @@
-*.log
-.DS_Store
+```
+# Dependencies
+node_modules/
+
+# Environment
 .env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
-/.fleet
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
-/node_modules
-/public/build
-/public/hot
-/public/storage
-/storage/*.key
-/storage/pail
-/vendor
-Homestead.json
-Homestead.yaml
+.env.local
+.env.*
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
 Thumbs.db
-public/db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git/
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+
+# PHP
+vendor/
+composer.lock
+
+# Build artifacts
+build/
+dist/
+target/
+.gradle/
+*.class
+*.jar
+*.war
+*.ear
+*.o
+*.so
+*.a
+*.obj
+*.out
+*.exe
+*.dll
+*.dylib
+
+# Compression
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+
+# Temp files
+*.tmp
+*.swp
+*.swo
+
+# Coverage
+coverage/
+htmlcov/
+```
