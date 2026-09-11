@@ -39,7 +39,7 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title fw-bold" id="importModalLabel">{{ __('erp.import_general_journal') }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('erp.close_btn') }}"></button>
                     </div>
                     <div class="modal-body">
                         
@@ -87,28 +87,28 @@
             @foreach($errors->all() as $error)
                 {{ $error }}<br>
             @endforeach
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show shadow-sm fw-bold" role="alert">
             <i class="fa-solid fa-triangle-exclamation me-2"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
     @if(session('info'))
         <div class="alert alert-info alert-dismissible fade show shadow-sm fw-bold" role="alert">
             <i class="fa-solid fa-circle-info me-2"></i> {{ session('info') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm fw-bold" role="alert">
             <i class="fa-solid fa-circle-check me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
@@ -135,12 +135,12 @@
                 <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number_desc') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari No. Bukti / Keterangan..." value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="{{ __('erp.search_evidence') }}" value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
-                <a href="{{ route('jurnal.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
+                <a href="{{ route('jurnal.index') }}" class="btn btn-sm btn-danger fw-bold" title="{{ __('erp.reset_filter') }}"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
     </div>
@@ -192,7 +192,7 @@
                                         <td class="align-middle">
                                             <a href="{{ route('trace.document', $header->evidence_number) }}" 
                                                class="text-primary text-decoration-none fw-bold" 
-                                               title="Klik untuk menelusuri dokumen asal">
+                                               title="{{ __('erp.trace_origin_doc') }}">
                                                <i class="fa-solid fa-link fa-sm me-1"></i> {{ $header->evidence_number }}
                                             </a>
                                         </td>
@@ -202,7 +202,7 @@
                                                 </td>
                                                 <td class="text-center align-middle pe-4">
                                                     <div class="btn-group">
-                                                        <button type="button" onclick="showEntityLog('{{ $header->evidence_number }}')" class="btn btn-sm btn-outline-info shadow-sm" title="Jejak Log Aktivitas"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                                                        <button type="button" onclick="showEntityLog('{{ $header->evidence_number }}')" class="btn btn-sm btn-outline-info shadow-sm" title="{{ __('erp.activity_log') }}"><i class="fa-solid fa-clock-rotate-left"></i></button>
                                                         <button type="button" onclick="if(confirm('Hapus jurnal error ini?')) document.getElementById('delete-form-{{ $primaryId }}').submit();" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash-can"></i></button>
                                                     </div>
                                                 </td>
@@ -219,14 +219,14 @@
                                                 <td rowspan="{{ $detailsCount + 1 }}" class="align-top pt-3" style="background-color: #f8fafc;">
                                                     <a href="{{ route('trace.document', $header->evidence_number) }}" 
                                                        class="text-primary text-decoration-none fw-bold" 
-                                                       title="Klik untuk menelusuri dokumen asal">
+                                                       title="{{ __('erp.trace_origin_doc') }}">
                                                        <i class="fa-solid fa-link fa-sm me-1"></i> {{ $header->evidence_number }}
                                                     </a>
                                                     @if($header->source_doc_no)
                                                         <br><small class="text-success fw-bold">
                                                             <a href="{{ route('trace.document', $header->source_doc_no) }}" 
                                                                class="text-success text-decoration-none" 
-                                                               title="Klik untuk menelusuri dokumen operasional asli">
+                                                               title="{{ __('erp.trace_origin_doc') }}">
                                                                <i class="fa-solid fa-file-invoice fa-sm me-1"></i> {{ $header->source_doc_no }}
                                                             </a>
                                                         </small>
@@ -246,7 +246,7 @@
                                             @if($index == 0)
                                                 <td rowspan="{{ $detailsCount + 1 }}" class="text-center align-top pe-4 pt-3" style="background-color: #f8fafc;">
                                                     <div class="btn-group">
-                                                        <button type="button" onclick="showEntityLog('{{ $header->evidence_number }}')" class="btn btn-sm btn-outline-info shadow-sm" title="Jejak Log Aktivitas"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                                                        <button type="button" onclick="showEntityLog('{{ $header->evidence_number }}')" class="btn btn-sm btn-outline-info shadow-sm" title="{{ __('erp.activity_log') }}"><i class="fa-solid fa-clock-rotate-left"></i></button>
                                                         <a href="{{ route('jurnal.edit', $primaryId) }}" class="btn btn-sm btn-outline-primary shadow-sm"><i class="fa-solid fa-pen-to-square"></i></a>
                                                         <button type="button" onclick="if(confirm('Hapus jurnal ini?')) document.getElementById('delete-form-{{ $primaryId }}').submit();" class="btn btn-sm btn-outline-danger shadow-sm"><i class="fa-solid fa-trash-can"></i></button>
                                                     </div>

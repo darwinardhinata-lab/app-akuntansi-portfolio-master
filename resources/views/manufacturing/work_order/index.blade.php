@@ -34,7 +34,7 @@
         <div class="card-body py-2">
             <form method="GET" class="row g-2 align-items-center">
                 <div class="col-md-4">
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari No. SPK / Nama Garmen / Style SKU" value="{{ $search }}">
+                    <input type="text" name="search" class="form-control form-control-sm" placeholder="{{ __('erp.search_spk') }}" value="{{ $search }}">
                 </div>
                 <div class="col-md-3">
                     <select name="status" class="form-select form-select-sm">

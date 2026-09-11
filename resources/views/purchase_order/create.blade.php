@@ -37,7 +37,7 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.po_number') }} <span class="text-danger">*</span></label>
-                                <input type="text" name="po_number" class="form-control fw-bold" placeholder="PO-XXXX" required>
+                                <input type="text" name="po_number" class="form-control fw-bold" placeholder="{{ __('erp.po_number_ph') }}" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.transaction_date') }} <span class="text-danger">*</span></label>
@@ -45,7 +45,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.supplier_vendor_name') }} <span class="text-danger">*</span></label>
-                                <input type="text" name="contact_name" class="form-control" placeholder="Masukkan nama vendor..." required>
+                                <input type="text" name="contact_name" class="form-control" placeholder="{{ __('erp.enter_vendor_name') }}" required>
                             </div>
                         </div>
                     </div>
@@ -71,7 +71,7 @@
                                 </thead>
                                 <tbody id="baris-po">
                                     <tr>
-                                        <td><input type="text" name="details[0][item_code]" class="form-control form-control-sm" placeholder="Ketik SKU..." required></td>
+                                        <td><input type="text" name="details[0][item_code]" class="form-control form-control-sm" placeholder="{{ __('erp.type_sku_ph') }}" required></td>
                                         <td><input type="text" name="details[0][description]" class="form-control form-control-sm"></td>
                                         <td><input type="number" name="details[0][price]" class="form-control form-control-sm text-end price-input" value="0" min="0" required></td>
                                         <td><input type="number" name="details[0][qty]" class="form-control form-control-sm text-center qty-input" value="1" min="1" required></td>
@@ -170,7 +170,7 @@
         const tbody = document.getElementById('baris-po');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input type="text" name="details[${barisCount}][item_code]" class="form-control form-control-sm" placeholder="Ketik SKU..." required></td>
+            <td><input type="text" name="details[${barisCount}][item_code]" class="form-control form-control-sm" placeholder="{{ __('erp.type_sku_ph') }}" required></td>
             <td><input type="text" name="details[${barisCount}][description]" class="form-control form-control-sm"></td>
             <td><input type="number" name="details[${barisCount}][price]" class="form-control form-control-sm text-end price-input" value="0" min="0" required></td>
             <td><input type="number" name="details[${barisCount}][qty]" class="form-control form-control-sm text-center qty-input" value="1" min="1" required></td>

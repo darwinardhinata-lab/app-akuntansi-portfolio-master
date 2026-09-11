@@ -43,7 +43,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.customer_required') }}</label>
-                                <input type="text" name="contact_name" class="form-control" placeholder="Nama Customer" required>
+                                <input type="text" name="contact_name" class="form-control" placeholder="{{ __('erp.customer_name') }}" required>
                             </div>
                         </div>
                     </div>

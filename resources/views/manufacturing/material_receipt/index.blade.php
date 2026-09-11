@@ -37,7 +37,7 @@
         <div class="card-body py-2">
             <form method="GET" class="row g-2">
                 <div class="col-md-4">
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari No. MRN" value="{{ $search }}">
+                    <input type="text" name="search" class="form-control form-control-sm" placeholder="{{ __('erp.search_mrn') }}" value="{{ $search }}">
                 </div>
                 <div class="col-md-2"><button type="submit" class="btn btn-sm btn-outline-primary w-100">{{ __('erp.filter_label') }}</button></div>
             </form>

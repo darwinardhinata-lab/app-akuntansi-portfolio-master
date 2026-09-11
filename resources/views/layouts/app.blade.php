@@ -334,7 +334,7 @@
     <button class="btn-hamburger" id="btnHamburger" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
     <a href="{{ route('dashboard') }}" class="topbar-brand">
         @if($hasLogo)
-            <img src="{{ asset('storage/' . $companyProfile->logo) }}" alt="Logo" style="height: 30px; max-width: 100px; object-fit: contain; margin-right: 8px; border-radius: 4px;">
+            <img src="{{ asset('storage/' . $companyProfile->logo) }}" alt="{{ __('erp.logo_alt') }}" style="height: 30px; max-width: 100px; object-fit: contain; margin-right: 8px; border-radius: 4px;">
         @else
             <div class="icon"><i class="fa-solid fa-layer-group"></i></div>
         @endif
@@ -347,7 +347,7 @@
 <aside class="sidebar d-flex flex-column vh-100" id="sidebar">
     <a href="{{ route('dashboard') }}" class="sidebar-brand" onclick="closeSidebar()">
         @if($hasLogo)
-            <img src="{{ asset('storage/' . $companyProfile->logo) }}" alt="Logo" style="height: 35px; max-width: 100px; object-fit: contain; margin-right: 10px; border-radius: 4px;">
+            <img src="{{ asset('storage/' . $companyProfile->logo) }}" alt="{{ __('erp.logo_alt') }}" style="height: 35px; max-width: 100px; object-fit: contain; margin-right: 10px; border-radius: 4px;">
         @else
             <div class="sidebar-brand-icon"><i class="fa-solid fa-layer-group"></i></div>
         @endif
@@ -746,7 +746,7 @@
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
             <div class="modal-header bg-light border-bottom-0">
                 <h6 class="modal-title fw-bold text-dark"><i class="fa-solid fa-list-check me-2 text-primary"></i> Jejak Aktivitas (<span id="logKeywordTitle" class="text-secondary"></span>)</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('erp.close_btn') }}"></button>
             </div>
             <div class="modal-body p-4" id="globalLogContent">
             </div>

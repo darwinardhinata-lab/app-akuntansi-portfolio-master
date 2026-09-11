@@ -52,7 +52,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold small text-muted">{{ __('erp.delivery_note_bill_no_required') }}</label>
-                        <input type="text" name="bill_number" class="form-control fw-bold" placeholder="Misal: SJ-001 / INV-001" required>
+                        <input type="text" name="bill_number" class="form-control fw-bold" placeholder="{{ __('erp.eg_delivery_note_inv') }}" required>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold small text-muted">{{ __('erp.receive_in_date_required') }}</label>

@@ -141,7 +141,7 @@
             <div class="mb-4">
                 @if(isset($companyProfile) && $companyProfile->logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($companyProfile->logo))
                     <div class="d-inline-flex align-items-center justify-content-center bg-white p-2 rounded-3 shadow-sm mb-3" style="max-height: 60px;">
-                        <img src="{{ asset('storage/' . $companyProfile->logo) }}" alt="Logo" style="max-height: 44px; max-width: 140px; object-fit: contain;">
+                        <img src="{{ asset('storage/' . $companyProfile->logo) }}" alt="{{ __('erp.logo_alt') }}" style="max-height: 44px; max-width: 140px; object-fit: contain;">
                     </div>
                 @else
                     <div class="d-inline-flex align-items-center justify-content-center bg-white text-primary rounded-3 shadow-sm mb-3" style="width: 52px; height: 52px; font-size: 1.6rem;">
@@ -217,7 +217,7 @@
 
                 <div class="col-md-6">
                     <label class="form-label">{{ __('erp.requester_pic') }} <span class="text-danger">*</span></label>
-                    <input type="text" name="penerima_pj" class="form-control" placeholder="Nama Lengkap Karyawan" value="{{ old('penerima_pj') }}" required>
+                    <input type="text" name="penerima_pj" class="form-control" placeholder="{{ __('erp.employee_full_name') }}" value="{{ old('penerima_pj') }}" required>
                 </div>
 
                 <div class="col-md-6">
@@ -244,17 +244,17 @@
 
                 <div class="col-md-6">
                     <label class="form-label">{{ __('erp.destination_store_vendor') }} <span class="text-danger">*</span></label>
-                    <input type="text" name="vendor_toko" class="form-control" placeholder="Nama Toko atau Supplier" value="{{ old('vendor_toko') }}" required>
+                    <input type="text" name="vendor_toko" class="form-control" placeholder="{{ __('erp.store_supplier_name') }}" value="{{ old('vendor_toko') }}" required>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label">{{ __('erp.account_no_va') }} <span class="text-muted text-lowercase" style="font-weight: 500;">{{ __('erp.optional_paren') }}</span></label>
-                    <input type="text" name="rekening_va" class="form-control" placeholder="Nama Bank - Nomor - Atas Nama" value="{{ old('rekening_va') }}">
+                    <input type="text" name="rekening_va" class="form-control" placeholder="{{ __('erp.bank_number_holder_ph') }}" value="{{ old('rekening_va') }}">
                 </div>
 
                 <div class="col-12">
                     <label class="form-label">{{ __('erp.submission_purpose') }} <span class="text-danger">*</span></label>
-                    <textarea name="keterangan" class="form-control" rows="2" placeholder="Jelaskan secara rinci detail item dan tujuan penggunaan dana..." required>{{ old('keterangan') }}</textarea>
+                    <textarea name="keterangan" class="form-control" rows="2" placeholder="{{ __('erp.explain_item_purpose_ph') }}" required>{{ old('keterangan') }}</textarea>
                 </div>
 
                 <div class="col-12">
@@ -275,7 +275,7 @@
                 <div class="col-12 mt-2">
                     <div class="p-3 rounded-3 border" style="background-color: #f8fafc; border-color: #cbd5e1;">
                         <label class="form-label text-primary"><i class="fa-solid fa-lock me-1"></i> {{ __('erp.security_authorization') }} <span class="text-danger">*</span></label>
-                        <input type="password" name="pin_perusahaan" inputmode="numeric" pattern="[0-9]*" class="form-control" placeholder="Masukkan PIN Perusahaan" required>
+                        <input type="password" name="pin_perusahaan" inputmode="numeric" pattern="[0-9]*" class="form-control" placeholder="{{ __('erp.enter_company_pin') }}" required>
                         <small class="text-muted mt-1 d-block" style="font-size: 0.8rem;">{{ __('erp.internal_employee_pin_hint') }}</small>
                     </div>
                 </div>

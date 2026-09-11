@@ -93,12 +93,12 @@
                 <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_number_desc') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik kata kunci..." value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="{{ __('erp.search_placeholder') }}" value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
-                <a href="{{ route('po.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
+                <a href="{{ route('po.index') }}" class="btn btn-sm btn-danger fw-bold" title="{{ __('erp.reset_filter') }}"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
     </div>
@@ -130,7 +130,7 @@
                         <td class="fw-bold text-primary">
                             {{ $o->po_number }}
                             @if($isUangMuka)
-                                <i class="fa-solid fa-money-check-dollar text-success ms-1" title="Terkoneksi Payment Plan"></i>
+                                <i class="fa-solid fa-money-check-dollar text-success ms-1" title="{{ __('erp.connected_payment_plan') }}"></i>
                             @endif
                         </td>
                         <td class="fw-bold text-dark">
@@ -156,12 +156,12 @@
                                     </button>
                                 @endif
 
-                                <button type="button" onclick="showEntityLog('{{ $o->po_number }}')" class="btn btn-sm btn-outline-info shadow-sm" title="Jejak Log Aktivitas"><i class="fa-solid fa-clock-rotate-left"></i></button>
+                                <button type="button" onclick="showEntityLog('{{ $o->po_number }}')" class="btn btn-sm btn-outline-info shadow-sm" title="{{ __('erp.activity_log') }}"><i class="fa-solid fa-clock-rotate-left"></i></button>
                                 
-                                <a href="{{ route('po.edit', $o->id) }}" class="btn btn-sm btn-outline-primary shadow-sm" title="Edit PO"><i class="fa-solid fa-pen"></i></a>
+                                <a href="{{ route('po.edit', $o->id) }}" class="btn btn-sm btn-outline-primary shadow-sm" title="{{ __('erp.edit_po') }}"><i class="fa-solid fa-pen"></i></a>
                                 <form action="{{ route('po.destroy', $o->id) }}" method="POST" class="m-0 d-inline" onsubmit="return confirm('Batalkan dan Hapus PO ini secara permanen?')">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" title="Hapus PO"><i class="fa-solid fa-trash-can"></i></button>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm" title="{{ __('erp.delete_po') }}"><i class="fa-solid fa-trash-can"></i></button>
                                 </form>
                             </div>
 
@@ -182,13 +182,13 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <small class="text-muted fw-bold text-uppercase d-block">{{ __('erp.supplier_bill_no_required') }}</small>
-                                                    <input type="text" name="bill_number" class="form-control form-control-sm fw-bold" placeholder="Misal: INV-SUP-01" required>
+                                                    <input type="text" name="bill_number" class="form-control form-control-sm fw-bold" placeholder="{{ __('erp.eg_supplier_inv') }}" required>
                                                 </div>
                                                 <div class="col-md-3 text-md-end">
                                                     <small class="text-muted fw-bold text-uppercase d-block">{{ __('erp.bill_date_due_date') }}</small>
                                                     <div class="d-flex gap-1 justify-content-end">
-                                                        <input type="date" name="receive_date" class="form-control form-control-sm fw-bold w-auto" value="{{ date('Y-m-d') }}" title="Tanggal Tagihan" required>
-                                                        <input type="date" name="due_date" class="form-control form-control-sm fw-bold w-auto" title="Jatuh Tempo (Opsional)">
+                                                        <input type="date" name="receive_date" class="form-control form-control-sm fw-bold w-auto" value="{{ date('Y-m-d') }}" title="{{ __('erp.bill_date') }}" required>
+                                                        <input type="date" name="due_date" class="form-control form-control-sm fw-bold w-auto" title="{{ __('erp.due_date_optional') }}">
                                                     </div>
                                                 </div>
                                             </div>

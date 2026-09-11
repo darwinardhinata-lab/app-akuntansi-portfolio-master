@@ -107,13 +107,6 @@
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-bold small text-muted">{{ __('erp.marketplace_shipment') }}</label>
-                                <select name="is_marketplace_shipment" class="form-select">
-                                    <option value="0" {{ $so->is_marketplace_shipment == 0 ? 'selected' : '' }}>{{ __('erp.no_word') }}</option>
-                                    <option value="1" {{ $so->is_marketplace_shipment == 1 ? 'selected' : '' }}>{{ __('erp.yes_label') }}</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.total_weight_gram') }}</label>
                                 <div class="input-group">
                                     <input type="number" name="total_weight" class="form-control text-end" value="{{ $so->total_weight }}">

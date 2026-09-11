@@ -43,7 +43,7 @@
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title fw-bold" id="importSaldoModalLabel">{{ __('erp.import_opening_balance') }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('erp.close_btn') }}"></button>
                     </div>
                     <div class="modal-body">
                         <div class="alert alert-info py-3 small">

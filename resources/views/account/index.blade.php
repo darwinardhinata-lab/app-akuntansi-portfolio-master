@@ -63,14 +63,14 @@
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
             <i class="fa-solid fa-circle-check me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
             <i class="fa-solid fa-triangle-exclamation me-2"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
@@ -104,12 +104,12 @@
                 <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_account') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik Kode atau Nama Akun..." value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="{{ __('erp.search_account') }}" value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
-                <a href="{{ route('account.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
+                <a href="{{ route('account.index') }}" class="btn btn-sm btn-danger fw-bold" title="{{ __('erp.reset_filter') }}"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
     </div>
@@ -146,13 +146,13 @@
                                 </td>
                                 <td class="text-center pe-4">
                                     <div class="btn-group flex-nowrap">
-                                        <a href="{{ route('account.edit', $acc->account_code ?? $acc->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                        <a href="{{ route('account.edit', $acc->account_code ?? $acc->id) }}" class="btn btn-sm btn-outline-primary" title="{{ __('erp.edit_btn') }}">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
                                         <form action="{{ route('account.destroy', $acc->account_code ?? $acc->id) }}" method="POST" onsubmit="return confirm('Hapus akun ini secara permanen?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('erp.delete_btn') }}">
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </form>

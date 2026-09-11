@@ -14,17 +14,15 @@
         <div class="d-flex flex-wrap gap-2">
             <div class="btn-group flex-grow-1 flex-md-grow-0">
                 <button type="button" class="btn btn-success fw-bold px-3 shadow-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fa-solid fa-file-export me-1"></i> {{ __('erp.export_btn') }}
+                    <i class="fa-solid fa-file-export me-1"></i> Export
                 </button>
                 <ul class="dropdown-menu shadow-sm">
                     <li><h6 class="dropdown-header">{{ __('erp.quick_submitted_only') }}</h6></li>
-                    <li><a class="dropdown-item" href="{{ route('payment.export.worklist') }}"><i class="fa-solid fa-list-check me-1 text-warning"></i> {{ __('erp.worklist_manual_ap_dp_deposit') }}</a></li>
-                    <li><a class="dropdown-item" href="{{ route('payment.export.kasbank') }}"><i class="fa-solid fa-money-bill-transfer me-1 text-info"></i> {{ __('erp.worklist_kas_bank') }}</a></li>
-                    <li><hr class="dropdown-divider"></li>
-
+                    <li><a class="dropdown-item" href="{{ route('payment.export.kasbank') }}"><i class="fa-solid fa-building-columns me-1 text-primary"></i> {{ __('erp.cash_bank_ready_import') }}</a></li>
                     <li><a class="dropdown-item" href="{{ route('payment.export.worklist') }}"><i class="fa-solid fa-list-check me-1 text-warning"></i> {{ __('erp.worklist_manual_ap_dp_deposit') }}</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><h6 class="dropdown-header">{{ __('erp.custom_all_data_filter') }}</h6></li>
+                    <li><a class="dropdown-item" href="#" data-target="{{ route('payment.export.kasbank') }}" onclick="openExportModal(event, this)"><i class="fa-solid fa-sliders me-1 text-primary"></i> {{ __('erp.cash_bank_custom_filter') }}</a></li>
                     <li><a class="dropdown-item" href="#" data-target="{{ route('payment.export.worklist') }}" onclick="openExportModal(event, this)"><i class="fa-solid fa-sliders me-1 text-warning"></i> {{ __('erp.worklist_manual_custom_filter') }}</a></li>
                 </ul>
             </div>
@@ -50,14 +48,14 @@
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
             <strong><i class="fas fa-check-circle"></i> {{ __('erp.success_excl') }}</strong> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
             <strong><i class="fas fa-exclamation-triangle"></i> {{ __('erp.error_occurred_excl') }}</strong> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
@@ -161,12 +159,12 @@
                 <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_label') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Ketik No / Vendor..." value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="{{ __('erp.search_vendor') }}" value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-1 d-flex gap-2">
                 <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i></button>
-                <a href="{{ route('payment.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
+                <a href="{{ route('payment.index') }}" class="btn btn-sm btn-danger fw-bold" title="{{ __('erp.reset_filter') }}"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
     </div>
@@ -210,7 +208,7 @@
                                 </td>
                                 <td class="text-center py-2">
                                     @if($details->count() > 0)
-                                    <button type="button" class="btn btn-sm btn-outline-secondary p-1" style="width: 26px; height: 26px;" data-bs-toggle="collapse" data-bs-target="#detail-{{ $item->id_payment }}" aria-expanded="false" title="Lihat rincian item">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary p-1" style="width: 26px; height: 26px;" data-bs-toggle="collapse" data-bs-target="#detail-{{ $item->id_payment }}" aria-expanded="false" title="{{ __('erp.view_item_details') }}">
                                         <i class="fa-solid fa-chevron-down"></i>
                                     </button>
                                     @endif
@@ -264,7 +262,7 @@
                                                     }
                                                 }
                                             @endphp
-                                            <input type="text" class="form-control form-control-sm coa-search-input {{ $item->id_akun ? 'border-success text-success fw-bold' : 'border-danger' }}" style="font-size: 12.5px;" placeholder="Cari Detil Akun (COA)..." value="{{ $displayValue }}" {{ $item->status_payment == 'POSTED' ? 'disabled' : '' }} autocomplete="off">
+                                            <input type="text" class="form-control form-control-sm coa-search-input {{ $item->id_akun ? 'border-success text-success fw-bold' : 'border-danger' }}" style="font-size: 12.5px;" placeholder="{{ __('erp.search_coa') }}" value="{{ $displayValue }}" {{ $item->status_payment == 'POSTED' ? 'disabled' : '' }} autocomplete="off">
                                             <div class="coa-dropdown-menu position-absolute w-100 bg-white border rounded shadow-sm text-start" style="top: 100%; left: 0; z-index: 1050; max-height: 220px; overflow-y: auto; display: none; margin-top: 2px;">
                                                 <div class="coa-options-container"></div>
                                             </div>
@@ -285,21 +283,21 @@
                                 <td class="text-end fw-bold text-success py-2">{{ number_format($item->nominal_aktual_efektif, 0, ',', '.') }}</td>
                                 <td class="text-center py-2">
                                     <div class="btn-group" role="group">
-                                        <button type="button" onclick="showEntityLog('{{ $item->no_transaksi }}')" class="btn btn-sm btn-outline-secondary" title="Jejak Log Aktivitas">
+                                        <button type="button" onclick="showEntityLog('{{ $item->no_transaksi }}')" class="btn btn-sm btn-outline-secondary" title="{{ __('erp.activity_log') }}">
                                             <i class="fa-solid fa-clock-rotate-left"></i>
                                         </button>
                                         @if(!empty($item->bukti_file))
-                                            <a href="{{ $item->bukti_file }}" target="_blank" class="btn btn-sm btn-outline-info text-dark" title="Lihat Bukti Nota/Upload">
+                                            <a href="{{ $item->bukti_file }}" target="_blank" class="btn btn-sm btn-outline-info text-dark" title="{{ __('erp.view_receipt_proof') }}">
                                                 <i class="fas fa-paperclip"></i>
                                             </a>
                                         @endif
-                                        <a href="{{ route('payment.edit', $item->id_payment) }}" class="btn btn-sm btn-outline-warning" title="Edit Data">
+                                        <a href="{{ route('payment.edit', $item->id_payment) }}" class="btn btn-sm btn-outline-warning" title="{{ __('erp.edit_data') }}">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('payment.destroy', $item->id_payment) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus pengajuan Payment Plan ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus Data">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('erp.delete_data') }}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -338,7 +336,7 @@
                                                         </td>
                                                         <td class="text-center">
                                                             @if($d->bukti_file)
-                                                                <a href="{{ $d->bukti_file }}" target="_blank" title="Lihat bukti item ini">
+                                                                <a href="{{ $d->bukti_file }}" target="_blank" title="{{ __('erp.view_item_proof') }}">
                                                                     <i class="fa-solid fa-paperclip text-primary"></i>
                                                                 </a>
                                                             @else
