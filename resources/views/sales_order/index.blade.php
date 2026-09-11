@@ -13,18 +13,18 @@
         </div>
         <div class="d-flex flex-wrap gap-2">
             <button type="submit" form="filterForm" name="export" value="excel" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
-                <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                <i class="fa-solid fa-file-excel me-1"></i> {{ __('erp.export_excel_btn') }}
             </button>
             <button type="button" class="btn btn-warning fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0 text-dark" id="btnSyncSOTemp">
                 <i class="fa-solid fa-rotate me-2"></i> Sync ke Temp
             </button>
             
             <button type="button" class="btn btn-info text-white fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importSO">
-                <i class="fa-solid fa-file-import me-1"></i> Import CSV
+                <i class="fa-solid fa-file-import me-1"></i> {{ __('erp.import_csv_btn') }}
             </button>
 
             <a href="{{ route('so.create') }}" class="btn btn-primary fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
-                <i class="fa-solid fa-plus me-1"></i> Buat Manual
+                <i class="fa-solid fa-plus me-1"></i> {{ __('erp.create_manual_btn') }}
             </a>
         </div>
     </div>
@@ -49,7 +49,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <span><i class="fa-solid fa-info-circle me-1"></i> {{ __('erp.use_standard_csv_format') }}</span>
                             <a href="{{ route('so.template') }}" class="btn btn-sm btn-light border-primary text-primary fw-bold shadow-sm">
-                                <i class="fa-solid fa-download me-1"></i> Download Template
+                                <i class="fa-solid fa-download me-1"></i> {{ __('erp.download_template_btn') }}
                             </a>
                         </div>
                     </div>

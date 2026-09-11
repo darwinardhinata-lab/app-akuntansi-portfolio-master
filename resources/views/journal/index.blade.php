@@ -18,16 +18,16 @@
                 'end_date' => request('end_date'),
                 'search' => request('search')
             ]) }}" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
-                <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                <i class="fa-solid fa-file-excel me-1"></i> {{ __('erp.export_excel_btn') }}
             </a>
             <button type="button" class="btn btn-warning fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0 text-dark" id="btnSyncTemp">
                 <i class="fa-solid fa-rotate me-2"></i> Sync ke Temp
             </button>
             <button type="button" class="btn btn-info text-white fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importModal">
-                <i class="fa-solid fa-file-import me-1"></i> Import CSV
+                <i class="fa-solid fa-file-import me-1"></i> {{ __('erp.import_csv_btn') }}
             </button>
             <a href="{{ route('jurnal.create') }}" class="btn btn-primary fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
-                <i class="fa-solid fa-plus me-1"></i> Buat Manual
+                <i class="fa-solid fa-plus me-1"></i> {{ __('erp.create_manual_btn') }}
             </a>
         </div>
     </div>
@@ -47,7 +47,7 @@
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h6 class="fw-bold mb-0"><i class="fa-solid fa-circle-info"></i> {{ __('erp.csv_format_9col') }}</h6>
                                 <a href="{{ route('jurnal.download-template') }}" class="btn btn-sm btn-light border-primary text-primary fw-bold shadow-sm" style="font-size: 0.75rem;">
-                                    <i class="fa-solid fa-download me-1"></i> Download Template
+                                    <i class="fa-solid fa-download me-1"></i> {{ __('erp.download_template_btn') }}
                                 </a>
                             </div>
                             Kolom 1: Tanggal<br>
@@ -72,7 +72,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
                         <button type="submit" class="btn btn-primary fw-bold">
-                            <i class="fa-solid fa-upload me-1"></i> Proses Import
+                            <i class="fa-solid fa-upload me-1"></i> {{ __('erp.process_import_btn') }}
                         </button>
                     </div>
                 </form>
@@ -150,7 +150,7 @@
 
         <div class="mb-3">
             <button type="submit" class="btn btn-sm btn-danger fw-bold px-3 shadow-sm">
-                <i class="fa-solid fa-trash-can me-2"></i> Hapus Massal Terpilih
+                <i class="fa-solid fa-trash-can me-2"></i> {{ __('erp.delete_btn') }} Massal Terpilih
             </button>
         </div>
 

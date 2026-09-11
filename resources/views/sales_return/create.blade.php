@@ -78,7 +78,7 @@
         <div class="d-flex justify-content-end gap-2">
             <a href="{{ route('sales-returns.index') }}" class="btn btn-lg btn-light fw-bold px-4">{{ __('erp.cancel') }}</a>
             <button type="submit" class="btn btn-lg btn-primary fw-bold px-5 shadow-sm">
-                <i class="fa-solid fa-save me-1"></i> Simpan & Lanjut Pemeriksaan
+                <i class="fa-solid fa-save me-1"></i> {{ __('erp.save_continue_btn') }}
             </button>
         </div>
     </form>

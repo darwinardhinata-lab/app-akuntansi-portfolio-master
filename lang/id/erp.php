@@ -4,34 +4,28 @@ return [
     'main_menu' => 'Menu Utama',
     'dashboard' => 'Dashboard',
     'user_management' => 'Manajemen User',
-    
     'master_planning' => 'Data Master & Perencanaan',
     'master_product' => 'Master Barang',
     'master_division' => 'Master Divisi',
     'budgeting' => 'Budgeting',
-    
     'sales_inflow' => 'Manajemen Penjualan (Inflow)',
     'sales_order' => 'Sales Order (SO)',
     'sales_invoice' => 'Faktur Penjualan',
-    
     'expense_outflow' => 'Manajemen Pengeluaran (Outflow)',
     'purchase_order' => 'Purchase Order (PO)',
     'purchase_return' => 'Retur Pembelian',
     'purchase_bill' => 'Tagihan Pembelian (BIL)',
     'payment_plan' => 'Payment Plan',
-    
     'accounting' => 'Akuntansi',
     'master_data' => 'Master Data',
     'coa' => 'Kode Akun (COA)',
     'helper_code' => 'Kode Bantu',
     'tax_master' => 'Master Pajak (Tax)',
-    
     'transaction' => 'Transaksi',
     'general_journal' => 'Jurnal Umum',
     'fixed_asset' => 'Aset Tetap',
     'new_asset' => 'Data Aset Baru',
     'depreciation_list' => 'List Depresiasi',
-    
     'reports' => 'Laporan',
     'general_ledger' => 'Buku Besar',
     'profit_loss' => 'Laba Rugi',
@@ -41,21 +35,15 @@ return [
     'cash_flow' => 'Arus Kas',
     'direct_method' => 'Metode Langsung',
     'indirect_method' => 'Metode Tidak Langsung',
-    
     'cogs_chronology' => 'Kronologi HPP Barang',
     'tag_report' => 'Laporan per Tag/Proyek',
     'ar_dp' => 'Piutang & Uang Muka Jual',
     'ar_subledger' => 'Rincian Piutang & Uang Muka Jual',
     'ap_subledger' => 'Rincian Hutang & Uang Muka Beli',
     'ap_dp' => 'Hutang & Uang Muka Beli',
-    
     'select_language' => 'Pilih Bahasa',
     'dark_mode' => 'Mode Gelap',
     'logout' => 'Keluar',
-
-    // ... (kosakata sebelumnya)
-    
-    // Kamus Halaman Piutang
     'ar_management_title' => 'Manajemen Piutang Penjualan',
     'ar_management_desc' => 'Buku Besar Pembantu Piutang, pelacakan tagihan konsumen, cicilan, dan retur.',
     'unpaid_bill' => 'Tagihan (Belum Lunas)',
@@ -70,8 +58,6 @@ return [
     'ar_sub_no_data' => 'Belum ada riwayat transaksi pada kategori ini.',
     'filter_active' => 'Menampilkan rincian khusus Akun:',
     'clear_filter' => 'Hapus Filter',
-
-    // KOSAKATA GLOBAL (Tombol & Pop-up)
     'add_new' => 'Tambah Data Baru',
     'save' => 'Simpan Data',
     'edit' => 'Ubah',
@@ -84,14 +70,10 @@ return [
     'print' => 'Cetak',
     'export' => 'Unduh Excel',
     'detail' => 'Lihat Detail',
-    
-    // KOSAKATA MODAL / POP-UP
     'confirm_delete_title' => 'Konfirmasi Hapus',
     'confirm_delete_msg' => 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.',
     'success_save' => 'Data berhasil disimpan!',
     'error_save' => 'Terjadi kesalahan saat menyimpan data.',
-    
-    // KOSAKATA TABEL UMUM & JURNAL
     'date' => 'Tanggal',
     'description' => 'Keterangan',
     'account' => 'Nama Akun',
@@ -100,22 +82,17 @@ return [
     'balance' => 'Saldo',
     'total' => 'Total',
     'no_data' => 'Belum ada data tersedia.',
-    
-    // MASTER BARANG
     'product_code' => 'Kode Barang',
     'product_name' => 'Nama Barang',
     'category' => 'Kategori',
     'buy_price' => 'Harga Beli',
     'sell_price' => 'Harga Jual',
     'stock' => 'Stok Saat Ini',
-
     'home' => 'Beranda',
     'journal' => 'Jurnal',
     'payment' => 'Payment',
     'report' => 'Laporan',
     'all_menu' => 'Semua',
-
-    // KOSAKATA DASHBOARD
     'executive_dashboard' => 'Dashboard Eksekutif',
     'latest_financial_summary' => 'Ringkasan keuangan terkini',
     'fiscal_year' => 'Tahun Buku',
@@ -180,8 +157,6 @@ return [
     'income_mil' => 'Pemasukan (jt)',
     'expense_mil' => 'Pengeluaran (jt)',
     'net_cash_mil' => 'Net Cash (jt)',
-
-    // === MANUFACTURING MODULE (MFG) ===
     'mfg_module' => 'Manufaktur',
     'mfg_work_orders' => 'Surat Perintah Kerja (SPK)',
     'mfg_material_receipt' => 'Penerimaan Bahan (MRN)',
@@ -190,14 +165,10 @@ return [
     'mfg_master_supplier' => 'Master Supplier/Vendor',
     'mfg_master_process' => 'Master Rate Proses',
     'mfg_report_hpp' => 'Laporan HPP Manufaktur',
-
-    // Status
     'mfg_status_open' => 'Terbuka',
     'mfg_status_in_progress' => 'Sedang Diproses',
     'mfg_status_completed' => 'Selesai',
     'mfg_status_voided' => 'Dibatalkan',
-
-    // Process Types
     'mfg_process_knitting' => 'Knitting (Rajut)',
     'mfg_process_dyeing' => 'Dyeing (Celup)',
     'mfg_process_printing' => 'Printing (Cetak)',
@@ -205,33 +176,21 @@ return [
     'mfg_process_cutting' => 'Cutting (Potong)',
     'mfg_process_stitching' => 'Stitching (Jahit)',
     'mfg_process_other' => 'Lainnya',
-
-    // Fabric States
     'mfg_fabric_grey' => 'Kain Grey (Mentah)',
     'mfg_fabric_finished' => 'Kain Finished (Jadi)',
-
-    // Finishing Stages
     'mfg_stage_washing' => 'Washing (Cuci)',
     'mfg_stage_ironing' => 'Ironing (Setrika)',
     'mfg_stage_qc' => 'Quality Control',
     'mfg_stage_packing' => 'Packing (Kemas)',
     'mfg_stage_other' => 'Lainnya',
-
-    // Material Types
     'mfg_material_yarn' => 'Benang',
     'mfg_material_fabric' => 'Kain',
-
-    // Ledger Types
     'mfg_ledger_in' => 'Masuk',
     'mfg_ledger_out' => 'Keluar',
-
-    // Success Messages
     'mfg_processing_order_created' => 'Processing Order :number berhasil dibuat.',
     'mfg_material_receipt_created' => 'MRN :number berhasil dicatat & jurnal diposting.',
     'mfg_work_order_completed' => 'SPK :number berhasil diselesaikan. HPP dihitung ulang.',
     'mfg_void_success' => 'Dokumen :number berhasil dibatalkan. Jurnal pembalik diposting.',
-
-    // Error Messages
     'mfg_processing_order_failed' => 'Gagal membuat Processing Order: :reason',
     'mfg_material_receipt_failed' => 'Gagal mencatat MRN: :reason',
     'mfg_fabric_stock_insufficient' => 'Stok kain :fabric_code tidak cukup. Tersedia: :available, Diminta: :requested',
@@ -241,8 +200,6 @@ return [
     'mfg_target_date_must_future' => 'Tanggal target harus hari ini atau di masa depan.',
     'mfg_journal_not_balance' => 'Jurnal manufaktur tidak seimbang (Debet ≠ Kredit). Transaksi dibatalkan.',
     'mfg_mrn_no_items' => 'MRN harus memiliki minimal 1 item.',
-
-    // Form Labels
     'mfg_fabric_code' => 'Kode Kain',
     'mfg_fabric_type' => 'Jenis Kain',
     'mfg_yarn_code' => 'Kode Benang',
@@ -261,8 +218,6 @@ return [
     'mfg_process_type' => 'Tipe Proses',
     'mfg_rate_unit' => 'Satuan Rate',
     'mfg_process_rate' => 'Rate Proses',
-
-    // === Auto-added: common recurring UI vocabulary (batch 1) ===
     'rp_zero' => 'Rp 0',
     'save_btn' => 'Simpan',
     'search_btn' => 'Cari',
@@ -588,8 +543,6 @@ return [
     'total_cost' => 'Total Biaya',
     'raw_material_item' => 'Item Bahan Baku',
     'amount_label' => 'Jumlah',
-
-    // === Auto-added: breadcrumb labels (batch 2) ===
     'bc_asset_management' => 'Aset Management',
     'bc_goods_out' => 'Barang Keluar',
     'bc_goods_in' => 'Barang Masuk',
@@ -633,19 +586,13 @@ return [
     'bc_bills' => 'Tagihan (Bills)',
     'bc_purchase_bill' => 'Tagihan Pembelian',
     'bc_warehouse' => 'Warehouse',
-
-    // === Auto-added: batch 3 (misc partials) ===
     'breadcrumb_home' => 'Home',
     'scroll_table_hint' => '← Geser tabel ke samping untuk melihat semua bulan →',
     'no_activity_history' => 'Belum ada riwayat aktivitas yang tercatat untuk data ini.',
     'by_label' => 'Oleh',
     'system_robot' => 'System/Robot',
-
-    // === Auto-added: batch 4 (back button variants) ===
     'back_to' => 'Kembali ke',
     'list_label' => 'Daftar',
-
-    // === Auto-added: batch 3 comprehensive sweep ===
     'system_word' => 'System',
     'system_activity_logs' => 'System Activity Logs',
     'transaction_detail' => 'Detail Transaksi',
@@ -1338,17 +1285,12 @@ return [
     'void_mrn' => 'Void MRN',
     'lot_label' => 'Lot',
     'position_label' => 'Posisi',
-
-    // === Auto-added: batch 4 (final sweep) ===
     'coa_master_add_title' => 'Tambah Master Akun (COA)',
     'total_overall_colon_caps' => 'TOTAL KESELURUHAN:',
     'edit_payment_plan_category' => 'Edit Kategori Payment Plan',
     'mfg_flow_hint' => 'Rekap SPK produksi garmen: knitting -> processing -> cutting -> stitching -> finishing.',
     'import_timeout_tip' => 'Tip: Untuk data > 10.000 baris, gunakan fitur Import via Command Line VS Code agar bebas dari limit timeout server.',
-
-    // KOSAKATA HALAMAN WELCOME
     'welcome_deploy_now' => 'Deploy Sekarang',
-    // HTML ATTRIBUTE KEYS
     'close_btn' => 'Tutup',
     'logo_alt' => 'Logo',
     'reset_filter' => 'Reset Filter',
@@ -1379,8 +1321,6 @@ return [
     'search_tag' => 'Ketik nama tag / proyek...',
     'search_coa' => 'Cari Detil Akun (COA)...',
     'search_journal' => 'Cari No. Bukti / Keterangan...',
-
-    // WELCOME PAGE
     'welcome_dashboard' => 'Dashboard',
     'welcome_login' => 'Masuk',
     'welcome_register' => 'Daftar',
@@ -1397,8 +1337,6 @@ return [
     'welcome_vibrant_ecosystem' => 'Ekosistem yang Beragam',
     'welcome_vibrant_ecosystem_desc' => 'Perpustakaan kuat dan alat-alat pertama.',
     'welcome_start_again' => 'Mulai Lagi',
-
-    // HTML Attribute Keys (100% Pass)
     'trace_origin_doc' => 'Klik untuk menelusuri dokumen asal',
     'view_journal_pair' => 'Lihat Pasangan Jurnal',
     'void_cutting_order' => 'Void Cutting Order',
@@ -1440,8 +1378,6 @@ return [
     'eg_electricity_payment' => 'Contoh: Pembayaran listrik bulan ini',
     'eg_buy_atk' => 'Contoh: Beli ATK untuk bulan ini',
     'eg_store_link' => 'Contoh: Shopee, Tokopedia, atau link toko',
-
-    // Additional example & input placeholders
     'eg_account_code' => 'Contoh: 11101',
     'eg_useful_life' => 'Contoh: 36',
     'eg_divisi_code' => 'Contoh: FIN',
@@ -1458,11 +1394,47 @@ return [
     'courier_ph' => 'JNE / J&T / Sicepat',
     'eg_tax_name' => 'Contoh: PPN 11%',
     'eg_delivery_note_inv' => 'Misal: SJ-001 / INV-001',
-    // === Added during parity fix ===
     'csv_format_9col' => 'Format CSV (9 Kolom):',
     'import_csv_sales' => 'Import CSV Penjualan',
     'po_item_detail' => 'Rincian Barang Purchase Order',
     'use_standard_csv_format' => 'Gunakan format CSV standar.',
     'kas_bank_export' => 'Kas & Bank (Export)',
+    'export_excel_btn' => 'Export Excel',
+    'import_csv_btn' => 'Import CSV',
+    'download_template_btn' => 'Download Template',
+    'create_manual_btn' => 'Buat Manual',
+    'add_fabric_btn' => 'Tambah Fabric',
+    'add_process_btn' => 'Tambah Proses',
+    'add_supplier_btn' => 'Tambah Supplier',
+    'add_yarn_btn' => 'Tambah Yarn',
+    'save_continue_btn' => 'Simpan & Lanjut Pemeriksaan',
+    'process_finalize_btn' => 'Proses & Finalisasi Retur',
+    'delete_finance_btn' => 'Hapus Faktur & Batalkan Transaksi',
+    'create_receipt_btn' => 'Buat Penerimaan Manual',
+    'create_outbound_btn' => 'Buat Pengeluaran Manual',
+    'process_import_btn' => 'Proses Import',
+    'status_inactive' => 'Tidak Aktif',
+    'status_active' => 'Aktif',
+    'knitting_process' => 'Knitting (Yarn -> Kain Grey)',
+    'complete_spk_btn' => 'Selesaikan SPK (WIP -> Persediaan Barang Jadi)',
+    'vendor_select_placeholder' => '-- Cari / Pilih / Ketik Vendor --',
+    'process_journal_btn' => 'Proses Jurnal Penyusutan Bulan Ini',
+    'no_depreciation_data' => 'Belum ada data penyusutan aset.',
+    'add_payment_item_alert' => 'Tambahkan minimal 1 item pembayaran.',
+    'account_not_found' => 'Nama Akun Tidak Ditemukan',
+    'no_transaction_history' => 'Belum ada riwayat transaksi pada kategori ini.',
+    'delete_fabric_confirm' => 'Yakin hapus fabric ini?',
+    'delete_process_confirm' => 'Yakin hapus rate proses ini?',
+    'delete_supplier_confirm' => 'Yakin hapus supplier ini?',
+    'delete_yarn_confirm' => 'Yakin hapus yarn ini?',
+    'void_mrn_confirm' => 'Yakin void MRN ini? Jurnal & kartu stok akan dibalik. Hanya bisa jika stoknya belum terpakai.',
+    'void_qc_confirm' => 'Void QC Cutting Order ini? Jurnal wastage (jika ada) akan dibalik & status kembali OPEN.',
+    'complete_spk_confirm' => 'Yakin selesaikan SPK ini? Jurnal WIP->Persediaan akan diposting dan tidak bisa diulang.',
+    'toggle_asset_confirm' => 'Ubah status aset ini?',
+    'no_account_data' => 'Tidak ada master data akun yang ditemukan.',
+    'delete_selected_confirm' => 'Hapus semua data yang dipilih secara permanen?',
+    'delete_item_confirm' => 'Hapus data ini?',
+    'process_finalize_retur' => 'Proses & Finalisasi Retur',
+    'cost_material_note' => '"Biaya Bahan" dihitung dari nilai kain saat masuk WIP (tahap Cutting), "Biaya Proses" dari',
 
 ];

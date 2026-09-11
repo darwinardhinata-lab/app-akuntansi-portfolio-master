@@ -16,7 +16,7 @@
             <form action="{{ route('aset.generate_depreciation') }}" method="POST" onsubmit="return confirm('Proses Jurnal Penyusutan untuk bulan ini? Pastikan Anda belum memprosesnya agar tidak terjadi jurnal ganda.')">
                 @csrf
                 <button type="submit" class="btn btn-warning btn-sm fw-bold shadow-sm text-dark">
-                    <i class="fa-solid fa-calculator me-1"></i> Proses Jurnal Penyusutan Bulan Ini
+                    <i class="fa-solid fa-calculator me-1"></i> {{ __('erp.process_journal_btn') }}
                 </button>
             </form>
 
@@ -78,7 +78,7 @@
                             <tr>
                                 <td colspan="9" class="text-center py-5 text-muted">
                                     <i class="fa-solid fa-box-open mb-3" style="font-size: 2rem;"></i><br>
-                                    Belum ada data penyusutan aset.
+                                    {{ __('erp.no_depreciation_data') }}
                                 </td>
                             </tr>
                         @endforelse

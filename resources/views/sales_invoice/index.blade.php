@@ -16,7 +16,7 @@
                 <i class="fa-solid fa-cloud-arrow-down me-1"></i> Sync ke Temp
             </button>
             <button type="submit" form="filterForm" name="export" value="excel" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
-                <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                <i class="fa-solid fa-file-excel me-1"></i> {{ __('erp.export_excel_btn') }}
             </button>
             <a href="{{ route('invoice.create') }}" class="btn btn-primary fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
                 <i class="fa-solid fa-plus me-1"></i> Buat Faktur Manual

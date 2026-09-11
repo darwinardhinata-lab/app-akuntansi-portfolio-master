@@ -52,7 +52,7 @@
     {{-- ============ TAHAP 1: KNITTING ============ --}}
     <div class="card shadow-sm border-0 mb-3">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <b><i class="fa-solid fa-1 me-1"></i> Knitting (Yarn -> Kain Grey)</b>
+            <b><i class="fa-solid fa-1 me-1"></i> {{ __('erp.knitting_process') }}</b>
             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalKnitOrder"><i class="fa-solid fa-plus"></i> {{ __('erp.new_knit_order') }}</button>
         </div>
         <div class="card-body p-0">
@@ -382,7 +382,7 @@
 
             @if($workOrder->status !== 'COMPLETED')
                 <hr>
-                <h6 class="fw-bold">Selesaikan SPK (WIP -> Persediaan Barang Jadi)</h6>
+                <h6 class="fw-bold">{{ __('erp.complete_spk_btn') }}</h6>
                 <form action="{{ route('mfg.work-orders.complete', $workOrder->id) }}" method="POST" class="row g-2 align-items-end"
                       onsubmit="return confirm('Yakin selesaikan SPK ini? Jurnal WIP->Persediaan akan diposting dan tidak bisa diulang.')">
                     @csrf

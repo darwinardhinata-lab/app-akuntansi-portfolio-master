@@ -17,7 +17,7 @@
         <li class="nav-item">
             <a class="nav-link fw-bold px-4 {{ $tab == 'tagihan' ? 'active bg-danger text-white border-bottom-0' : 'text-muted' }}" 
                href="{{ route('reports.ap_subledger', ['tab' => 'tagihan', 'account_code' => $accountCode ?? '']) }}">
-                <i class="fa-solid fa-receipt me-1"></i> Tagihan (Belum Lunas)
+                <i class="fa-solid fa-receipt me-1"></i> {{ __('erp.unpaid_bill') }}
             </a>
         </li>
         <li class="nav-item">
@@ -88,7 +88,7 @@
                         <tr>
                             <td colspan="5" class="text-center py-5 text-muted">
                                 <i class="fa-solid fa-folder-open fs-2 mb-2 d-block text-light"></i>
-                                Belum ada riwayat transaksi pada kategori ini.
+                                {{ __('erp.no_transaction_history') }}
                             </td>
                         </tr>
                     @endforelse

@@ -110,7 +110,7 @@
         <form action="{{ route('purchase-bills.destroy', $bill->id) }}" method="POST" onsubmit="return confirm('Hapus tagihan ini?')">
             @csrf @method('DELETE')
             <button type="submit" class="btn btn-outline-danger fw-bold px-4">
-                <i class="fa-solid fa-trash me-1"></i> Hapus
+                <i class="fa-solid fa-trash me-1"></i> {{ __('erp.delete_btn') }}
             </button>
         </form>
     </div>

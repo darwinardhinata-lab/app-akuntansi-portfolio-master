@@ -34,11 +34,11 @@
             <button type="button" class="btn btn-danger fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" id="btnTriggerDelete" style="display:none;">{{ __('erp.delete_selected') }}</button>
 
             <button type="button" class="btn btn-info text-white fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importHelper">
-                <i class="fa-solid fa-file-import me-1"></i> Import CSV
+                <i class="fa-solid fa-file-import me-1"></i> {{ __('erp.import_csv_btn') }}
             </button>
 
             <a href="{{ route('helper.create') }}" class="btn btn-primary fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
-                <i class="fa-solid fa-plus me-1"></i> Buat Manual
+                <i class="fa-solid fa-plus me-1"></i> {{ __('erp.create_manual_btn') }}
             </a>
         </div>
     </div>
@@ -55,7 +55,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <span><i class="fa-solid fa-info-circle me-1"></i> {{ __('erp.use_csv_template_column_arrangement') }}</span>
                             <a href="{{ route('helper.download-template') }}" class="btn btn-sm btn-light border-primary text-primary fw-bold shadow-sm">
-                                <i class="fa-solid fa-download me-1"></i> Download Template
+                                <i class="fa-solid fa-download me-1"></i> {{ __('erp.download_template_btn') }}
                             </a>
                         </div>
                     </div>

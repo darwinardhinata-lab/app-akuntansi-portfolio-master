@@ -11,7 +11,7 @@
         </div>
         <div>
             <a href="{{ route('warehouse.outbound.create') }}" class="btn btn-danger fw-bold shadow-sm">
-                <i class="fa-solid fa-plus me-1"></i> Buat Pengeluaran Manual
+                <i class="fa-solid fa-plus me-1"></i> {{ __('erp.create_outbound_btn') }}
             </a>
         </div>
     </div>

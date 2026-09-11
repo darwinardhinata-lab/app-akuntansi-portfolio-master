@@ -120,7 +120,7 @@
                                 <h6 class="fw-bold text-warning mb-0"><i class="fa-solid fa-cart-shopping me-1"></i> {{ __('erp.payment_item_detail') }}</h6>
                                 @unless($statusTerkunci)
                                 <button type="button" class="btn btn-warning btn-sm fw-bold text-dark" onclick="tambahItem()">
-                                    <i class="fa-solid fa-plus me-1"></i> Tambah Item
+                                    <i class="fa-solid fa-plus me-1"></i> {{ __('erp.add_item_btn') }}
                                 </button>
                                 @endunless
                             </div>

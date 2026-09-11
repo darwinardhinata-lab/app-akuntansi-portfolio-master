@@ -19,7 +19,7 @@
                 <i class="fa-solid fa-file-import me-1"></i> Import
             </button>
             <button type="button" class="btn btn-primary fw-bold px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCreate">
-                <i class="fa-solid fa-plus me-1"></i> Tambah Yarn
+                <i class="fa-solid fa-plus me-1"></i> {{ __('erp.add_yarn_btn') }}
             </button>
         </div>
     </div>

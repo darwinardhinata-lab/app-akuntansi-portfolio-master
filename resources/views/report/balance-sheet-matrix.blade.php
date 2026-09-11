@@ -17,7 +17,7 @@
                 <i class="fa-solid fa-list me-2"></i> Tampilan Standar
             </a>
             <a href="{{ route('balance-sheet.matrix', ['year' => $year, 'export' => 'excel']) }}" class="btn btn-success fw-bold px-3 shadow-sm">
-                <i class="fa-solid fa-file-excel me-2"></i> Export Excel
+                <i class="fa-solid fa-file-excel me-2"></i> {{ __('erp.export_excel_btn') }}
             </a>
         </div>
     </div>

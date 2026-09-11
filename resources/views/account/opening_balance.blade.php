@@ -56,7 +56,7 @@
                             
                             <div class="mt-3">
                                 <a href="{{ route('account.download_template_opening_balance') }}" class="btn btn-xs btn-light text-primary fw-bold border border-primary shadow-sm">
-                                    <i class="fa-solid fa-download"></i> Download Template CSV Di Sini
+                                    <i class="fa-solid fa-download"></i> {{ __('erp.download_template_btn') }} CSV Di Sini
                                 </a>
                             </div>
                         </div>

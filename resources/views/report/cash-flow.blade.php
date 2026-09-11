@@ -70,7 +70,7 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ $tab == 'indirect' ? 'active' : '' }}" href="{{ route('arus-kas.index', ['tab' => 'indirect', 'year' => $year, 'interval' => $interval, 'month' => $month]) }}">
-                    <i class="fa-solid fa-shuffle me-1"></i> Metode Tidak Langsung (Indirect)
+                    <i class="fa-solid fa-shuffle me-1"></i> {{ __('erp.indirect_method') }}
                 </a>
             </li>
         </ul>

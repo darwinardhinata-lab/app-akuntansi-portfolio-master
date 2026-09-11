@@ -35,6 +35,46 @@ class AccountImport implements ToCollection, WithStartRow
             if (str_contains($posSaldo, 'KRE')) $posSaldo = 'KREDIT';
 
             // =================================================================
+            // MAPPING: Konversi nilai report_pos bahasa Inggris ke bahasa Indonesia
+            // Database enum: (NERACA, LABA RUGI)
+            // Template Inggris menggunakan: BALANCE SHEET, PROFIT & LOSS
+            // =================================================================
+            $reportPosMap = [
+                'BALANCE SHEET' => 'NERACA',
+                'PROFIT & LOSS' => 'LABA RUGI',
+                'PROFIT AND LOSS' => 'LABA RUGI',
+                'INCOME STATEMENT' => 'LABA RUGI',
+            ];
+            $posLaporanNormalized = $reportPosMap[strtoupper(trim($posLaporan))] ?? $posLaporan;
+
+            // =================================================================
+            // MAPPING: Konversi nilai coa_type yang melebihi varchar(50)
+            // Database: coa_type = string(50)
+            // Beberapa nilai template melebihi 50 karakter
+            // =================================================================
+            $coaTypeMap = [
+                'ACCUMULATED DEPRECIATION OF FIXED ASSETS (NON-CURRENT ASSETS)' => 'Accum. Depreciation of Fixed Assets',
+                'ACCOUNTS RECEIVABLE (CURRENT ASSETS)' => 'Accounts Receivable',
+                'INVENTORY (CURRENT ASSETS)' => 'Inventory',
+                'FIXED ASSETS (NON-CURRENT ASSETS)' => 'Fixed Assets',
+                'OTHER ASSETS (NON-CURRENT ASSETS)' => 'Other Assets',
+                'INTANGIBLE ASSETS (NON-CURRENT ASSETS)' => 'Intangible Assets',
+                'DEFERRED TAX ASSETS (NON-CURRENT ASSETS)' => 'Deferred Tax Assets',
+                'ACCRUED EXPENSES (CURRENT LIABILITIES)' => 'Accrued Expenses',
+                'TAX PAYABLES (CURRENT LIABILITIES)' => 'Tax Payables',
+                'DEFERRED REVENUE (CUSTOMER ADVANCES)' => 'Deferred Revenue',
+                'DEPRECIATION & AMORTIZATION EXPENSES' => 'Depreciation & Amortization',
+                'GENERAL & ADMINISTRATIVE EXPENSES' => 'General & Admin Expenses',
+                'PREPAID TAXES (CURRENT ASSETS)' => 'Prepaid Taxes',
+                'SECURITY DEPOSITS (CURRENT ASSETS)' => 'Security Deposits',
+            ];
+            $tipeNormalized = $coaTypeMap[strtoupper(trim($tipe))] ?? $tipe;
+            // Safety: truncate to 50 chars if still too long
+            if (strlen($tipeNormalized) > 50) {
+                $tipeNormalized = substr($tipeNormalized, 0, 50);
+            }
+
+            // =================================================================
             // PERBAIKAN: Akun dengan prefix 8 adalah PENDAPATAN LAIN (KREDIT)
             // Sesuai RULES.md: 8 = Pendapatan Lain (Saldo Normal: KREDIT)
             // Koreksi otomatis prefix 8 DIHAPUS untuk mengizinkan data import tetap
@@ -46,9 +86,9 @@ class AccountImport implements ToCollection, WithStartRow
                 ['account_code' => $kode],
                 [
                     'account_name'   => $nama,
-                    'coa_type'       => empty($tipe) ? 'Lainnya' : $tipe,
+                    'coa_type'       => empty($tipeNormalized) ? 'Lainnya' : $tipeNormalized,
                     'normal_balance' => in_array($posSaldo, ['DEBET', 'KREDIT']) ? $posSaldo : 'DEBET',
-                    'report_pos'     => empty($posLaporan) ? 'NERACA' : $posLaporan,
+                    'report_pos'     => in_array($posLaporanNormalized, ['NERACA', 'LABA RUGI']) ? $posLaporanNormalized : 'NERACA',
                 ]
             );
         }

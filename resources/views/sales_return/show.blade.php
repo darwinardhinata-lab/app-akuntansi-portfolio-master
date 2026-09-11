@@ -147,7 +147,7 @@
         @if($canProcess)
         <div class="d-flex justify-content-end">
             <button type="submit" class="btn btn-lg btn-primary fw-bold px-5 shadow-sm">
-                <i class="fa-solid fa-check-double me-1"></i> Proses & Finalisasi Retur
+                <i class="fa-solid fa-check-double me-1"></i> {{ __('erp.process_finalize_btn') }}
             </button>
         </div>
         @else

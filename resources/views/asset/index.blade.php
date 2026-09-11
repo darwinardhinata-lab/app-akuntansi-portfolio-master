@@ -18,10 +18,10 @@
                 'end_date' => request('end_date'),
                 'search' => request('search')
             ]) }}" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
-                <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                <i class="fa-solid fa-file-excel me-1"></i> {{ __('erp.export_excel_btn') }}
             </a>
             <button type="button" class="btn btn-info text-white fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importModal">
-                <i class="fa-solid fa-file-import me-1"></i> Import CSV
+                <i class="fa-solid fa-file-import me-1"></i> {{ __('erp.import_csv_btn') }}
             </button>
             <a href="{{ route('aset.template') }}" class="btn btn-outline-primary fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
                 <i class="fa-solid fa-download me-1"></i> Template
@@ -47,7 +47,7 @@
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h6 class="fw-bold mb-0"><i class="fa-solid fa-circle-info"></i> {{ __('erp.csv_excel_format_11col') }}</h6>
                                 <a href="{{ route('aset.template') }}" class="btn btn-sm btn-light border-primary text-primary fw-bold shadow-sm" style="font-size: 0.75rem;">
-                                    <i class="fa-solid fa-download me-1"></i> Download Template
+                                    <i class="fa-solid fa-download me-1"></i> {{ __('erp.download_template_btn') }}
                                 </a>
                             </div>
                             <strong>{{ __('erp.column_order_header_required') }}</strong><br>
@@ -77,7 +77,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
                         <button type="submit" class="btn btn-primary fw-bold">
-                            <i class="fa-solid fa-upload me-1"></i> Proses Import
+                            <i class="fa-solid fa-upload me-1"></i> {{ __('erp.process_import_btn') }}
                         </button>
                     </div>
                 </form>
@@ -205,9 +205,9 @@
                                     class="btn btn-sm shadow-sm {{ $asset->is_active ? 'btn-success' : 'btn-secondary' }}"
                                     title="{{ __('erp.toggle_status') }}">
                                     @if($asset->is_active)
-                                        <i class="fa-solid fa-toggle-on me-1"></i> Aktif
+                                        <i class="fa-solid fa-toggle-on me-1"></i> {{ __('erp.status_active') }}
                                     @else
-                                        <i class="fa-solid fa-toggle-off me-1"></i> Tidak Aktif
+                                        <i class="fa-solid fa-toggle-off me-1"></i> {{ __('erp.status_inactive') }}
                                     @endif
                                 </button>
                             </td>
@@ -232,7 +232,7 @@
                         <tr>
                             <td colspan="12" class="text-center py-5 text-muted">
                                 <i class="fa-solid fa-box-open mb-3" style="font-size: 2rem;"></i><br>
-                                Belum ada data aset terdeteksi. Pastikan Anda memiliki Jurnal Pembelian Aset Tetap di Jurnal Umum, atau tambahkan aset secara manual.
+                                {{ __('erp.no_asset_data') }}
                             </td>
                         </tr>
                     @endforelse
@@ -287,10 +287,10 @@ function toggleAssetStatus(assetId, btnElement) {
             // Update tampilan tombol sesuai status baru
             if (data.is_active) {
                 btnElement.className = 'btn btn-sm shadow-sm btn-success';
-                btnElement.innerHTML = '<i class="fa-solid fa-toggle-on me-1"></i> Aktif';
+                btnElement.innerHTML = '<i class="fa-solid fa-toggle-on me-1"></i> {{ __('erp.status_active') }}';
             } else {
                 btnElement.className = 'btn btn-sm shadow-sm btn-secondary';
-                btnElement.innerHTML = '<i class="fa-solid fa-toggle-off me-1"></i> Tidak Aktif';
+                btnElement.innerHTML = '<i class="fa-solid fa-toggle-off me-1"></i> {{ __('erp.status_inactive') }}';
             }
             // Tampilkan notifikasi sukses
             const alertHtml = '<div class="alert alert-success alert-dismissible fade show shadow-sm fw-bold" role="alert">' +

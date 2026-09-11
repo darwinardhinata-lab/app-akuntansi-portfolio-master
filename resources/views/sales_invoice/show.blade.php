@@ -187,7 +187,7 @@
                 <form action="{{ route('invoice.destroy', $invoice->id) }}" method="POST" onsubmit="return confirm('PERINGATAN: Menghapus faktur ini akan membatalkan Jurnal Keuangan dan mengembalikan Stok Barang ke Gudang. Yakin ingin menghapus?')">
                     @csrf @method('DELETE')
                     <button type="submit" class="btn btn-danger fw-bold px-4 shadow-sm">
-                        <i class="fa-solid fa-trash me-1"></i> Hapus Faktur & Batalkan Transaksi
+                        <i class="fa-solid fa-trash me-1"></i> {{ __('erp.delete_finance_btn') }}
                     </button>
                 </form>
             </div>

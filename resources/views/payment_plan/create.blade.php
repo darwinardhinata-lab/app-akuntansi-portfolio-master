@@ -155,7 +155,7 @@
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="fw-bold text-primary m-0"><i class="fa-solid fa-cart-shopping me-1"></i> {{ __('erp.payment_item_detail') }}</h6>
                                 <button type="button" class="btn btn-primary btn-sm fw-bold" onclick="tambahItem()">
-                                    <i class="fa-solid fa-plus me-1"></i> Tambah Item
+                                    <i class="fa-solid fa-plus me-1"></i> {{ __('erp.add_item_btn') }}
                                 </button>
                             </div>
 
