@@ -1478,5 +1478,11 @@ return [
     'hpp_report_desc' => 'Recap of COMPLETED SPK in the selected period, based on WIP journal.',
     'public_form_desc' => 'Integrated automatic form system for operational cash disbursement.',
     'ap_subledger_desc' => 'Accounts Payable Subledger, supplier billing monitoring.',
+    'sync_to_temp' => 'Sync to Temp',
+    'sync_started' => 'Synchronization Started',
+    'opening_balance_desc_full' => 'Enter opening balance amounts. System auto-positions based on normal balance.',
+    'import_opening_balance_csv' => 'Import Opening Balance (CSV)',
+    'save_opening_balance' => 'Save Opening Balance',
+    'opening_balance_label' => 'OPENING BALANCE',
 
 ];

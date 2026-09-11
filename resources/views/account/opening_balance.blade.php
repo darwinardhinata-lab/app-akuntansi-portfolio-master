@@ -28,7 +28,7 @@
   
         <div class="d-flex flex-wrap gap-2">
             <button type="button" class="btn btn-sm btn-success fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#importSaldoModal">
-                <i class="fa-solid fa-file-import me-1"></i> Import Saldo Awal (CSV)
+                <i class="fa-solid fa-file-import me-1"></i> {{ __('erp.import_opening_balance_csv') }}
             </button>
             
             <a href="{{ route('account.index') }}" class="btn btn-sm btn-outline-secondary fw-bold px-3 shadow-sm">
@@ -153,7 +153,7 @@
                 <div>{{ __('erp.difference_colon') }} <span id="lblSelisih" class="text-warning fs-6 ms-1">{{ __('erp.rp_zero') }}</span></div>
             </div>
             <button type="submit" class="btn btn-primary fw-bold px-5 py-2 shadow-sm" id="btnSubmit" disabled>
-                <i class="fa-solid fa-floppy-disk me-2"></i> Simpan Saldo Awal
+                <i class="fa-solid fa-floppy-disk me-2"></i> {{ __('erp.save_opening_balance') }}
             </button>
         </div>
 

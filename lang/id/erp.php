@@ -1478,5 +1478,11 @@ return [
     'hpp_report_desc' => 'Rekap SPK yang sudah COMPLETED (selesai & masuk stok barang jadi) dalam periode terpilih.',
     'public_form_desc' => 'Sistem formulir terintegrasi otomatis untuk permohonan pencairan kas operasional.',
     'ap_subledger_desc' => 'Buku Besar Pembantu Hutang, pemantauan tagihan supplier, pelunasan, dan retur material.',
+    'sync_to_temp' => 'Sync ke Temp',
+    'sync_started' => 'Sinkronisasi Dimulai',
+    'opening_balance_desc_full' => 'Masukkan nominal saldo awal neraca & laba rugi. Sistem otomatis memposisikannya sesuai sifat saldo normalnya.',
+    'import_opening_balance_csv' => 'Import Saldo Awal (CSV)',
+    'save_opening_balance' => 'Simpan Saldo Awal',
+    'opening_balance_label' => 'SALDO AWAL',
 
 ];

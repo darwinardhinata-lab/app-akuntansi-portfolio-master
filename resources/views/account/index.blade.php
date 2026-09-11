@@ -26,7 +26,7 @@
             </a>
             
             <a href="{{ route('account.opening_balance') }}" class="btn btn-outline-primary fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
-                <i class="fa-solid fa-scale-balanced me-2"></i> Setup Saldo Awal
+                <i class="fa-solid fa-scale-balanced me-2"></i> {{ __('erp.setup_opening_balance') }}
             </a>
         </div>
     </div>

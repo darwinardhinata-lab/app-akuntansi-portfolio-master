@@ -1478,5 +1478,11 @@ return [
     'hpp_report_desc' => '汇总所选期间已完成的SPK。',
     'public_form_desc' => '集成自动表单系统，用于运营现金支付。',
     'ap_subledger_desc' => '应付账款明细账，供应商账单监控。',
+    'sync_to_temp' => '同步到临时表',
+    'sync_started' => '同步已开始',
+    'opening_balance_desc_full' => '输入期初余额。系统根据正常余额自动定位。',
+    'import_opening_balance_csv' => '导入期初余额（CSV）',
+    'save_opening_balance' => '保存期初余额',
+    'opening_balance_label' => '期初余额',
 
 ];

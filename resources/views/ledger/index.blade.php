@@ -123,7 +123,7 @@
                 <tbody>
                     <tr class="table-light fw-bold">
                         <td colspan="3" class="ps-4 text-uppercase text-muted">
-                            SALDO AWAL 
+                            {{ __('erp.opening_balance_label') }} 
                             @if($page > 1) 
                                 <span class="text-primary">(Pindahan ke Hal {{ $page }})</span>
                             @else 
