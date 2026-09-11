@@ -2519,4 +2519,11 @@ return [
     'courier_ph' => '顺丰 / 中通 / 圆通',
     'eg_tax_name' => '例如：增值税 11%',
     'eg_delivery_note_inv' => '例如：送货单-001 / 发票-001',
+    // === Added during parity fix ===
+    'csv_format_9col' => 'CSV格式（9列）：',
+    'import_csv_sales' => '导入CSV销售',
+    'po_item_detail' => '采购订单商品明细',
+    'use_standard_csv_format' => '使用标准CSV格式。',
+    'kas_bank_export' => '现金与银行（导出）',
+
 ];

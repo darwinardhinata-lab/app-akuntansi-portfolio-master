@@ -18,7 +18,7 @@
                 </button>
                 <ul class="dropdown-menu shadow-sm">
                     <li><h6 class="dropdown-header">{{ __('erp.quick_submitted_only') }}</h6></li>
-                    <li><a class="dropdown-item" href="{{ route('payment.export.kasbank') }}"><i class="fa-solid fa-building-columns me-1 text-primary"></i> {{ __('erp.cash_bank_ready_import') }}</a></li>
+                    <li><a class="dropdown-item" href="{{ route('payment.export.kasbank') }}"><i class="fa-solid fa-building-columns me-1 text-primary"></i> {{ __('erp.kas_bank_export') }}</a></li>
                     <li><a class="dropdown-item" href="{{ route('payment.export.worklist') }}"><i class="fa-solid fa-list-check me-1 text-warning"></i> {{ __('erp.worklist_manual_ap_dp_deposit') }}</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><h6 class="dropdown-header">{{ __('erp.custom_all_data_filter') }}</h6></li>

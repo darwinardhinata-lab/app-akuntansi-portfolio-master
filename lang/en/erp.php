@@ -3732,4 +3732,11 @@ return [
     'courier_ph' => 'Courier / Shipping Express',
     'eg_tax_name' => 'e.g. VAT 11%',
     'eg_delivery_note_inv' => 'e.g. DN-001 / INV-001',
+    // === Added during parity fix ===
+    'csv_format_9col' => 'CSV Format (9 Columns):',
+    'import_csv_sales' => 'Import CSV Sales',
+    'po_item_detail' => 'Purchase Order Item Details',
+    'use_standard_csv_format' => 'Use standard CSV format.',
+    'kas_bank_export' => 'Cash & Bank (Export)',
+
 ];

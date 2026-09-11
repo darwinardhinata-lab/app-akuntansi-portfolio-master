@@ -1458,4 +1458,11 @@ return [
     'courier_ph' => 'JNE / J&T / Sicepat',
     'eg_tax_name' => 'Contoh: PPN 11%',
     'eg_delivery_note_inv' => 'Misal: SJ-001 / INV-001',
+    // === Added during parity fix ===
+    'csv_format_9col' => 'Format CSV (9 Kolom):',
+    'import_csv_sales' => 'Import CSV Penjualan',
+    'po_item_detail' => 'Rincian Barang Purchase Order',
+    'use_standard_csv_format' => 'Gunakan format CSV standar.',
+    'kas_bank_export' => 'Kas & Bank (Export)',
+
 ];
