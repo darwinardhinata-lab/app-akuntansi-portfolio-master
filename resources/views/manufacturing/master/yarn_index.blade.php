@@ -75,7 +75,7 @@
                                         <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal"
                                             data-bs-target="#modalEdit{{ $yarn->id }}"><i class="fas fa-edit"></i></button>
                                         <form action="{{ route('mfg.yarns.destroy', $yarn->id) }}" method="POST" class="d-inline"
-                                            onsubmit="return confirm('Yakin hapus yarn ini?')">
+                                            onsubmit="return confirm(__('erp.confirm_delete_yarn'))">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                                         </form>

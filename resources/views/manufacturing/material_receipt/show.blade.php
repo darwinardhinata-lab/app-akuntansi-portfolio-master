@@ -35,7 +35,7 @@
                     <div class="fw-bold text-primary">Neto: Rp {{ number_format($receipt->net_amount, 2) }}</div>
                     @if($receipt->status === 'POSTED')
                         <form action="{{ route('mfg.material-receipts.void', $receipt->id) }}" method="POST" class="mt-2 no-print"
-                              onsubmit="return confirm('Yakin void MRN ini? Jurnal & kartu stok akan dibalik. Hanya bisa jika stoknya belum terpakai.')">
+                              onsubmit="return confirm(__('erp.confirm_void_mrn'))">
                             @csrf
                             <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-rotate-left me-1"></i>{{ __('erp.void_mrn') }}</button>
                         </form>

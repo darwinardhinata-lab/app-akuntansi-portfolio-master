@@ -16,7 +16,7 @@
                 <i class="fa-solid fa-file-excel me-1"></i> {{ __('erp.export_excel_btn') }}
             </button>
             <button type="button" class="btn btn-warning fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0 text-dark" id="btnSyncSOTemp">
-                <i class="fa-solid fa-rotate me-2"></i> Sync ke Temp
+                <i class="fa-solid fa-rotate me-2"></i> {{ __('erp.btn_sync_temp') }}
             </button>
             
             <button type="button" class="btn btn-info text-white fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importSO">
@@ -622,7 +622,7 @@
 
         $('#btnSyncSOTemp').click(function() {
             var btn = $(this);
-            btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Menyinkronkan...');
+            btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin me-2"></i> {{ __('erp.syncing') }}');
             
             $.ajax({
                 url: "{{ route('so.sync_temp') }}",
@@ -633,11 +633,11 @@
                 success: function(response) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Sinkronisasi Dimulai',
+                        title: __('erp.alert_sync_started'),
                         text: 'Sinkronisasi SO sedang berjalan di latar belakang server. Anda bisa menutup halaman ini atau lanjut bekerja.',
                         confirmButtonColor: '#3085d6'
                     });
-                    btn.prop('disabled', false).html('<i class="fa-solid fa-rotate me-2"></i> Sync ke Temp (Background)');
+                    btn.prop('disabled', false).html('<i class="fa-solid fa-rotate me-2"></i> {{ __('erp.btn_sync_temp') }} (Background)');
                 },
                 error: function() {
                     Swal.fire({
@@ -646,7 +646,7 @@
                         text: 'Terjadi kesalahan saat memulai sinkronisasi SO.',
                         confirmButtonColor: '#d33'
                     });
-                    btn.prop('disabled', false).html('<i class="fa-solid fa-rotate me-2"></i> Sync ke Temp (Background)');
+                    btn.prop('disabled', false).html('<i class="fa-solid fa-rotate me-2"></i> {{ __('erp.btn_sync_temp') }} (Background)');
                 }
             });
         });

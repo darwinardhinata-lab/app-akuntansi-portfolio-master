@@ -250,7 +250,7 @@
                                         <button class="btn btn-xs btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalStitchingOrder{{ $co->id }}">{{ __('erp.create_stitching') }}</button>
                                         @foreach($co->checks as $chk)
                                             <form action="{{ route('mfg.cutting-orders.void-check', $chk->id) }}" method="POST" class="d-inline"
-                                                  onsubmit="return confirm('Void QC Cutting Order ini? Jurnal wastage (jika ada) akan dibalik & status kembali OPEN.')">
+                                                  onsubmit="return confirm(__('erp.confirm_void_qc'))">
                                                 @csrf
                                                 <button type="submit" class="btn btn-xs btn-outline-danger" title="Void QC"><i class="fa-solid fa-rotate-left"></i> {{ __('erp.void_qc') }}</button>
                                             </form>
@@ -384,7 +384,7 @@
                 <hr>
                 <h6 class="fw-bold">{{ __('erp.complete_spk_btn') }}</h6>
                 <form action="{{ route('mfg.work-orders.complete', $workOrder->id) }}" method="POST" class="row g-2 align-items-end"
-                      onsubmit="return confirm('Yakin selesaikan SPK ini? Jurnal WIP->Persediaan akan diposting dan tidak bisa diulang.')">
+                      onsubmit="return confirm(__('erp.confirm_complete_spk'))">
                     @csrf
                     <div class="col-md-4">
                         <label class="form-label">{{ __('erp.target_product_sku') }}</label>

@@ -163,7 +163,7 @@
     }
 
     btnTriggerDelete.addEventListener('click', function() {
-        if (confirm('Hapus semua data yang dipilih secara permanen?')) {
+        if (confirm(__('erp.confirm_delete_selected'))) {
             mainFormDelete.submit();
         }
     });

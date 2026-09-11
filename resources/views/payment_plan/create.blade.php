@@ -318,7 +318,7 @@
         const rows = document.querySelectorAll('#baris-item .baris-item-row');
         if (rows.length === 0) {
             e.preventDefault();
-            alert('Tambahkan minimal 1 item pembayaran.');
+            alert(__('erp.alert_add_payment_item'));
             return;
         }
         if (parseFloat(nominalAsliTotal.value || 0) <= 0) {

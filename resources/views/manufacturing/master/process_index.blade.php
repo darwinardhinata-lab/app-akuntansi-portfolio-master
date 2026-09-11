@@ -59,7 +59,7 @@
                                         <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal"
                                             data-bs-target="#modalEdit{{ $process->id }}"><i class="fas fa-edit"></i></button>
                                         <form action="{{ route('mfg.processes.destroy', $process->id) }}" method="POST" class="d-inline"
-                                            onsubmit="return confirm('Yakin hapus rate proses ini?')">
+                                            onsubmit="return confirm(__('erp.confirm_delete_process'))">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                                         </form>
@@ -175,7 +175,7 @@
                         <label class="form-label">{{ __('erp.choose_file_xlsx') }}</label>
                         <input type="file" name="file_excel" class="form-control" required accept=".xlsx,.xls,.csv">
                     </div>
-                    <div class="form-text">Data selalu ditambahkan baru (tidak ada kode unik utk update), edit rate lama lewat tombol Edit di tabel.</div>
+                    <div class="form-text">{{ __('erp.data_always_new') }}</div>
                 </div>
                 <div class="modal-footer"><button type="submit" class="btn btn-primary fw-bold">{{ __('erp.start_import') }}</button></div>
             </div>

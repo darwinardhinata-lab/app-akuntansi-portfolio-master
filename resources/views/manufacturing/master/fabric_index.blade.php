@@ -73,7 +73,7 @@
                                         <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal"
                                             data-bs-target="#modalEdit{{ $fabric->id }}"><i class="fas fa-edit"></i></button>
                                         <form action="{{ route('mfg.fabrics.destroy', $fabric->id) }}" method="POST" class="d-inline"
-                                            onsubmit="return confirm('Yakin hapus fabric ini?')">
+                                            onsubmit="return confirm(__('erp.confirm_delete_fabric'))">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                                         </form>

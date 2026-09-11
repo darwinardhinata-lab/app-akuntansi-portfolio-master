@@ -258,7 +258,7 @@
 @push('scripts')
 <script>
 function toggleAssetStatus(assetId, btnElement) {
-    if (!confirm('Ubah status aset ini?')) return;
+    if (!confirm(__('erp.confirm_toggle_asset'))) return;
 
     // Build URL dinamis menggunakan base URL aplikasi, hindari route() helper dengan parameter kosong
     const url = '{{ url("aset/toggle-status") }}/' + assetId;
