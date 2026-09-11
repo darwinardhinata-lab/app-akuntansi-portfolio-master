@@ -48,4 +48,4 @@ Thumbs.db
 !.env.local.backup
 !.env.*.backup
 # Original rules preserved
-*.log
+*.log`n.qwen/
