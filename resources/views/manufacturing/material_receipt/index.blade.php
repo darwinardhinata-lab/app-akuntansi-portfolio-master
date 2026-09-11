@@ -9,7 +9,7 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <h3 class="fw-bold mb-1 text-dark">{{ __('erp.material_receipt_note_title') }}</h3>
-            <p class="text-muted small mb-0">Penerimaan bahan baku (yarn/kain) dari supplier — otomatis posting jurnal Persediaan.</p>
+            <p class="text-muted small mb-0">{{ __('erp.material_receipt_desc') }}</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('mfg.material-receipts.index', array_merge(request()->query(), ['export' => 'excel'])) }}" class="btn btn-success fw-bold px-3 shadow-sm">

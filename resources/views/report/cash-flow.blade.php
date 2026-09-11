@@ -60,7 +60,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4 no-print">
         <div>
             <h3 class="fw-bold mb-1" style="color: #0f172a;">{{ __('erp.cash_flow_report_title') }}</h3>
-            <p class="text-muted small mb-0">Rekapitulasi aliran kas masuk dan keluar berbasis matriks interval tersinkronisasi.</p>
+            <p class="text-muted small mb-0">{{ __('erp.cash_flow_desc') }}.</p>
         </div>
         <ul class="nav nav-pills bg-white p-1 rounded-3 border shadow-sm" role="tablist">
             <li class="nav-item me-1">

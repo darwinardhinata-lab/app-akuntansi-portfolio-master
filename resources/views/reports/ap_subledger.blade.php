@@ -9,7 +9,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-file-invoice text-danger me-2"></i>{{ __('erp.ap_management') }}</h4>
-            <p class="text-muted small mb-0">Buku Besar Pembantu Hutang, pemantauan tagihan supplier, pelunasan, dan retur material.</p>
+            <p class="text-muted small mb-0">{{ __('erp.ap_subledger_desc') }}</p>
         </div>
     </div>
 

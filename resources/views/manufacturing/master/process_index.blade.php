@@ -9,7 +9,7 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <h3 class="fw-bold mb-1 text-dark">{{ __('erp.process_rate_master_vendor') }}</h3>
-            <p class="text-muted small mb-0">Rate default per kg/pcs untuk knitting, dyeing, printing, finishing, cutting, stitching.</p>
+            <p class="text-muted small mb-0">{{ __('erp.process_rate_desc') }}</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('mfg.processes.index', ['export' => 'excel']) }}" class="btn btn-success fw-bold px-3 shadow-sm">

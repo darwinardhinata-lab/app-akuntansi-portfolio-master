@@ -19,7 +19,7 @@
             </div>
             <div>
                 <h5 class="fw-bold mb-0">{{ __('erp.company_profile_identity') }}</h5>
-                <p class="text-muted small mb-0 text-white-50">Informasi ini otomatis dicetak di kop atas lembar print/export Excel seluruh laporan keuangan.</p>
+                <p class="text-muted small mb-0 text-white-50">{{ __('erp.company_profile_print_desc') }}</p>
             </div>
         </div>
         <form action="{{ route('company.update') }}" method="POST" enctype="multipart/form-data" class="card-body p-4 bg-white">

@@ -10,7 +10,7 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <h3 class="fw-bold mb-1 text-dark">{{ __('erp.general_journal') }}</h3>
-            <p class="text-muted small mb-0">Pencatatan mutasi transaksi harian dengan kaidah pembukuan berpasangan (Double-Entry).</p>
+            <p class="text-muted small mb-0">{{ __('erp.journal_desc') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <a href="{{ route('jurnal.export', [

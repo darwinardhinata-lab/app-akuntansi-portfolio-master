@@ -10,7 +10,7 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
     <h3 class="fw-bold mb-1 text-dark">{{ __('erp.bc_asset_management') }}</h3>
-    <p class="text-muted small mb-0">Kelola aset tetap, umur ekonomis, dan pantau penyusutan otomatis. Buat jurnal dengan kode akun 12000 (Aset Tetap) untuk menambahkan aset secara otomatis.</p>
+    <p class="text-muted small mb-0">{{ __('erp.asset_management_desc') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <a href="{{ route('aset.export', [
@@ -27,7 +27,7 @@
                 <i class="fa-solid fa-download me-1"></i> Template
             </a>
             <a href="{{ route('aset.create') }}" class="btn btn-primary fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
-                <i class="fa-solid fa-plus me-1"></i> Input Manual
+                <i class="fa-solid fa-plus me-1"></i> {{ __('erp.input_manual_btn') }}
             </a>
         </div>
     </div>
@@ -249,7 +249,7 @@
     {{-- Quick Link to Depreciation List --}}
     <div class="mt-4 text-end">
         <a href="{{ route('aset.list') }}" class="btn btn-outline-warning btn-sm fw-bold shadow-sm text-dark">
-            <i class="fa-solid fa-table-list me-1"></i> Lihat List Depresiasi (Matriks Nilai Buku)
+            <i class="fa-solid fa-table-list me-1"></i> {{ __('erp.view_depreciation_list') }}
         </a>
     </div>
 </div>
@@ -304,7 +304,7 @@ function toggleAssetStatus(assetId, btnElement) {
     .catch(error => {
         console.error('Toggle status error:', error);
         btnElement.innerHTML = originalContent;
-        alert('Gagal mengubah status aset. Silakan coba lagi. (' + error.message + ')');
+        alert(__('erp.toggle_status_error') + ' (' + error.message + ')');
     })
     .finally(() => {
         btnElement.disabled = false;

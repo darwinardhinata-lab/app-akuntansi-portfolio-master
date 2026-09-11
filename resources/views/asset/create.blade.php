@@ -10,7 +10,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h3 class="fw-bold mb-1 text-dark">{{ __('erp.asset_depreciation_life_setting') }}</h3>
-            <p class="text-muted small mb-0">Pilih aset yang belum mengalami penyusutan untuk mengatur lama masa pakai (umur penyusutan).</p>
+            <p class="text-muted small mb-0">{{ __('erp.asset_edit_select_desc') }}</p>
         </div>
         <a href="{{ route('aset.index') }}" class="btn btn-outline-secondary btn-sm fw-bold shadow-sm">
             <i class="fa-solid fa-arrow-left me-1"></i> {{ __('erp.back_to') }} {{ __('erp.bc_asset_list') }}</a>

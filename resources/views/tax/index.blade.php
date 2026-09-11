@@ -10,7 +10,7 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <h3 class="fw-bold mb-1 text-dark">{{ __('erp.tax_master_vat_wht') }}</h3>
-            <p class="text-muted small mb-0">Konfigurasi tarif pajak penambah (PPN) dan pemotong (PPh) untuk otomatisasi pembelian.</p>
+            <p class="text-muted small mb-0">{{ __('erp.tax_desc') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <button type="submit" form="filterForm" name="export" value="excel" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
