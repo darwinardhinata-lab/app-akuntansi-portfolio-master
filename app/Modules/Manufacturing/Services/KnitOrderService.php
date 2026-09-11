@@ -97,6 +97,14 @@ class KnitOrderService
     {
         return DB::transaction(function () use ($knitOrderId, $data) {
             $knitOrder = KnitOrder::lockForUpdate()->findOrFail($knitOrderId);
+
+            if ($knitOrder->status !== 'ISSUED') {
+                throw new Exception(
+                    "Tidak bisa menerima kain grey: Knit Order '{$knitOrder->knit_order_number}' berstatus {$knitOrder->status}. " .
+                    "Kain grey hanya bisa diterima sekali, setelah yarn di-issue (status ISSUED) dan sebelum GFR lain diposting."
+                );
+            }
+
             $fabric = Fabric::lockForUpdate()->findOrFail($knitOrder->fabric_id);
 
             $receiptNumber = DocumentSequence::generateSecure(

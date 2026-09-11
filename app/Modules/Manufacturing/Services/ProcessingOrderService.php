@@ -81,6 +81,14 @@ class ProcessingOrderService
     {
         return DB::transaction(function () use ($processingOrderId, $data) {
             $order = ProcessingOrder::lockForUpdate()->findOrFail($processingOrderId);
+
+            if ($order->status !== 'ISSUED') {
+                throw new Exception(
+                    "Tidak bisa menerima kain finished: Processing Order '{$order->order_number}' berstatus {$order->status}. " .
+                    "Kain finished hanya bisa diterima sekali, setelah kain grey di-issue (status ISSUED) dan sebelum FR lain diposting."
+                );
+            }
+
             $finishedFabric = Fabric::lockForUpdate()->findOrFail($data['finished_fabric_id']);
 
             $receiptNumber = DocumentSequence::generateSecure(
