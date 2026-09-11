@@ -1,0 +1,95 @@
+--- a/app/Modules/Manufacturing/Services/KnitOrderService.php	2026-09-11 01:37:55.144140254 +0000
++++ b/app/Modules/Manufacturing/Services/KnitOrderService.php	2026-09-10 14:56:09.687452550 +0000
+@@ -97,6 +97,14 @@
+     {
+         return DB::transaction(function () use ($knitOrderId, $data) {
+             $knitOrder = KnitOrder::lockForUpdate()->findOrFail($knitOrderId);
++
++            if ($knitOrder->status !== 'ISSUED') {
++                throw new Exception(
++                    "Tidak bisa menerima kain grey: Knit Order '{$knitOrder->knit_order_number}' berstatus {$knitOrder->status}. " .
++                    "Kain grey hanya bisa diterima sekali, setelah yarn di-issue (status ISSUED) dan sebelum GFR lain diposting."
++                );
++            }
++
+             $fabric = Fabric::lockForUpdate()->findOrFail($knitOrder->fabric_id);
+ 
+             $receiptNumber = DocumentSequence::generateSecure(
+
+--- a/app/Modules/Manufacturing/Services/ProcessingOrderService.php	2026-09-11 01:37:55.144254824 +0000
++++ b/app/Modules/Manufacturing/Services/ProcessingOrderService.php	2026-09-11 01:37:34.515406484 +0000
+@@ -81,6 +81,14 @@
+     {
+         return DB::transaction(function () use ($processingOrderId, $data) {
+             $order = ProcessingOrder::lockForUpdate()->findOrFail($processingOrderId);
++
++            if ($order->status !== 'ISSUED') {
++                throw new Exception(
++                    "Tidak bisa menerima kain finished: Processing Order '{$order->order_number}' berstatus {$order->status}. " .
++                    "Kain finished hanya bisa diterima sekali, setelah kain grey di-issue (status ISSUED) dan sebelum FR lain diposting."
++                );
++            }
++
+             $finishedFabric = Fabric::lockForUpdate()->findOrFail($data['finished_fabric_id']);
+ 
+             $receiptNumber = DocumentSequence::generateSecure(
+
+--- a/app/Modules/Manufacturing/Services/BarcodeLabelService.php	2026-09-11 01:37:55.144061738 +0000
++++ b/app/Modules/Manufacturing/Services/BarcodeLabelService.php	2026-09-11 01:37:49.237936850 +0000
+@@ -4,6 +4,7 @@
+ 
+ use App\Modules\Manufacturing\Models\BarcodeLabel;
+ use App\Modules\Manufacturing\Models\WorkOrder;
++use Illuminate\Support\Facades\DB;
+ use Illuminate\Support\Str;
+ 
+ /**
+@@ -19,25 +20,31 @@
+      */
+     public function generate(int $workOrderId, array $sizes, string $batchNumber, ?int $finishingStageId = null): array
+     {
+-        $workOrder = WorkOrder::findOrFail($workOrderId);
+-        $labels = [];
++        // Dibungkus transaction: barcode punya unique constraint di DB (lihat
++        // migration mfg_barcode_labels). Tanpa transaction, collision Str::random(6)
++        // di tengah loop akan menyisakan sebagian label sudah ter-insert (partial
++        // batch) sementara sisanya gagal — membuat batch_number tidak konsisten.
++        return DB::transaction(function () use ($workOrderId, $sizes, $batchNumber, $finishingStageId) {
++            $workOrder = WorkOrder::findOrFail($workOrderId);
++            $labels = [];
+ 
+-        foreach ($sizes as $row) {
+-            for ($i = 0; $i < (int) $row['qty']; $i++) {
+-                $labels[] = BarcodeLabel::create([
+-                    'work_order_id'      => $workOrder->id,
+-                    'finishing_stage_id' => $finishingStageId,
+-                    'product_id'         => $workOrder->product_id,
+-                    'size'               => $row['size'],
+-                    'barcode'            => strtoupper($workOrder->spk_number) . '-' . strtoupper($row['size']) . '-' . Str::upper(Str::random(6)),
+-                    'mrp'                => $row['mrp'],
+-                    'batch_number'       => $batchNumber,
+-                    'is_printed'         => false,
+-                ]);
++            foreach ($sizes as $row) {
++                for ($i = 0; $i < (int) $row['qty']; $i++) {
++                    $labels[] = BarcodeLabel::create([
++                        'work_order_id'      => $workOrder->id,
++                        'finishing_stage_id' => $finishingStageId,
++                        'product_id'         => $workOrder->product_id,
++                        'size'               => $row['size'],
++                        'barcode'            => strtoupper($workOrder->spk_number) . '-' . strtoupper($row['size']) . '-' . Str::upper(Str::random(6)),
++                        'mrp'                => $row['mrp'],
++                        'batch_number'       => $batchNumber,
++                        'is_printed'         => false,
++                    ]);
++                }
+             }
+-        }
+ 
+-        return $labels;
++            return $labels;
++        });
+     }
+ 
+     public function markPrinted(array $labelIds): int
+
