@@ -1,0 +1,46 @@
+<?php
+
+return [
+    'module_title' => 'Customs',
+    'status' => [
+        'draft' => 'Draft',
+        'queued' => 'Queued',
+        'submitted' => 'Submitted',
+        'under_review' => 'Under Review',
+        'need_correction' => 'Need Correction',
+        'rejected' => 'Rejected',
+        'sppb_issued' => 'SPPB Issued',
+        'npe_issued' => 'NPE Issued',
+        'voided' => 'Voided',
+    ],
+    'field' => [
+        'internal_number' => 'Internal Number',
+        'nomor_aju' => 'Submission Number',
+        'nomor_pendaftaran' => 'Registration Number',
+        'kode_kantor' => 'Customs Office Code',
+        'document_type' => 'Document Type',
+    ],
+    'dashboard' => [
+        'title' => 'Customs Dashboard',
+        'filter' => 'Filter',
+        'all_types' => 'All Types',
+        'all_status' => 'All Status',
+        'actions' => 'Actions',
+        'view' => 'View',
+        'edit' => 'Edit',
+        'submit' => 'Submit to CEISA',
+        'retry' => 'Retry',
+        'void' => 'Void',
+        'export' => 'Export',
+        'no_documents' => 'No customs documents yet',
+        'confirm_submit' => 'Are you sure to submit this document to CEISA?',
+        'confirm_void' => 'Are you sure to void this document?',
+    ],
+    'messages' => [
+        'draft_created' => 'Draft document created successfully',
+        'submit_success' => 'Document submitted to CEISA successfully',
+        'retry_success' => 'Retry submit triggered successfully',
+        'void_success' => 'Document voided successfully',
+        'update_success' => 'Document updated successfully',
+    ],
+];

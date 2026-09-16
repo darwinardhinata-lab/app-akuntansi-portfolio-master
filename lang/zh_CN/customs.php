@@ -1,0 +1,46 @@
+<?php
+
+return [
+    'module_title' => '海关',
+    'status' => [
+        'draft' => '草稿',
+        'queued' => '排队中',
+        'submitted' => '已提交',
+        'under_review' => '审核中',
+        'need_correction' => '需要修正',
+        'rejected' => '已拒绝',
+        'sppb_issued' => 'SPPB已签发',
+        'npe_issued' => 'NPE已签发',
+        'voided' => '已作废',
+    ],
+    'field' => [
+        'internal_number' => '内部编号',
+        'nomor_aju' => '申请编号',
+        'nomor_pendaftaran' => '注册编号',
+        'kode_kantor' => '海关编码',
+        'document_type' => '文件类型',
+    ],
+    'dashboard' => [
+        'title' => '海关仪表板',
+        'filter' => '筛选',
+        'all_types' => '全部类型',
+        'all_status' => '全部状态',
+        'actions' => '操作',
+        'view' => '查看',
+        'edit' => '编辑',
+        'submit' => '提交到CEISA',
+        'retry' => '重试',
+        'void' => '作废',
+        'export' => '导出',
+        'no_documents' => '暂无海关文件',
+        'confirm_submit' => '确认要向CEISA提交此文件吗？',
+        'confirm_void' => '确认要作废此文件吗？',
+    ],
+    'messages' => [
+        'draft_created' => '草稿文件创建成功',
+        'submit_success' => '文件成功提交到CEISA',
+        'retry_success' => '重试提交成功触发',
+        'void_success' => '文件作废成功',
+        'update_success' => '文件更新成功',
+    ],
+];

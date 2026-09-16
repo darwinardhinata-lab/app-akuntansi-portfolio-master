@@ -18,7 +18,7 @@
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-1">
         <div>
             <h3 class="fw-bold mb-1 text-dark">{{ __('erp.mfg_cogs_report_title') }}</h3>
-            <p class="text-muted small mb-0">Rekap SPK yang sudah COMPLETED (selesai & masuk stok barang jadi) dalam periode terpilih, berdasarkan tanggal jurnal penyelesaian.</p>
+            <p class="text-muted small mb-0">{{ __('erp.hpp_report_desc') }}</p>
         </div>
         <div class="d-flex gap-2 no-print">
             <a href="{{ route('mfg.reports.hpp', ['start_date' => $startDate, 'end_date' => $endDate, 'export' => 'excel']) }}" class="btn btn-success btn-sm fw-bold px-3">
@@ -140,10 +140,7 @@
 
     <p class="small text-muted">
         <i class="fa-solid fa-circle-info me-1"></i>
-        "Biaya Bahan" dihitung dari nilai kain saat masuk WIP (tahap Cutting), "Biaya Proses" dari
-        biaya jasa jahit (Stitching CMT), dan "Wastage" dari kerugian kain terbuang saat QC Cutting
-        (sudah dikeluarkan dari HPP, dicatat sbg kerugian operasional terpisah — lihat Jurnal #4b
-        di MANUFACTURING_INTEGRATION.md).
+        {{ __('erp.cogs_explanation') }}
     </p>
 </div>
 @endsection

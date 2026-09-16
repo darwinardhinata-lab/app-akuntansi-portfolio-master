@@ -1,0 +1,46 @@
+<?php
+
+return [
+    'module_title' => 'Kepabeanan',
+    'status' => [
+        'draft' => 'Draft',
+        'queued' => 'Antrian',
+        'submitted' => 'Dikirim',
+        'under_review' => 'Dalam Review',
+        'need_correction' => 'Perlu Koreksi',
+        'rejected' => 'Ditolak',
+        'sppb_issued' => 'SPPB Terbit',
+        'npe_issued' => 'NPE Terbit',
+        'voided' => 'Dibatalkan',
+    ],
+    'field' => [
+        'internal_number' => 'Nomor Internal',
+        'nomor_aju' => 'Nomor Ajuan',
+        'nomor_pendaftaran' => 'Nomor Pendaftaran',
+        'kode_kantor' => 'Kode Kantor Pabean',
+        'document_type' => 'Tipe Dokumen',
+    ],
+    'dashboard' => [
+        'title' => 'Dashboard Kepabeanan',
+        'filter' => 'Filter',
+        'all_types' => 'Semua Tipe',
+        'all_status' => 'Semua Status',
+        'actions' => 'Aksi',
+        'view' => 'Lihat',
+        'edit' => 'Edit',
+        'submit' => 'Submit ke CEISA',
+        'retry' => 'Retry',
+        'void' => 'Batalkan',
+        'export' => 'Export',
+        'no_documents' => 'Belum ada dokumen kepabeanan',
+        'confirm_submit' => 'Yakin ingin submit dokumen ini ke CEISA?',
+        'confirm_void' => 'Yakin ingin membatalkan dokumen ini?',
+    ],
+    'messages' => [
+        'draft_created' => 'Dokumen draft berhasil dibuat',
+        'submit_success' => 'Dokumen berhasil diajukan ke CEISA',
+        'retry_success' => 'Retry submit berhasil dipicu',
+        'void_success' => 'Dokumen berhasil dibatalkan',
+        'update_success' => 'Dokumen berhasil diperbarui',
+    ],
+];

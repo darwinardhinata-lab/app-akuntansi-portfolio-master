@@ -88,6 +88,11 @@ Route::middleware(['auth'])->group(function () {
     // ==========================================
     require base_path('routes/manufacturing.php');
 
+    // ==========================================
+    // --- MODUL KEPABEANAN (CEISA H2H Integration) ---
+    // ==========================================
+    require base_path('routes/customs.php');
+
     Route::get('/jurnal', [JournalController::class, 'index'])->name('jurnal.index');
     Route::get('/jurnal/create', [JournalController::class, 'create'])->name('jurnal.create');
     Route::post('/jurnal', [JournalController::class, 'store'])->name('jurnal.store');
