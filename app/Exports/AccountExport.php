@@ -5,11 +5,12 @@ namespace App\Exports;
 use App\Models\Account;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
-class AccountExport implements FromQuery, WithHeadings
+class AccountExport implements FromQuery, WithHeadings, WithMapping
 {
     use Exportable;
 
@@ -56,6 +57,28 @@ class AccountExport implements FromQuery, WithHeadings
             'Pos Laporan',
             'Created At',
             'Updated At',
+        ];
+    }
+
+    /**
+     * FIX: ditambahkan supaya export mengikuti locale aktif saat request
+     * (app()->getLocale(), diset SetLocaleMiddleware). Sebelumnya tanpa
+     * WithMapping, Excel package export atribut mentah apa adanya (selalu
+     * locale id) walau UI sedang dalam mode en/zh_CN.
+     *
+     * Kolom mentah accounts.coa_type / normal_balance / report_pos TIDAK
+     * ikut berubah di database -- ini murni transformasi output export.
+     */
+    public function map($account): array
+    {
+        return [
+            $account->account_code,
+            $account->translatedName(),
+            $account->translatedCoaType(),
+            $account->translatedNormalBalance(),
+            $account->translatedReportPos(),
+            optional($account->created_at)->format('Y-m-d H:i:s'),
+            optional($account->updated_at)->format('Y-m-d H:i:s'),
         ];
     }
 }
