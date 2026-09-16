@@ -611,6 +611,35 @@
                         <span class="nav-text">{{ __('customs.reports.activity_log') }}</span>
                     </a>
                 </div>
+
+                {{-- SUBSECTION: TRACKING INSW (Hyperlink Eksternal Portal INSW) --}}
+                <a href="#menuInswTracking" data-bs-toggle="collapse" class="nav-link">
+                    <span class="nav-icon"><i class="fa-solid fa-globe text-primary"></i></span>
+                    <span class="nav-text">{{ __('customs.insw.title') }}</span>
+                    <i class="fa-solid fa-chevron-down nav-chevron"></i>
+                </a>
+                <div class="collapse nav-submenu" id="menuInswTracking">
+                    <a href="https://insw.go.id/pib-peb" target="_blank" rel="noopener noreferrer" class="nav-link">
+                        <span class="nav-text">{{ __('customs.insw.pib_peb') }}</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
+                    </a>
+                    <a href="https://insw.go.id/perijinan" target="_blank" rel="noopener noreferrer" class="nav-link">
+                        <span class="nav-text">{{ __('customs.insw.perijinan') }}</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
+                    </a>
+                    <a href="https://insw.go.id/e-coo" target="_blank" rel="noopener noreferrer" class="nav-link">
+                        <span class="nav-text">{{ __('customs.insw.e_coo') }}</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
+                    </a>
+                    <a href="https://insw.go.id/intr" target="_blank" rel="noopener noreferrer" class="nav-link">
+                        <span class="nav-text">{{ __('customs.insw.intr') }}</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
+                    </a>
+                    <a href="https://insw.go.id/nib" target="_blank" rel="noopener noreferrer" class="nav-link">
+                        <span class="nav-text">{{ __('customs.insw.nib') }}</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
+                    </a>
+                </div>
             </div>
         </div>
         @endif

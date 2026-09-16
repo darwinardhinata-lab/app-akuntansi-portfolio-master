@@ -54,4 +54,12 @@ return [
         'mutation_reject' => '7. 废品及不良品变动报表',
         'activity_log' => '8. 活动日志报表',
     ],
+    'insw' => [
+        'title' => 'INSW 查询追踪',
+        'pib_peb' => '1. PIB/PEB 追踪',
+        'perijinan' => '2. 许可证追踪',
+        'e_coo' => '3. e-COO 原产地证追踪',
+        'intr' => '4. INTR 追踪',
+        'nib' => '5. NIB 商业许可追踪',
+    ],
 ];

@@ -54,4 +54,12 @@ return [
         'mutation_reject' => '7. Scrap & Rejected Goods Mutation Report',
         'activity_log' => '8. Activity Log Report',
     ],
+    'insw' => [
+        'title' => 'TRACKING INSW',
+        'pib_peb' => '1. Tracking PIB/PEB',
+        'perijinan' => '2. Tracking Licensing',
+        'e_coo' => '3. Tracking e-COO',
+        'intr' => '4. Tracking INTR',
+        'nib' => '5. Tracking NIB',
+    ],
 ];
