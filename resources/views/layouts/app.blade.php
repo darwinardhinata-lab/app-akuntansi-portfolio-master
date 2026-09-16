@@ -564,6 +564,58 @@
         </div>
 
         {{-- ================================================================
+             SECTION: CUSTOMS (CEISA H2H Integration)
+        ================================================================ --}}
+        @if(config('customs.enabled', false))
+        <div class="nav-section">
+            <a href="#sectionCustoms" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('customs.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('customs.*') ? 'true' : 'false' }}">
+                <span class="section-icon"><i class="fa-solid fa-file-signature text-info"></i></span>
+                <span class="section-text">{{ __('erp.customs_module') }}</span>
+                <i class="fa-solid fa-chevron-down section-chevron"></i>
+            </a>
+            <div class="collapse section-collapse {{ request()->routeIs('customs.*') ? 'show' : '' }}" id="sectionCustoms">
+                <a href="{{ route('customs.index') }}" class="nav-link {{ request()->routeIs('customs.index') || request()->routeIs('customs.documents.*') || request()->routeIs('customs.show') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-file-invoice text-info"></i></span>
+                    <span class="nav-text">{{ __('erp.customs_documents') }}</span>
+                </a>
+
+                {{-- SUBSECTION: LAPORAN BEACUKAI (8 Laporan TPB / IT Inventory) --}}
+                <a href="#menuCustomsReports" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('customs.reports.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-chart-pie text-secondary"></i></span>
+                    <span class="nav-text">{{ __('customs.reports.title') }}</span>
+                    <i class="fa-solid fa-chevron-down nav-chevron"></i>
+                </a>
+                <div class="collapse nav-submenu {{ request()->routeIs('customs.reports.*') ? 'show' : '' }}" id="menuCustomsReports">
+                    <a href="{{ route('customs.reports.inbound') }}" class="nav-link {{ request()->routeIs('customs.reports.inbound') ? 'active' : '' }}">
+                        <span class="nav-text">{{ __('customs.reports.inbound') }}</span>
+                    </a>
+                    <a href="{{ route('customs.reports.outbound') }}" class="nav-link {{ request()->routeIs('customs.reports.outbound') ? 'active' : '' }}">
+                        <span class="nav-text">{{ __('customs.reports.outbound') }}</span>
+                    </a>
+                    <a href="{{ route('customs.reports.mutation-raw') }}" class="nav-link {{ request()->routeIs('customs.reports.mutation-raw') ? 'active' : '' }}">
+                        <span class="nav-text">{{ __('customs.reports.mutation_raw') }}</span>
+                    </a>
+                    <a href="{{ route('customs.reports.wip') }}" class="nav-link {{ request()->routeIs('customs.reports.wip') ? 'active' : '' }}">
+                        <span class="nav-text">{{ __('customs.reports.wip') }}</span>
+                    </a>
+                    <a href="{{ route('customs.reports.mutation-finished') }}" class="nav-link {{ request()->routeIs('customs.reports.mutation-finished') ? 'active' : '' }}">
+                        <span class="nav-text">{{ __('customs.reports.mutation_finished') }}</span>
+                    </a>
+                    <a href="{{ route('customs.reports.mutation-capital') }}" class="nav-link {{ request()->routeIs('customs.reports.mutation-capital') ? 'active' : '' }}">
+                        <span class="nav-text">{{ __('customs.reports.mutation_capital') }}</span>
+                    </a>
+                    <a href="{{ route('customs.reports.mutation-reject') }}" class="nav-link {{ request()->routeIs('customs.reports.mutation-reject') ? 'active' : '' }}">
+                        <span class="nav-text">{{ __('customs.reports.mutation_reject') }}</span>
+                    </a>
+                    <a href="{{ route('customs.reports.activity-log') }}" class="nav-link {{ request()->routeIs('customs.reports.activity-log') ? 'active' : '' }}">
+                        <span class="nav-text">{{ __('customs.reports.activity_log') }}</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- ================================================================
              SECTION: AKUNTANSI
         ================================================================ --}}
         <div class="nav-section">

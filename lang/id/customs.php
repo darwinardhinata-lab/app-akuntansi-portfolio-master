@@ -43,4 +43,15 @@ return [
         'void_success' => 'Dokumen berhasil dibatalkan',
         'update_success' => 'Dokumen berhasil diperbarui',
     ],
+    'reports' => [
+        'title' => 'Laporan Bea Cukai',
+        'inbound' => '1. Laporan Pemasukan Barang',
+        'outbound' => '2. Laporan Pengeluaran Barang',
+        'mutation_raw' => '3. Laporan Mutasi Bahan Baku & Penolong',
+        'wip' => '4. Laporan Posisi Barang Dalam Proses (WIP)',
+        'mutation_finished' => '5. Laporan Mutasi Barang Jadi (Hasil Produksi)',
+        'mutation_capital' => '6. Laporan Mutasi Barang Modal & Barang Lain',
+        'mutation_reject' => '7. Laporan Mutasi Barang Reject & Sisa Produksi',
+        'activity_log' => '8. Laporan Riwayat Aktivitas',
+    ],
 ];

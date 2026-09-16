@@ -1789,5 +1789,9 @@ return [
     'processor_label' => '加工商',
     'mfg_process_type' => '工艺类型',
     'target_completion' => '目标完成日期',
+    'customs_module' => '报关',
+    'customs_documents' => '报关文档',
+    'bc_cust' => '报关',
 
 ];
+

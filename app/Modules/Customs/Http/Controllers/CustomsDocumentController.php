@@ -2,6 +2,7 @@
 
 namespace App\Modules\Customs\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Modules\Customs\Models\CustomsDocument;
 use App\Modules\Customs\Services\CustomsDocumentService;
 use Illuminate\Http\Request;

@@ -43,4 +43,15 @@ return [
         'void_success' => '文件作废成功',
         'update_success' => '文件更新成功',
     ],
+    'reports' => [
+        'title' => '海关报表',
+        'inbound' => '1. 进货报表',
+        'outbound' => '2. 出货报表',
+        'mutation_raw' => '3. 原材料及辅料变动报表',
+        'wip' => '4. 在制品 (WIP) 状况报表',
+        'mutation_finished' => '5. 产成品变动报表',
+        'mutation_capital' => '6. 固定资产及其他物品变动报表',
+        'mutation_reject' => '7. 废品及不良品变动报表',
+        'activity_log' => '8. 活动日志报表',
+    ],
 ];

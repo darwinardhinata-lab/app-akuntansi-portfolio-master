@@ -1586,5 +1586,9 @@ return [
     'import_opening_balance_csv' => 'Import Saldo Awal (CSV)',
     'save_opening_balance' => 'Simpan Saldo Awal',
     'opening_balance_label' => 'SALDO AWAL',
+    'customs_module' => 'Kepabeanan',
+    'customs_documents' => 'Dokumen Kepabeanan',
+    'bc_cust' => 'Kepabeanan',
 
 ];
+

@@ -43,4 +43,15 @@ return [
         'void_success' => 'Document voided successfully',
         'update_success' => 'Document updated successfully',
     ],
+    'reports' => [
+        'title' => 'Customs Reports',
+        'inbound' => '1. Goods Inbound Report',
+        'outbound' => '2. Goods Outbound Report',
+        'mutation_raw' => '3. Raw & Auxiliary Materials Mutation Report',
+        'wip' => '4. Work In Process (WIP) Report',
+        'mutation_finished' => '5. Finished Goods Mutation Report',
+        'mutation_capital' => '6. Capital Goods & Other Goods Mutation Report',
+        'mutation_reject' => '7. Scrap & Rejected Goods Mutation Report',
+        'activity_log' => '8. Activity Log Report',
+    ],
 ];

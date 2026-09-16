@@ -1586,5 +1586,9 @@ return [
     'import_opening_balance_csv' => 'Import Opening Balance (CSV)',
     'save_opening_balance' => 'Save Opening Balance',
     'opening_balance_label' => 'OPENING BALANCE',
+    'customs_module' => 'Customs',
+    'customs_documents' => 'Customs Documents',
+    'bc_cust' => 'Customs',
 
 ];
+
