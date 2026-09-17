@@ -124,11 +124,19 @@
                 <tbody>
                     @foreach($accounts as $acc)
                         @php
-                            $prefix   = substr(trim($acc->account_code), 0, 1);
-                            $isDebet  = in_array($prefix, ['1', '5', '6', '9']);
-                            $posName  = $isDebet ? 'DEBET' : 'KREDIT';
+                            // FIX: Posisi Normal harus konsisten dengan kolom "Pos Saldo"
+                            // di Daftar Akun (COA) — gunakan normal_balance dari master COA.
+                            // Fallback ke aturan prefix hanya jika data master kosong.
+                            $normalBalance = strtoupper(trim($acc->normal_balance ?? ''));
+                            if ($normalBalance === 'DEBET' || $normalBalance === 'KREDIT') {
+                                $posName = $normalBalance;
+                            } else {
+                                $prefix  = substr(trim($acc->account_code), 0, 1);
+                                $posName = in_array($prefix, ['1', '5', '6', '9']) ? 'DEBET' : 'KREDIT';
+                            }
+                            $isDebet  = $posName === 'DEBET';
                             $badgeCls = $isDebet ? 'bg-deb' : 'bg-kre';
-                            
+
                             $currVal  = $existingDetails[$acc->account_code] ?? 0;
                         @endphp
                         <tr class="{{ $currVal != 0 ? 'table-warning' : '' }}">

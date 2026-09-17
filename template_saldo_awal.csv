@@ -1,0 +1,10 @@
+KODE AKUN;NAMA AKUN;DEBET;KREDIT
+111002;Kas Rupiah Besar IDR;13.212.965.350,46;
+121002;Building;1.767.476.731,00;
+121003;Plant & Machinery;36.915.580.208,60;
+121007;Computer Equipment;81.501.400,00;
+122001;Akumulasi Penyusutan Building;;4.418.691,83
+122002;Akumulasi Penyusutan Plant & Machinery;;769.074.587,68
+122006;Akumulasi Penyusutan Computer Equipment;;1.697.945,80
+310001;Modal Investasi;;56.350.000.000,00
+320002;Saldo laba rugi ditahan;;(5.147.667.535,25)

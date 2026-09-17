@@ -90,14 +90,13 @@ class CustomsDocument extends Model
 
     // FIX (T6): local scope ini dipanggil dari PollCustomsStatusJob via
     // CustomsDocument::submitted() tapi sebelumnya tidak ada di model sama sekali
-    // -> "Call to undefined method" setiap kali job polling jalan.
+    // -> "Call to undefined method" (fatal error) setiap kali job polling jalan.
     // Dokumen yang "sedang dalam proses di CEISA" adalah yang berstatus SUBMITTED
     // atau UNDER_REVIEW (belum final: SPPB/NPE/REJECTED/VOIDED).
     public function scopeSubmitted($query)
     {
         return $query->whereIn('status', [self::STATUS_SUBMITTED, self::STATUS_UNDER_REVIEW]);
     }
-
 
     /**
      * Resolver sumber dokumen.

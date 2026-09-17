@@ -2,13 +2,21 @@
 
 namespace App\Modules\Customs\Services;
 
+use App\Modules\Customs\Jobs\SubmitCustomsDocumentJob;
+use App\Modules\Customs\Jobs\PollCustomsStatusJob;
 use App\Modules\Customs\Models\CustomsDocument;
 use App\Modules\Customs\Models\CustomsStatusHistory;
+use App\Modules\Customs\Services\CeisaH2HClient;
 use App\Support\DocumentSequence;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CustomsDocumentService
 {
+    public function __construct(
+        private readonly CeisaH2HClient $ceisaClient
+    ) {}
+
     public function createDraft(
         string $sourceType,
         int $sourceId,
@@ -51,6 +59,9 @@ class CustomsDocumentService
                 'note' => 'Dokumen draft dibuat',
                 'changed_at' => now(),
             ]);
+
+            // FIX (T5-missing-methods): Dispatch job polling untuk mengecek status dokumen yang baru dibuat.
+            PollCustomsStatusJob::dispatch($document->id);
 
             return $document;
         });

@@ -310,4 +310,4 @@ return [
     'mfg_no_supplier_data' => 'Belum ada data supplier.',
     'mfg_no_process_data' => 'Belum ada data proses.',
 ];
-];
+
