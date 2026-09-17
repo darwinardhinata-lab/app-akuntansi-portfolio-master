@@ -72,13 +72,13 @@ class CustomsDocument extends Model
         return $this->hasMany(CustomsStatusHistory::class, 'customs_document_id');
     }
 
-    // FIX (T6): method ini dipanggil dari SubmitCustomsDocumentJob::handle() tapi
-    // sebelumnya tidak pernah didefinisikan -> "Call to undefined method" (fatal error).
-    // Dokumen boleh disubmit dari status DRAFT (submit pertama kali) atau QUEUED
-    // (sudah diantrekan oleh CustomsDocumentService::submit()/retry() tapi job belum jalan).
+    // FIX (C2 / Fase 1-B): guard submit sekarang hanya DRAFT dan NEED_CORRECTION
+    // (dokumen yang baru dibuat atau butuh perbaikan). QUEUED TIDAK lagi boleh
+    // di-submit dari service — status QUEUED ditangani oleh SubmitCustomsDocumentJob
+    // (guard di job memeriksa DRAFT/QUEUED secara eksplisit).
     public function canBeSubmitted(): bool
     {
-        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_QUEUED], true);
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_NEED_CORRECTION], true);
     }
 
     // FIX (T5 pendukung): dipakai oleh CustomsDocumentService::updateFromPayload()

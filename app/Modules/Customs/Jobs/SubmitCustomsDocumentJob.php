@@ -38,12 +38,16 @@ class SubmitCustomsDocumentJob implements ShouldQueue
             return;
         }
 
-        if (! $document->canBeSubmitted()) {
+        // FIX (C2/Fase 1-B): guard status di JOB eksplisit DRAFT/QUEUED. canBeSubmitted()
+        // di model sekarang hanya mengizinkan DRAFT/NEED_CORRECTION (guard untuk service
+        // submit()), sedangkan job ini justru memproses dokumen yang berstatus QUEUED.
+        if (! in_array($document->status, [CustomsDocument::STATUS_DRAFT, CustomsDocument::STATUS_QUEUED], true)) {
             Log::warning("Dokumen {$document->internal_number} tidak dapat di-submit. Status: {$document->status}");
             return;
         }
 
-        $currentHash = hash('sha256', $this->buildPayload($document));
+        // FIX (C5): hash() butuh string, bukan array.
+        $currentHash = hash('sha256', json_encode($this->buildPayload($document)));
         if ($document->payload_hash && $document->payload_hash !== $currentHash) {
             Log::warning("Payload dokumen {$document->internal_number} telah berubah.");
             return;
@@ -53,11 +57,17 @@ class SubmitCustomsDocumentJob implements ShouldQueue
         $document->save();
 
         $payload = $this->buildPayload($document);
-        CustomsAuditLogger::logOutboundRequest(
+
+        // FIX (C6 + C4): correlationId disimpan ke property SEBELUM dipakai, dan
+        // method logger yang benar adalah logRequest() (bukan logOutboundRequest()).
+        $this->correlationId = $this->generateCorrelationId();
+
+        CustomsAuditLogger::logRequest(
             $document->id,
-            '/api/v1/submit',
+            'SUBMIT',
             $payload,
-            $this->generateCorrelationId(),
+            null,
+            $this->correlationId,
             $document->created_by
         );
 
@@ -66,14 +76,20 @@ class SubmitCustomsDocumentJob implements ShouldQueue
             $response = $this->callCeisaApi($document, $payload);
             $latencyMs = (microtime(true) - $startTime) * 1000;
 
-            CustomsAuditLogger::logInboundResponse(
+            // FIX (C4): method yang benar adalah logResponse() dengan urutan parameter
+            // (documentId, eventType, response, httpStatus, correlationId, latencyMs).
+            CustomsAuditLogger::logResponse(
                 $document->id,
+                'SUBMIT',
+                $response['body'] ?? [],
                 $response['http_status'],
-                json_encode($response['body']),
                 $this->correlationId,
-                $latencyMs
+                (int) $latencyMs
             );
 
+            // FIX (E4): pemanggilan updateStatusFromResponse() sudah cocok dengan
+            // signature di CustomsDocumentService (documentId, ceisaStatus, body,
+            // nomorAju, nomorPendaftaran).
             $documentService->updateStatusFromResponse(
                 $document->id,
                 $response['ceisa_status'],
@@ -83,6 +99,8 @@ class SubmitCustomsDocumentJob implements ShouldQueue
             );
 
         } catch (\Exception $e) {
+            // logError() signature sudah benar; correlationId dijamin ter-assign
+            // dari blok E1 sebelum baris ini dieksekusi.
             CustomsAuditLogger::logError(
                 $document->id,
                 $e->getMessage(),

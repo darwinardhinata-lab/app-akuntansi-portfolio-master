@@ -19,6 +19,10 @@ return [
 
     'signing' => [
         'method' => env('CEISA_SIGN_METHOD', 'hmac'),
+        // FIX (M1): api_key & api_secret ditambahkan — dipakai CeisaSignatureService
+        // untuk HMAC signing. WAJIB tetap kosong/null secara default (jangan diisi).
+        'api_key' => env('CEISA_API_KEY'),
+        'api_secret' => env('CEISA_API_SECRET'),
     ],
 
     'polling_interval_minutes' => 15,

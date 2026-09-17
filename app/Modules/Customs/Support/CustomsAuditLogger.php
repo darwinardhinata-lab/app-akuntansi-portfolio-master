@@ -129,6 +129,10 @@ class CustomsAuditLogger
 
     /**
      * Log error saat komunikasi dengan CEISA gagal.
+     *
+     * FIX (M2 / Fase 1-B): sebelumnya hanya Log::error() ke file — sekarang juga
+     * menulis ke tabel cst_customs_document_logs, konsisten dengan logRequest()
+     * dan logResponse(), sehingga error muncul di timeline audit UI dokumen.
      */
     public static function logError(
         int $documentId,
@@ -136,13 +140,23 @@ class CustomsAuditLogger
         ?string $correlationId = null,
         ?array $context = null
     ): void {
-        $logData = [
+        CustomsDocumentLog::create([
+            'customs_document_id' => $documentId,
+            'direction' => 'INBOUND',
+            'event_type' => 'ERROR',
+            'http_status' => null,
+            'response_payload' => json_encode(self::redact([
+                'error' => $errorMessage,
+                'context' => $context ?? [],
+            ])),
+            'correlation_id' => $correlationId,
+        ]);
+
+        Log::error('CEISA Error', [
             'document_id' => $documentId,
             'error' => $errorMessage,
             'correlation_id' => $correlationId,
             'context' => $context ?? [],
-        ];
-
-        Log::error('CEISA Error', $logData);
+        ]);
     }
 }

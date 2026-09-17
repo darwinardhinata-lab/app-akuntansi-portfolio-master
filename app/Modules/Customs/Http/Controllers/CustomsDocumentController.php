@@ -52,10 +52,12 @@ class CustomsDocumentController extends Controller
             abort(404, 'Dokumen sumber tidak ditemukan.');
         }
 
+        // FIX (C1): urutan argumen sebelumnya terbalik terhadap signature
+        // createDraft(string $sourceType, int $sourceId, string $documentType, ?int $createdBy = null).
         $customsDocument = app(CustomsDocumentService::class)->createDraft(
-            $sourceConfig['type'],
             $sourceType,
             $sourceId,
+            $sourceConfig['type'],
             auth()->id()
         );
 
@@ -68,6 +70,20 @@ class CustomsDocumentController extends Controller
         $document->load(['details', 'statusHistory', 'logs']);
 
         return view('customs.show', ['document' => $document]);
+    }
+
+    // FIX (C7): route customs.edit sebelumnya mengarah ke show() karena view edit
+    // tidak ada. Sekarang view-nya ada, method edit() dibuat agar form edit
+    // benar-benar ditampilkan untuk dokumen DRAFT.
+    public function edit(CustomsDocument $document)
+    {
+        if ($document->status !== 'DRAFT') {
+            return redirect()->route('customs.show', $document->id)
+                ->with('error', 'Hanya dokumen berstatus DRAFT yang dapat diedit.');
+        }
+
+        $document->load(['details']);
+        return view('customs.edit', ['document' => $document]);
     }
 
     public function submit(CustomsDocument $document, Request $request)
@@ -152,6 +168,13 @@ class CustomsDocumentController extends Controller
 
     public function handleWebhook(Request $request)
     {
-        return response()->json(['status' => 'OK']);
+        // FIX (H2): jangan pura-pura sukses. TODO Fase 2: verifikasi signature request
+        // sesuai spesifikasi resmi DJBC, baru proses payload via
+        // CustomsDocumentService::updateStatusFromResponse().
+        // Untuk saat ini endpoint belum boleh dianggap 'menerima' data apa pun.
+        return response()->json([
+            'status' => 'NOT_IMPLEMENTED',
+            'message' => 'Webhook verification belum diimplementasi — menunggu spesifikasi resmi DJBC.',
+        ], 501);
     }
 }
