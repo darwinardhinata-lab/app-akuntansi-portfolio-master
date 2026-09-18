@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Modules\Customs\Jobs\SubmitCustomsDocumentJob;
 use App\Modules\Customs\Models\CustomsDocument;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Route;
@@ -113,6 +114,38 @@ class CustomsDocumentControllerTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_source_resolves_to_original_purchase_order(): void
+    {
+        config(['customs.enabled' => false]);
+        $this->actingUser();
+
+        $po = PurchaseOrder::create([
+            'po_number' => 'PO-TEST-SOURCE',
+            'transaction_date' => now()->toDateString(),
+            'contact_name' => 'Supplier Test',
+            'location_name' => 'Gudang Utama',
+            'status' => 'completed',
+            'sub_total' => 1000000,
+            'grand_total' => 1100000,
+        ]);
+
+        $this->get(route('customs.create', [
+            'sourceType' => 'purchase_order',
+            'sourceId' => $po->id,
+        ]));
+
+        $document = CustomsDocument::where('source_type', 'purchase_order')
+            ->where('source_id', $po->id)
+            ->firstOrFail();
+
+        $source = $document->source();
+
+        $this->assertInstanceOf(PurchaseOrder::class, $source);
+        $this->assertSame($po->id, $source->id);
+
+        Http::assertNothingSent();
+    }
+
     public function test_submit_via_http_route_dispatches_job(): void
     {
         config(['customs.enabled' => false]);
@@ -200,6 +233,26 @@ class CustomsDocumentControllerTest extends TestCase
         ]);
 
         Queue::assertPushed(SubmitCustomsDocumentJob::class);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_void_respects_gate(): void
+    {
+        config(['customs.enabled' => false]);
+        Gate::define('customs.void', fn () => false);
+        $this->actingUser();
+
+        $document = $this->makeDocument('DRAFT');
+
+        $response = $this->post(route('customs.void', $document->id));
+
+        $response->assertStatus(403);
+
+        $this->assertDatabaseHas('cst_customs_documents', [
+            'id' => $document->id,
+            'status' => 'DRAFT',
+        ]);
 
         Http::assertNothingSent();
     }

@@ -3,7 +3,6 @@
 namespace App\Modules\Customs\Services;
 
 use App\Modules\Customs\Jobs\SubmitCustomsDocumentJob;
-use App\Modules\Customs\Jobs\PollCustomsStatusJob;
 use App\Modules\Customs\Models\CustomsDocument;
 use App\Modules\Customs\Models\CustomsStatusHistory;
 use App\Modules\Customs\Services\CeisaH2HClient;
@@ -59,9 +58,6 @@ class CustomsDocumentService
                 'note' => 'Dokumen draft dibuat',
                 'changed_at' => now(),
             ]);
-
-            // FIX (T5-missing-methods): Dispatch job polling untuk mengecek status dokumen yang baru dibuat.
-            PollCustomsStatusJob::dispatch($document->id);
 
             return $document;
         });
@@ -193,8 +189,8 @@ class CustomsDocumentService
     }
 
     /**
-     * Dipanggil oleh SubmitCustomsDocumentJob / PollCustomsStatusJob setelah
-     * menerima respons dari CEISA (atau simulasi TODO saat ini).
+     * Dipanggil oleh job pengiriman/polling status setelah menerima respons
+     * dari CEISA (atau simulasi TODO saat ini).
      *
      * NOTE: mapping status CEISA -> status internal masih sementara (pass-through
      * langsung dari $ceisaStatus) sampai spesifikasi resmi DJBC diterima —

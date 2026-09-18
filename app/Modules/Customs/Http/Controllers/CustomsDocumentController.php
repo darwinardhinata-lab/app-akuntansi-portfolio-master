@@ -122,6 +122,10 @@ class CustomsDocumentController extends Controller
 
     public function void(CustomsDocument $document, Request $request)
     {
+        if (! Gate::allows('customs.void')) {
+            abort(403, 'Anda tidak memiliki izin untuk membatalkan dokumen ini.');
+        }
+
         try {
             DB::transaction(function () use ($document) {
                 app(CustomsDocumentService::class)->void($document, auth()->id());

@@ -3,6 +3,7 @@
 namespace App\Modules\Customs\Jobs;
 
 use App\Modules\Customs\Models\CustomsDocument;
+use App\Modules\Customs\Services\CeisaH2HClient;
 use App\Modules\Customs\Support\CustomsAuditLogger;
 use App\Modules\Customs\Services\CustomsDocumentService;
 use Illuminate\Bus\Queueable;
@@ -90,14 +91,42 @@ class SubmitCustomsDocumentJob implements ShouldQueue
             // FIX (E4): pemanggilan updateStatusFromResponse() sudah cocok dengan
             // signature di CustomsDocumentService (documentId, ceisaStatus, body,
             // nomorAju, nomorPendaftaran).
+            // Fase 2 (Task D): respons asli CeisaH2HClient hanya berisi
+            // http_status/body/raw. Status dipetakan dari http_status
+            // (2xx = SUBMIT_SUCCESS) — [BELUM PASTI - TODO] mapping status resmi
+            // CEISA perlu dikonfirmasi ke dokumentasi DJBC (GAPS_TO_CONFIRM.md).
+            $ceisaStatus = ($response['http_status'] >= 200 && $response['http_status'] < 300)
+                ? 'SUBMIT_SUCCESS'
+                : 'SUBMIT_FAILED';
+
             $documentService->updateStatusFromResponse(
                 $document->id,
-                $response['ceisa_status'],
-                $response['body'],
-                $response['nomor_aju'] ?? null,
-                $response['nomor_pendaftaran'] ?? null
+                $ceisaStatus,
+                $response['body'] ?? [],
+                $response['body']['nomor_aju'] ?? null,
+                $response['body']['nomor_pendaftaran'] ?? null
             );
 
+        } catch (\RuntimeException $e) {
+            if (str_contains($e->getMessage(), 'tidak aktif')) {
+                // Modul memang sengaja dimatikan — bukan kegagalan transient,
+                // jangan retry otomatis. Log dulu sebelum fail() supaya audit
+                // tetap tercatat (fail() melempar ulang exception).
+                CustomsAuditLogger::logError(
+                    $document->id,
+                    $e->getMessage(),
+                    $this->correlationId,
+                    ['type' => 'module_disabled']
+                );
+
+                $this->fail($e);
+
+                return;
+            }
+
+            // RuntimeException lain (mis. kredensial signing kosong) — gagal cepat,
+            // retry tidak akan membantu karena bukan masalah transient.
+            throw $e;
         } catch (\Exception $e) {
             // logError() signature sudah benar; correlationId dijamin ter-assign
             // dari blok E1 sebelum baris ini dieksekusi.
@@ -127,14 +156,14 @@ class SubmitCustomsDocumentJob implements ShouldQueue
 
     private function callCeisaApi(CustomsDocument $document, array $payload): array
     {
-        // TODO: Ganti dengan call ke CeisaH2HClient yang asli
-        return [
-            'http_status' => 200,
-            'body' => ['status' => 'SUBMIT_SUCCESS'],
-            'ceisa_status' => 'SUBMIT_SUCCESS',
-            'nomor_aju' => 'AJU-' . uniqid(),
-            'nomor_pendaftaran' => null,
-        ];
+        // Fase 2 (Task D): simulasi palsu dihapus — sekarang benar-benar memanggil
+        // CeisaH2HClient, yang akan melempar RuntimeException jika modul tidak
+        // aktif (mencegah "pura-pura sukses" saat CEISA_ENABLED=false).
+        return app(CeisaH2HClient::class)->submit(
+            $document->document_type,
+            $payload,
+            $this->correlationId
+        );
     }
 
     private string $correlationId;

@@ -19,6 +19,12 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <!-- CEISA_ENABLED=true HANYA di lingkungan test: route modul customs
+             diregistrasi saat boot berdasarkan nilai env ini (lihat routes/customs.php),
+             jadi feature test butuh route terdaftar. Perilaku runtime tiap test
+             tetap dikontrol eksplisit via config(['customs.enabled' => ...]).
+             Default di config/customs.php, .env, dan .env.example TETAP false. -->
+        <env name="CEISA_ENABLED" value="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>

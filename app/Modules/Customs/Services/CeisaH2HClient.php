@@ -18,40 +18,44 @@ class CeisaH2HClient
     ) {}
 
     /**
-     * Kirim dokumen ke CEISA H2H.
+     * Kirim dokumen ke CEISA H2H melalui endpoint sandbox/produksi.
      *
      * @param string $documentType 'PIB' atau 'PEB'
-     * @param array $payload Data dokumen
+     * @param array  $payload      Data dokumen
      * @param string $correlationId ID untuk tracking
      * @return array ['http_status' => int, 'body' => array, 'raw' => string]
-     * @throws \RuntimeException Jika modul tidak diaktifkan
+     * @throws \RuntimeException Jika modul tidak diaktifkan atau path tidak ditemukan
      */
     public function submit(string $documentType, array $payload, string $correlationId): array
     {
         if (! config('customs.enabled')) {
-            throw new \RuntimeException('Modul CEISA H2H tidak diaktifkan. Set CEISA_ENABLED=true di .env untuk mengaktifkan.');
+            throw new \RuntimeException('Modul Customs (CEISA H2H) tidak aktif. Set CEISA_ENABLED=true di .env untuk mengaktifkan (hanya untuk testing manual terverifikasi).');
         }
 
-        $signed = $this->signer->sign($payload);
+        $path = config("customs.endpoints.paths.{$documentType}");
+
+        if (! $path) {
+            throw new \RuntimeException("Path endpoint untuk dokumen tipe {$documentType} tidak ditemukan di config.");
+        }
+
+        $signed = $this->signer->sign($payload, 'POST', $path);
 
         $response = Http::baseUrl($this->baseUrl())
-            ->withHeaders([
+            ->withHeaders(array_merge($signed['headers'], [
                 'Content-Type' => 'application/json',
                 'X-Correlation-Id' => $correlationId,
-                'X-Signature' => $signed['signature'],
-                'X-Timestamp' => $signed['timestamp'] ?? time(),
-            ])
-            ->timeout(config('customs.timeout', 30))
+            ]))
+            ->timeout(config('customs.timeout'))
             ->retry(
-                config('customs.retry.times', 3),
+                config('customs.retry.times'),
                 fn ($attempt) => config('customs.retry.backoff_seconds')[$attempt - 1] ?? 300,
                 throw: false,
             )
-            ->post($this->endpointFor($documentType), $signed['body']);
+            ->post($path, $signed['body']);
 
         return [
             'http_status' => $response->status(),
-            'body' => $response->json(),
+            'body' => $response->json() ?? [],
             'raw' => $response->body(),
         ];
     }
@@ -59,23 +63,33 @@ class CeisaH2HClient
     /**
      * Cek status dokumen di CEISA.
      *
-     * @param string $nomorAju Nomor ajuan dari CEISA
+     * @param string $documentType 'PIB' atau 'PEB'
+     * @param string $nomorAju     Nomor ajuan dari CEISA
      * @return array ['http_status' => int, 'body' => array, 'raw' => string]
      * @throws \RuntimeException Jika modul tidak diaktifkan
      */
-    public function checkStatus(string $nomorAju): array
+    public function checkStatus(string $documentType, string $nomorAju): array
     {
         if (! config('customs.enabled')) {
-            throw new \RuntimeException('Modul CEISA H2H tidak diaktifkan. Set CEISA_ENABLED=true di .env untuk mengaktifkan.');
+            throw new \RuntimeException('Modul Customs (CEISA H2H) tidak aktif. Set CEISA_ENABLED=true di .env untuk mengaktifkan.');
         }
 
+        $path = config("customs.endpoints.paths.{$documentType}") . '/' . $nomorAju;
+        // [BELUM PASTI - TODO] Format path GET untuk cek status ini adalah asumsi REST
+        // umum, BUKAN dari spesifikasi resmi — wajib dikonfirmasi ke dokumentasi DJBC.
+
+        $signed = $this->signer->sign([], 'GET', $path);
+
         $response = Http::baseUrl($this->baseUrl())
-            ->timeout(config('customs.timeout', 30))
-            ->get($this->statusEndpoint(), ['nomor_aju' => $nomorAju]);
+            ->withHeaders(array_merge($signed['headers'], [
+                'X-Correlation-Id' => (string) \Illuminate\Support\Str::uuid(),
+            ]))
+            ->timeout(config('customs.timeout'))
+            ->get($path);
 
         return [
             'http_status' => $response->status(),
-            'body' => $response->json(),
+            'body' => $response->json() ?? [],
             'raw' => $response->body(),
         ];
     }
@@ -84,17 +98,5 @@ class CeisaH2HClient
     {
         $env = config('customs.default_environment', 'sandbox');
         return config("customs.endpoints.{$env}");
-    }
-
-    private function endpointFor(string $documentType): string
-    {
-        // TODO: Ganti sesuai endpoint resmi DJBC setelah diterima
-        return '/api/v1/submit/' . strtolower($documentType);
-    }
-
-    private function statusEndpoint(): string
-    {
-        // TODO: Ganti sesuai endpoint resmi DJBC setelah diterima
-        return '/api/v1/status';
     }
 }

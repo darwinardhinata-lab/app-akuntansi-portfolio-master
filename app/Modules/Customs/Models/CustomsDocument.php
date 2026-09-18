@@ -101,10 +101,8 @@ class CustomsDocument extends Model
 
     /**
      * Resolver sumber dokumen.
-     * source_type diisi dengan nama tabel (konvensi proyek ini), bukan nama class.
-     * Contoh: 'purchase_orders', 'purchase_bills', 'sales_orders', 'sales_invoices'.
-     * Keputusan ini diambil karena codebase ini konsisten menggunakan nama tabel
-     * sebagai identifier di kolom *_type (ditemui di log audit dan sistem tracking lain).
+     * source_type disimpan sebagai slug tunggal sesuai nilai dari controller.
+     * Contoh: 'purchase_order', 'purchase_bill', 'sales_order', 'sales_invoice'.
      */
     public function source()
     {
@@ -113,10 +111,10 @@ class CustomsDocument extends Model
         }
 
         $mapping = [
-            'purchase_orders' => \App\Models\PurchaseOrder::class,
-            'purchase_bills' => \App\Models\PurchaseBill::class,
-            'sales_orders' => \App\Models\SalesOrder::class,
-            'sales_invoices' => \App\Models\SalesInvoice::class,
+            'purchase_order' => \App\Models\PurchaseOrder::class,
+            'purchase_bill' => \App\Models\PurchaseBill::class,
+            'sales_order' => \App\Models\SalesOrder::class,
+            'sales_invoice' => \App\Models\SalesInvoice::class,
         ];
 
         $modelClass = $mapping[$this->source_type] ?? null;
