@@ -16,9 +16,6 @@ composer.lock
 .env.local
 .env.*
 !.env.example
-!.env.testing
-!.env.development
-!.env.production
 storage/framework/cache/data/*
 storage/framework/sessions/*
 storage/framework/testing/*
@@ -41,11 +38,6 @@ Thumbs.db
 .env.backup
 .env.local.backup
 .env.*.backup
-!/.env
-!/.env.local
-!/.env.*
-!.env.backup
-!.env.local.backup
-!.env.*.backup
 # Original rules preserved
-*.log`n.qwen/
+*.log
+.qwen/
