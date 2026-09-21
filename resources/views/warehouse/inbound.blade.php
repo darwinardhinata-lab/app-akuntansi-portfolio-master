@@ -33,6 +33,9 @@
         <li class="nav-item">
             <a class="nav-link fw-bold px-3 {{ $tab == 'penempatan_barang' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.inbound', ['tab' => 'penempatan_barang']) }}">{{ __('erp.goods_placement') }}</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link fw-bold px-3 {{ $tab == 'manufaktur' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.inbound', ['tab' => 'manufaktur']) }}">{{ __('erp.goods_receipt_mfg_spk') }}</a>
+        </li>
     </ul>
 
     @if(session('success')) <div class="alert alert-success fw-bold shadow-sm">{{ session('success') }}</div> @endif
@@ -54,7 +57,13 @@
                     @forelse($ledgers as $l)
                     <tr>
                         <td class="ps-4 fw-medium">{{ \Carbon\Carbon::parse($l->transaction_date)->format('d M Y') }}</td>
-                        <td class="fw-bold text-primary">{{ $l->evidence_number }}</td>
+                        <td class="fw-bold text-primary">
+                            @if(($manufakturSpkMap[$l->evidence_number] ?? null))
+                                <a href="{{ route('mfg.work-orders.show', $manufakturSpkMap[$l->evidence_number]) }}" class="text-primary text-decoration-none fw-bold" title="{{ __('erp.mfg_work_order_title') }}">{{ $l->evidence_number }} <i class="fa-solid fa-arrow-up-right-from-square small ms-1" style="font-size: 0.7rem;"></i></a>
+                            @else
+                                {{ $l->evidence_number }}
+                            @endif
+                        </td>
                         <td class="fw-bold text-dark">{{ $l->product->sku ?? '-' }} <br><span class="text-muted small fw-normal">{{ $l->product->name ?? '-' }}</span></td>
                         <td class="text-center fw-bold text-success">+{{ $l->qty }}</td>
                         <td class="text-end pe-4 font-monospace">{{ number_format($l->unit_cost, 0, ',', '.') }}</td>

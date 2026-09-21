@@ -723,6 +723,7 @@ return [
     'goods_in_inbound' => 'Goods In (Inbound)',
     'goods_receipt_history_hint' => 'History of goods receipts and other incoming stock movements.',
     'goods_receipt_bil' => 'Goods Receipt (Bill)',
+    'goods_receipt_mfg_spk' => 'Manufacturing (SPK Completion)',
     'purchase_order_po_label' => 'Purchase Order (PO)',
     'online_channel_return' => 'Online Channel Return',
     'goods_placement' => 'Goods Placement',

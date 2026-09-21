@@ -721,6 +721,7 @@ return [
     'goods_in_inbound' => 'Barang Masuk (Inbound)',
     'goods_receipt_history_hint' => 'Riwayat penerimaan barang dan mutasi masuk lainnya.',
     'goods_receipt_bil' => 'Penerimaan Barang (BIL)',
+    'goods_receipt_mfg_spk' => 'Manufaktur (Penyelesaian SPK)',
     'purchase_order_po_label' => 'Pesanan Pembelian (PO)',
     'online_channel_return' => 'Retur Channel Online',
     'goods_placement' => 'Penempatan Barang',

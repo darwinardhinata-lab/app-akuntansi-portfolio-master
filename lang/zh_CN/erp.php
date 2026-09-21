@@ -722,6 +722,7 @@ return [
     'goods_in_inbound' => '入库',
     'goods_receipt_history_hint' => '商品收货及其他入库变动记录。',
     'goods_receipt_bil' => '收货（账单）',
+    'goods_receipt_mfg_spk' => '生产制造（工单完成）',
     'purchase_order_po_label' => '采购订单',
     'online_channel_return' => '线上渠道退货',
     'goods_placement' => '商品上架',
