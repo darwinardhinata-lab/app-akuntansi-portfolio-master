@@ -568,16 +568,33 @@
         ================================================================ --}}
         @if(config('customs.enabled', false))
         <div class="nav-section">
-            <a href="#sectionCustoms" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('customs.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('customs.*') ? 'true' : 'false' }}">
+            <a href="#sectionCustoms" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'true' : 'false' }}">
                 <span class="section-icon"><i class="fa-solid fa-file-signature text-info"></i></span>
                 <span class="section-text">{{ __('erp.customs_module') }}</span>
                 <i class="fa-solid fa-chevron-down section-chevron"></i>
             </a>
-            <div class="collapse section-collapse {{ request()->routeIs('customs.*') ? 'show' : '' }}" id="sectionCustoms">
-                <a href="{{ route('customs.index') }}" class="nav-link {{ request()->routeIs('customs.index') || request()->routeIs('customs.documents.*') || request()->routeIs('customs.show') ? 'active' : '' }}">
+            <div class="collapse section-collapse {{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'show' : '' }}" id="sectionCustoms">
+                <a href="{{ route('customs.index') }}" class="nav-link {{ request()->routeIs('customs.index') || request()->routeIs('customs.documents.*') || request()->routeIs('customs.show') || request()->routeIs('customs-reports.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-file-invoice text-info"></i></span>
                     <span class="nav-text">{{ __('erp.customs_documents') }}</span>
                 </a>
+
+                {{-- SUBSECTION: LAPORAN CEISA --}}
+                <a href="#menuLaporanCeisa" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('customs-reports.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-chart-line text-success"></i></span>
+                    <span class="nav-text">Laporan CEISA</span>
+                    <i class="fa-solid fa-chevron-down nav-chevron"></i>
+                </a>
+                <div class="collapse nav-submenu {{ request()->routeIs('customs-reports.*') ? 'show' : '' }}" id="menuLaporanCeisa">
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'PEMASUKAN']) }}" class="nav-link {{ request()->routeIs('customs-reports.*') && request()->input('report_type') == 'PEMASUKAN' ? 'active' : '' }}"><span class="nav-text">1. Pemasukan Barang</span></a>
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'PENGELUARAN']) }}" class="nav-link {{ request()->routeIs('customs-reports.*') && request()->input('report_type') == 'PENGELUARAN' ? 'active' : '' }}"><span class="nav-text">2. Pengeluaran Barang</span></a>
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'MUTASI_BAHAN_BAKU']) }}" class="nav-link"><span class="nav-text">3. Mutasi Bahan Baku &amp; Penolong</span></a>
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'WIP']) }}" class="nav-link"><span class="nav-text">4. WIP</span></a>
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'MUTASI_BARANG_JADI']) }}" class="nav-link"><span class="nav-text">5. Mutasi Barang Jadi</span></a>
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'MUTASI_BARANG_MODAL']) }}" class="nav-link"><span class="nav-text">6. Mutasi Barang Modal &amp; Lain</span></a>
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'MUTASI_REJECT']) }}" class="nav-link"><span class="nav-text">7. Mutasi Barang Reject &amp; Sisa</span></a>
+                    <a href="{{ route('customs-reports.index') }}" class="nav-link"><span class="nav-text">Lihat Semua Periode</span></a>
+                </div>
 
                 {{-- SUBSECTION: TRACKING INSW (Hyperlink Eksternal Portal INSW) --}}
                 <a href="#menuInswTracking" data-bs-toggle="collapse" class="nav-link">
