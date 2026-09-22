@@ -1793,6 +1793,10 @@ return [
     'customs_module' => '报关',
     'customs_documents' => '报关文档',
     'bc_cust' => '报关',
+    'bc_gudang' => '仓库',
+    'bc_outbound' => '出库',
+    'mfg_see_in_warehouse' => '查看仓库',
+    'bc_sales_outbound' => '销售出库',
 
 ];
 

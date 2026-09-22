@@ -18,6 +18,9 @@
 <div class="container-fluid px-0">
 
     <div class="d-flex justify-content-end gap-2 mb-2 no-print">
+        <a href="{{ route('warehouse.inbound', ['tab' => 'manufaktur']) }}" class="btn btn-sm btn-outline-primary fw-bold px-3">
+            <i class="fa-solid fa-warehouse me-1"></i> {{ __('erp.mfg_see_in_warehouse') }}
+        </a>
         <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-secondary fw-bold px-3">
             <i class="fa-solid fa-print me-1"></i> Cetak SPK
         </button>

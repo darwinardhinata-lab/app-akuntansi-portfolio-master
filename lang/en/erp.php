@@ -1590,6 +1590,7 @@ return [
     'customs_module' => 'Customs',
     'customs_documents' => 'Customs Documents',
     'bc_cust' => 'Customs',
-
+    'bc_sales_outbound' => 'Sales Outbound',
+    'mfg_see_in_warehouse' => 'See in Warehouse',
 ];
 

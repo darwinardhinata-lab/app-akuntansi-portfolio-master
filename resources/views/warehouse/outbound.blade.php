@@ -19,6 +19,10 @@
     {{-- SUB-SUB-MENU / NAV PILLS --}}
     <ul class="nav nav-pills mb-4 bg-white p-2 rounded border shadow-sm flex-nowrap overflow-auto" style="white-space: nowrap;">
         <li class="nav-item">
+            <a class="nav-link fw-bold px-4 {{ $tab == 'sales_outbound' ? 'active' : 'text-muted' }}"
+               href="{{ route('warehouse.outbound', ['tab' => 'sales_outbound']) }}">{{ __('erp.bc_sales_outbound') }}</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link fw-bold px-4 {{ $tab == 'transfer_keluar' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.outbound', ['tab' => 'transfer_keluar']) }}">{{ __('erp.transfer_out') }}</a>
         </li>
         <li class="nav-item">

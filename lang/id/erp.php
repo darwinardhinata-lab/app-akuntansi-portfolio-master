@@ -1590,6 +1590,7 @@ return [
     'customs_module' => 'Kepabeanan',
     'customs_documents' => 'Dokumen Kepabeanan',
     'bc_cust' => 'Kepabeanan',
-
+    'bc_sales_outbound' => 'Penjualan Keluar',
+    'mfg_see_in_warehouse' => 'Lihat di Gudang',
 ];
 

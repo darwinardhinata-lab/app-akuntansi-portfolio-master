@@ -63,6 +63,12 @@ class WarehouseController extends Controller
             $query->where(function($q) {
                 $q->where('evidence_number', 'LIKE', 'PR-%')->orWhere('description', 'LIKE', '%Retur Pembelian%');
             });
+        } elseif ($tab == 'sales_outbound') {
+            // Sales Invoice (INV-...) → OUT (lihat InventorySyncService::STOCK_DIRECTIONS).
+            // Menghubungkan menu Penjualan (Sales Invoice) dengan gudang:
+            // SalesInvoiceController::store() memanggil InventorySyncService::processStockMovements()
+            // dengan docType='INV' yang memetakan ke InventoryLedger type 'OUT'.
+            $query->where('evidence_number', 'LIKE', 'INV-%');
         } elseif ($tab == 'transfer_keluar') {
             $query->where('evidence_number', 'LIKE', 'OUT-%'); // Transaksi keluar manual
         }
