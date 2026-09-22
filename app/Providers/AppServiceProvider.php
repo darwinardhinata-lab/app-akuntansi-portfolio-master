@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Listeners\LogUserLogin;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator; // <-- 1. WAJIB PANGGIL CLASS INI
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(Login::class, LogUserLogin::class);
+
         // 2. PAKSA LARAVEL MENGGUNAKAN TAMPILAN BOOTSTRAP 5
         Paginator::useBootstrapFive();
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\CustomsReports\Http\Controllers\ReportPeriodController;
+use App\Modules\CustomsReports\Http\Controllers\ActivityReportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +20,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 if (config('customs.enabled')) {
+    Route::get('/customs-reports/riwayat-aktivitas', [ActivityReportController::class, 'index'])
+        ->middleware(['auth'])
+        ->name('customs-reports.riwayat-aktivitas');
+
     Route::prefix('laporan-ceisa')->name('customs-reports.')->middleware(['auth'])->group(function () {
         Route::get('/', [ReportPeriodController::class, 'index'])->name('index');
         Route::get('/create', [ReportPeriodController::class, 'create'])->name('create');
