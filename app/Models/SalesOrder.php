@@ -13,7 +13,7 @@ class SalesOrder extends Model
         'so_number', 'invoice_id', 'invoice_no', 'transaction_date', 'contact_name', 'ref_number', 'salesman',
         'source', 'store_name', 'location_name', 'remarks', 'is_tax_included',
         'receiver_name', 'receiver_address', 'receiver_phone', 'is_cod',
-        'tracking_number', 'total_weight', 'is_jubelio_shipment', 'courier',
+        'tracking_number', 'total_weight', 'is_marketplace_shipment', 'courier',
         'status', 'wms_status', 'is_paid', 'sub_total', 'disc_amount', 'other_discount',
         'tax_amount', 'shipping_cost', 'shipping_discount', 'other_cost',
         'return_remaining', 'grand_total'

@@ -1,4 +1,4 @@
-# DESIGN.md — Panduan Desain Teknis & Antarmuka ERP Akuntansi
+﻿# DESIGN.md — Panduan Desain Teknis & Antarmuka ERP Akuntansi
 
 > Status: **BARU** (belum ada dokumen desain terpisah sebelumnya). Disusun dari observasi 70 file Blade view, pola Controller/Service, dan konvensi penamaan yang konsisten di seluruh kode.
 
@@ -6,7 +6,7 @@
 
 Sistem dirancang sebagai **ERP internal berbasis form + tabel**, dioptimalkan untuk:
 - Input transaksi cepat oleh staf akuntansi/gudang (bukan customer-facing, kecuali portal Payment Plan publik).
-- Volume data besar (impor CSV ratusan ribu baris dari Jubelio) → UI harus tetap responsif meski data besar (pagination, AJAX partial-load, background Job).
+- Volume data besar (impor CSV ratusan ribu baris dari [External Platform]) → UI harus tetap responsif meski data besar (pagination, AJAX partial-load, background Job).
 - Akurasi angka mutlak di atas estetika — validasi ketat di server, bukan hanya client-side.
 
 ## 2. Pola UI (Blade + AJAX)
@@ -79,7 +79,7 @@ Semua modul memiliki kelas Export terpisah di `app/Exports/` (`AccountExport`, `
 
 ## 8. Import Data (Excel/CSV)
 
-Pola `app/Imports/` konsisten memakai `maatwebsite/excel` `ToModel`/`ToCollection` dengan validasi baris + pelaporan baris gagal (`failedParseCount`). Untuk file sangat besar (CSV jurnal Jubelio), dipakai **custom streaming parser** (`fgets()` manual) di `JournalCsvImportService`, bukan `maatwebsite/excel`, karena kebutuhan kontrol memori lebih granular dan auto-deteksi delimiter (`;` vs `,`) serta format tanggal/angka Indonesia vs US (lihat `NumberParser`).
+Pola `app/Imports/` konsisten memakai `maatwebsite/excel` `ToModel`/`ToCollection` dengan validasi baris + pelaporan baris gagal (`failedParseCount`). Untuk file sangat besar (CSV jurnal [External Platform]), dipakai **custom streaming parser** (`fgets()` manual) di `JournalCsvImportService`, bukan `maatwebsite/excel`, karena kebutuhan kontrol memori lebih granular dan auto-deteksi delimiter (`;` vs `,`) serta format tanggal/angka Indonesia vs US (lihat `NumberParser`).
 
 ## 9. Internasionalisasi (i18n)
 

@@ -188,7 +188,7 @@ class ProductController extends Controller
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM UTF-8
             
-            // Header standar Jubelio (Kolom 0 sampai 17)
+            // Header standar import produk (Kolom 0 sampai 17)
             fputcsv($file, [
                 'Item Group', 'Group Description', 'Item Name', 'Item Code', 
                 'Category', 'Keterangan/Varian', 'Merek', 'Ukuran', 'Berat', 

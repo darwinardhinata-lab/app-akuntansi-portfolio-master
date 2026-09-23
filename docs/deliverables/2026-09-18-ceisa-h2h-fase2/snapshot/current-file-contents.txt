@@ -1,0 +1,1930 @@
+===== FILE: app/Modules/Customs/Http/Controllers/CustomsDocumentController.php =====
+<?php
+
+namespace App\Modules\Customs\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Modules\Customs\Models\CustomsDocument;
+use App\Modules\Customs\Services\CustomsDocumentService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+
+class CustomsDocumentController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = CustomsDocument::with(['details', 'statusHistory'])
+            ->orderByDesc('created_at');
+
+        if ($request->filled('document_type')) {
+            $query->where('document_type', $request->document_type);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $documents = $query->paginate(20);
+
+        return view('customs.index', [
+            'documents' => $documents,
+            'filters' => $request->only(['document_type', 'status']),
+        ]);
+    }
+
+    public function create(Request $request, string $sourceType, int $sourceId)
+    {
+        $allowedSources = [
+            'purchase_order' => ['model' => \App\Models\PurchaseOrder::class, 'type' => 'PIB'],
+            'purchase_bill' => ['model' => \App\Models\PurchaseBill::class, 'type' => 'PIB'],
+            'sales_order' => ['model' => \App\Models\SalesOrder::class, 'type' => 'PEB'],
+            'sales_invoice' => ['model' => \App\Models\SalesInvoice::class, 'type' => 'PEB'],
+        ];
+
+        if (! isset($allowedSources[$sourceType])) {
+            abort(404, 'Sumber dokumen tidak valid.');
+        }
+
+        $sourceConfig = $allowedSources[$sourceType];
+        $sourceDocument = $sourceConfig['model']::find($sourceId);
+
+        if (! $sourceDocument) {
+            abort(404, 'Dokumen sumber tidak ditemukan.');
+        }
+
+        // FIX (C1): urutan argumen sebelumnya terbalik terhadap signature
+        // createDraft(string $sourceType, int $sourceId, string $documentType, ?int $createdBy = null).
+        $customsDocument = app(CustomsDocumentService::class)->createDraft(
+            $sourceType,
+            $sourceId,
+            $sourceConfig['type'],
+            auth()->id()
+        );
+
+        return redirect()->route('customs.edit', $customsDocument->id)
+            ->with('success', 'Dokumen draft berhasil dibuat.');
+    }
+
+    public function show(CustomsDocument $document)
+    {
+        $document->load(['details', 'statusHistory', 'logs']);
+
+        return view('customs.show', ['document' => $document]);
+    }
+
+    // FIX (C7): route customs.edit sebelumnya mengarah ke show() karena view edit
+    // tidak ada. Sekarang view-nya ada, method edit() dibuat agar form edit
+    // benar-benar ditampilkan untuk dokumen DRAFT.
+    public function edit(CustomsDocument $document)
+    {
+        if ($document->status !== 'DRAFT') {
+            return redirect()->route('customs.show', $document->id)
+                ->with('error', 'Hanya dokumen berstatus DRAFT yang dapat diedit.');
+        }
+
+        $document->load(['details']);
+        return view('customs.edit', ['document' => $document]);
+    }
+
+    public function submit(CustomsDocument $document, Request $request)
+    {
+        if (! Gate::allows('customs.submit')) {
+            abort(403, 'Anda tidak memiliki izin untuk submit dokumen ini.');
+        }
+
+        try {
+            DB::transaction(function () use ($document) {
+                app(CustomsDocumentService::class)->submit($document, auth()->id());
+            });
+
+            return redirect()->route('customs.show', $document->id)
+                ->with('success', 'Dokumen berhasil diajukan ke CEISA.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function retry(CustomsDocument $document, Request $request)
+    {
+        try {
+            DB::transaction(function () use ($document) {
+                app(CustomsDocumentService::class)->retry($document, auth()->id());
+            });
+
+            return redirect()->route('customs.show', $document->id)
+                ->with('success', 'Retry submit berhasil dipicu.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function void(CustomsDocument $document, Request $request)
+    {
+        if (! Gate::allows('customs.void')) {
+            abort(403, 'Anda tidak memiliki izin untuk membatalkan dokumen ini.');
+        }
+
+        try {
+            DB::transaction(function () use ($document) {
+                app(CustomsDocumentService::class)->void($document, auth()->id());
+            });
+
+            return redirect()->route('customs.show', $document->id)
+                ->with('success', 'Dokumen berhasil dibatalkan.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function update(CustomsDocument $document, Request $request)
+    {
+        $validated = $request->validate([
+            'kode_kantor' => 'sometimes|string|max:20',
+            'currency' => 'sometimes|string|size:3',
+            'exchange_rate' => 'sometimes|numeric|min:0.000001',
+        ]);
+
+        try {
+            DB::transaction(function () use ($document, $validated) {
+                app(CustomsDocumentService::class)->updateFromPayload($document, $validated);
+            });
+
+            return back()->with('success', 'Dokumen berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function print(CustomsDocument $document)
+    {
+        $document->load(['details']);
+        return view('customs.print', ['document' => $document]);
+    }
+
+    public function export(Request $request)
+    {
+        return redirect()->route('customs.index')->with('error', 'Export belum diimplementasi.');
+    }
+
+    public function handleWebhook(Request $request)
+    {
+        // FIX (H2): jangan pura-pura sukses. TODO Fase 2: verifikasi signature request
+        // sesuai spesifikasi resmi DJBC, baru proses payload via
+        // CustomsDocumentService::updateStatusFromResponse().
+        // Untuk saat ini endpoint belum boleh dianggap 'menerima' data apa pun.
+        return response()->json([
+            'status' => 'NOT_IMPLEMENTED',
+            'message' => 'Webhook verification belum diimplementasi — menunggu spesifikasi resmi DJBC.',
+        ], 501);
+    }
+}
+
+===== FILE: app/Modules/Customs/Services/CustomsDocumentService.php =====
+<?php
+
+namespace App\Modules\Customs\Services;
+
+use App\Modules\Customs\Jobs\SubmitCustomsDocumentJob;
+use App\Modules\Customs\Models\CustomsDocument;
+use App\Modules\Customs\Models\CustomsStatusHistory;
+use App\Modules\Customs\Services\CeisaH2HClient;
+use App\Support\DocumentSequence;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+class CustomsDocumentService
+{
+    public function __construct(
+        private readonly CeisaH2HClient $ceisaClient
+    ) {}
+
+    public function createDraft(
+        string $sourceType,
+        int $sourceId,
+        string $documentType,
+        ?int $createdBy = null
+    ): CustomsDocument {
+        return DB::transaction(function () use ($sourceType, $sourceId, $documentType, $createdBy) {
+            $existing = CustomsDocument::where('source_type', $sourceType)
+                ->where('source_id', $sourceId)
+                ->where('document_type', $documentType)
+                ->first();
+
+            if ($existing) {
+                throw new \RuntimeException(
+                    "Dokumen Customs {$documentType} sudah ada"
+                );
+            }
+
+            $prefix = $documentType . '/' . now()->format('Y/m') . '/';
+            $internalNumber = DocumentSequence::generateSecure(
+                'cst_customs_documents',
+                'internal_number',
+                $prefix,
+                5
+            );
+
+            $document = CustomsDocument::create([
+                'document_type' => $documentType,
+                'internal_number' => $internalNumber,
+                'source_type' => $sourceType,
+                'source_id' => $sourceId,
+                'status' => 'DRAFT',
+                'environment' => config('customs.default_environment', 'sandbox'),
+                'created_by' => $createdBy,
+            ]);
+
+            CustomsStatusHistory::create([
+                'customs_document_id' => $document->id,
+                'status' => 'DRAFT',
+                'note' => 'Dokumen draft dibuat',
+                'changed_at' => now(),
+            ]);
+
+            return $document;
+        });
+    }
+
+    /**
+     * FIX (C3 / Fase 1-B): method submit/retry/void/updateFromPayload/
+     * updateStatusFromResponse sebelumnya dipanggil controller & job tapi tidak
+     * pernah didefinisikan di sini -> fatal error saat modul dipakai.
+     */
+
+    /**
+     * Ajukan dokumen untuk dikirim ke CEISA — hanya mengubah status ke QUEUED
+     * dan dispatch job. TIDAK memanggil CEISA sungguhan di sini (itu tugas job).
+     */
+    public function submit(CustomsDocument $document, ?int $actorId = null): CustomsDocument
+    {
+        return DB::transaction(function () use ($document, $actorId) {
+            $locked = CustomsDocument::lockForUpdate()->findOrFail($document->id);
+
+            if (! $locked->canBeSubmitted()) {
+                throw new \RuntimeException(
+                    "Dokumen berstatus {$locked->status} tidak dapat diajukan."
+                );
+            }
+
+            $locked->update([
+                'status' => 'QUEUED',
+                'updated_by' => $actorId,
+            ]);
+
+            CustomsStatusHistory::create([
+                'customs_document_id' => $locked->id,
+                'status' => 'QUEUED',
+                'note' => 'Diajukan oleh user untuk dikirim ke CEISA',
+                'changed_at' => now(),
+            ]);
+
+            SubmitCustomsDocumentJob::dispatch($locked->id);
+
+            return $locked;
+        });
+    }
+
+    /**
+     * Retry submit untuk dokumen yang ditolak/butuh perbaikan.
+     */
+    public function retry(CustomsDocument $document, ?int $actorId = null): CustomsDocument
+    {
+        return DB::transaction(function () use ($document, $actorId) {
+            $locked = CustomsDocument::lockForUpdate()->findOrFail($document->id);
+
+            if (! in_array($locked->status, ['NEED_CORRECTION', 'REJECTED'], true)) {
+                throw new \RuntimeException(
+                    "Dokumen berstatus {$locked->status} tidak dapat di-retry."
+                );
+            }
+
+            $locked->update([
+                'status' => 'QUEUED',
+                'retry_count' => $locked->retry_count + 1,
+                'last_error_code' => null,
+                'last_error_message' => null,
+                'updated_by' => $actorId,
+            ]);
+
+            CustomsStatusHistory::create([
+                'customs_document_id' => $locked->id,
+                'status' => 'QUEUED',
+                'note' => "Retry ke-{$locked->retry_count} oleh user",
+                'changed_at' => now(),
+            ]);
+
+            SubmitCustomsDocumentJob::dispatch($locked->id);
+
+            return $locked;
+        });
+    }
+
+    /**
+     * Batalkan dokumen — hanya boleh untuk dokumen yang belum final di CEISA.
+     */
+    public function void(CustomsDocument $document, ?int $actorId = null): CustomsDocument
+    {
+        return DB::transaction(function () use ($document, $actorId) {
+            $locked = CustomsDocument::lockForUpdate()->findOrFail($document->id);
+
+            if (! in_array($locked->status, ['DRAFT', 'NEED_CORRECTION', 'REJECTED'], true)) {
+                throw new \RuntimeException(
+                    "Dokumen berstatus {$locked->status} tidak dapat dibatalkan. " .
+                    'Dokumen yang sudah SUBMITTED/SPPB_ISSUED/NPE_ISSUED tidak bisa di-void dari sini.'
+                );
+            }
+
+            $locked->update([
+                'status' => 'VOIDED',
+                'updated_by' => $actorId,
+            ]);
+
+            CustomsStatusHistory::create([
+                'customs_document_id' => $locked->id,
+                'status' => 'VOIDED',
+                'note' => 'Dibatalkan oleh user',
+                'changed_at' => now(),
+            ]);
+
+            return $locked;
+        });
+    }
+
+    /**
+     * Update field header dokumen — hanya boleh saat masih DRAFT.
+     */
+    public function updateFromPayload(CustomsDocument $document, array $validated): CustomsDocument
+    {
+        return DB::transaction(function () use ($document, $validated) {
+            $locked = CustomsDocument::lockForUpdate()->findOrFail($document->id);
+
+            if ($locked->status !== 'DRAFT') {
+                throw new \RuntimeException(
+                    "Dokumen berstatus {$locked->status} tidak dapat diedit. Hanya dokumen DRAFT yang bisa diubah."
+                );
+            }
+
+            $locked->update($validated);
+
+            return $locked;
+        });
+    }
+
+    /**
+     * Dipanggil oleh job pengiriman/polling status setelah menerima respons
+     * dari CEISA (atau simulasi TODO saat ini).
+     *
+     * NOTE: mapping status CEISA -> status internal masih sementara (pass-through
+     * langsung dari $ceisaStatus) sampai spesifikasi resmi DJBC diterima —
+     * lihat TODO di CeisaSignatureService/CeisaH2HClient.
+     */
+    public function updateStatusFromResponse(
+        int $documentId,
+        string $ceisaStatus,
+        array $responseBody,
+        ?string $nomorAju = null,
+        ?string $nomorPendaftaran = null
+    ): CustomsDocument {
+        return DB::transaction(function () use ($documentId, $ceisaStatus, $nomorAju, $nomorPendaftaran) {
+            $locked = CustomsDocument::lockForUpdate()->findOrFail($documentId);
+
+            // Idempotency guard: kalau status sudah sama persis dan nomor sudah terisi, tidak usah diproses ulang.
+            if ($locked->status === $ceisaStatus && $locked->nomor_aju === $nomorAju) {
+                return $locked;
+            }
+
+            $locked->update([
+                'status' => $ceisaStatus,
+                'nomor_aju' => $nomorAju ?? $locked->nomor_aju,
+                'nomor_pendaftaran' => $nomorPendaftaran ?? $locked->nomor_pendaftaran,
+                'submitted_at' => $locked->submitted_at ?? now(),
+                'responded_at' => now(),
+            ]);
+
+            CustomsStatusHistory::create([
+                'customs_document_id' => $locked->id,
+                'status' => $ceisaStatus,
+                'note' => 'Update status dari respons CEISA',
+                'changed_at' => now(),
+            ]);
+
+            return $locked;
+        });
+    }
+}
+
+===== FILE: app/Modules/Customs/Services/CeisaSignatureService.php =====
+<?php
+
+namespace App\Modules\Customs\Services;
+
+/**
+ * CeisaSignatureService - Layanan tanda tangan untuk request ke CEISA H2H.
+ *
+ * Formula (sesuai spesifikasi resmi yang diberikan user):
+ *   String to Sign = HTTP_METHOD:PATH_URL:ACCESS_TOKEN:TIMESTAMP
+ *   Signature      = Base64(HMAC-SHA256(String to Sign, client_secret))
+ */
+class CeisaSignatureService
+{
+    /**
+     * Tandatangani payload untuk dikirim ke CEISA.
+     *
+     * @param array  $payload    Data yang akan ditandatangani (body request)
+     * @param string $httpMethod HTTP method (POST/GET)
+     * @param string $pathUrl    Path endpoint, mis. '/ceisa/v1/pib'
+     * @return array ['body' => array, 'headers' => array]
+     *
+     * CATATAN Fase 2: signature method berubah dari sign(array $payload) versi
+     * Fase 1 menjadi butuh 2 parameter tambahan ($httpMethod, $pathUrl) karena
+     * string-to-sign butuh keduanya. Semua pemanggil (CeisaH2HClient) sudah
+     * disesuaikan.
+     */
+    public function sign(array $payload, string $httpMethod = 'POST', string $pathUrl = ''): array
+    {
+        return match (config('customs.signing.method')) {
+            'hmac' => $this->signHmac($payload, $httpMethod, $pathUrl),
+            'rsa' => $this->signAsymmetric($payload, $httpMethod, $pathUrl),
+            default => throw new \RuntimeException(
+                'Metode signing tidak dikenal: ' . config('customs.signing.method')
+            ),
+        };
+    }
+
+    private function signHmac(array $payload, string $httpMethod, string $pathUrl): array
+    {
+        $clientSecret = config('customs.signing.client_secret');
+        $accessToken = config('customs.signing.access_token');
+
+        if (! $clientSecret || ! $accessToken) {
+            throw new \RuntimeException(
+                'CEISA_CLIENT_SECRET dan/atau CEISA_ACCESS_TOKEN belum diatur di .env — signing HMAC tidak dapat dilakukan.'
+            );
+        }
+
+        // [BELUM PASTI - TODO] format timestamp (epoch detik vs ms vs ISO8601)
+        // belum dikonfirmasi — perlu dicek ulang ke dokumentasi resmi DJBC.
+        $timestamp = (string) now()->timestamp;
+
+        $stringToSign = "{$httpMethod}:{$pathUrl}:{$accessToken}:{$timestamp}";
+        $signature = base64_encode(hash_hmac('sha256', $stringToSign, $clientSecret, true));
+
+        return [
+            'body' => $payload,
+            'headers' => [
+                config('customs.signing.signature_header') => $signature,
+                config('customs.signing.client_id_header') => config('customs.signing.client_id'),
+                config('customs.signing.timestamp_header') => $timestamp,
+                config('customs.signing.authorization_header') => 'Bearer ' . $accessToken,
+            ],
+        ];
+    }
+
+    /**
+     * [BELUM PASTI - TODO] Beberapa modul CEISA disebutkan membutuhkan tanda tangan
+     * asimetris (RSA) dengan Private Key sertifikat X.509 perusahaan, tapi TIDAK
+     * dijelaskan modul/endpoint mana persisnya. Sengaja dibuat melempar exception
+     * dulu daripada menebak implementasi yang salah.
+     */
+    private function signAsymmetric(array $payload, string $httpMethod, string $pathUrl): array
+    {
+        throw new \RuntimeException(
+            'Signing RSA/X.509 belum diimplementasi — perlu konfirmasi modul CEISA mana ' .
+            'yang membutuhkan tanda tangan asimetris sebelum bisa dikerjakan.'
+        );
+    }
+}
+
+===== FILE: app/Modules/Customs/Services/CeisaH2HClient.php =====
+<?php
+
+namespace App\Modules\Customs\Services;
+
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * CeisaH2HClient - HTTP client untuk berkomunikasi dengan CEISA H2H.
+ * 
+ * Client ini SELALU melempar exception jika config('customs.enabled') false,
+ * untuk mencegah koneksi ke server nyata sebelum siap.
+ */
+class CeisaH2HClient
+{
+    public function __construct(
+        private readonly CeisaSignatureService $signer
+    ) {}
+
+    /**
+     * Kirim dokumen ke CEISA H2H melalui endpoint sandbox/produksi.
+     *
+     * @param string $documentType 'PIB' atau 'PEB'
+     * @param array  $payload      Data dokumen
+     * @param string $correlationId ID untuk tracking
+     * @return array ['http_status' => int, 'body' => array, 'raw' => string]
+     * @throws \RuntimeException Jika modul tidak diaktifkan atau path tidak ditemukan
+     */
+    public function submit(string $documentType, array $payload, string $correlationId): array
+    {
+        if (! config('customs.enabled')) {
+            throw new \RuntimeException('Modul Customs (CEISA H2H) tidak aktif. Set CEISA_ENABLED=true di .env untuk mengaktifkan (hanya untuk testing manual terverifikasi).');
+        }
+
+        $path = config("customs.endpoints.paths.{$documentType}");
+
+        if (! $path) {
+            throw new \RuntimeException("Path endpoint untuk dokumen tipe {$documentType} tidak ditemukan di config.");
+        }
+
+        $signed = $this->signer->sign($payload, 'POST', $path);
+
+        $response = Http::baseUrl($this->baseUrl())
+            ->withHeaders(array_merge($signed['headers'], [
+                'Content-Type' => 'application/json',
+                'X-Correlation-Id' => $correlationId,
+            ]))
+            ->timeout(config('customs.timeout'))
+            ->retry(
+                config('customs.retry.times'),
+                fn ($attempt) => config('customs.retry.backoff_seconds')[$attempt - 1] ?? 300,
+                throw: false,
+            )
+            ->post($path, $signed['body']);
+
+        return [
+            'http_status' => $response->status(),
+            'body' => $response->json() ?? [],
+            'raw' => $response->body(),
+        ];
+    }
+
+    /**
+     * Cek status dokumen di CEISA.
+     *
+     * @param string $documentType 'PIB' atau 'PEB'
+     * @param string $nomorAju     Nomor ajuan dari CEISA
+     * @return array ['http_status' => int, 'body' => array, 'raw' => string]
+     * @throws \RuntimeException Jika modul tidak diaktifkan
+     */
+    public function checkStatus(string $documentType, string $nomorAju): array
+    {
+        if (! config('customs.enabled')) {
+            throw new \RuntimeException('Modul Customs (CEISA H2H) tidak aktif. Set CEISA_ENABLED=true di .env untuk mengaktifkan.');
+        }
+
+        $path = config("customs.endpoints.paths.{$documentType}") . '/' . $nomorAju;
+        // [BELUM PASTI - TODO] Format path GET untuk cek status ini adalah asumsi REST
+        // umum, BUKAN dari spesifikasi resmi — wajib dikonfirmasi ke dokumentasi DJBC.
+
+        $signed = $this->signer->sign([], 'GET', $path);
+
+        $response = Http::baseUrl($this->baseUrl())
+            ->withHeaders(array_merge($signed['headers'], [
+                'X-Correlation-Id' => (string) \Illuminate\Support\Str::uuid(),
+            ]))
+            ->timeout(config('customs.timeout'))
+            ->get($path);
+
+        return [
+            'http_status' => $response->status(),
+            'body' => $response->json() ?? [],
+            'raw' => $response->body(),
+        ];
+    }
+
+    private function baseUrl(): string
+    {
+        $env = config('customs.default_environment', 'sandbox');
+        return config("customs.endpoints.{$env}");
+    }
+}
+
+===== FILE: app/Modules/Customs/Jobs/SubmitCustomsDocumentJob.php =====
+<?php
+
+namespace App\Modules\Customs\Jobs;
+
+use App\Modules\Customs\Models\CustomsDocument;
+use App\Modules\Customs\Services\CeisaH2HClient;
+use App\Modules\Customs\Support\CustomsAuditLogger;
+use App\Modules\Customs\Services\CustomsDocumentService;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+
+class SubmitCustomsDocumentJob implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $tries = 3;
+    public array $backoff = [10, 60, 300];
+
+    public int $customsDocumentId;
+
+    public function __construct(int $customsDocumentId)
+    {
+        $this->customsDocumentId = $customsDocumentId;
+        $this->onQueue('customs');
+    }
+
+    public function handle(CustomsDocumentService $documentService): void
+    {
+        $document = CustomsDocument::with('details')->find($this->customsDocumentId);
+
+        if (! $document) {
+            Log::error("CustomsDocument #{$this->customsDocumentId} tidak ditemukan.", [
+                'job' => self::class,
+            ]);
+            return;
+        }
+
+        // FIX (C2/Fase 1-B): guard status di JOB eksplisit DRAFT/QUEUED. canBeSubmitted()
+        // di model sekarang hanya mengizinkan DRAFT/NEED_CORRECTION (guard untuk service
+        // submit()), sedangkan job ini justru memproses dokumen yang berstatus QUEUED.
+        if (! in_array($document->status, [CustomsDocument::STATUS_DRAFT, CustomsDocument::STATUS_QUEUED], true)) {
+            Log::warning("Dokumen {$document->internal_number} tidak dapat di-submit. Status: {$document->status}");
+            return;
+        }
+
+        // FIX (C5): hash() butuh string, bukan array.
+        $currentHash = hash('sha256', json_encode($this->buildPayload($document)));
+        if ($document->payload_hash && $document->payload_hash !== $currentHash) {
+            Log::warning("Payload dokumen {$document->internal_number} telah berubah.");
+            return;
+        }
+
+        $document->payload_hash = $currentHash;
+        $document->save();
+
+        $payload = $this->buildPayload($document);
+
+        // FIX (C6 + C4): correlationId disimpan ke property SEBELUM dipakai, dan
+        // method logger yang benar adalah logRequest() (bukan logOutboundRequest()).
+        $this->correlationId = $this->generateCorrelationId();
+
+        CustomsAuditLogger::logRequest(
+            $document->id,
+            'SUBMIT',
+            $payload,
+            null,
+            $this->correlationId,
+            $document->created_by
+        );
+
+        try {
+            $startTime = microtime(true);
+            $response = $this->callCeisaApi($document, $payload);
+            $latencyMs = (microtime(true) - $startTime) * 1000;
+
+            // FIX (C4): method yang benar adalah logResponse() dengan urutan parameter
+            // (documentId, eventType, response, httpStatus, correlationId, latencyMs).
+            CustomsAuditLogger::logResponse(
+                $document->id,
+                'SUBMIT',
+                $response['body'] ?? [],
+                $response['http_status'],
+                $this->correlationId,
+                (int) $latencyMs
+            );
+
+            // FIX (E4): pemanggilan updateStatusFromResponse() sudah cocok dengan
+            // signature di CustomsDocumentService (documentId, ceisaStatus, body,
+            // nomorAju, nomorPendaftaran).
+            // Fase 2 (Task D): respons asli CeisaH2HClient hanya berisi
+            // http_status/body/raw. Status dipetakan dari http_status
+            // (2xx = SUBMIT_SUCCESS) — [BELUM PASTI - TODO] mapping status resmi
+            // CEISA perlu dikonfirmasi ke dokumentasi DJBC (GAPS_TO_CONFIRM.md).
+            $ceisaStatus = ($response['http_status'] >= 200 && $response['http_status'] < 300)
+                ? 'SUBMIT_SUCCESS'
+                : 'SUBMIT_FAILED';
+
+            $documentService->updateStatusFromResponse(
+                $document->id,
+                $ceisaStatus,
+                $response['body'] ?? [],
+                $response['body']['nomor_aju'] ?? null,
+                $response['body']['nomor_pendaftaran'] ?? null
+            );
+
+        } catch (\RuntimeException $e) {
+            if (str_contains($e->getMessage(), 'tidak aktif')) {
+                // Modul memang sengaja dimatikan — bukan kegagalan transient,
+                // jangan retry otomatis. Log dulu sebelum fail() supaya audit
+                // tetap tercatat (fail() melempar ulang exception).
+                CustomsAuditLogger::logError(
+                    $document->id,
+                    $e->getMessage(),
+                    $this->correlationId,
+                    ['type' => 'module_disabled']
+                );
+
+                $this->fail($e);
+
+                return;
+            }
+
+            // RuntimeException lain (mis. kredensial signing kosong) — gagal cepat,
+            // retry tidak akan membantu karena bukan masalah transient.
+            throw $e;
+        } catch (\Exception $e) {
+            // logError() signature sudah benar; correlationId dijamin ter-assign
+            // dari blok E1 sebelum baris ini dieksekusi.
+            CustomsAuditLogger::logError(
+                $document->id,
+                $e->getMessage(),
+                $this->correlationId,
+                ['exception_class' => get_class($e)]
+            );
+
+            $document->last_error_code = $e->getCode() ?: 'UNKNOWN_ERROR';
+            $document->last_error_message = $e->getMessage();
+            $document->save();
+
+            throw $e;
+        }
+    }
+
+    private function buildPayload(CustomsDocument $document): array
+    {
+        return [
+            'document_type' => $document->document_type,
+            'internal_number' => $document->internal_number,
+            'kode_kantor' => $document->kode_kantor,
+        ];
+    }
+
+    private function callCeisaApi(CustomsDocument $document, array $payload): array
+    {
+        // Fase 2 (Task D): simulasi palsu dihapus — sekarang benar-benar memanggil
+        // CeisaH2HClient, yang akan melempar RuntimeException jika modul tidak
+        // aktif (mencegah "pura-pura sukses" saat CEISA_ENABLED=false).
+        return app(CeisaH2HClient::class)->submit(
+            $document->document_type,
+            $payload,
+            $this->correlationId
+        );
+    }
+
+    private string $correlationId;
+
+    private function generateCorrelationId(): string
+    {
+        return 'CEISA_' . uniqid() . '_' . time();
+    }
+}
+
+===== FILE: app/Modules/Customs/Jobs/PollCustomsStatusJob.php =====
+<?php
+
+namespace App\Modules\Customs\Jobs;
+
+use App\Modules\Customs\Models\CustomsDocument;
+use App\Modules\Customs\Services\CustomsDocumentService;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+
+class PollCustomsStatusJob implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public function handle(CustomsDocumentService $documentService): void
+    {
+        $documents = CustomsDocument::submitted()
+            ->whereNull('nomor_pendaftaran')
+            ->get();
+
+        foreach ($documents as $document) {
+            $this->checkStatus($document, $documentService);
+        }
+    }
+
+    private function checkStatus(CustomsDocument $document, CustomsDocumentService $documentService): void
+    {
+        // TODO: Ganti dengan call ke CeisaH2HClient::checkStatus()
+        // Untuk saat ini, simulate respons
+
+        Log::info("Polling status dokumen {$document->internal_number}", [
+            'document_id' => $document->id,
+        ]);
+    }
+}
+
+===== FILE: app/Modules/Customs/Models/CustomsDocument.php =====
+<?php
+
+namespace App\Modules\Customs\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+/**
+ * Modul Kepabeanan — CustomsDocument
+ * Tabel: cst_customs_documents
+ */
+class CustomsDocument extends Model
+{
+    // FIX (T6): konstanta status ditambahkan agar konsisten dengan lang/*/customs.php
+    // dan resources/views/customs/index.blade.php (yang sudah memakai nilai UPPERCASE ini).
+    // Sebelumnya status hanya string bebas tanpa satu sumber kebenaran -> rawan typo.
+    public const STATUS_DRAFT = 'DRAFT';
+    public const STATUS_QUEUED = 'QUEUED';
+    public const STATUS_SUBMITTED = 'SUBMITTED';
+    public const STATUS_UNDER_REVIEW = 'UNDER_REVIEW';
+    public const STATUS_NEED_CORRECTION = 'NEED_CORRECTION';
+    public const STATUS_REJECTED = 'REJECTED';
+    public const STATUS_SPPB_ISSUED = 'SPPB_ISSUED';
+    public const STATUS_NPE_ISSUED = 'NPE_ISSUED';
+    public const STATUS_VOIDED = 'VOIDED';
+
+    protected $table = 'cst_customs_documents';
+
+    protected $fillable = [
+        'document_type',
+        'internal_number',
+        'source_type',
+        'source_id',
+        'nomor_aju',
+        'nomor_pendaftaran',
+        'status',
+        'environment',
+        'kode_kantor',
+        'currency',
+        'exchange_rate',
+        'total_value',
+        'submitted_at',
+        'responded_at',
+        'last_error_code',
+        'last_error_message',
+        'retry_count',
+        'payload_hash',
+        'created_by',
+        'updated_by',
+    ];
+
+    protected $casts = [
+        'exchange_rate' => 'decimal:4',
+        'total_value' => 'decimal:2',
+        'submitted_at' => 'datetime',
+        'responded_at' => 'datetime',
+        'retry_count' => 'integer',
+    ];
+
+    public function details(): HasMany
+    {
+        return $this->hasMany(CustomsDocumentDetail::class, 'customs_document_id');
+    }
+
+    public function logs(): HasMany
+    {
+        return $this->hasMany(CustomsDocumentLog::class, 'customs_document_id');
+    }
+
+    public function statusHistory(): HasMany
+    {
+        return $this->hasMany(CustomsStatusHistory::class, 'customs_document_id');
+    }
+
+    // FIX (C2 / Fase 1-B): guard submit sekarang hanya DRAFT dan NEED_CORRECTION
+    // (dokumen yang baru dibuat atau butuh perbaikan). QUEUED TIDAK lagi boleh
+    // di-submit dari service — status QUEUED ditangani oleh SubmitCustomsDocumentJob
+    // (guard di job memeriksa DRAFT/QUEUED secara eksplisit).
+    public function canBeSubmitted(): bool
+    {
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_NEED_CORRECTION], true);
+    }
+
+    // FIX (T5 pendukung): dipakai oleh CustomsDocumentService::updateFromPayload()
+    // untuk menolak edit pada dokumen yang statusnya sudah "berjalan" di CEISA.
+    public function isEditable(): bool
+    {
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_NEED_CORRECTION], true);
+    }
+
+    // FIX (T6): local scope ini dipanggil dari PollCustomsStatusJob via
+    // CustomsDocument::submitted() tapi sebelumnya tidak ada di model sama sekali
+    // -> "Call to undefined method" setiap kali job polling jalan.
+    // Dokumen yang "sedang dalam proses di CEISA" adalah yang berstatus SUBMITTED
+    // atau UNDER_REVIEW (belum final: SPPB/NPE/REJECTED/VOIDED).
+    public function scopeSubmitted($query)
+    {
+        return $query->whereIn('status', [self::STATUS_SUBMITTED, self::STATUS_UNDER_REVIEW]);
+    }
+
+
+    /**
+     * Resolver sumber dokumen.
+     * source_type disimpan sebagai slug tunggal sesuai nilai dari controller.
+     * Contoh: 'purchase_order', 'purchase_bill', 'sales_order', 'sales_invoice'.
+     */
+    public function source()
+    {
+        if (! $this->source_type || ! $this->source_id) {
+            return null;
+        }
+
+        $mapping = [
+            'purchase_order' => \App\Models\PurchaseOrder::class,
+            'purchase_bill' => \App\Models\PurchaseBill::class,
+            'sales_order' => \App\Models\SalesOrder::class,
+            'sales_invoice' => \App\Models\SalesInvoice::class,
+        ];
+
+        $modelClass = $mapping[$this->source_type] ?? null;
+
+        if (! $modelClass) {
+            return null;
+        }
+
+        return (new $modelClass)->find($this->source_id);
+    }
+}
+
+
+===== FILE: config/customs.php =====
+<?php
+
+return [
+    'enabled' => env('CEISA_ENABLED', false), // WAJIB false secara default
+
+    'default_environment' => env('CEISA_ENV', 'sandbox'),
+
+    'endpoints' => [
+        'sandbox' => env('CEISA_SANDBOX_BASE_URL', 'https://apis-sandbox.beacukai.go.id'),
+        'production' => env('CEISA_PRODUCTION_BASE_URL'),
+        // [BELUM PASTI - TODO] Path di bawah ini contoh dari spesifikasi yang diberikan,
+        // BUKAN konfirmasi final — wajib dicek ulang ke Postman collection resmi DJBC
+        // per dokumen (PIB/PEB). Path GET cek status juga masih asumsi (lihat CeisaH2HClient).
+        'paths' => [
+            'PIB' => env('CEISA_PATH_PIB', '/ceisa/v1/pib'),
+            'PEB' => env('CEISA_PATH_PEB', '/ceisa/v1/peb'),
+        ],
+    ],
+
+    'timeout' => env('CEISA_TIMEOUT', 30),
+
+    'retry' => [
+        'times' => 3,
+        'backoff_seconds' => [10, 60, 300],
+    ],
+
+    'signing' => [
+        'method' => env('CEISA_SIGN_METHOD', 'hmac'), // 'hmac' | 'rsa' — 'rsa' masih stub, lihat CeisaSignatureService::signAsymmetric()
+        'client_id' => env('CEISA_CLIENT_ID'),
+        'client_secret' => env('CEISA_CLIENT_SECRET'),
+        // [BELUM PASTI - TODO] Tidak ada alur resmi (client credentials grant?) untuk
+        // mendapatkan access_token otomatis di spesifikasi yang diberikan. Untuk sementara
+        // token disimpan manual di .env dan TIDAK di-refresh otomatis.
+        'access_token' => env('CEISA_ACCESS_TOKEN'),
+        'signature_header' => 'beacukai-signature',
+        // [BELUM PASTI - TODO] Nama header di bawah ini nama yang wajar berdasarkan pola
+        // API sejenis, BUKAN dari dokumentasi resmi — wajib dikonfirmasi ke Postman
+        // collection resmi DJBC sebelum dipakai untuk request sungguhan.
+        'client_id_header' => 'client-id',
+        'timestamp_header' => 'timestamp',
+        'authorization_header' => 'Authorization',
+    ],
+
+    'polling_interval_minutes' => 15,
+];
+
+
+===== FILE: phpunit.xml =====
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>app</directory>
+        </include>
+    </source>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <!-- CEISA_ENABLED=true HANYA di lingkungan test: route modul customs
+             diregistrasi saat boot berdasarkan nilai env ini (lihat routes/customs.php),
+             jadi feature test butuh route terdaftar. Perilaku runtime tiap test
+             tetap dikontrol eksplisit via config(['customs.enabled' => ...]).
+             Default di config/customs.php, .env, dan .env.example TETAP false. -->
+        <env name="CEISA_ENABLED" value="true"/>
+        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="BROADCAST_CONNECTION" value="null"/>
+        <env name="CACHE_STORE" value="array"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
+        <env name="DB_URL" value=""/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="PULSE_ENABLED" value="false"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="NIGHTWATCH_ENABLED" value="false"/>
+    </php>
+</phpunit>
+
+===== FILE: .env.example =====
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost
+
+APP_LOCALE=en
+APP_FALLBACK_LOCALE=en
+APP_FAKER_LOCALE=en_US
+
+APP_MAINTENANCE_DRIVER=file
+# APP_MAINTENANCE_STORE=database
+
+# PHP_CLI_SERVER_WORKERS=4
+
+BCRYPT_ROUNDS=12
+
+LOG_CHANNEL=stack
+LOG_STACK=single
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+DB_CONNECTION=sqlite
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=laravel
+# DB_USERNAME=root
+# DB_PASSWORD=
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=false
+SESSION_PATH=/
+SESSION_DOMAIN=null
+
+BROADCAST_CONNECTION=log
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+
+CACHE_STORE=database
+# CACHE_PREFIX=
+
+MEMCACHED_HOST=127.0.0.1
+
+REDIS_CLIENT=phpredis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=log
+MAIL_SCHEME=null
+MAIL_HOST=127.0.0.1
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_FROM_ADDRESS="hello@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+
+# =============================================================================
+# CEISA H2H Integration (Customs/Bea Cukai)
+# Dokumentasi: https://ceisa.beacukai.go.id atau sesuai info dari DJBC/PPJK
+# =============================================================================
+
+# Environment: 'sandbox' atau 'production'
+CEISA_ENABLED=false
+CEISA_ENV=sandbox
+
+# Base URL CEISA H2H (default sudah diset di config/customs.php; env hanya override bila perlu)
+CEISA_SANDBOX_BASE_URL=https://apis-sandbox.beacukai.go.id
+CEISA_PRODUCTION_BASE_URL=https://production-ceisa.beacukai.go.id
+
+# Timeout HTTP request (detik)
+CEISA_TIMEOUT=30
+
+# Retry configuration
+CEISA_RETRY_TIMES=3
+
+# Polling interval (menit)
+CEISA_POLLING_INTERVAL=15
+
+# Metode signing: 'hmac' atau 'rsa' ('rsa' masih stub — lihat CeisaSignatureService)
+CEISA_SIGN_METHOD=hmac
+
+# Kredensial HMAC untuk CEISA H2H
+CEISA_CLIENT_ID=
+CEISA_CLIENT_SECRET=
+# [BELUM PASTI - TODO] Alur login/mendapatkan access_token otomatis belum ada di
+# spesifikasi resmi. Token diisi manual di sini hanya untuk testing; JANGAN pernah
+# commit nilai asli ke repo ini — gunakan .env lokal yang tidak ter-commit.
+CEISA_ACCESS_TOKEN=
+
+# Kredensial X.509 (jika menggunakan sertifikat elektronik)
+CEISA_CERT_PATH=
+CEISA_CERT_PASSWORD=
+CEISA_PRIVATE_KEY_PATH=
+
+# Webhook Configuration
+CEISA_WEBHOOK_URL=
+CEISA_WEBHOOK_SECRET=
+CEISA_WEBHOOK_ENABLED=false
+
+# Default kode kantor pabean
+CEISA_DEFAULT_KODE_KANTOR=BE001
+
+# PPJK Configuration (jika submission melalui PPJK)
+CEISA_PPJK_ENABLED=false
+CEISA_PPJK_NAMA=
+CEISA_PPJK_KODE=
+
+# Auto-post jurnal saat SPPB/NPE terbit
+CEISA_AUTO_POST_JOURNAL=true
+
+# Akun untuk jurnal bea masuk (sesuaikan dengan chart of accounts Anda)
+CEISA_ACCOUNT_BEA_MASUK=60010000
+CEISA_ACCOUNT_PPN_IMPOR=21010000
+CEISA_ACCOUNT_PERSEDIAAN=10010000
+CEISA_ACCOUNT_HUTANG_BM=21020000
+
+# Logging
+CEISA_LOG_RAW_PAYLOADS=false
+CEISA_LOG_CHANNEL=stack
+
+# =============================================================================
+# End CEISA H2H Configuration
+# =============================================================================
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+VITE_APP_NAME="${APP_NAME}"
+
+===== FILE: tests/Feature/CeisaSignatureServiceTest.php =====
+<?php
+
+namespace Tests\Feature;
+
+use App\Modules\Customs\Services\CeisaSignatureService;
+use Illuminate\Support\Carbon;
+use Tests\TestCase;
+
+/**
+ * Task E (Fase 2): HMAC signature harus deterministik dan bisa diverifikasi manual.
+ * Tidak ada HTTP request sama sekali di test ini — murni perhitungan signing.
+ */
+class CeisaSignatureServiceTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config([
+            'customs.signing.method' => 'hmac',
+            'customs.signing.client_id' => 'test-client-id',
+            'customs.signing.client_secret' => 'test-secret',
+            'customs.signing.access_token' => 'test-token',
+        ]);
+    }
+
+    /**
+     * Memverifikasi formula "String to Sign = HTTP_METHOD:PATH_URL:ACCESS_TOKEN:TIMESTAMP"
+     * di-HMAC-SHA256 dengan client_secret lalu di-Base64 — signature dihitung ulang
+     * MANUAL di test ini dan dibandingkan dengan hasil service.
+     */
+    public function test_hmac_signature_matches_manual_calculation(): void
+    {
+        // Freeze waktu supaya timestamp deterministik.
+        Carbon::setTestNow('2026-09-18 10:00:00');
+        $expectedTimestamp = (string) now()->timestamp;
+
+        $signer = new CeisaSignatureService();
+        $result = $signer->sign(['foo' => 'bar'], 'POST', '/ceisa/v1/pib');
+
+        // Perhitungan manual di test ini sendiri (bukan memanggil service):
+        $manualSignature = base64_encode(
+            hash_hmac('sha256', "POST:/ceisa/v1/pib:test-token:{$expectedTimestamp}", 'test-secret', true)
+        );
+
+        $this->assertSame($manualSignature, $result['headers']['beacukai-signature']);
+        $this->assertSame($expectedTimestamp, $result['headers']['timestamp']);
+        $this->assertSame('test-client-id', $result['headers']['client-id']);
+        $this->assertSame('Bearer test-token', $result['headers']['Authorization']);
+
+        // Deterministik: panggilan kedua dengan waktu yang dibekukan sama harus identik.
+        $result2 = $signer->sign(['foo' => 'bar'], 'POST', '/ceisa/v1/pib');
+        $this->assertSame($result['headers']['beacukai-signature'], $result2['headers']['beacukai-signature']);
+
+        Carbon::setTestNow();
+    }
+
+    public function test_hmac_throws_when_credentials_missing(): void
+    {
+        config(['customs.signing.client_secret' => null]);
+
+        $signer = new CeisaSignatureService();
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('CEISA_CLIENT_SECRET dan/atau CEISA_ACCESS_TOKEN belum diatur');
+
+        $signer->sign(['foo' => 'bar'], 'POST', '/ceisa/v1/pib');
+    }
+
+    /**
+     * Stub RSA/X.509 sengaja melempar exception sampai dikonfirmasi modul mana
+     * yang butuh tanda tangan asimetris (lihat GAPS_TO_CONFIRM.md).
+     */
+    public function test_asymmetric_signing_throws_not_implemented(): void
+    {
+        config(['customs.signing.method' => 'rsa']);
+
+        $signer = new CeisaSignatureService();
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Signing RSA/X.509 belum diimplementasi');
+
+        $signer->sign(['foo' => 'bar'], 'POST', '/ceisa/v1/pib');
+    }
+}
+
+===== FILE: tests/Feature/CeisaH2HClientTest.php =====
+<?php
+
+namespace Tests\Feature;
+
+use App\Modules\Customs\Jobs\SubmitCustomsDocumentJob;
+use App\Modules\Customs\Models\CustomsDocument;
+use App\Modules\Customs\Services\CeisaH2HClient;
+use App\Modules\Customs\Services\CeisaSignatureService;
+use App\Modules\Customs\Services\CustomsDocumentService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
+
+/**
+ * Task E (Fase 2): client CEISA H2H sungguhan.
+ *
+ * PENTING: SEMUA test di sini memakai Http::fake() — TIDAK ADA request sungguhan
+ * ke apis-sandbox.beacukai.go.id atau domain CEISA manapun. Test ini menguji
+ * perilaku client TERHADAP Http::fake(), bukan konektivitas ke server CEISA.
+ */
+class CeisaH2HClientTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Default: modul nonaktif (sesuai default config).
+        // CATATAN: Http::fake() TIDAK dipanggil di setUp — di Laravel, pemanggilan
+        // fake() berikutnya tidak menimpa stub catch-all pertama, sehingga setiap
+        // test memanggil Http::fake() sendiri sesuai stub yang dibutuhkan.
+        config(['customs.enabled' => false]);
+    }
+
+    /**
+     * Regresi untuk gap yang ditemukan di Task D: guard config('customs.enabled')
+     * benar-benar memblokir submit sebelum ada request terkirim.
+     */
+    public function test_submit_throws_when_module_disabled(): void
+    {
+        Http::fake();
+
+        $client = new CeisaH2HClient(new CeisaSignatureService());
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('tidak aktif');
+
+        $client->submit('PIB', ['foo' => 'bar'], 'corr-1');
+    }
+
+    /**
+     * Mengaktifkan modul HANYA di dalam test ini (config runtime; file config/
+     * .env tetap false). Request diverifikasi terhadap Http::fake().
+     */
+    public function test_submit_sends_correct_headers_and_path_when_enabled(): void
+    {
+        // Pin base URL eksplisit supaya test tidak tergantung isi .env lokal.
+        config(['customs.endpoints.sandbox' => 'https://apis-sandbox.beacukai.go.id']);
+        $baseUrl = config('customs.endpoints.sandbox');
+
+        // Satu pemanggilan fake() dengan dua pola: stub target + catch-all 599
+        // sebagai tripwire — kalau URL request tidak match pola target, response
+        // 599 membuat assert gagal keras dan TIDAK PERNAH ada request sungguhan.
+        Http::fake([
+            $baseUrl.'/*' => Http::response(['status' => 'RECEIVED'], 200),
+            '*' => Http::response(['unexpected_stub' => true], 599),
+        ]);
+
+        config([
+            'customs.enabled' => true,
+            'customs.signing.client_id' => 'test-client-id',
+            'customs.signing.client_secret' => 'test-secret',
+            'customs.signing.access_token' => 'test-token',
+        ]);
+
+        $client = new CeisaH2HClient(new CeisaSignatureService());
+        $response = $client->submit('PIB', ['foo' => 'bar'], 'corr-42');
+
+        $this->assertSame(200, $response['http_status']);
+        $this->assertSame(['status' => 'RECEIVED'], $response['body']);
+
+        Http::assertSent(function ($request) use ($baseUrl) {
+            $path = config('customs.endpoints.paths.PIB');
+
+            return $request->method() === 'POST'
+                && $request->url() === $baseUrl.$path
+                && $request->hasHeader('beacukai-signature')
+                && $request->header('client-id')[0] === 'test-client-id'
+                && $request->hasHeader('timestamp')
+                && $request->header('Authorization')[0] === 'Bearer test-token'
+                && $request->header('X-Correlation-Id')[0] === 'corr-42'
+                && $request['foo'] === 'bar';
+        });
+    }
+
+    /**
+     * Regresi khusus bug lama di Task D: dulu callCeisaApi() SELALU mengembalikan
+     * sukses palsu tanpa mengecek config('customs.enabled'). Sekarang job harus
+     * gagal dengan pesan jelas, status dokumen TIDAK berubah jadi sukses, dan
+     * tidak ada HTTP request terkirim.
+     */
+    public function test_submit_job_does_not_fake_success_when_disabled(): void
+    {
+        config(['customs.signing.client_id' => 'test-client-id']);
+        config(['customs.signing.client_secret' => 'test-secret']);
+        config(['customs.signing.access_token' => 'test-token']);
+
+        Http::fake();
+
+        $document = CustomsDocument::create([
+            'document_type' => 'PIB',
+            'internal_number' => 'PIB/2026/09/JOBTEST-'.uniqid(),
+            'source_type' => 'purchase_orders',
+            'source_id' => random_int(1, 999999),
+            'status' => CustomsDocument::STATUS_QUEUED,
+            'environment' => 'sandbox',
+        ]);
+
+        // withFakeQueueInteractions(): tanpa ini, fail() di luar konteks queue
+        // TIDAK melakukan apa-apa (InteractsWithQueue::fail hanya bekerja jika
+        // $this->job terisi) — dengan ini kita bisa assert job benar-benar gagal.
+        $job = (new SubmitCustomsDocumentJob($document->id))->withFakeQueueInteractions();
+        $job->handle(app(CustomsDocumentService::class));
+
+        // Job harus gagal (bukan pura-pura sukses) dengan pesan yang jelas.
+        $job->assertFailedWith(
+            new \RuntimeException('Modul Customs (CEISA H2H) tidak aktif. Set CEISA_ENABLED=true di .env untuk mengaktifkan (hanya untuk testing manual terverifikasi).')
+        );
+
+        // Status dokumen TIDAK boleh berubah jadi sukses / SPPB_ISSUED.
+        $this->assertDatabaseHas('cst_customs_documents', [
+            'id' => $document->id,
+            'status' => CustomsDocument::STATUS_QUEUED,
+        ]);
+
+        // Audit error module_disabled tercatat di timeline log dokumen.
+        $this->assertDatabaseHas('cst_customs_document_logs', [
+            'customs_document_id' => $document->id,
+            'event_type' => 'ERROR',
+        ]);
+
+        // TIDAK ADA HTTP request terkirim.
+        Http::assertNothingSent();
+    }
+}
+
+===== FILE: tests/Feature/CustomsDocumentControllerTest.php =====
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\PurchaseOrder;
+use App\Models\User;
+use App\Modules\Customs\Jobs\SubmitCustomsDocumentJob;
+use App\Modules\Customs\Models\CustomsDocument;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Route;
+use Tests\TestCase;
+
+/**
+ * FIX (Fase 1-B / Task L): test yang benar-benar menembus Controller/HTTP.
+ *
+ * Semua test memakai $this->get()/post() terhadap route (bukan memanggil service
+ * langsung), sehingga regresi bug C1/C7/H2 tertangkap di level HTTP.
+ *
+ * Catatan: routes/customs.php hanya mendaftarkan route ketika
+ * config('customs.enabled') bernilai true SAAT file route di-load. Karena route
+ * di-load pada boot aplikasi (config test default: false), route modul ini
+ * didaftarkan manual di setUp() dengan meng-require file routes/customs.php
+ * (dijaga agar tidak dobel). Setelah itu config dikembalikan ke false —
+ * sehingga TIDAK ada panggilan HTTP keluar selama test (di-assert juga via
+ * Http::assertNothingSent()).
+ */
+class CustomsDocumentControllerTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // APP_URL lokal (mis. http://localhost/app-akuntansi-portfolio-master/public)
+        // membuat route()/url() menghasilkan URL absolut ber-subfolder sehingga semua
+        // request test 404. Paksa root URL generator ke host bersih.
+        \Illuminate\Support\Facades\URL::forceRootUrl('http://localhost');
+
+        Http::fake();
+
+        if (! Route::has('customs.index')) {
+            // Daftarkan route modul customs (butuh config enabled=true saat load).
+            config(['customs.enabled' => true]);
+            require base_path('routes/customs.php');
+        }
+
+        // Kembalikan ke default: modul CEISA nonaktif.
+        config(['customs.enabled' => false]);
+    }
+
+    // PART2
+
+    /**
+     * Buat dokumen customs langsung via model (tanpa factory — modul ini
+     * belum punya factory; pembuatan via service diuji di Foundation test).
+     * source_id dibuat unik per pemanggilan karena tabel punya UNIQUE
+     * (source_type, source_id, document_type).
+     */
+    private static int $docSeq = 0;
+
+    private function makeDocument(string $status = 'DRAFT'): CustomsDocument
+    {
+        return CustomsDocument::create([
+            'document_type' => 'PIB',
+            'internal_number' => 'PIB/2026/09/T' . uniqid(),
+            'source_type' => 'purchase_orders',
+            'source_id' => ++self::$docSeq,
+            'status' => $status,
+            'environment' => 'sandbox',
+        ]);
+    }
+
+    private function actingUser(): User
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        return $user;
+    }
+
+    public function test_create_draft_via_http_route_succeeds(): void
+    {
+        config(['customs.enabled' => false]);
+        $this->actingUser();
+
+        $po = PurchaseOrder::create([
+            'po_number' => 'PO-TEST-001',
+            'transaction_date' => now()->toDateString(),
+            'contact_name' => 'Supplier Test',
+            'location_name' => 'Gudang Utama',
+            'status' => 'completed',
+            'sub_total' => 1000000,
+            'grand_total' => 1100000,
+        ]);
+
+        $response = $this->get(route('customs.create', ['sourceType' => 'purchase_order', 'sourceId' => $po->id]));
+
+        // Regresi C1: kalau urutan argumen createDraft() terbalik lagi,
+        // test ini gagal (redirect atau DB row tidak sesuai).
+        $newDocumentId = CustomsDocument::latest('id')->first()->id;
+        $response->assertRedirect(route('customs.edit', $newDocumentId));
+
+        $this->assertDatabaseHas('cst_customs_documents', [
+            'source_type' => 'purchase_order',
+            'source_id' => $po->id,
+            'document_type' => 'PIB',
+            'status' => 'DRAFT',
+        ]);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_source_resolves_to_original_purchase_order(): void
+    {
+        config(['customs.enabled' => false]);
+        $this->actingUser();
+
+        $po = PurchaseOrder::create([
+            'po_number' => 'PO-TEST-SOURCE',
+            'transaction_date' => now()->toDateString(),
+            'contact_name' => 'Supplier Test',
+            'location_name' => 'Gudang Utama',
+            'status' => 'completed',
+            'sub_total' => 1000000,
+            'grand_total' => 1100000,
+        ]);
+
+        $this->get(route('customs.create', [
+            'sourceType' => 'purchase_order',
+            'sourceId' => $po->id,
+        ]));
+
+        $document = CustomsDocument::where('source_type', 'purchase_order')
+            ->where('source_id', $po->id)
+            ->firstOrFail();
+
+        $source = $document->source();
+
+        $this->assertInstanceOf(PurchaseOrder::class, $source);
+        $this->assertSame($po->id, $source->id);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_submit_via_http_route_dispatches_job(): void
+    {
+        config(['customs.enabled' => false]);
+        Queue::fake();
+        $this->actingUser();
+
+        $document = $this->makeDocument('DRAFT');
+
+        $response = $this->post(route('customs.submit', $document->id));
+
+        $response->assertRedirect(route('customs.show', $document->id));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('cst_customs_documents', [
+            'id' => $document->id,
+            'status' => 'QUEUED',
+        ]);
+
+        Queue::assertPushed(SubmitCustomsDocumentJob::class, function ($job) use ($document) {
+            return $job->customsDocumentId === $document->id;
+        });
+
+        Http::assertNothingSent();
+    }
+
+    // PART3
+
+    public function test_submit_blocked_when_status_not_submittable(): void
+    {
+        config(['customs.enabled' => false]);
+        Queue::fake();
+        $this->actingUser();
+
+        $document = $this->makeDocument('SUBMITTED');
+
+        $response = $this->post(route('customs.submit', $document->id));
+
+        // Tidak boleh 500 — controller menangkap exception dan kembali dengan pesan error.
+        $response->assertStatus(302);
+        $response->assertSessionHas('error', function ($error) {
+            return str_contains($error, 'tidak dapat diajukan');
+        });
+
+        // Status TIDAK berubah.
+        $this->assertDatabaseHas('cst_customs_documents', [
+            'id' => $document->id,
+            'status' => 'SUBMITTED',
+        ]);
+
+        Queue::assertNotPushed(SubmitCustomsDocumentJob::class);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_retry_only_allowed_from_need_correction_or_rejected(): void
+    {
+        config(['customs.enabled' => false]);
+        Queue::fake();
+        $this->actingUser();
+
+        // Dari DRAFT: harus DITOLAK.
+        $draft = $this->makeDocument('DRAFT');
+        $this->post(route('customs.retry', $draft->id))
+            ->assertStatus(302)
+            ->assertSessionHas('error', function ($error) {
+                return str_contains($error, 'tidak dapat di-retry');
+            });
+
+        $this->assertDatabaseHas('cst_customs_documents', [
+            'id' => $draft->id,
+            'status' => 'DRAFT',
+            'retry_count' => 0,
+        ]);
+
+        // Dari NEED_CORRECTION: harus DIBOLEHKAN -> QUEUED + retry_count 1.
+        $correction = $this->makeDocument('NEED_CORRECTION');
+        $this->post(route('customs.retry', $correction->id))
+            ->assertStatus(302)
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('cst_customs_documents', [
+            'id' => $correction->id,
+            'status' => 'QUEUED',
+            'retry_count' => 1,
+        ]);
+
+        Queue::assertPushed(SubmitCustomsDocumentJob::class);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_void_respects_gate(): void
+    {
+        config(['customs.enabled' => false]);
+        Gate::define('customs.void', fn () => false);
+        $this->actingUser();
+
+        $document = $this->makeDocument('DRAFT');
+
+        $response = $this->post(route('customs.void', $document->id));
+
+        $response->assertStatus(403);
+
+        $this->assertDatabaseHas('cst_customs_documents', [
+            'id' => $document->id,
+            'status' => 'DRAFT',
+        ]);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_void_blocked_for_submitted_document(): void
+    {
+        config(['customs.enabled' => false]);
+        Queue::fake();
+        $this->actingUser();
+
+        $document = $this->makeDocument('SUBMITTED');
+
+        $response = $this->post(route('customs.void', $document->id));
+
+        $response->assertStatus(302);
+        $response->assertSessionHas('error', function ($error) {
+            return str_contains($error, 'tidak dapat dibatalkan');
+        });
+
+        $this->assertDatabaseHas('cst_customs_documents', [
+            'id' => $document->id,
+            'status' => 'SUBMITTED',
+        ]);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_show_and_print_and_edit_views_render_without_error(): void
+    {
+        config(['customs.enabled' => false]);
+        $this->actingUser();
+
+        $document = $this->makeDocument('DRAFT');
+
+        // Regresi C7: kalau view show/print/edit hilang atau error, test ini gagal.
+        $this->get(route('customs.show', $document->id))->assertOk();
+        $this->get(route('customs.print', $document->id))->assertOk();
+        $this->get(route('customs.edit', $document->id))->assertOk();
+
+        // Edit untuk dokumen non-DRAFT harus redirect ke show.
+        $submitted = $this->makeDocument('SUBMITTED');
+        $this->get(route('customs.edit', $submitted->id))
+            ->assertRedirect(route('customs.show', $submitted->id));
+
+        Http::assertNothingSent();
+    }
+
+    public function test_webhook_route_returns_not_implemented_when_enabled(): void
+    {
+        // Khusus test ini modul di-enable (boleh — hanya config runtime di test;
+        // file config/.env/.env.example default TETAP false/kosong).
+        config(['customs.enabled' => true]);
+
+        $response = $this->post('/webhook/customs/ceisa', [
+            'document_type' => 'PIB',
+            'status' => 'APPROVED',
+        ]);
+
+        // Regresi H2: webhook TIDAK boleh pura-pura sukses (200 OK tanpa proses).
+        $response->assertStatus(501);
+        $response->assertJsonPath('status', 'NOT_IMPLEMENTED');
+
+        Http::assertNothingSent();
+    }
+}
+
+===== FILE: tests/Feature/CustomsDocumentFoundationTest.php =====
+<?php
+
+namespace Tests\Feature;
+
+use App\Modules\Customs\Models\CustomsDocument;
+use App\Modules\Customs\Models\CustomsDocumentLog;
+use App\Modules\Customs\Services\CeisaH2HClient;
+use App\Modules\Customs\Services\CeisaSignatureService;
+use App\Modules\Customs\Services\CustomsDocumentService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
+
+class CustomsDocumentFoundationTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['customs.enabled' => false]);
+        config(['customs.signing.api_secret' => 'test-secret']);
+    }
+
+    public function test_create_draft_produces_draft_status_and_internal_number(): void
+    {
+        config(['customs.enabled' => true]);
+        Http::fake();
+
+        $service = app(CustomsDocumentService::class);
+        $document = $service->createDraft('purchase_orders', 1, 'PIB', null);
+
+        $this->assertNotNull($document->id);
+        $this->assertEquals('DRAFT', $document->status);
+        $this->assertNotNull($document->internal_number);
+        $this->assertStringStartsWith('PIB/', $document->internal_number);
+        $this->assertEquals('purchase_orders', $document->source_type);
+        $this->assertEquals(1, $document->source_id);
+        $this->assertEquals('PIB', $document->document_type);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_duplicate_draft_throws_exception(): void
+    {
+        config(['customs.enabled' => true]);
+        Http::fake();
+
+        $service = app(CustomsDocumentService::class);
+        $service->createDraft('purchase_orders', 1, 'PIB', null);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('sudah ada');
+
+        $service->createDraft('purchase_orders', 1, 'PIB', null);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_submit_throws_exception_when_disabled(): void
+    {
+        config(['customs.enabled' => false]);
+        Http::fake();
+
+        $signer = new CeisaSignatureService();
+        $client = new CeisaH2HClient($signer);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('tidak aktif');
+
+        $client->submit('PIB', ['test' => 'data'], 'corr-123');
+
+        Http::assertNothingSent();
+    }
+
+    public function test_check_status_throws_exception_when_disabled(): void
+    {
+        config(['customs.enabled' => false]);
+        Http::fake();
+
+        $signer = new CeisaSignatureService();
+        $client = new CeisaH2HClient($signer);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('tidak aktif');
+
+        $client->checkStatus('PIB', 'AJU-123');
+
+        Http::assertNothingSent();
+    }
+
+    public function test_customs_document_log_rejects_update(): void
+    {
+        // Buat dokumen terlebih dahulu agar FK constraint terpenuhi
+        $document = CustomsDocument::create([
+            'document_type' => 'PIB',
+            'internal_number' => 'PIB/2026/09/00001',
+            'source_type' => 'purchase_orders',
+            'source_id' => 1,
+            'status' => 'DRAFT',
+            'environment' => 'sandbox',
+        ]);
+
+        $log = CustomsDocumentLog::create([
+            'customs_document_id' => $document->id,
+            'direction' => 'OUTBOUND',
+            'event_type' => 'TEST',
+            'request_payload' => json_encode(['test' => 'data']),
+            'correlation_id' => 'test-corr-123',
+        ]);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Tidak boleh diupdate');
+
+        $log->update(['event_type' => 'UPDATED']);
+    }
+
+    public function test_customs_document_log_rejects_delete(): void
+    {
+        // Buat dokumen terlebih dahulu agar FK constraint terpenuhi
+        $document = CustomsDocument::create([
+            'document_type' => 'PIB',
+            'internal_number' => 'PIB/2026/09/00002',
+            'source_type' => 'purchase_orders',
+            'source_id' => 1,
+            'status' => 'DRAFT',
+            'environment' => 'sandbox',
+        ]);
+
+        $log = CustomsDocumentLog::create([
+            'customs_document_id' => $document->id,
+            'direction' => 'OUTBOUND',
+            'event_type' => 'TEST',
+            'request_payload' => json_encode(['test' => 'data']),
+            'correlation_id' => 'test-corr-456',
+        ]);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Tidak boleh dihapus');
+
+        $log->delete();
+    }
+}
+
+===== FILE: docs/deliverables/2026-09-18-ceisa-h2h-fase2/GAPS_TO_CONFIRM.md =====
+# GAPS TO CONFIRM — CEISA H2H Fase 2 (Signing & Client Sungguhan)
+
+> Dibuat otomatis oleh Cline pada Fase 2. **Semua item di bawah WAJIB dikonfirmasi ke
+> dokumentasi resmi DJBC / Postman collection CEISA 4.0 sebelum modul ini dipakai
+> untuk request sungguhan (sandbox maupun produksi).** Implementasi saat ini
+> sengaja TIDAK menebak di luar yang tercantum di sini.
+
+| # | Gap | Lokasi di kode | Asumsi sementara yang dipakai | Yang perlu dikonfirmasi |
+|---|-----|----------------|-------------------------------|-------------------------|
+| 1 | **Format timestamp** pada string-to-sign | `CeisaSignatureService::signHmac()` | Epoch detik (`now()->timestamp`), mis. `1726646400` | Epoch detik, milidetik, atau ISO 8601? Zona waktu WIB atau UTC? |
+| 2 | **Nama header selain `beacukai-signature`** | `config/customs.php` → `signing.*_header` | `client-id`, `timestamp`, `Authorization: Bearer {token}` | Nama header resmi untuk client id, timestamp, dan access token. Apakah `Authorization` dipakai, atau ada header khusus (mis. `access-token`)? |
+| 3 | **Alur mendapatkan Access Token** | `config/customs.php` → `signing.access_token` (diisi manual via `.env`) | Token diisi manual, TIDAK di-refresh otomatis | Endpoint & grant type resmi (client credentials?), format request/response, masa berlaku token, dan apakah perlu job refresh otomatis (di luar scope Fase 2). |
+| 4 | **Modul mana yang butuh RSA/X.509** | `CeisaSignatureService::signAsymmetric()` — sengaja `throw new RuntimeException` | Tidak ada — stub gagal cepat | Modul/endpoint mana (PIB? PEB? keduanya?) yang wajib tanda tangan asimetris, format sertifikat, dan cara menghitung string-to-sign untuk RSA. |
+| 5 | **Path endpoint PIB/PEB** | `config/customs.php` → `endpoints.paths` | `/ceisa/v1/pib`, `/ceisa/v1/peb` (dari contoh spesifikasi user) | Path resmi per-layanan di sandbox (POST submit). |
+| 6 | **Path GET cek status** | `CeisaH2HClient::checkStatus()` | `{path}/{nomor_aju}` — asumsi pola REST umum | Format resmi path GET untuk cek status + parameter query bila ada. |
+| 7 | **Mapping status CEISA → status lokal** | `SubmitCustomsDocumentJob::handle()` | 2xx → `SUBMIT_SUCCESS`, selain itu `SUBMIT_FAILED`; `nomor_aju`/`nomor_pendaftaran` dibaca dari body response bila ada | Struktur body response submit/cek status resmi (nama field status, nomor AJU, nomor pendaftaran/SPPB), daftar nilai status yang mungkin, dan pemetaannya ke status lokal (`SUBMITTED`, `UNDER_REVIEW`, `SPPB_ISSUED`, `REJECTED`, dst.). |
+| 8 | **Base URL produksi** | `config/customs.php` → `endpoints.production` | Kosong (wajib diisi via `.env` bila perlu) | Host produksi resmi (sandbox terisi: `https://apis-sandbox.beacukai.go.id`). |
+| 9 | **Perilaku retry** | `config/customs.php` → `retry` | 3x dengan backoff 10/60/300 detik | Apakah CEISA menyetujui retry otomatis pada 5xx/timeout, atau semua kegagalan harus dikonfirmasi manual (hindari double-submission PIB/PEB)? |
+| 10 | **`.env` lokal `CEISA_SANDBOX_BASE_URL=https://sandbox-ceisa.customs.go.id`** | `.env` baris ~53 (TIDAK diubah oleh Fase 2) | Domain tebakan lama sebelum spesifikasi resmi; TIDAK resolve (diverifikasi via cURL error 6) | Ganti manual ke `https://apis-sandbox.beacukai.go.id` (atau hapus barisnya agar pakai default config). Sengaja tidak diubah otomatis karena `.env` adalah file lokal user. |
+
+## Catatan infrastruktur test (Fase 2)
+- `phpunit.xml` kini men-set `CEISA_ENABLED=true` **hanya untuk lingkungan test**:
+  registrasi route modul (`routes/customs.php`) dievaluasi saat boot dari env ini,
+  jadi feature test butuh route terdaftar. Perilaku runtime tiap test tetap
+  dikontrol eksplisit lewat `config(['customs.enabled' => ...])`.
+  Default di `config/customs.php`, `.env`, dan `.env.example` **tetap `false`**.
+- ⚠️ **Temuan kebersihan repo (di luar scope, perlu keputusan manusia):** file `.env`
+  ternyata **ter-track di git** (muncul sebagai `M .env` di `git status`), padahal
+  konvensi seharusnya di-gitignore. Selama kredensial asli CEISA belum diisi ini
+  tidak fatal, tapi **sebelum uji sandbox sungguhan dengan kredensial asli, `.env`
+  sebaiknya dikeluarkan dari tracking** (`git rm --cached .env` + tambah ke
+  `.gitignore`) supaya secret tidak pernah ter-commit.
+- Minor: `.env.example` punya `CEISA_RETRY_TIMES`, tapi `config/customs.php` masih
+  hardcode `retry.times = 3` (belum membaca env) — cleanup kecil untuk Fase berikutnya.
+
+## Catatan keamanan
+- `config('customs.enabled')` default **false** di semua file; kredensial asli hanya boleh
+  di `.env` (gitignored). Tidak ada kredensial yang di-commit.
+- Uji coba sungguhan ke sandbox dilakukan **manual oleh manusia**, bukan oleh agent.
+
+## Status implementasi terkait gap
+- Semua test memakai `Http::fake()` — tidak ada satu pun test yang mengirim request nyata.
+- `test_asymmetric_signing_throws_not_implemented` mengunci perilaku stub RSA agar gagal
+  cepat sampai gap #4 diselesaikan.
+

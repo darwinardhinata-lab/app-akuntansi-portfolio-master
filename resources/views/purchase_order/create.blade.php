@@ -2,9 +2,8 @@
 
 @section('top_bar_left')
     <a href="{{ route('po.index') }}" class="btn btn-sm btn-white border fw-bold shadow-sm text-secondary me-3" style="border-radius: 8px;">
-        <i class="fa-solid fa-arrow-left me-1"></i> Kembali
-    </a>
-    <x-breadcrumb :links="['Pembelian' => '#', 'Purchase Orders' => route('po.index'), 'Buat Baru' => null]" />
+        <i class="fa-solid fa-arrow-left me-1"></i> {{ __('erp.back_btn') }}</a>
+    <x-breadcrumb :links="[__('erp.bc_purchasing') => '#', __('erp.bc_purchase_orders') => route('po.index'), __('erp.bc_create_new') => null]" />
 @endsection
 
 @section('content')
@@ -16,9 +15,9 @@
         @csrf
         
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold mb-0 text-dark">Buat Purchase Order (PO)</h4>
+            <h4 class="fw-bold mb-0 text-dark">{{ __('erp.create_po') }}</h4>
             <div>
-                <a href="{{ route('po.index') }}" class="btn btn-outline-secondary fw-bold px-3 me-2">Batal</a>
+                <a href="{{ route('po.index') }}" class="btn btn-outline-secondary fw-bold px-3 me-2">{{ __('erp.cancel') }}</a>
                 <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">
                     <i class="fa-solid fa-save me-1"></i> Simpan PO
                 </button>
@@ -32,21 +31,21 @@
                 {{-- 1. INFORMASI UTAMA --}}
                 <div class="card border-0 shadow-sm mb-3" style="border-radius: 12px;">
                     <div class="card-header bg-white border-bottom py-3">
-                        <h6 class="fw-bold m-0 text-primary"><i class="fa-solid fa-file-invoice me-2"></i>Informasi Pembelian</h6>
+                        <h6 class="fw-bold m-0 text-primary"><i class="fa-solid fa-file-invoice me-2"></i>{{ __('erp.purchase_information') }}</h6>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="form-label fw-bold small text-muted">Nomor PO <span class="text-danger">*</span></label>
-                                <input type="text" name="po_number" class="form-control fw-bold" placeholder="PO-XXXX" required>
+                                <label class="form-label fw-bold small text-muted">{{ __('erp.po_number') }} <span class="text-danger">*</span></label>
+                                <input type="text" name="po_number" class="form-control fw-bold" placeholder="{{ __('erp.po_number_ph') }}" required>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-bold small text-muted">Tanggal Transaksi <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold small text-muted">{{ __('erp.transaction_date') }} <span class="text-danger">*</span></label>
                                 <input type="date" name="transaction_date" class="form-control" value="{{ date('Y-m-d') }}" required>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-bold small text-muted">Nama Supplier/Vendor <span class="text-danger">*</span></label>
-                                <input type="text" name="contact_name" class="form-control" placeholder="Masukkan nama vendor..." required>
+                                <label class="form-label fw-bold small text-muted">{{ __('erp.supplier_vendor_name') }} <span class="text-danger">*</span></label>
+                                <input type="text" name="contact_name" class="form-control" placeholder="{{ __('erp.enter_vendor_name') }}" required>
                             </div>
                         </div>
                     </div>
@@ -55,24 +54,24 @@
                 {{-- 2. RINCIAN PRODUK --}}
                 <div class="card border-0 shadow-sm mb-3" style="border-radius: 12px;">
                     <div class="card-header bg-white border-bottom py-3">
-                        <h6 class="fw-bold m-0 text-warning"><i class="fa-solid fa-box-open me-2"></i>Produk Dipesan</h6>
+                        <h6 class="fw-bold m-0 text-warning"><i class="fa-solid fa-box-open me-2"></i>{{ __('erp.products_ordered') }}</h6>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle m-0" style="font-size: 0.85rem;">
                                 <thead class="table-light text-muted text-center">
                                     <tr>
-                                        <th width="30%">SKU / Item Code</th>
-                                        <th width="30%">Deskripsi (Opsional)</th>
-                                        <th width="15%">Harga Satuan</th>
-                                        <th width="10%">QTY</th>
-                                        <th width="15%">Total (Rp)</th>
+                                        <th width="30%">{{ __('erp.sku_item_code') }}</th>
+                                        <th width="30%">{{ __('erp.description_optional') }}</th>
+                                        <th width="15%">{{ __('erp.unit_price') }}</th>
+                                        <th width="10%">{{ __('erp.qty_caps') }}</th>
+                                        <th width="15%">{{ __('erp.total_rp') }}</th>
                                         <th width="5%"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="baris-po">
                                     <tr>
-                                        <td><input type="text" name="details[0][item_code]" class="form-control form-control-sm" placeholder="Ketik SKU..." required></td>
+                                        <td><input type="text" name="details[0][item_code]" class="form-control form-control-sm" placeholder="{{ __('erp.type_sku_ph') }}" required></td>
                                         <td><input type="text" name="details[0][description]" class="form-control form-control-sm"></td>
                                         <td><input type="number" name="details[0][price]" class="form-control form-control-sm text-end price-input" value="0" min="0" required></td>
                                         <td><input type="number" name="details[0][qty]" class="form-control form-control-sm text-center qty-input" value="1" min="1" required></td>
@@ -84,7 +83,7 @@
                         </div>
                     </div>
                     <div class="card-footer bg-white py-2">
-                        <button type="button" class="btn btn-outline-primary btn-sm fw-bold w-100" onclick="tambahBaris()">+ Tambah Baris Item</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm fw-bold w-100" onclick="tambahBaris()">{{ __('erp.add_item_row') }}</button>
                     </div>
                 </div>
 
@@ -94,31 +93,31 @@
             <div class="col-lg-4">
                 <div class="card border-0 shadow-sm sticky-top" style="border-radius: 12px; top: 80px;">
                     <div class="card-header bg-dark text-white border-bottom py-3">
-                        <h6 class="fw-bold m-0"><i class="fa-solid fa-calculator me-2"></i>Kalkulasi & Pajak</h6>
+                        <h6 class="fw-bold m-0"><i class="fa-solid fa-calculator me-2"></i>{{ __('erp.calculation_and_tax') }}</h6>
                     </div>
                     <div class="card-body">
                         
                         {{-- Pengaturan Pajak --}}
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Status Harga</label>
+                            <label class="form-label fw-bold small text-muted">{{ __('erp.price_status') }}</label>
                             <select name="is_include_ppn" id="is_include_ppn" class="form-select form-select-sm fw-bold">
-                                <option value="0">Exclude PPN (Belum Termasuk)</option>
-                                <option value="1">Include PPN (Sudah Termasuk)</option>
+                                <option value="0">{{ __('erp.exclude_vat') }}</option>
+                                <option value="1">{{ __('erp.include_vat') }}</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-muted">Pajak Penambah (PPN)</label>
+                            <label class="form-label fw-bold small text-muted">{{ __('erp.addition_tax_vat') }}</label>
                             <select name="tax_addition_id" id="tax_addition_id" class="form-select form-select-sm">
-                                <option value="" data-rate="0">-- Tidak Ada --</option>
+                                <option value="" data-rate="0">{{ __('erp.none_option_caps') }}</option>
                                 @foreach($taxesAddition as $tax)
                                     <option value="{{ $tax->id }}" data-rate="{{ $tax->rate }}">{{ $tax->tax_name }} ({{ number_format($tax->rate, 0) }}%)</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label fw-bold small text-muted">Pajak Pemotong (PPh)</label>
+                            <label class="form-label fw-bold small text-muted">{{ __('erp.deduction_tax_wht') }}</label>
                             <select name="tax_deduction_id" id="tax_deduction_id" class="form-select form-select-sm">
-                                <option value="" data-rate="0">-- Tidak Ada --</option>
+                                <option value="" data-rate="0">{{ __('erp.none_option_caps') }}</option>
                                 @foreach($taxesDeduction as $tax)
                                     <option value="{{ $tax->id }}" data-rate="{{ $tax->rate }}">{{ $tax->tax_name }} ({{ number_format($tax->rate, 2) }}%)</option>
                                 @endforeach
@@ -130,26 +129,26 @@
                         {{-- Ringkasan --}}
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted fw-bold small">Subtotal (<span id="txt_total_qty">0</span> item)</span>
-                            <span class="fw-bold text-dark" id="lbl_subtotal">Rp 0</span>
+                            <span class="fw-bold text-dark" id="lbl_subtotal">{{ __('erp.rp_zero') }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted fw-bold small">DPP (Dasar Pengenaan Pajak)</span>
-                            <span class="fw-bold text-danger" id="lbl_dpp">Rp 0</span>
+                            <span class="text-muted fw-bold small">{{ __('erp.tax_base_dpp') }}</span>
+                            <span class="fw-bold text-danger" id="lbl_dpp">{{ __('erp.rp_zero') }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted fw-bold small">Pajak Penambah (+)</span>
-                            <span class="fw-bold text-success" id="lbl_addition">Rp 0</span>
+                            <span class="text-muted fw-bold small">{{ __('erp.addition_tax_plus') }}</span>
+                            <span class="fw-bold text-success" id="lbl_addition">{{ __('erp.rp_zero') }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-3">
-                            <span class="text-muted fw-bold small">Pajak Pemotong (-)</span>
-                            <span class="fw-bold text-danger" id="lbl_deduction">Rp 0</span>
+                            <span class="text-muted fw-bold small">{{ __('erp.deduction_tax_minus') }}</span>
+                            <span class="fw-bold text-danger" id="lbl_deduction">{{ __('erp.rp_zero') }}</span>
                         </div>
 
                         <hr class="my-3 border-dark">
 
                         <div class="d-flex justify-content-between align-items-end mb-2">
-                            <span class="fw-bold text-uppercase" style="font-size: 0.9rem;">Total Bayar</span>
-                            <h3 class="fw-bold text-primary m-0" id="lbl_grandtotal">Rp 0</h3>
+                            <span class="fw-bold text-uppercase" style="font-size: 0.9rem;">{{ __('erp.total_payment') }}</span>
+                            <h3 class="fw-bold text-primary m-0" id="lbl_grandtotal">{{ __('erp.rp_zero') }}</h3>
                         </div>
 
                         {{-- HIDDEN INPUT UNTUK CONTROLLER --}}
@@ -171,7 +170,7 @@
         const tbody = document.getElementById('baris-po');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input type="text" name="details[${barisCount}][item_code]" class="form-control form-control-sm" placeholder="Ketik SKU..." required></td>
+            <td><input type="text" name="details[${barisCount}][item_code]" class="form-control form-control-sm" placeholder="{{ __('erp.type_sku_ph') }}" required></td>
             <td><input type="text" name="details[${barisCount}][description]" class="form-control form-control-sm"></td>
             <td><input type="number" name="details[${barisCount}][price]" class="form-control form-control-sm text-end price-input" value="0" min="0" required></td>
             <td><input type="number" name="details[${barisCount}][qty]" class="form-control form-control-sm text-center qty-input" value="1" min="1" required></td>

@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'deepl' => [
+        'key' => env('DEEPL_API_KEY'),
+        // FIX: default arahkan ke host FREE tier DeepL (api-free.deepl.com).
+        // Kalau nanti upgrade ke DeepL Pro, ganti ke https://api.deepl.com/v2/translate
+        // dan pakai API key Pro (tidak berakhiran ":fx").
+        'endpoint' => env('DEEPL_API_ENDPOINT', 'https://api-free.deepl.com/v2/translate'),
+    ],
+
 ];

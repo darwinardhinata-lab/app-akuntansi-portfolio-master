@@ -53,7 +53,7 @@ class ProcessPendingSOTempJob implements ShouldQueue
                     try {
                         foreach ($pendingSOs as $tempSo) {
                             $weightGram = isset($tempSo->total_weight_in_kg) ? ($tempSo->total_weight_in_kg * 1000) : 0;
-                            $sourceName = !empty($tempSo->source_name) ? $tempSo->source_name : (!empty($tempSo->source) ? $tempSo->source : 'JUBELIO');
+                            $sourceName = !empty($tempSo->source_name) ? $tempSo->source_name : (!empty($tempSo->source) ? $tempSo->source : 'EXTERNAL');
 
                             $so = SalesOrder::updateOrCreate(
                                 ['so_number' => $tempSo->salesorder_no],
@@ -75,10 +75,10 @@ class ProcessPendingSOTempJob implements ShouldQueue
                                     'is_cod' => $tempSo->is_cod ? 1 : 0,
                                     'tracking_number' => $tempSo->tracking_number,
                                     'total_weight' => $weightGram,
-                                    'is_jubelio_shipment' => $tempSo->is_jubelio_shipment ? 1 : 0,
+                                    'is_marketplace_shipment' => $tempSo->is_marketplace_shipment ? 1 : 0,
                                     'courier' => $tempSo->courier,
                                     'status' => 'APPROVED', // Status akuntansi mutlak
-                                    'wms_status' => $tempSo->wms_status ?? null, // Status operasional gudang Jubelio
+                                    'wms_status' => $tempSo->wms_status ?? null, // Status operasional gudang (WMS)
                                     'is_paid' => $tempSo->is_paid ? 1 : 0,
 
                                     'sub_total' => $tempSo->sub_total ?? 0,

@@ -3,7 +3,7 @@
 @section('header')
 <div class="container-fluid px-0">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3">System Activity Logs</h1>
+        <h1 class="h3">{{ __('erp.system_activity_logs') }}</h1>
     </div>
 </div>
 @endsection
@@ -12,18 +12,18 @@
 <div class="container-fluid px-0">
     <div class="card">
         <div class="card-header">
-            <h5>Riwayat Aktivitas Sistem</h5>
+            <h5>{{ __('erp.system_activity_history') }}</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
-                            <th>Waktu</th>
-                            <th>User</th>
-                            <th>Aksi</th>
-                            <th>Modul</th>
-                            <th>Keterangan</th>
+                            <th>{{ __('erp.time_label') }}</th>
+                            <th>{{ __('erp.user_label') }}</th>
+                            <th>{{ __('erp.action') }}</th>
+                            <th>{{ __('erp.module_label') }}</th>
+                            <th>{{ __('erp.description') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -49,7 +49,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center">Tidak ada data log.</td>
+                                <td colspan="5" class="text-center">{{ __('erp.no_log_data') }}</td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Budgeting' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.budgeting') => null]" />
 @endsection
 
 @section('content')
@@ -11,10 +11,10 @@
     
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1" style="color: #0f172a;">Executive Dashboard: Budgeting & Proyeksi</h3>
+            <h3 class="fw-bold mb-1" style="color: #0f172a;">{{ __('erp.executive_dashboard_budgeting') }}</h3>
             <p class="text-muted small mb-0">
                 <i class="fa-solid fa-calendar-days me-1 text-primary"></i> 
-                Berdasarkan Data Historis: <span class="fw-bold text-dark">{{ date('d M Y', strtotime($startDate)) }}</span> s/d <span class="fw-bold text-dark">{{ date('d M Y', strtotime($endDate)) }}</span> ({{ $monthCount }} Bulan)
+                Berdasarkan Data Historis: <span class="fw-bold text-dark">{{ date('d M Y', strtotime($startDate)) }}</span> {{ __('erp.to_abbr') }} <span class="fw-bold text-dark">{{ date('d M Y', strtotime($endDate)) }}</span> ({{ $monthCount }} Bulan)
             </p>
         </div>
     </div>
@@ -22,15 +22,15 @@
     <form action="{{ route('budgeting.index') }}" method="GET" class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
         <div class="row g-3 align-items-center">
             <div class="col-md-3">
-                <label class="form-label small fw-bold text-muted mb-1">Analisa Sejak</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.analysis_since') }}</label>
                 <input type="date" name="start_date" class="form-control form-control-sm fw-bold" value="{{ $startDate }}" required>
             </div>
             <div class="col-md-3">
-                <label class="form-label small fw-bold text-muted mb-1">Hingga</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.until_label') }}</label>
                 <input type="date" name="end_date" class="form-control form-control-sm fw-bold" value="{{ $endDate }}" required>
             </div>
             <div class="col-md-4">
-                <label class="form-label small fw-bold text-muted mb-1">Metode Forecasting</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.forecasting_method') }}</label>
                 <select name="method" class="form-select form-select-sm fw-bold" onchange="this.form.submit()">
                     <option value="simple_avg" {{ request('method', 'simple_avg') == 'simple_avg' ? 'selected' : '' }}>
                         Simple Average (Default)
@@ -48,10 +48,10 @@
                         Median Forecast
                     </option>
                 </select>
-                <small class="text-muted">Auto-submit saat dipilih</small>
+                <small class="text-muted">{{ __('erp.auto_submit_on_select') }}</small>
             </div>
             <div class="col-md-2 d-flex align-items-end mt-4 pt-1">
-                <button type="submit" class="btn btn-sm btn-primary fw-bold w-100 shadow-sm"><i class="fa-solid fa-calculator me-2"></i> Hitung</button>
+                <button type="submit" class="btn btn-sm btn-primary fw-bold w-100 shadow-sm"><i class="fa-solid fa-calculator me-2"></i> {{ __('erp.calculate_btn') }}</button>
             </div>
         </div>
     </form>
@@ -60,7 +60,7 @@
         <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 5px solid #0ea5e9 !important;">
                 <div class="card-body p-3">
-                    <p class="text-muted small fw-bold text-uppercase mb-1">Target Pendapatan</p>
+                    <p class="text-muted small fw-bold text-uppercase mb-1">{{ __('erp.revenue_target') }}</p>
                     <h5 class="fw-bold text-dark mb-0">Rp {{ number_format($summary['pendapatan'], 0, ',', '.') }}</h5>
                     <small class="text-muted">{{ ucfirst(str_replace('_', ' ', $methodUsed ?? 'simple_avg')) }}</small>
                 </div>
@@ -69,7 +69,7 @@
         <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 5px solid #f59e0b !important;">
                 <div class="card-body p-3">
-                    <p class="text-muted small fw-bold text-uppercase mb-1">Budget HPP (Max)</p>
+                    <p class="text-muted small fw-bold text-uppercase mb-1">{{ __('erp.cogs_budget_max') }}</p>
                     <h5 class="fw-bold text-dark mb-0">Rp {{ number_format($summary['hpp'], 0, ',', '.') }}</h5>
                     @if(isset($trendInfo) && $trendInfo)
                         <small class="text-{{ $trendInfo['trend_direction'] == 'increasing' ? 'success' : ($trendInfo['trend_direction'] == 'decreasing' ? 'danger' : 'muted') }}">
@@ -83,7 +83,7 @@
         <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm h-100" style="border-radius: 12px; border-left: 5px solid #ef4444 !important;">
                 <div class="card-body p-3">
-                    <p class="text-muted small fw-bold text-uppercase mb-1">Budget Operasional (Max)</p>
+                    <p class="text-muted small fw-bold text-uppercase mb-1">{{ __('erp.operational_budget_max') }}</p>
                     <h5 class="fw-bold text-dark mb-0">Rp {{ number_format($summary['opex'], 0, ',', '.') }}</h5>
                     @if(isset($trendInfo) && isset($trendInfo['confidence_r2']))
                         <small class="text-muted">R²: {{ number_format($trendInfo['confidence_r2'] ?? 0, 2) }}</small>
@@ -94,7 +94,7 @@
         <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm h-100 {{ $summary['laba_bersih'] < 0 ? 'bg-danger text-white' : 'bg-success text-white' }}" style="border-radius: 12px;">
                 <div class="card-body p-3">
-                    <p class="small fw-bold text-uppercase mb-1" style="opacity: 0.8;">Proyeksi Laba Bersih</p>
+                    <p class="small fw-bold text-uppercase mb-1" style="opacity: 0.8;">{{ __('erp.net_profit_projection') }}</p>
                     <h5 class="fw-bold mb-0">Rp {{ number_format($summary['laba_bersih'], 0, ',', '.') }}</h5>
                 </div>
             </div>
@@ -105,7 +105,7 @@
         <div class="col-12 col-lg-7">
             <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
                 <div class="card-body p-4">
-                    <h6 class="fw-bold text-muted mb-4"><i class="fa-solid fa-scale-balanced me-2"></i> Peta Proyeksi: Pendapatan vs Pengeluaran</h6>
+                    <h6 class="fw-bold text-muted mb-4"><i class="fa-solid fa-scale-balanced me-2"></i> {{ __('erp.projection_map_revenue_vs_expense') }}</h6>
                     <canvas id="barChart" height="120"></canvas>
                 </div>
             </div>
@@ -113,28 +113,28 @@
         <div class="col-12 col-lg-5">
             <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
                 <div class="card-body p-4">
-                    <h6 class="fw-bold text-muted mb-4"><i class="fa-solid fa-fire me-2 text-danger"></i> Top 6 Sedotan Biaya Operasional</h6>
+                    <h6 class="fw-bold text-muted mb-4"><i class="fa-solid fa-fire me-2 text-danger"></i> {{ __('erp.top6_operational_cost_drains') }}</h6>
                     <canvas id="pieChart" height="180"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <h5 class="fw-bold mb-3" style="color: #0f172a;"><i class="fa-solid fa-table-list me-2"></i> Rincian Proyeksi & Budget Per Akun</h5>
+    <h5 class="fw-bold mb-3" style="color: #0f172a;"><i class="fa-solid fa-table-list me-2"></i> {{ __('erp.projection_budget_detail_per_account') }}</h5>
     <div class="row g-4">
         
         <div class="col-12 col-lg-4">
             <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
                 <div class="card-header bg-white border-bottom py-3">
-                    <h6 class="mb-0 fw-bold text-primary"><i class="fa-solid fa-arrow-trend-up me-1"></i> Target Penjualan</h6>
+                    <h6 class="mb-0 fw-bold text-primary"><i class="fa-solid fa-arrow-trend-up me-1"></i> {{ __('erp.sales_target') }}</h6>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0 small">
                         <thead class="table-light text-muted">
                             <tr>
-                                <th>Nama Akun</th>
-                                <th class="text-end">Total Historis</th>
-                                <th class="text-end pe-3">Rata-rata/Bulan</th>
+                                <th>{{ __('erp.account') }}</th>
+                                <th class="text-end">{{ __('erp.total_historical') }}</th>
+                                <th class="text-end pe-3">{{ __('erp.average_per_month') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -150,7 +150,7 @@
                         </tbody>
                         <tfoot class="table-light fw-bold border-top" style="font-size: 0.8rem;">
                             <tr class="text-dark">
-                                <td>TOTAL PENJUALAN</td>
+                                <td>{{ __('erp.total_sales_caps') }}</td>
                                 <td class="text-end">{{ number_format($totalHistorisPenjualan, 0, ',', '.') }}</td>
                                 <td class="text-end pe-3 text-primary" style="font-size: 0.85rem;">{{ number_format($report['penjualan']['total_avg'], 0, ',', '.') }}</td>
                             </tr>
@@ -163,15 +163,15 @@
         <div class="col-12 col-lg-4">
             <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
                 <div class="card-header bg-white border-bottom py-3">
-                    <h6 class="mb-0 fw-bold text-warning"><i class="fa-solid fa-basket-shopping me-1"></i> Budget HPP / Barang</h6>
+                    <h6 class="mb-0 fw-bold text-warning"><i class="fa-solid fa-basket-shopping me-1"></i> {{ __('erp.cogs_budget_goods') }}</h6>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0 small">
                         <thead class="table-light text-muted">
                             <tr>
-                                <th>Nama Akun</th>
-                                <th class="text-end">Total Historis</th>
-                                <th class="text-end pe-3">Limit/Bulan</th>
+                                <th>{{ __('erp.account') }}</th>
+                                <th class="text-end">{{ __('erp.total_historical') }}</th>
+                                <th class="text-end pe-3">{{ __('erp.limit_per_month') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -187,7 +187,7 @@
                         </tbody>
                         <tfoot class="table-light fw-bold border-top" style="font-size: 0.8rem;">
                             <tr class="text-dark">
-                                <td>TOTAL BUDGET HPP</td>
+                                <td>{{ __('erp.total_cogs_budget_caps') }}</td>
                                 <td class="text-end">{{ number_format($totalHistorisPembelian, 0, ',', '.') }}</td>
                                 <td class="text-end pe-3 text-warning" style="font-size: 0.85rem;">{{ number_format($report['pembelian']['total_avg'], 0, ',', '.') }}</td>
                             </tr>
@@ -200,15 +200,15 @@
         <div class="col-12 col-lg-4">
             <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
                 <div class="card-header bg-white border-bottom py-3">
-                    <h6 class="mb-0 fw-bold text-danger"><i class="fa-solid fa-hand-holding-dollar me-1"></i> Budget Operasional</h6>
+                    <h6 class="mb-0 fw-bold text-danger"><i class="fa-solid fa-hand-holding-dollar me-1"></i> {{ __('erp.operational_budget') }}</h6>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0 small">
                         <thead class="table-light text-muted">
                             <tr>
-                                <th>Nama Akun</th>
-                                <th class="text-end">Total Historis</th>
-                                <th class="text-end pe-3">Limit/Bulan</th>
+                                <th>{{ __('erp.account') }}</th>
+                                <th class="text-end">{{ __('erp.total_historical') }}</th>
+                                <th class="text-end pe-3">{{ __('erp.limit_per_month') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -224,7 +224,7 @@
                         </tbody>
                         <tfoot class="table-light fw-bold border-top" style="font-size: 0.8rem;">
                             <tr class="text-dark">
-                                <td>TOTAL OPERASIONAL</td>
+                                <td>{{ __('erp.total_operational_caps') }}</td>
                                 <td class="text-end">{{ number_format($totalHistorisOperasional, 0, ',', '.') }}</td>
                                 <td class="text-end pe-3 text-danger" style="font-size: 0.85rem;">{{ number_format($report['operasional']['total_avg'], 0, ',', '.') }}</td>
                             </tr>

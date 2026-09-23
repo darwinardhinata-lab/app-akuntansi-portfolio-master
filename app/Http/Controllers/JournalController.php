@@ -326,7 +326,7 @@ class JournalController extends Controller
     {
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="Template_Jurnal_Jubelio.csv"',
+            'Content-Disposition' => 'attachment; filename="Template_Jurnal.csv"',
         ];
 
         $callback = function() {

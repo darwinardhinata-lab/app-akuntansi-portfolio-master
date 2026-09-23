@@ -11,7 +11,7 @@ use App\Support\NumberParser;
 class FastSyncJurnal extends Command
 {
     protected $signature = 'jurnal:sync {file}';
-    protected $description = 'Smart Sync Jurnal Jubelio (Skala Big Data / Enterprise)';
+    protected $description = 'Smart Sync Jurnal dari file CSV (Skala Big Data / Enterprise)';
 
     public function handle()
     {

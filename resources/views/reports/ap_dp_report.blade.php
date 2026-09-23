@@ -1,19 +1,19 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Laporan AP DP' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.bc_ap_dp_report') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-4">
-    <h4 class="fw-bold mb-4">Laporan Hutang & Uang Muka Pembelian</h4>
+    <h4 class="fw-bold mb-4">{{ __('erp.ap_dp_report_title') }}</h4>
     <div class="row g-4">
         {{-- Hutang --}}
         <div class="col-md-6">
             <div class="card shadow-sm border-0 border-top border-danger border-4">
-                <div class="card-header bg-white"><h6 class="fw-bold m-0 text-danger">Rekapitulasi Hutang (AP)</h6></div>
+                <div class="card-header bg-white"><h6 class="fw-bold m-0 text-danger">{{ __('erp.ap_recap') }}</h6></div>
                 <table class="table mb-0">
-                    <thead class="table-light"><tr><th>Kode Akun</th><th>Nama Akun</th><th class="text-end">Saldo Akhir</th></tr></thead>
+                    <thead class="table-light"><tr><th>{{ __('erp.account_code') }}</th><th>{{ __('erp.account') }}</th><th class="text-end">{{ __('erp.ending_balance') }}</th></tr></thead>
                     <tbody>
                         @foreach($hutang as $h)
                         <tr>
@@ -33,9 +33,9 @@
         {{-- Uang Muka Pembelian --}}
         <div class="col-md-6">
             <div class="card shadow-sm border-0 border-top border-info border-4">
-                <div class="card-header bg-white"><h6 class="fw-bold m-0 text-info">Rekapitulasi Uang Muka ke Supplier</h6></div>
+                <div class="card-header bg-white"><h6 class="fw-bold m-0 text-info">{{ __('erp.supplier_dp_recap') }}</h6></div>
                 <table class="table mb-0">
-                    <thead class="table-light"><tr><th>Kode Akun</th><th>Nama Akun</th><th class="text-end">Saldo Akhir</th></tr></thead>
+                    <thead class="table-light"><tr><th>{{ __('erp.account_code') }}</th><th>{{ __('erp.account') }}</th><th class="text-end">{{ __('erp.ending_balance') }}</th></tr></thead>
                     <tbody>
                         @foreach($uangMuka as $um)
                         <tr>

@@ -1,4 +1,4 @@
-# ERP Akuntansi Manufaktur — Integrasi Modul Manufaktur
+﻿# ERP Akuntansi Manufaktur — Integrasi Modul Manufaktur
 
 > **Status: Modul Manufaktur (MFG/SPK) SELESAI dan menjadi satu kesatuan utuh dengan
 > ERP Akuntansi.** Anthrilo (Python/FastAPI) **tidak lagi dibutuhkan** — seluruh logic,
@@ -37,7 +37,7 @@ dari sini, Anthrilo boleh dimatikan kapan saja.
 | `yarns` | `mfg_yarns` | + `average_cost`, `inventory_account_code` (moving average) |
 | `fabrics` | `mfg_fabrics` | + kolom `state` (GREY/FINISHED) menyatukan 2 konsep Anthrilo dalam 1 tabel |
 | `processes` | `mfg_processes` | rate jasa vendor (knitting/dyeing/printing/finishing/cutting/stitching) |
-| `purchase_orders` + `po_items` (raw material) | `mfg_material_purchase_orders` + `mfg_material_purchase_order_details` | dipisah dari `purchase_orders` inti akuntansi (barang jadi/Jubelio) |
+| `purchase_orders` + `po_items` (raw material) | `mfg_material_purchase_orders` + `mfg_material_purchase_order_details` | dipisah dari `purchase_orders` inti akuntansi (barang jadi/[External Platform]) |
 | `gate_entries` + `mrns` + `mrn_items` | `mfg_material_receipts` + `mfg_material_receipt_details` | digabung jadi 1 dokumen MRN |
 | `inventory_transactions` | `mfg_material_ledgers` | versi Laravel, moving average khusus bahan baku |
 | `knit_orders` | `mfg_knit_orders` | + `work_order_id` (link ke SPK, opsional/traceability) |

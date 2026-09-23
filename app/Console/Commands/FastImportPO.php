@@ -61,7 +61,7 @@ class FastImportPO extends Command
 
                 if (empty($poNumber) || strtolower($poNumber) == 'purchase order no.') continue;
 
-                // Smart Date Parser Jubelio ('25 Mei 2026' -> 2026-05-25)
+                // Smart Date Parser ('25 Mei 2026' -> 2026-05-25)
                 $time = strtotime(str_replace(['Mei', 'Okt', 'Ags', 'Des'], ['May', 'Oct', 'Aug', 'Dec'], $tglRaw));
                 $tanggal = $time ? date('Y-m-d', $time) : date('Y-m-d');
 

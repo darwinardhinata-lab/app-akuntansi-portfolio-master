@@ -26,7 +26,11 @@ class JournalBalanceTest extends TestCase
                     'position'     => 'DEBET',
                     'amount'       => 100.00,
                 ],
-                // No corresponding KREDIT -> unbalanced
+                [
+                    'account_code' => '21100',
+                    'position'     => 'KREDIT',
+                    'amount'       => 50.00,
+                ],
             ],
         ];
 

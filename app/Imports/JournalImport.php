@@ -20,7 +20,7 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
     
     /**
      * Akun untuk menampung selisih pembulatan jurnal
-     * Menggunakan akun '88068' (Pembulatan Transaksi) yang sudah ditetapkan di Master COA Jubelio
+     * Menggunakan akun '88068' (Pembulatan Transaksi) yang sudah ditetapkan di Master COA
      * Saldo Normal: DEBET (Biaya/Beban Operasional)
      * Untuk pembulatan: selisih DEBET → tambah DEBET, selisih KREDIT → tambah KREDIT
      */
@@ -138,7 +138,7 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
         }
 
         // --- GUARD 2: Cross-check raw No Bukti (INV-/BIL-) yang mungkin "tersembunyi" walau No Jurnal terisi ---
-        // Skenario: No Jurnal = 1399694 (Jubelio internal), No Bukti = INV-260729-0001
+        // Skenario: No Jurnal = 1399694 (ID internal sumber eksternal), No Bukti = INV-260729-0001
         // evidence_number = 1399694 (tidak terdeteksi Guard 1), tapi No Bukti berisi INV- yang sudah punya jurnal sistem
         $rawNoBuktiList = array_unique(array_filter($rawNoBuktiList));
         if (!empty($rawNoBuktiList)) {
@@ -274,7 +274,7 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
                         'source_doc_no'    => $pRow['no_bukti'] ?: null, // FIX: traceability untuk DocumentTrace
                         'transaction_date' => $pRow['tanggal'],
                         'description'      => substr($evidenceNumber . ' - ' . $pRow['deskripsi'], 0, 255),
-                        'jj_id'            => time() + $seq, // FIX 1364: Bypass constraint NOT NULL dari Jubelio
+                        'jj_id'            => time() + $seq, // FIX 1364: Bypass constraint NOT NULL legacy
                         'created_at'       => now(),
                         'updated_at'       => now(),
                     ];

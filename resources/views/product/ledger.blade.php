@@ -1,20 +1,20 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Master Data' => '#', 'Ledger Produk' => null]" />
+    <x-breadcrumb :links="[__('erp.master_data') => '#', __('erp.bc_product_ledger') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-0">
     <div class="mb-4">
-        <h3 class="fw-bold mb-1 text-dark">Kartu Stok (Inventory Ledger)</h3>
-        <p class="text-muted small mb-0">Pantau riwayat masuk-keluar barang dan pergerakan Harga Modal (HPP).</p>
+        <h3 class="fw-bold mb-1 text-dark">{{ __('erp.stock_card_inventory_ledger') }}</h3>
+        <p class="text-muted small mb-0">{{ __('erp.monitor_stock_movement_cogs_hint') }}</p>
     </div>
 
     <form action="{{ route('inventory.ledger') }}" method="GET" class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
         <div class="row g-2 align-items-end">
             <div class="col-md-5">
-                <label class="form-label small fw-bold text-muted mb-1">Pilih Barang (SKU)</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.select_item_sku') }}</label>
                 <select name="product_id" class="form-select form-select-sm" required>
                     @foreach($products as $p)
                         <option value="{{ $p->id }}" {{ $productId == $p->id ? 'selected' : '' }}>
@@ -24,11 +24,11 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label small fw-bold text-muted mb-1">Tanggal Awal</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.start_date_full') }}</label>
                 <input type="date" name="start_date" class="form-control form-control-sm" value="{{ $startDate }}">
             </div>
             <div class="col-md-3">
-                <label class="form-label small fw-bold text-muted mb-1">Tanggal Akhir</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.end_date_full') }}</label>
                 <input type="date" name="end_date" class="form-control form-control-sm" value="{{ $endDate }}">
             </div>
             <div class="col-md-1">
@@ -44,7 +44,7 @@
                 <small class="text-muted">SKU: {{ $selectedProduct->sku ?? '-' }}</small>
             </div>
             <div class="text-end">
-                <small class="d-block text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">HPP / Nilai Rata-rata Terkini</small>
+                <small class="d-block text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">{{ __('erp.cogs_current_average_value') }}</small>
                 <span class="badge bg-dark fw-bold fs-6">Rp {{ number_format($selectedProduct->average_cost ?? 0, 2, ',', '.') }}</span>
             </div>
         </div>
@@ -52,14 +52,14 @@
             <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size: 0.85rem;">
                 <thead class="table-light text-muted text-uppercase" style="font-size: 0.75rem;">
                     <tr>
-                        <th class="ps-3 py-3">Tanggal</th>
-                        <th>No Bukti</th>
-                        <th>Keterangan</th>
-                        <th class="text-center">Masuk</th>
-                        <th class="text-center">Keluar</th>
-                        <th class="text-end">Hrg Satuan / HPP</th>
-                        <th class="text-center bg-light border-start">Sisa Stok</th>
-                        <th class="text-end bg-light pe-3">Saldo Nilai (Rp)</th>
+                        <th class="ps-3 py-3">{{ __('erp.date') }}</th>
+                        <th>{{ __('erp.proof_no') }}</th>
+                        <th>{{ __('erp.description') }}</th>
+                        <th class="text-center">{{ __('erp.mfg_ledger_in') }}</th>
+                        <th class="text-center">{{ __('erp.logout') }}</th>
+                        <th class="text-end">{{ __('erp.unit_price_cogs') }}</th>
+                        <th class="text-center bg-light border-start">{{ __('erp.remaining_stock') }}</th>
+                        <th class="text-end bg-light pe-3">{{ __('erp.value_balance_rp') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -78,7 +78,7 @@
                         <td class="text-end bg-light pe-3 fw-bold">{{ number_format($ledger->running_value, 2, ',', '.') }}</td>
                     </tr>
                     @empty
-                    <tr><td colspan="8" class="text-center py-5 text-muted">Belum ada riwayat mutasi stok untuk barang ini di periode terpilih.</td></tr>
+                    <tr><td colspan="8" class="text-center py-5 text-muted">{{ __('erp.no_stock_movement_history_period') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

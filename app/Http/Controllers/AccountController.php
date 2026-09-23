@@ -376,7 +376,7 @@ class AccountController extends Controller
                     $kodeAkun = $accountMapping[$kodeAkun];
                 }
 
-                // FIX: DRY — gunakan NumberParser helper
+                                // FIX: DRY — gunakan NumberParser helper
                 $debet  = NumberParser::parseDecimal($r[2] ?? '0');
                 $kredit = NumberParser::parseDecimal($r[3] ?? '0');
                 if (empty($kodeAkun) || ($debet == 0 && $kredit == 0)) continue;
@@ -386,13 +386,33 @@ class AccountController extends Controller
                     continue;
                 }
 
+                // Accounting-style: nilai negatif (ditandai kurung di CSV) dialihkan
+                // ke kolom sebaliknya agar selalu positif & seimbang.
+                if ($debet != 0) {
+                    if ($debet < 0) {
+                        // Pindahkan ke kredit lalu nolkan agar tidak diproses ulang (double insert)
+                        $kredit += abs($debet);
+                        $debet = 0;
+                    } else {
+                        $detailsToInsert[] = ['journal_id' => $primaryKeyId, 'account_code' => $kodeAkun, 'helper_code' => null, 'position' => 'DEBET',  'amount' => $debet,  'created_at' => $now, 'updated_at' => $now];
+                        $totalDebet += $debet;
+                        $debet = 0;
+                    }
+                }
+                if ($kredit != 0) {
+                    if ($kredit < 0) {
+                        $debet += abs($kredit);
+                        $kredit = 0;
+                    } else {
+                        $detailsToInsert[] = ['journal_id' => $primaryKeyId, 'account_code' => $kodeAkun, 'helper_code' => null, 'position' => 'KREDIT', 'amount' => $kredit, 'created_at' => $now, 'updated_at' => $now];
+                        $totalKredit += $kredit;
+                        $kredit = 0;
+                    }
+                }
+                // Sisa debet yang dihasilkan dari pengalihan kredit negatif
                 if ($debet != 0) {
                     $detailsToInsert[] = ['journal_id' => $primaryKeyId, 'account_code' => $kodeAkun, 'helper_code' => null, 'position' => 'DEBET',  'amount' => $debet,  'created_at' => $now, 'updated_at' => $now];
                     $totalDebet += $debet;
-                }
-                if ($kredit != 0) {
-                    $detailsToInsert[] = ['journal_id' => $primaryKeyId, 'account_code' => $kodeAkun, 'helper_code' => null, 'position' => 'KREDIT', 'amount' => $kredit, 'created_at' => $now, 'updated_at' => $now];
-                    $totalKredit += $kredit;
                 }
             }
             fclose($handle);
@@ -403,7 +423,10 @@ class AccountController extends Controller
             }
 
             // FIX #5: Validasi balance SEBELUM commit — sebelumnya commit dulu baru cek
-            if (round($totalDebet, 2) !== round($totalKredit, 2)) {
+            // FIX: gunakan toleransi pembulatan (bccomp 2 desimal) karena operasi float
+            // pada nominal miliaran dapat menghasilkan selisih 1-2 sen artifisial.
+            if (bccomp((string) round($totalDebet, 2), (string) round($totalKredit, 2), 2) !== 0
+                && abs($totalDebet - $totalKredit) >= 0.01) {
                 DB::rollBack();
                 $selisih = abs($totalDebet - $totalKredit);
                 return back()->with('error',

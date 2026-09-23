@@ -1,4 +1,4 @@
-# AUDIT REPORT — Aplikasi Akuntansi ERP
+﻿# AUDIT REPORT — Aplikasi Akuntansi ERP
 
 **Tanggal Audit:** 2026-07-16
 **Lingkup:** Analisis menyeluruh kode sumber (Models, Controllers, Services, Jobs, Views, Routes) untuk menemukan bug logika, kebocoran data, dan pola N+1 (query berulang per baris).
@@ -115,7 +115,7 @@ Mass-assignment terbuka (`$guarded = []`) memungkinkan request mengisi sembarang
 1. **XSS:** `JournalController::getJournalDetailsAjax` sudah menggunakan `e($evidence)` sebelum render view — ✅ aman.
 2. **Validasi Balance Jurnal:** `store()`, `update()`, `openingBalanceStore`, `importOpeningBalance`, dan service `SalesOrderService`/`PurchaseOrderService` sudah mengecek keseimbangan Debet=Kredit sebelum commit — ✅ baik.
 3. **Race Condition Stok:** `SalesOrderService`, `PurchaseOrderService`, `WarehouseController` sudah menggunakan `lockForUpdate()` pada baris produk/SO/PO — ✅ baik.
-4. **CSRF:** Webhook Jubelio sengaja dikecualikan dari CSRF (`VerifyCsrfToken`) — sesuai desain eksternal.
+4. **CSRF:** Webhook [External Platform] sengaja dikecualikan dari CSRF (`VerifyCsrfToken`) — sesuai desain eksternal.
 5. **Throttling:** Login, import, dan webhook sudah dibatasi (`throttle:10,1` dll) — ✅.
 
 ---

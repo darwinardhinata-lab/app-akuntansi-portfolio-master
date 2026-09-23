@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Saldo Awal' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.opening_balance') => null]" />
 @endsection
 
 @section('content')
@@ -22,18 +22,17 @@
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1" style="color: #0f172a;">Setup Saldo Awal Akun (Opening Balance)</h3>
+            <h3 class="fw-bold mb-1" style="color: #0f172a;">{{ __('erp.setup_opening_balance') }}</h3>
             <p class="text-muted small mb-0">Masukkan nominal saldo awal neraca & laba rugi. Sistem otomatis memposisikannya sesuai sifat saldo normal.</p>
         </div>
   
         <div class="d-flex flex-wrap gap-2">
             <button type="button" class="btn btn-sm btn-success fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#importSaldoModal">
-                <i class="fa-solid fa-file-import me-1"></i> Import Saldo Awal (CSV)
+                <i class="fa-solid fa-file-import me-1"></i> {{ __('erp.import_opening_balance_csv') }}
             </button>
             
             <a href="{{ route('account.index') }}" class="btn btn-sm btn-outline-secondary fw-bold px-3 shadow-sm">
-                <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke COA
-            </a>
+                <i class="fa-solid fa-arrow-left me-1"></i> {{ __('erp.back_to') }} {{ __('erp.coa') }}</a>
         </div>
     </div>
 
@@ -43,38 +42,38 @@
                 <form action="{{ route('account.import_opening_balance') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title fw-bold" id="importSaldoModalLabel">Import Saldo Awal</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5 class="modal-title fw-bold" id="importSaldoModalLabel">{{ __('erp.import_opening_balance') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('erp.close_btn') }}"></button>
                     </div>
                     <div class="modal-body">
                         <div class="alert alert-info py-3 small">
-                            <strong>Format CSV yang didukung:</strong><br>
+                            <strong>{{ __('erp.supported_csv_format') }}</strong><br>
                             Kolom 1: Kode Akun<br>
                             Kolom 2: Nama Akun<br>
                             Kolom 3: Nominal Debet<br>
                             Kolom 4: Nominal Kredit<br>
-                            <em>(Baris pertama akan diabaikan sebagai header/judul kolom)</em>
+                            <em>{{ __('erp.first_row_ignored_header') }}</em>
                             
                             <div class="mt-3">
                                 <a href="{{ route('account.download_template_opening_balance') }}" class="btn btn-xs btn-light text-primary fw-bold border border-primary shadow-sm">
-                                    <i class="fa-solid fa-download"></i> Download Template CSV Di Sini
+                                    <i class="fa-solid fa-download"></i> {{ __('erp.download_template_btn') }} CSV Di Sini
                                 </a>
                             </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="file_csv" class="form-label fw-bold">Pilih File CSV Hasil Edit</label>
+                            <label for="file_csv" class="form-label fw-bold">{{ __('erp.choose_edited_csv') }}</label>
                             <input type="file" class="form-control" name="file" id="file_csv" accept=".csv" required>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="tanggal_saldo" class="form-label fw-bold">Tanggal Saldo Awal</label>
+                            <label for="tanggal_saldo" class="form-label fw-bold">{{ __('erp.opening_balance_date') }}</label>
                             <input type="date" class="form-control" name="tanggal_saldo" value="{{ date('Y-01-01') }}" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-success fw-bold"><i class="fa-solid fa-upload me-1"></i> Proses Import</button>
+                        <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
+                        <button type="submit" class="btn btn-success fw-bold"><i class="fa-solid fa-upload me-1"></i> {{ __('erp.process_import') }}</button>
                     </div>
                 </form>
             </div>
@@ -104,11 +103,11 @@
 
         <div class="row mb-4 bg-light p-3 rounded border g-3 align-items-center">
             <div class="col-md-4">
-                <label class="form-label small fw-bold text-muted mb-1">Tanggal Saldo Awal (Cut-off)</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.opening_balance_cutoff_date') }}</label>
                 <input type="date" name="transaction_date" class="form-control fw-bold" value="{{ $existingDate }}" required>
             </div>
             <div class="col-md-8 text-md-end pt-md-3">
-                <span class="text-muted small">Petunjuk: Saldo awal akuntansi wajib seimbang <b>(Total Debet = Total Kredit)</b>.</span>
+                <span class="text-muted small">{{ __('erp.hint_opening_balance_must_balance') }} <b>{{ __('erp.total_debit_equals_credit') }}</b>.</span>
             </div>
         </div>
 
@@ -116,20 +115,28 @@
             <table class="table table-coa mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th width="15%" class="ps-3">Kode Akun</th>
-                        <th width="40%">Nama Akun</th>
-                        <th width="15%" class="text-center">Posisi Normal</th>
-                        <th width="30%" class="text-end pe-3">Nominal Saldo (Rp)</th>
+                        <th width="15%" class="ps-3">{{ __('erp.account_code') }}</th>
+                        <th width="40%">{{ __('erp.account') }}</th>
+                        <th width="15%" class="text-center">{{ __('erp.normal_position') }}</th>
+                        <th width="30%" class="text-end pe-3">{{ __('erp.balance_amount_rp') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($accounts as $acc)
                         @php
-                            $prefix   = substr(trim($acc->account_code), 0, 1);
-                            $isDebet  = in_array($prefix, ['1', '5', '6', '9']);
-                            $posName  = $isDebet ? 'DEBET' : 'KREDIT';
+                            // FIX: Posisi Normal harus konsisten dengan kolom "Pos Saldo"
+                            // di Daftar Akun (COA) — gunakan normal_balance dari master COA.
+                            // Fallback ke aturan prefix hanya jika data master kosong.
+                            $normalBalance = strtoupper(trim($acc->normal_balance ?? ''));
+                            if ($normalBalance === 'DEBET' || $normalBalance === 'KREDIT') {
+                                $posName = $normalBalance;
+                            } else {
+                                $prefix  = substr(trim($acc->account_code), 0, 1);
+                                $posName = in_array($prefix, ['1', '5', '6', '9']) ? 'DEBET' : 'KREDIT';
+                            }
+                            $isDebet  = $posName === 'DEBET';
                             $badgeCls = $isDebet ? 'bg-deb' : 'bg-kre';
-                            
+
                             $currVal  = $existingDetails[$acc->account_code] ?? 0;
                         @endphp
                         <tr class="{{ $currVal != 0 ? 'table-warning' : '' }}">
@@ -149,12 +156,12 @@
 
         <div class="bg-light p-3 rounded border d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
             <div class="d-flex gap-4 fw-bold text-nowrap">
-                <div>Total Debet: <span id="lblDebet" class="text-success fs-6 ms-1">Rp 0</span></div>
-                <div>Total Kredit: <span id="lblKredit" class="text-danger fs-6 ms-1">Rp 0</span></div>
-                <div>Selisih: <span id="lblSelisih" class="text-warning fs-6 ms-1">Rp 0</span></div>
+                <div>{{ __('erp.total_debit_colon') }} <span id="lblDebet" class="text-success fs-6 ms-1">{{ __('erp.rp_zero') }}</span></div>
+                <div>{{ __('erp.total_credit_colon') }} <span id="lblKredit" class="text-danger fs-6 ms-1">{{ __('erp.rp_zero') }}</span></div>
+                <div>{{ __('erp.difference_colon') }} <span id="lblSelisih" class="text-warning fs-6 ms-1">{{ __('erp.rp_zero') }}</span></div>
             </div>
             <button type="submit" class="btn btn-primary fw-bold px-5 py-2 shadow-sm" id="btnSubmit" disabled>
-                <i class="fa-solid fa-floppy-disk me-2"></i> Simpan Saldo Awal
+                <i class="fa-solid fa-floppy-disk me-2"></i> {{ __('erp.save_opening_balance') }}
             </button>
         </div>
 

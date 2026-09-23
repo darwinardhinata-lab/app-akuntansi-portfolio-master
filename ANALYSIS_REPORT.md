@@ -1,8 +1,8 @@
-# LAPORAN ANALISIS DEEP DIVE: PERBEDALAN HASIL LAPORAN KEUANGAN
+﻿# LAPORAN ANALISIS DEEP DIVE: PERBEDALAN HASIL LAPORAN KEUANGAN
 
 ## Ringkasan Eksekutif
 
-Setelah melakukan analisis mendalam terhadap logika perhitungan dan flow data pada sistem akuntansi, **ditemukan 5 (lima) temuan kritis** yang menyebabkan perbedaan hasil laporan keuangan (Laba Rugi, Neraca, Arus Kas) antara source data Jubelio dengan output sistem.
+Setelah melakukan analisis mendalam terhadap logika perhitungan dan flow data pada sistem akuntansi, **ditemukan 5 (lima) temuan kritis** yang menyebabkan perbedaan hasil laporan keuangan (Laba Rugi, Neraca, Arus Kas) antara source data [External Platform] dengan output sistem.
 
 ---
 
@@ -30,7 +30,7 @@ if ($prefix == '8' || $kode == '88004') {
 
 **Dampak:**
 - Laba Rugi menunjukkan nilai yang salah
-- Selisih antara source data Jubelio dan output sistem
+- Selisih antara source data [External Platform] dan output sistem
 - Akun 8-8000 (akun pembulatan) juga terkena dampak
 
 ---
@@ -81,7 +81,7 @@ $position = in_array($prefix, ['1', '5', '6', '8', '9']) ? 'DEBET' : 'KREDIT';
 
 **Dampak:**
 - Saldo awal di Buku Besar tidak akurat
-- Perbedaan nilai akhir antara sistem dan Jubelio
+- Perbedaan nilai akhir antara sistem dan [External Platform]
 
 ---
 
@@ -149,13 +149,13 @@ $journalLines[] = [...'account_code' => '11200'...];  // Kas
 
 ---
 
-## Flow Data dari Jubelio ke Laporan Keuangan
+## Flow Data dari [External Platform] ke Laporan Keuangan
 
-### 1. Source Data Jubelio
+### 1. Source Data [External Platform]
 ```
-Jubelio API/Webhook → JSON Data
+[External Platform] API/Webhook → JSON Data
     ↓
-Jubelio CSV Export → File CSV/Excel
+[External Platform] CSV Export → File CSV/Excel
 ```
 
 ### 2. Proses Impok
@@ -169,7 +169,7 @@ JournalCsvImportService / JournalImport → Journal Headers & Details
 
 ### 3. Proses Transaksi
 ```
-JubelioWebhookController → SalesOrderService
+[External Platform]WebhookController → SalesOrderService
     ↓
     → Buat SalesInvoice
     ↓
@@ -209,7 +209,7 @@ LedgerController → Buku besar
 ### Prioritas 1 (KRITIS):
 1. **Hapus koreksi otomatis prefix 8 di AccountImport.php**
    - Jangan memaksa akun 8 menjadi DEBET
-   - Izinkan `normal_balance` dari Jubelio yang benar
+   - Izinkan `normal_balance` dari [External Platform] yang benar
 
 2. **Perbaiki logika di LedgerController.php**
    ```php
@@ -264,7 +264,7 @@ LedgerController → Buku besar
 2. **Import ulang master COA** dengan logika yang benar
 3. **Verifikasi saldo awal** semua akun
 4. **Export ulang laporan keuangan** untuk memvalidasi hasil
-5. **Bandingkan dengan source data Jubelio** untuk konfirmasi kesesuaian
+5. **Bandingkan dengan source data [External Platform]** untuk konfirmasi kesesuaian
 
 ---
 

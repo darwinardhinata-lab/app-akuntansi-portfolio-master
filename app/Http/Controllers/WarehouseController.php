@@ -9,6 +9,7 @@ use App\Models\Account;
 use App\Models\JournalHeader;
 use App\Models\JournalDetail;
 use App\Models\SystemLog;
+use App\Modules\Manufacturing\Models\WorkOrder;
 use Illuminate\Support\Facades\DB;
 
 class WarehouseController extends Controller
@@ -30,10 +31,27 @@ class WarehouseController extends Controller
             $query->where('evidence_number', 'LIKE', 'BIL-%'); // Terkoneksi dengan Bill
         } elseif ($tab == 'penempatan_barang') {
             $query->where('evidence_number', 'LIKE', 'PUT-%'); // Placeholder WMS Putaway
+        } elseif ($tab == 'manufaktur') {
+            // Penyelesaian SPK Manufaktur → barang jadi masuk stok (evidence: MFG-YYYYMMDD-XXXX).
+            // Menghubungkan menu Manufaktur dengan gudang: WorkOrderService::complete()
+            // menuliskan InventoryLedger IN ini — satu sumber kebenaran stok & harga rata-rata
+            // yang sama dengan menu Warehouse (lihat MANUFACTURING_INTEGRATION.md §3, JURNAL #6).
+            $query->where('evidence_number', 'LIKE', 'MFG-%');
         }
 
         $ledgers = $query->orderBy('transaction_date', 'desc')->paginate(50)->appends(['tab' => $tab]);
-        return view('warehouse.inbound', compact('ledgers', 'tab'));
+        $manufakturSpkMap = [];
+        if ($tab == 'manufaktur') {
+            // 1 query saja: peta SPK -> WorkOrder ID agar nomor SPK di tabel bisa ditautkan
+            // ke halaman detail Manufaktur tanpa N+1 query per baris.
+            $spkNumbers = $ledgers->pluck('evidence_number')->filter()->unique()->all();
+            if (!empty($spkNumbers)) {
+                $manufakturSpkMap = WorkOrder::whereIn('spk_number', $spkNumbers)
+                    ->pluck('id', 'spk_number')->all();
+            }
+        }
+
+        return view('warehouse.inbound', compact('ledgers', 'tab', 'manufakturSpkMap'));
     }
 
     public function outbound(Request $request) {
@@ -45,6 +63,12 @@ class WarehouseController extends Controller
             $query->where(function($q) {
                 $q->where('evidence_number', 'LIKE', 'PR-%')->orWhere('description', 'LIKE', '%Retur Pembelian%');
             });
+        } elseif ($tab == 'sales_outbound') {
+            // Sales Invoice (INV-...) → OUT (lihat InventorySyncService::STOCK_DIRECTIONS).
+            // Menghubungkan menu Penjualan (Sales Invoice) dengan gudang:
+            // SalesInvoiceController::store() memanggil InventorySyncService::processStockMovements()
+            // dengan docType='INV' yang memetakan ke InventoryLedger type 'OUT'.
+            $query->where('evidence_number', 'LIKE', 'INV-%');
         } elseif ($tab == 'transfer_keluar') {
             $query->where('evidence_number', 'LIKE', 'OUT-%'); // Transaksi keluar manual
         }
@@ -57,7 +81,7 @@ class WarehouseController extends Controller
         $tab = $request->get('tab', 'picking');
         $query = \App\Models\SalesOrder::query();
 
-        // Filter Logic WMS Jubelio / Pipeline Internal
+        // Filter Logic WMS / Pipeline Internal
         if ($tab == 'picking') {
             $query->whereIn('wms_status', ['PICK', 'FINISH_PICK', 'PRINT_PICK'])
                   ->orWhere(function($q) {

@@ -17,7 +17,7 @@ class JournalCsvImportService
 {
     /**
      * Akun untuk menampung selisih pembulatan jurnal
-     * Menggunakan akun '88068' (Pembulatan Transaksi) yang sudah ditetapkan di Master COA Jubelio
+     * Menggunakan akun '88068' (Pembulatan Transaksi) yang sudah ditetapkan di Master COA
      * Saldo Normal: DEBET (Biaya/Beban Operasional)
      */
     protected $roundingAccountCode = '88068';
@@ -213,7 +213,6 @@ class JournalCsvImportService
                 }
             }
 
-            DB::unprepared('SET FOREIGN_KEY_CHECKS=0;'); 
             DB::beginTransaction();
 
             try {
@@ -272,7 +271,7 @@ class JournalCsvImportService
                             'journal_id'       => $newId,
                             'evidence_number'  => $evidenceNumber,
                             'transaction_date' => $pRow['tanggal'],
-                            'description'      => substr($pRow['deskripsi'], 0, 255),
+                            'notes'            => substr($pRow['deskripsi'], 0, 255),
                             'jj_id'            => time() + $seq,
                             'created_at'       => $now,
                             'updated_at'       => $now,
@@ -369,7 +368,6 @@ class JournalCsvImportService
                 }
 
                 DB::commit();
-                DB::unprepared('SET FOREIGN_KEY_CHECKS=1;');
 
                 // POST-PROCESSING: Create Asset records for fixed asset accounts
                 // This ensures assets purchased via journal import are tracked in Aset Tetap
@@ -383,7 +381,6 @@ class JournalCsvImportService
 
             } catch (\Throwable $e) {
                 DB::rollBack();
-                DB::unprepared('SET FOREIGN_KEY_CHECKS=1;');
                 return ['status' => 'error', 'message' => "Gagal Menyimpan ke Database: " . explode(' (Connection', $e->getMessage())[0]];
             }
         } catch (\Throwable $e) {
@@ -442,7 +439,7 @@ class JournalCsvImportService
             ->toArray();
 
         $headerDescriptions = JournalHeader::whereIn('journal_id', $journalIds)
-            ->pluck('description', 'journal_id')
+            ->pluck('notes', 'journal_id')
             ->toArray();
 
         $assetsToCreate = [];

@@ -1,0 +1,3 @@
+Kode Barang;Nama Barang;Satuan Barang;Jumlah Barang;Saldo Awal;Jumlah Pemasukan Barang;Jumlah Pengeluaran Barang;Penyesuaian/Adjustment;Saldo Akhir;Hasil Pencacahan;Jumlah Selisih;Keterangan
+KB001;Bahan Baku Cotton 30s;KG;0,00;100,00;50,00;10,00;-2,50;137,50;Sudah;-2,50;Stock opname selesai
+KB002;Bahan Baku Polyester;KG;0,00;200,00;0,00;25,00;1,75;176,75;Belum;1,75;Menunggu stock opname

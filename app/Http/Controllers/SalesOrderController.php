@@ -29,7 +29,7 @@ class SalesOrderController extends Controller
         $ordersQuery = SalesOrder::with(['details', 'salesInvoice'])
             // FIX WMS: Filter query berdasarkan Tab yang aktif. Sebelumnya keliru mencocokkan ke kolom
             // 'status' (status akuntansi, isinya cuma APPROVED/SHIPPED) sehingga semua tab WMS selalu kosong.
-            // Sekarang dipisah: 'belum_dibayar' pakai flag is_paid, sisanya pakai kolom wms_status dari Jubelio.
+            // Sekarang dipisah: 'belum_dibayar' pakai flag is_paid, sisanya pakai kolom wms_status dari sumber eksternal.
             ->when($tab !== 'semua', function($q) use ($tab) {
                 if ($tab === 'belum_dibayar') {
                     $q->where('is_paid', 0);
@@ -531,7 +531,7 @@ class SalesOrderController extends Controller
                 'is_cod'              => $request->is_cod ? 1 : 0,
                 'tracking_number'     => $request->tracking_number,
                 'total_weight'        => $request->total_weight ?? 0,
-                'is_jubelio_shipment' => $request->is_jubelio_shipment ? 1 : 0,
+                'is_marketplace_shipment' => $request->is_marketplace_shipment ? 1 : 0,
                 'courier'             => $request->courier,
                 
                 'status'              => 'APPROVED',
@@ -592,7 +592,7 @@ class SalesOrderController extends Controller
     {
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="Template_Import_SO_Jubelio.csv"',
+            'Content-Disposition' => 'attachment; filename="Template_Import_SO.csv"',
         ];
 
         $callback = function() {
@@ -699,7 +699,7 @@ class SalesOrderController extends Controller
                 'is_cod'              => $request->is_cod ? 1 : 0,
                 'tracking_number'     => $request->tracking_number,
                 'total_weight'        => $request->total_weight ?? 0,
-                'is_jubelio_shipment' => $request->is_jubelio_shipment ? 1 : 0,
+                'is_marketplace_shipment' => $request->is_marketplace_shipment ? 1 : 0,
                 'courier'             => $request->courier,
                 
                 'is_paid'             => $request->is_paid ? 1 : 0,

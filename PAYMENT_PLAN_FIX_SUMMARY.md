@@ -1,6 +1,6 @@
-# PAYMENT PLAN FIX SUMMARY
+﻿# PAYMENT PLAN FIX SUMMARY
 **Tanggal:** 4 Agustus 2026  
-**Berdasarkan:** Analisis Mendalam Modul Payment Plan + Feedback Jubelio Flow
+**Berdasarkan:** Analisis Mendalam Modul Payment Plan + Feedback [External Platform] Flow
 
 ---
 
@@ -9,11 +9,11 @@
 1. **`PaymentPlanService::postToJournal()` — orphan code, fatal bug**: Mengkredit **Piutang Usaha** (aset) untuk transaksi kas keluar, dan menulis ke kolom `purchase_orders` yang tidak ada di skema. Tidak pernah dipanggil, tapi berbahaya jika suatu saat aktif.
 2. **`postJournal()` (controller) — akun debit bebas untuk PEMBAYARAN HUTANG**: Staff bisa pilih akun bebas via `setCoa()`, sehingga saat posting hutang, akun yang ter-debit bisa jadi salah (bukan Hutang Usaha).
 3. **`postJournal()` — tidak update `purchase_bills.payment_status`**: Setelah pelunasan hutang diposting, status BIL tetap `UNPAID` selamanya. Laporan aging hutang tidak sinkron.
-4. **`store()` — membuat PO sintetis untuk Uang Muka**: `PO-{no_transaksi}` bukan PO asli Jubelio. Saat barang diterima di PO asli, sistem gagal mencocokkan uang muka → uang muka "nyangkut", hutang tercatat penuh.
+4. **`store()` — membuat PO sintetis untuk Uang Muka**: `PO-{no_transaksi}` bukan PO asli [External Platform]. Saat barang diterima di PO asli, sistem gagal mencocokkan uang muka → uang muka "nyangkut", hutang tercatat penuh.
 5. **`receivePartialOrder()` — matching uang muka hanya by synthetic PO**: Tidak ada fallback ke PO asli.
 6. **Tidak ada validasi `ref_bill_number` untuk PEMBAYARAN HUTANG**: Bisa POSTED tanpa referensi bill.
 7. **Tidak ada kolom referensi** antara `transaksi_payment_plan` dan `purchase_bills` / `purchase_orders`.
-8. **Form tidak terstruktur seperti Jubelio**: Tidak ada cascade dropdown Vendor → Bill/PO.
+8. **Form tidak terstruktur seperti [External Platform]**: Tidak ada cascade dropdown Vendor → Bill/PO.
 
 ---
 
@@ -22,7 +22,7 @@
 ### Fix #1: Tambah kolom referensi (Migration)
 **File:** `database/migrations/2026_08_04_000002_add_payment_plan_reference_columns.php`  
 - `ref_bill_number` — untuk kategori PEMBAYARAN HUTANG, link ke `purchase_bills.bill_number`
-- `ref_po_number` — untuk kategori UANG MUKA, link ke `purchase_orders.po_number` (PO asli Jubelio)
+- `ref_po_number` — untuk kategori UANG MUKA, link ke `purchase_orders.po_number` (PO asli [External Platform])
 
 ### Fix #2: Update Model
 **File:** `app/Models/PaymentPlan.php`  
@@ -55,7 +55,7 @@
 **File:** `app/Http/Controllers/PaymentPlanController.php` (dalam `postJournal()`)  
 - `PEMBAYARAN HUTANG` tanpa `ref_bill_number` → skip dengan pesan error
 
-### Fix #8: Cascading Dropdown seperti Jubelio
+### Fix #8: Cascading Dropdown seperti [External Platform]
 **Files:** 
 - `app/Http/Controllers/PaymentPlanController.php` — tambah `apiBillsByVendor()` dan `apiPOsByVendor()`
 - `resources/views/payment_plan/create.blade.php` — redesign form dengan cascade:
@@ -84,7 +84,7 @@
 1. `php artisan migrate` — jalankan migration untuk tambah kolom referensi
 2. **Backfill data lama**: untuk Payment Plan lama yang sudah ada, isi `ref_bill_number` dan `ref_po_number` secara manual atau via script update
 3. Verifikasi: pastikan semua `PEMBAYARAN HUTANG` yang sudah POSTED memiliki `ref_bill_number`
-4. Verifikasi: pastikan semua Uang Muka memiliki `ref_po_number` yang menunjuk ke PO asli Jubelio
+4. Verifikasi: pastikan semua Uang Muka memiliki `ref_po_number` yang menunjuk ke PO asli [External Platform]
 5. Test: buat Payment Plan PEMBAYARAN HUTANG baru, pilih vendor → pilih bill → posting → cek apakah `purchase_bills.payment_status` berubah ke `PAID`
 6. Test: buat Payment Plan UANG MUKA, pilih vendor → pilih PO → cek apakah PO yang dipakai adalah PO asli (bukan sintetis)
 

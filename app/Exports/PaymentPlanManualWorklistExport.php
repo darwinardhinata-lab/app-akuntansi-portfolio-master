@@ -28,7 +28,7 @@ class PaymentPlanManualWorklistExport implements FromCollection, WithHeadings, W
             'Nama (PJ)', 'Divisi', 'Pemasok/Toko', 'Nama Toko / Link', 'Keterangan',
             'No VA/Rekening/Kode Bayar', 'Detil Akun (COA)', 'Qty', 'Satuan',
             'Pengajuan (Rp)', 'Aktual (Rp)', 'Selisih (Rp)', 'Total (Rp)',
-            'No. Bill/PO Referensi', 'Sudah Diinput ke Jubelio? (Y/N)',
+            'No. Bill/PO Referensi', 'Sudah Diinput Manual? (Y/N)',
         ];
     }
 

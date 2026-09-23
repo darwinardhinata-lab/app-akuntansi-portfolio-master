@@ -11,7 +11,7 @@ use App\Support\NumberParser;
 class FastImportJurnal extends Command
 {
     protected $signature = 'jurnal:fast {file}';
-    protected $description = 'Import Jurnal massal dari Jubelio via Terminal (Ultra Fast)';
+    protected $description = 'Import Jurnal massal dari file CSV via Terminal (Ultra Fast)';
 
     public function handle()
     {
@@ -164,7 +164,7 @@ class FastImportJurnal extends Command
                     $tanggal = date('Y-m-d', strtotime(str_replace('/', '-', $tanggal)));
                 }
 
-                // --- PARSER KODE AKUN JUBELIO ---
+                // --- PARSER KODE AKUN (FORMAT CSV IMPORT) ---
                 $explodeAkun = explode(' - ', $rawAkun);
                 $kodeAkunKotor = trim($explodeAkun[0]);
                 $kodeAkun = str_replace('-', '', $kodeAkunKotor);

@@ -12,14 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('journal_details', function (Blueprint $table) {
-            // Menambahkan kolom helper_code tepat setelah account_code
-            $table->string('helper_code', 20)->nullable()->after('account_code');
+            // Menambahkan kolom helper_code jika belum ada
+            if (!Schema::hasColumn('journal_details', 'helper_code')) {
+                $table->string('helper_code', 50)->nullable();
+            }
 
-            // Membuat relasi Foreign Key ke tabel helper_codes
-            $table->foreign('helper_code')
-                ->references('helper_code')->on('helper_codes')
-                ->onUpdate('cascade')
-                ->onDelete('set null');
+            // Membuat relasi Foreign Key ke tabel helper_codes (hanya jika belum ada)
+            try {
+                $table->foreign('helper_code')
+                    ->references('helper_code')->on('helper_codes')
+                    ->onUpdate('cascade')
+                    ->onDelete('set null');
+            } catch (\Exception $e) {
+                // Foreign key might already exist, skip
+            }
         });
     }
 

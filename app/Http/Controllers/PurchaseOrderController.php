@@ -235,7 +235,7 @@ class PurchaseOrderController extends Controller
 
                 if (empty($poNumber) || strtolower($poNumber) == 'purchase order no.') continue;
 
-                // Parser Tanggal (Khusus Jubelio '25 Mei 2026' -> 2026-05-25)
+                // Parser Tanggal (format lokal '25 Mei 2026' -> 2026-05-25)
                 $time = strtotime(str_replace(['Mei', 'Okt', 'Ags', 'Des'], ['May', 'Oct', 'Aug', 'Dec'], $tglRaw));
                 $tanggal = $time ? date('Y-m-d', $time) : date('Y-m-d');
 
@@ -483,7 +483,7 @@ class PurchaseOrderController extends Controller
     {
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="Template_Import_PO_Jubelio.csv"',
+            'Content-Disposition' => 'attachment; filename="Template_Import_PO.csv"',
         ];
 
         $callback = function() {

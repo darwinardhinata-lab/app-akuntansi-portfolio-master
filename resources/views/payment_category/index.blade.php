@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Master Kategori Payment' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.bc_master_payment_category') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark">Master Kategori Payment Plan</h3>
-            <p class="text-muted small mb-0">Kelola kategori payment plan yang dapat ditambah, diedit, atau dihapus.</p>
+            <h3 class="fw-bold mb-1 text-dark">{{ __('erp.payment_plan_category_master') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.manage_payment_category_hint') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <button type="button" class="btn btn-primary fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#modalCreate">
@@ -20,15 +20,15 @@
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <strong><i class="fas fa-check-circle"></i> Berhasil!</strong> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <strong><i class="fas fa-check-circle"></i> {{ __('erp.success_excl') }}</strong> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-            <strong><i class="fas fa-exclamation-triangle"></i> Terjadi Kesalahan!</strong> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <strong><i class="fas fa-exclamation-triangle"></i> {{ __('erp.error_occurred_excl') }}</strong> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
@@ -38,12 +38,12 @@
                 <table class="table table-bordered table-striped table-hover align-middle mb-0 text-nowrap" style="font-size: 13.5px;">
                     <thead class="bg-primary text-white text-center align-middle sticky-top">
                         <tr>
-                            <th>#</th>
-                            <th>Nama Kategori</th>
-                            <th>Slug</th>
-                            <th>Deskripsi</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
+                            <th>{{ __('erp.hash_symbol') }}</th>
+                            <th>{{ __('erp.category_name') }}</th>
+                            <th>{{ __('erp.slug_label') }}</th>
+                            <th>{{ __('erp.description_label') }}</th>
+                            <th>{{ __('erp.status') }}</th>
+                            <th>{{ __('erp.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -60,13 +60,13 @@
                                 </td>
                                 <td class="text-center py-2">
                                     <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-outline-warning" title="Edit" onclick="editCategory('{{ $category->id }}', '{{ $category->name }}', '{{ $category->slug }}', '{{ $category->description }}', {{ $category->is_active ? 'true' : 'false' }})" data-bs-toggle="modal" data-bs-target="#modalEdit">
+                                        <button type="button" class="btn btn-sm btn-outline-warning" title="{{ __('erp.edit_btn') }}" onclick="editCategory('{{ $category->id }}', '{{ $category->name }}', '{{ $category->slug }}', '{{ $category->description }}', {{ $category->is_active ? 'true' : 'false' }})" data-bs-toggle="modal" data-bs-target="#modalEdit">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         <form action="{{ route('payment-category.destroy', $category->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus kategori ini? Data yang sudah menggunakan kategori ini tidak akan terhapus.')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('erp.delete_btn') }}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -94,30 +94,30 @@
         <form action="{{ route('payment-category.store') }}" method="POST" class="modal-content border-0 shadow-lg">
             @csrf
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold">Tambah Kategori Payment Plan</h5>
+                <h5 class="modal-title fw-bold">{{ __('erp.add_payment_plan_category') }}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body bg-light p-4">
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Nama Kategori <span class="text-danger">*</span></label>
-                    <input type="text" name="name" class="form-control" placeholder="PEMBELIAN PERSEDIAAN (PEMBAYARAN HUTANG)" required>
+                    <label class="form-label fw-bold">{{ __('erp.category_name') }} <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control" placeholder="{{ __('erp.eg_payment_cat_name') }}" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Slug <span class="text-danger">*</span></label>
+                    <label class="form-label fw-bold">{{ __('erp.slug_label') }} <span class="text-danger">*</span></label>
                     <input type="text" name="slug" class="form-control" placeholder="hutang" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Deskripsi</label>
-                    <textarea name="description" class="form-control" rows="2" placeholder="Keterangan kategori..."></textarea>
+                    <label class="form-label fw-bold">{{ __('erp.description_label') }}</label>
+                    <textarea name="description" class="form-control" rows="2" placeholder="{{ __('erp.category_description_ph') }}"></textarea>
                 </div>
                 <div class="form-check">
                     <input type="checkbox" name="is_active" class="form-check-input" id="is_active_create" checked>
-                    <label class="form-check-label" for="is_active_create">Aktif</label>
+                    <label class="form-check-label" for="is_active_create">{{ __('erp.active_label') }}</label>
                 </div>
             </div>
             <div class="modal-footer bg-white">
-                <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">Simpan</button>
+                <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
+                <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">{{ __('erp.save_btn') }}</button>
             </div>
         </form>
     </div>
@@ -130,30 +130,30 @@
             @csrf
             @method('PUT')
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold">Edit Kategori Payment Plan</h5>
+                <h5 class="modal-title fw-bold">{{ __('erp.edit_payment_plan_category') }}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body bg-light p-4">
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Nama Kategori <span class="text-danger">*</span></label>
+                    <label class="form-label fw-bold">{{ __('erp.category_name') }} <span class="text-danger">*</span></label>
                     <input type="text" name="name" id="edit_name" class="form-control" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Slug <span class="text-danger">*</span></label>
+                    <label class="form-label fw-bold">{{ __('erp.slug_label') }} <span class="text-danger">*</span></label>
                     <input type="text" name="slug" id="edit_slug" class="form-control" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Deskripsi</label>
+                    <label class="form-label fw-bold">{{ __('erp.description_label') }}</label>
                     <textarea name="description" id="edit_description" class="form-control" rows="2"></textarea>
                 </div>
                 <div class="form-check">
                     <input type="checkbox" name="is_active" class="form-check-input" id="edit_is_active">
-                    <label class="form-check-label" for="edit_is_active">Aktif</label>
+                    <label class="form-check-label" for="edit_is_active">{{ __('erp.active_label') }}</label>
                 </div>
             </div>
             <div class="modal-footer bg-white">
-                <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">Update</button>
+                <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
+                <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm">{{ __('erp.update_btn') }}</button>
             </div>
         </form>
     </div>

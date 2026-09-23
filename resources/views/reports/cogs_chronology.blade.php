@@ -1,21 +1,21 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Master Data' => '#', 'Kronologi HPP' => null]" />
+    <x-breadcrumb :links="[__('erp.master_data') => '#', __('erp.bc_cogs_chronology') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-4">
-    <h4 class="fw-bold mb-4">Kronologi HPP & Kartu Stok</h4>
+    <h4 class="fw-bold mb-4">{{ __('erp.cogs_chronology_stock_card') }}</h4>
     
     <form method="GET" class="mb-4 d-flex gap-2 w-50">
         <select name="product_id" class="form-select" required>
-            <option value="">-- Pilih Barang --</option>
+            <option value="">{{ __('erp.select_item_ph') }}</option>
             @foreach($products as $p)
                 <option value="{{ $p->id }}" {{ request('product_id') == $p->id ? 'selected' : '' }}>{{ $p->sku }} - {{ $p->name }}</option>
             @endforeach
         </select>
-        <button type="submit" class="btn btn-primary fw-bold">Tampilkan</button>
+        <button type="submit" class="btn btn-primary fw-bold">{{ __('erp.show_label') }}</button>
     </form>
 
     @if($product)
@@ -27,12 +27,12 @@
             <table class="table table-hover table-bordered mb-0 text-nowrap" style="font-size: 0.85rem;">
                 <thead class="table-dark">
                     <tr>
-                        <th>Tanggal</th>
-                        <th>No. Dokumen</th>
-                        <th>Keterangan</th>
-                        <th class="text-center text-success">Masuk (In)</th>
-                        <th class="text-center text-danger">Keluar (Out)</th>
-                        <th class="text-center text-primary">Saldo (Qty)</th>
+                        <th>{{ __('erp.date') }}</th>
+                        <th>{{ __('erp.document_no') }}</th>
+                        <th>{{ __('erp.description') }}</th>
+                        <th class="text-center text-success">{{ __('erp.in_label') }}</th>
+                        <th class="text-center text-danger">{{ __('erp.out_label') }}</th>
+                        <th class="text-center text-primary">{{ __('erp.balance_qty') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,7 +48,7 @@
                             <td class="text-center fw-bold text-primary">{{ $saldoQty }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="text-center">Belum ada mutasi untuk barang ini.</td></tr>
+                        <tr><td colspan="6" class="text-center">{{ __('erp.no_movement_for_item') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

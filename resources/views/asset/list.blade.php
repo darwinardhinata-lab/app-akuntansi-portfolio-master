@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Daftar Aset' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.bc_asset_list') => null]" />
 @endsection
 
 @section('content')
@@ -16,7 +16,7 @@
             <form action="{{ route('aset.generate_depreciation') }}" method="POST" onsubmit="return confirm('Proses Jurnal Penyusutan untuk bulan ini? Pastikan Anda belum memprosesnya agar tidak terjadi jurnal ganda.')">
                 @csrf
                 <button type="submit" class="btn btn-warning btn-sm fw-bold shadow-sm text-dark">
-                    <i class="fa-solid fa-calculator me-1"></i> Proses Jurnal Penyusutan Bulan Ini
+                    <i class="fa-solid fa-calculator me-1"></i> {{ __('erp.process_journal_btn') }}
                 </button>
             </form>
 
@@ -29,7 +29,7 @@
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
             <i class="fa-solid fa-circle-check me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
@@ -44,15 +44,15 @@
                 <table class="table table-hover table-bordered mb-0" style="font-size: 0.85rem;">
                     <thead class="table-light text-center align-middle">
                         <tr>
-                            <th width="3%">No</th>
-                            <th width="8%">Tgl Beli</th>
-                            <th width="12%">Kode Aset</th>
-                            <th width="18%">Nama Aset</th>
-                            <th width="12%">Harga Perolehan</th>
-                            <th width="7%">Umur (Bln)</th>
-                            <th width="12%">Penyusutan / Bln</th>
-                            <th width="13%">Akumulasi Depresiasi</th>
-                            <th width="15%">Nilai Saldo Akhir</th>
+                            <th width="3%">{{ __('erp.no_abbr') }}</th>
+                            <th width="8%">{{ __('erp.purchase_date_short') }}</th>
+                            <th width="12%">{{ __('erp.asset_code') }}</th>
+                            <th width="18%">{{ __('erp.asset_name') }}</th>
+                            <th width="12%">{{ __('erp.purchase_price') }}</th>
+                            <th width="7%">{{ __('erp.useful_life_months') }}</th>
+                            <th width="12%">{{ __('erp.depreciation_per_month_v2') }}</th>
+                            <th width="13%">{{ __('erp.accumulated_depreciation_v2') }}</th>
+                            <th width="15%">{{ __('erp.ending_book_value') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -78,14 +78,14 @@
                             <tr>
                                 <td colspan="9" class="text-center py-5 text-muted">
                                     <i class="fa-solid fa-box-open mb-3" style="font-size: 2rem;"></i><br>
-                                    Belum ada data penyusutan aset.
+                                    {{ __('erp.no_depreciation_data') }}
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                     <tfoot class="table-light fw-bold align-middle">
                         <tr>
-                            <td colspan="4" class="text-end">TOTAL KESELURUHAN:</td>
+                            <td colspan="4" class="text-end">{{ __('erp.total_overall_colon_caps') }}</td>
                             <td class="text-end">Rp {{ number_format($assets->sum('purchase_price'), 2, ',', '.') }}</td>
                             <td></td>
                             <td class="text-end text-danger">Rp {{ number_format($assets->sum('depreciation_per_month'), 2, ',', '.') }}</td>

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Akuntansi' => '#', 'Aset Tetap' => null]" />
+    <x-breadcrumb :links="[__('erp.accounting') => '#', __('erp.fixed_asset') => null]" />
 @endsection
 
 @section('content')
@@ -9,8 +9,8 @@
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-    <h3 class="fw-bold mb-1 text-dark">Aset Management</h3>
-    <p class="text-muted small mb-0">Kelola aset tetap, umur ekonomis, dan pantau penyusutan otomatis. Buat jurnal dengan kode akun 12000 (Aset Tetap) untuk menambahkan aset secara otomatis.</p>
+    <h3 class="fw-bold mb-1 text-dark">{{ __('erp.bc_asset_management') }}</h3>
+    <p class="text-muted small mb-0">{{ __('erp.asset_management_desc') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <a href="{{ route('aset.export', [
@@ -18,16 +18,16 @@
                 'end_date' => request('end_date'),
                 'search' => request('search')
             ]) }}" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
-                <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                <i class="fa-solid fa-file-excel me-1"></i> {{ __('erp.export_excel_btn') }}
             </a>
             <button type="button" class="btn btn-info text-white fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importModal">
-                <i class="fa-solid fa-file-import me-1"></i> Import CSV
+                <i class="fa-solid fa-file-import me-1"></i> {{ __('erp.import_csv_btn') }}
             </button>
             <a href="{{ route('aset.template') }}" class="btn btn-outline-primary fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
                 <i class="fa-solid fa-download me-1"></i> Template
             </a>
             <a href="{{ route('aset.create') }}" class="btn btn-primary fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
-                <i class="fa-solid fa-plus me-1"></i> Input Manual
+                <i class="fa-solid fa-plus me-1"></i> {{ __('erp.input_manual_btn') }}
             </a>
         </div>
     </div>
@@ -39,18 +39,18 @@
                 <form action="{{ route('aset.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title fw-bold" id="importModalLabel">Import Aset Tetap</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5 class="modal-title fw-bold" id="importModalLabel">{{ __('erp.import_fixed_asset') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('erp.close_btn') }}"></button>
                     </div>
                     <div class="modal-body">
                         <div class="alert alert-info py-3 small mb-4" style="background-color: #e0f2fe; color: #0369a1; border-color: #bae6fd; border-radius: 8px;">
                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="fw-bold mb-0"><i class="fa-solid fa-circle-info"></i> Format CSV/Excel (11 Kolom):</h6>
+                                <h6 class="fw-bold mb-0"><i class="fa-solid fa-circle-info"></i> {{ __('erp.csv_excel_format_11col') }}</h6>
                                 <a href="{{ route('aset.template') }}" class="btn btn-sm btn-light border-primary text-primary fw-bold shadow-sm" style="font-size: 0.75rem;">
-                                    <i class="fa-solid fa-download me-1"></i> Download Template
+                                    <i class="fa-solid fa-download me-1"></i> {{ __('erp.download_template_btn') }}
                                 </a>
                             </div>
-                            <strong>Urutan Kolom (wajib dengan header):</strong><br>
+                            <strong>{{ __('erp.column_order_header_required') }}</strong><br>
                             <code>No;Kode Aset;Nama Aset;Kategori;Qty;Tgl. Pemakaian;Nilai Perolehan;Akumulasi Penyusutan;Nilai Buku;Nilai Sisa;Status</code><br>
                             <div class="mt-2">
                                 Kolom 1: No (opsional)<br>
@@ -70,14 +70,14 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="file_excel" class="form-label fw-bold">Pilih File (CSV / Excel)</label>
+                            <label for="file_excel" class="form-label fw-bold">{{ __('erp.choose_file_csv_excel') }}</label>
                             <input type="file" class="form-control" name="file_excel" id="file_excel" accept=".csv, .xls, .xlsx" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
                         <button type="submit" class="btn btn-primary fw-bold">
-                            <i class="fa-solid fa-upload me-1"></i> Proses Import
+                            <i class="fa-solid fa-upload me-1"></i> {{ __('erp.process_import_btn') }}
                         </button>
                     </div>
                 </form>
@@ -92,38 +92,38 @@
             @foreach($errors->all() as $error)
                 {{ $error }}<br>
             @endforeach
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show shadow-sm fw-bold" role="alert">
             <i class="fa-solid fa-triangle-exclamation me-2"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm fw-bold" role="alert">
             <i class="fa-solid fa-circle-check me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button>
         </div>
     @endif
 
     {{-- Filter --}}
     <div class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
-        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> Filter Pencarian</div>
+        <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.search_filter') }}</div>
         <form action="{{ route('aset.index') }}" method="GET" id="filterForm" class="row g-2 align-items-end">
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Mulai Tgl</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.start_date_short') }}</label>
                 <input type="date" name="start_date" class="form-control form-control-sm" value="{{ request('start_date') }}">
             </div>
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Sampai Tgl</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.end_date_short') }}</label>
                 <input type="date" name="end_date" class="form-control form-control-sm" value="{{ request('end_date') }}">
             </div>
             <div class="col-12 col-sm-6 col-md-2">
-                <label class="form-label small fw-bold text-muted mb-1">Baris</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.row_label') }}</label>
                 <select name="per_page" class="form-select form-select-sm">
                     <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
                     <option value="50" {{ request('per_page', 50) == 50 ? 'selected' : '' }}>50</option>
@@ -131,15 +131,15 @@
                 </select>
             </div>
             <div class="col-12 col-sm-12 col-md-4">
-                <label class="form-label small fw-bold text-muted mb-1">Pencarian Kode / Nama Aset</label>
+                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.search_asset_code_name') }}</label>
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari Kode Aset / Nama Aset..." value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="{{ __('erp.search_asset') }}" value="{{ request('search') }}">
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> Cari</button>
-                <a href="{{ route('aset.index') }}" class="btn btn-sm btn-danger fw-bold" title="Reset Filter"><i class="fa-solid fa-sync"></i></a>
+                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
+                <a href="{{ route('aset.index') }}" class="btn btn-sm btn-danger fw-bold" title="{{ __('erp.reset_filter') }}"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
     </div>
@@ -150,18 +150,18 @@
             <table class="table align-middle mb-0" style="font-size: 0.85rem;">
                 <thead class="table-light text-uppercase text-muted" style="font-size: 0.75rem;">
                     <tr>
-                        <th width="3%">No</th>
-                        <th width="8%">Tgl Beli</th>
-                        <th width="12%">Kode Aset</th>
-                        <th width="18%">Nama Aset</th>
-                        <th width="12%">Harga Perolehan</th>
-                        <th width="10%" class="text-end">Nilai Sisa</th>
-                        <th width="10%" class="text-center">Umur (Bln)</th>
-                        <th width="12%">Penyusutan / Bln</th>
-                        <th width="13%">Akumulasi Depresiasi</th>
-                        <th width="15%">Nilai Saldo Akhir</th>
-                        <th width="10%" class="text-center">Status</th>
-                        <th width="10%" class="text-center">Aksi</th>
+                        <th width="3%">{{ __('erp.no_abbr') }}</th>
+                        <th width="8%">{{ __('erp.purchase_date_short') }}</th>
+                        <th width="12%">{{ __('erp.asset_code') }}</th>
+                        <th width="18%">{{ __('erp.asset_name') }}</th>
+                        <th width="12%">{{ __('erp.purchase_price') }}</th>
+                        <th width="10%" class="text-end">{{ __('erp.residual_value') }}</th>
+                        <th width="10%" class="text-center">{{ __('erp.useful_life_months') }}</th>
+                        <th width="12%">{{ __('erp.depreciation_per_month_v2') }}</th>
+                        <th width="13%">{{ __('erp.accumulated_depreciation_v2') }}</th>
+                        <th width="15%">{{ __('erp.ending_book_value') }}</th>
+                        <th width="10%" class="text-center">{{ __('erp.status') }}</th>
+                        <th width="10%" class="text-center">{{ __('erp.action') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -203,26 +203,26 @@
                             <td class="text-center">
                                 <button type="button" onclick="toggleAssetStatus({{ $asset->id }}, this)"
                                     class="btn btn-sm shadow-sm {{ $asset->is_active ? 'btn-success' : 'btn-secondary' }}"
-                                    title="Klik untuk toggle status">
+                                    title="{{ __('erp.toggle_status') }}">
                                     @if($asset->is_active)
-                                        <i class="fa-solid fa-toggle-on me-1"></i> Aktif
+                                        <i class="fa-solid fa-toggle-on me-1"></i> {{ __('erp.status_active') }}
                                     @else
-                                        <i class="fa-solid fa-toggle-off me-1"></i> Tidak Aktif
+                                        <i class="fa-solid fa-toggle-off me-1"></i> {{ __('erp.status_inactive') }}
                                     @endif
                                 </button>
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                    <button type="button" onclick="showEntityLog('{{ $asset->asset_code }}')" class="btn btn-sm btn-outline-info shadow-sm" title="Jejak Log Aktivitas">
+                                    <button type="button" onclick="showEntityLog('{{ $asset->asset_code }}')" class="btn btn-sm btn-outline-info shadow-sm" title="{{ __('erp.activity_log') }}">
                                         <i class="fa-solid fa-clock-rotate-left"></i>
                                     </button>
-                                    <a href="{{ route('aset.create') }}" class="btn btn-sm btn-outline-primary shadow-sm" title="Duplikat/Duplicate">
+                                    <a href="{{ route('aset.create') }}" class="btn btn-sm btn-outline-primary shadow-sm" title="{{ __('erp.duplicate') }}">
                                         <i class="fa-solid fa-copy"></i>
                                     </a>
                                     <form id="delete-form-{{ $asset->id }}" action="{{ route('aset.destroy', $asset->id) }}" method="POST" style="display: none;">
                                         @csrf @method('DELETE')
                                     </form>
-                                    <button type="button" onclick="if(confirm('Hapus aset ini? Aset yang sudah terhubung ke jurnal tidak akan memengaruhi jurnal.')) document.getElementById('delete-form-{{ $asset->id }}').submit();" class="btn btn-sm btn-outline-danger shadow-sm" title="Hapus Aset">
+                                    <button type="button" onclick="if(confirm('Hapus aset ini? Aset yang sudah terhubung ke jurnal tidak akan memengaruhi jurnal.')) document.getElementById('delete-form-{{ $asset->id }}').submit();" class="btn btn-sm btn-outline-danger shadow-sm" title="{{ __('erp.delete_asset') }}">
                                         <i class="fa-solid fa-trash-can"></i>
                                     </button>
                                 </div>
@@ -232,7 +232,7 @@
                         <tr>
                             <td colspan="12" class="text-center py-5 text-muted">
                                 <i class="fa-solid fa-box-open mb-3" style="font-size: 2rem;"></i><br>
-                                Belum ada data aset terdeteksi. Pastikan Anda memiliki Jurnal Pembelian Aset Tetap di Jurnal Umum, atau tambahkan aset secara manual.
+                                {{ __('erp.no_asset_data') }}
                             </td>
                         </tr>
                     @endforelse
@@ -249,7 +249,7 @@
     {{-- Quick Link to Depreciation List --}}
     <div class="mt-4 text-end">
         <a href="{{ route('aset.list') }}" class="btn btn-outline-warning btn-sm fw-bold shadow-sm text-dark">
-            <i class="fa-solid fa-table-list me-1"></i> Lihat List Depresiasi (Matriks Nilai Buku)
+            <i class="fa-solid fa-table-list me-1"></i> {{ __('erp.view_depreciation_list') }}
         </a>
     </div>
 </div>
@@ -258,7 +258,7 @@
 @push('scripts')
 <script>
 function toggleAssetStatus(assetId, btnElement) {
-    if (!confirm('Ubah status aset ini?')) return;
+    if (!confirm(__('erp.confirm_toggle_asset'))) return;
 
     // Build URL dinamis menggunakan base URL aplikasi, hindari route() helper dengan parameter kosong
     const url = '{{ url("aset/toggle-status") }}/' + assetId;
@@ -287,15 +287,15 @@ function toggleAssetStatus(assetId, btnElement) {
             // Update tampilan tombol sesuai status baru
             if (data.is_active) {
                 btnElement.className = 'btn btn-sm shadow-sm btn-success';
-                btnElement.innerHTML = '<i class="fa-solid fa-toggle-on me-1"></i> Aktif';
+                btnElement.innerHTML = '<i class="fa-solid fa-toggle-on me-1"></i> {{ __('erp.status_active') }}';
             } else {
                 btnElement.className = 'btn btn-sm shadow-sm btn-secondary';
-                btnElement.innerHTML = '<i class="fa-solid fa-toggle-off me-1"></i> Tidak Aktif';
+                btnElement.innerHTML = '<i class="fa-solid fa-toggle-off me-1"></i> {{ __('erp.status_inactive') }}';
             }
             // Tampilkan notifikasi sukses
             const alertHtml = '<div class="alert alert-success alert-dismissible fade show shadow-sm fw-bold" role="alert">' +
                 '<i class="fa-solid fa-circle-check me-2"></i> ' + data.message +
-                '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ __('erp.close_btn') }}"></button></div>';
             document.querySelector('.container-fluid.px-0').insertAdjacentHTML('afterbegin', alertHtml);
         } else {
             btnElement.innerHTML = originalContent;
@@ -304,7 +304,7 @@ function toggleAssetStatus(assetId, btnElement) {
     .catch(error => {
         console.error('Toggle status error:', error);
         btnElement.innerHTML = originalContent;
-        alert('Gagal mengubah status aset. Silakan coba lagi. (' + error.message + ')');
+        alert(__('erp.toggle_status_error') + ' (' + error.message + ')');
     })
     .finally(() => {
         btnElement.disabled = false;

@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('top_bar_left')
-    <x-breadcrumb :links="['Warehouse' => '#', 'Proses Pesanan' => null]" />
+    <x-breadcrumb :links="[__('erp.bc_warehouse') => '#', __('erp.bc_process_orders') => null]" />
 @endsection
 
 @section('content')
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h3 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-boxes-packing text-primary me-2"></i>Dashboard Gudang: Proses Pesanan</h3>
-            <p class="text-muted small mb-0">Daftar pesanan aktif yang menunggu proses (Picking, Packing, Shipping).</p>
+            <h3 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-boxes-packing text-primary me-2"></i>{{ __('erp.warehouse_dashboard_process_orders') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.active_orders_awaiting_process_hint') }}</p>
         </div>
         <div>
             <span class="badge bg-warning text-dark px-3 py-2 fs-6 shadow-sm"><i class="fa-solid fa-stopwatch me-1"></i> {{ $orders->total() }} Pesanan</span>
@@ -19,19 +19,19 @@
     {{-- SUB-SUB-MENU / NAV PILLS --}}
     <ul class="nav nav-pills mb-4 bg-white p-2 rounded border shadow-sm flex-nowrap overflow-auto" style="white-space: nowrap;">
         <li class="nav-item">
-            <a class="nav-link fw-bold px-4 {{ $tab == 'picking' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.process-orders', ['tab' => 'picking']) }}">Picking</a>
+            <a class="nav-link fw-bold px-4 {{ $tab == 'picking' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.process-orders', ['tab' => 'picking']) }}">{{ __('erp.picking_label') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-4 {{ $tab == 'packing' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.process-orders', ['tab' => 'packing']) }}">Packing</a>
+            <a class="nav-link fw-bold px-4 {{ $tab == 'packing' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.process-orders', ['tab' => 'packing']) }}">{{ __('erp.packing_label') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-4 {{ $tab == 'shipping' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.process-orders', ['tab' => 'shipping']) }}">Shipping</a>
+            <a class="nav-link fw-bold px-4 {{ $tab == 'shipping' ? 'active' : 'text-muted' }}" href="{{ route('warehouse.process-orders', ['tab' => 'shipping']) }}">{{ __('erp.shipping_label') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-4 {{ $tab == 'sudah_dikirim' ? 'active bg-success' : 'text-muted' }}" href="{{ route('warehouse.process-orders', ['tab' => 'sudah_dikirim']) }}">Sudah Dikirim</a>
+            <a class="nav-link fw-bold px-4 {{ $tab == 'sudah_dikirim' ? 'active bg-success' : 'text-muted' }}" href="{{ route('warehouse.process-orders', ['tab' => 'sudah_dikirim']) }}">{{ __('erp.already_shipped') }}</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link fw-bold px-4 {{ $tab == 'selesai' ? 'active bg-dark' : 'text-muted' }}" href="{{ route('warehouse.process-orders', ['tab' => 'selesai']) }}">Selesai</a>
+            <a class="nav-link fw-bold px-4 {{ $tab == 'selesai' ? 'active bg-dark' : 'text-muted' }}" href="{{ route('warehouse.process-orders', ['tab' => 'selesai']) }}">{{ __('erp.mfg_status_completed') }}</a>
         </li>
     </ul>
 
@@ -44,23 +44,23 @@
                         <span class="badge bg-light text-dark border mb-2"><i class="fa-solid fa-calendar-day me-1"></i> {{ \Carbon\Carbon::parse($o->transaction_date)->format('d M Y') }}</span>
                         <h5 class="fw-bold text-primary mb-1">{{ $o->so_number }}</h5>
                     </div>
-                    <span class="badge bg-warning text-dark"><i class="fa-solid fa-box"></i> APPROVED</span>
+                    <span class="badge bg-warning text-dark"><i class="fa-solid fa-box"></i> {{ __('erp.status_approved') }}</span>
                 </div>
                 <div class="card-body py-3">
                     <div class="mb-3">
-                        <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.7rem;">Penerima / Pelanggan</small>
+                        <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.7rem;">{{ __('erp.recipient_customer') }}</small>
                         <span class="fw-bold text-dark fs-6">{{ $o->receiver_name ?? $o->contact_name }}</span>
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-6">
                             <div class="p-2 bg-light rounded border">
-                                <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.65rem;">Kurir</small>
+                                <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.65rem;">{{ __('erp.courier_label') }}</small>
                                 <span class="fw-bold text-dark">{{ $o->courier ?? 'Bawaan Sistem' }}</span>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="p-2 bg-light rounded border">
-                                <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.65rem;">Total Item</small>
+                                <small class="text-muted fw-bold d-block text-uppercase" style="font-size: 0.65rem;">{{ __('erp.total_item') }}</small>
                                 <span class="fw-bold text-danger">{{ $o->details->sum('qty') }} Pcs</span>
                             </div>
                         </div>
@@ -87,9 +87,9 @@
                             <table class="table table-hover align-middle mb-0" style="font-size: 0.9rem;">
                                 <thead class="table-secondary text-uppercase text-muted" style="font-size: 0.75rem;">
                                     <tr>
-                                        <th class="ps-4 py-3" width="60%">SKU & Deskripsi Barang</th>
-                                        <th class="text-center py-3" width="20%">Qty Dipesan</th>
-                                        <th class="text-center pe-4 py-3" width="20%">Ceklis</th>
+                                        <th class="ps-4 py-3" width="60%">{{ __('erp.sku_item_description') }}</th>
+                                        <th class="text-center py-3" width="20%">{{ __('erp.qty_ordered') }}</th>
+                                        <th class="text-center pe-4 py-3" width="20%">{{ __('erp.checklist_label') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -112,12 +112,12 @@
                         </div>
                         <div class="p-4 bg-white border-top">
                             <div class="alert alert-info py-2 small mb-0">
-                                <i class="fa-solid fa-info-circle me-1"></i> Setelah barang selesai di-packing, instruksikan bagian Finance/Admin untuk memproses resi dan menerbitkan Faktur Penjualan di menu <b>Sales Orders</b>.
+                                <i class="fa-solid fa-info-circle me-1"></i> Setelah barang selesai di-packing, instruksikan bagian Finance/Admin untuk memproses resi dan menerbitkan Faktur Penjualan di menu <b>{{ __('erp.bc_sales_orders') }}</b>.
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer bg-white py-3">
-                        <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Tutup</button>
+                        <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">{{ __('erp.close') }}</button>
                     </div>
                 </div>
             </div>
@@ -126,8 +126,8 @@
         <div class="col-12">
             <div class="text-center py-5">
                 <i class="fa-solid fa-box-open fa-3x text-muted mb-3 d-block"></i>
-                <h5 class="fw-bold text-secondary">Gudang Kosong</h5>
-                <p class="text-muted">Tidak ada pesanan penjualan yang menunggu untuk diproses saat ini.</p>
+                <h5 class="fw-bold text-secondary">{{ __('erp.empty_warehouse') }}</h5>
+                <p class="text-muted">{{ __('erp.no_orders_awaiting_process') }}</p>
             </div>
         </div>
         @endforelse
