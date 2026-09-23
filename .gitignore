@@ -41,3 +41,6 @@ Thumbs.db
 # Original rules preserved
 *.log
 .qwen/
+
+# Local agent task prompts
+/ANTIGRAVITY_PROMPT_*.md
