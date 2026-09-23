@@ -2,9 +2,12 @@
 
 namespace App\Modules\CustomsReports\Services;
 
+use App\Models\Product;
 use App\Modules\Customs\Models\CustomsDocument;
 use App\Modules\CustomsReports\Imports\DokumenPabeanImport;
+use App\Modules\CustomsReports\Models\MutasiLine;
 use App\Modules\CustomsReports\Models\ReportPeriod;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -198,5 +201,128 @@ class ReportPeriodService
             'created' => $import->getSuccessCount(),
             'errors' => $import->getErrors(),
         ];
+    }
+
+    /**
+     * Auto-populate Mutasi Bahan Baku & Penolong from the read-only
+     * Manufacturing material ledger. Only cbr_mutasi_lines is written.
+     */
+    public function populateMutasiBahanBaku(ReportPeriod $period): void
+    {
+        $this->ensureDraftType($period, ReportPeriod::TYPE_MUTASI_BAHAN_BAKU);
+        $this->populateMutasiFromLedger($period, 'mfg_material_ledgers', 'item_id', function ($item): array {
+            return $this->resolveMaterialIdentity($item->item_type, (int) $item->item_id);
+        }, ['item_type']);
+    }
+
+    /**
+     * Auto-populate Mutasi Barang Jadi from the read-only inventory ledger.
+     * Only products referenced by a Manufacturing work order are included.
+     */
+    public function populateMutasiBarangJadi(ReportPeriod $period): void
+    {
+        $this->ensureDraftType($period, ReportPeriod::TYPE_MUTASI_BARANG_JADI);
+
+        $start = Carbon::create($period->periode_tahun, $period->periode_bulan, 1)->startOfMonth();
+        $end = $start->copy()->endOfMonth();
+        $startDate = $start->toDateString();
+        $endDate = $end->toDateString();
+        $productIds = DB::table('mfg_work_orders')->whereNotNull('product_id')->distinct()->pluck('product_id');
+        $products = Product::whereIn('id', $productIds)->get();
+
+        DB::transaction(function () use ($period, $products, $startDate, $endDate): void {
+            foreach ($products as $product) {
+                $query = DB::table('inventory_ledgers')->where('product_id', $product->id);
+                $hasMovement = (clone $query)->whereBetween('transaction_date', [$startDate, $endDate])->exists();
+                if (! $hasMovement) {
+                    continue;
+                }
+
+                $this->upsertMutasiLine(
+                    $period,
+                    $product->sku,
+                    $product->name,
+                    $product->unit,
+                    (clone $query)->where('transaction_date', '<', $startDate)->latest('transaction_date')->latest('id')->value('running_qty') ?? 0,
+                    (clone $query)->whereBetween('transaction_date', [$startDate, $endDate])->where('type', 'IN')->sum('qty'),
+                    (clone $query)->whereBetween('transaction_date', [$startDate, $endDate])->where('type', 'OUT')->sum('qty'),
+                    (clone $query)->whereBetween('transaction_date', [$startDate, $endDate])->where('type', 'ADJ')->sum('qty'),
+                    (clone $query)->where('transaction_date', '<=', $endDate)->latest('transaction_date')->latest('id')->value('running_qty') ?? 0,
+                    'Auto-populate dari inventory_ledgers'
+                );
+            }
+        });
+    }
+
+    /** @return array{grey_fabric: \Illuminate\Support\Collection, fabric: \Illuminate\Support\Collection, cutting: \Illuminate\Support\Collection, finishing: \Illuminate\Support\Collection} */
+    public function rejectAssistData(int $bulan, int $tahun): array
+    {
+        $start = Carbon::create($tahun, $bulan, 1)->startOfMonth();
+        $end = $start->copy()->endOfMonth();
+        $startDate = $start->toDateString();
+        $endDate = $end->toDateString();
+
+        return [
+            'grey_fabric' => DB::table('mfg_grey_fabric_receipts')->whereBetween('receipt_date', [$startDate, $endDate])->where('qty_rejected', '>', 0)->select('receipt_number', 'receipt_date', 'fabric_id', 'qty_rejected', 'remarks')->get(),
+            'fabric' => DB::table('mfg_fabric_receipts')->whereBetween('receipt_date', [$startDate, $endDate])->where('qty_rejected', '>', 0)->select('receipt_number', 'receipt_date', 'fabric_id', 'qty_rejected', 'remarks')->get(),
+            'cutting' => DB::table('mfg_cutting_checks')->whereBetween('check_date', [$startDate, $endDate])->where(fn ($query) => $query->where('pieces_rejected', '>', 0)->orWhere('fabric_wastage_kg', '>', 0))->select('check_date', 'pieces_rejected', 'fabric_wastage_kg', 'remarks')->get(),
+            'finishing' => DB::table('mfg_finishing_stages')->whereBetween('stage_date', [$startDate, $endDate])->where('pieces_rejected', '>', 0)->select('stage', 'stage_date', 'pieces_rejected', 'remarks')->get(),
+        ];
+    }
+
+    private function populateMutasiFromLedger(ReportPeriod $period, string $table, string $idColumn, callable $identity, array $groupColumns): void
+    {
+        $start = Carbon::create($period->periode_tahun, $period->periode_bulan, 1)->startOfMonth();
+        $end = $start->copy()->endOfMonth();
+        $startDate = $start->toDateString();
+        $endDate = $end->toDateString();
+        $items = DB::table($table)->select([...$groupColumns, $idColumn])->whereBetween('transaction_date', [$startDate, $endDate])->distinct()->get();
+
+        DB::transaction(function () use ($period, $table, $idColumn, $identity, $groupColumns, $items, $startDate, $endDate): void {
+            foreach ($items as $item) {
+                $query = DB::table($table)->where($idColumn, $item->{$idColumn});
+                foreach ($groupColumns as $column) {
+                    $query->where($column, $item->{$column});
+                }
+                [$code, $name, $unit] = $identity($item);
+                $saldoAwal = (clone $query)->where('transaction_date', '<', $startDate)->latest('transaction_date')->latest('id')->value('running_qty') ?? 0;
+                $saldoAkhir = (clone $query)->where('transaction_date', '<=', $endDate)->latest('transaction_date')->latest('id')->value('running_qty') ?? $saldoAwal;
+                $this->upsertMutasiLine($period, $code, $name, $unit, $saldoAwal,
+                    (clone $query)->whereBetween('transaction_date', [$startDate, $endDate])->where('type', 'IN')->sum('qty'),
+                    (clone $query)->whereBetween('transaction_date', [$startDate, $endDate])->where('type', 'OUT')->sum('qty'),
+                    (clone $query)->whereBetween('transaction_date', [$startDate, $endDate])->where('type', 'ADJ')->sum('qty'),
+                    $saldoAkhir, 'Auto-populate dari mfg_material_ledgers');
+            }
+        });
+    }
+
+    /** @return array{0: string, 1: string, 2: string} */
+    private function resolveMaterialIdentity(string $itemType, int $itemId): array
+    {
+        $item = DB::table($itemType === 'YARN' ? 'mfg_yarns' : 'mfg_fabrics')->find($itemId);
+        if (! $item) {
+            throw new \RuntimeException("Master material {$itemType} #{$itemId} tidak ditemukan.");
+        }
+
+        return $itemType === 'YARN'
+            ? [$item->yarn_code, trim($item->yarn_type . ' ' . ($item->color ?? '')), $item->unit]
+            : [$item->fabric_code, trim($item->fabric_type . ' ' . ($item->color ?? '')), $item->unit];
+    }
+
+    private function upsertMutasiLine(ReportPeriod $period, string $code, string $name, string $unit, mixed $opening, mixed $in, mixed $out, mixed $adjustment, mixed $closing, string $note): void
+    {
+        MutasiLine::updateOrCreate(['report_period_id' => $period->id, 'kode_barang' => $code], [
+            'nama_barang' => $name, 'satuan_barang' => $unit, 'jumlah_barang' => 0,
+            'saldo_awal' => $opening, 'jumlah_pemasukan_barang' => $in, 'jumlah_pengeluaran_barang' => $out,
+            'penyesuaian_adjustment' => $adjustment, 'saldo_akhir' => $closing,
+            'hasil_pencacahan' => 'Belum', 'jumlah_selisih' => 0, 'keterangan' => $note,
+        ]);
+    }
+
+    private function ensureDraftType(ReportPeriod $period, string $type): void
+    {
+        if ($period->report_type !== $type || ! $period->isDraft()) {
+            throw new \RuntimeException('Auto-populate hanya dapat dilakukan pada periode DRAFT dengan jenis laporan yang sesuai.');
+        }
     }
 }

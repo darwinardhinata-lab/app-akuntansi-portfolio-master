@@ -25,6 +25,11 @@
                     <i class="fa-solid fa-magic me-1"></i> Populate dari H2H
                 </button>
             @endif
+            @if(in_array($period->report_type, [\App\Modules\CustomsReports\Models\ReportPeriod::TYPE_MUTASI_BAHAN_BAKU, \App\Modules\CustomsReports\Models\ReportPeriod::TYPE_MUTASI_BARANG_JADI]))
+                <button type="button" class="btn btn-outline-info btn-sm" onclick="populateMutasi()">
+                    <i class="fa-solid fa-magic me-1"></i> Ambil Otomatis dari Data Produksi
+                </button>
+            @endif
 
             <label class="btn btn-outline-success btn-sm mb-0" id="importBtn">
                 <i class="fa-solid fa-file-arrow-up me-1"></i> Import Excel
@@ -59,6 +64,7 @@
 <form id="finalizeForm" action="{{ route('customs-reports.finalize', $period) }}" method="POST">@csrf</form>
 <form id="markUploadedForm" action="{{ route('customs-reports.mark-uploaded', $period) }}" method="POST">@csrf</form>
 <form id="populateForm" action="{{ route('customs-reports.populate-from-h2h', $period) }}" method="POST">@csrf</form>
+<form id="populateMutasiForm" action="{{ route('customs-reports.populate-mutasi', $period) }}" method="POST">@csrf</form>
 
 <script>
 document.getElementById('importFileInput').addEventListener('change', function(e) {
@@ -84,6 +90,11 @@ function markUploaded() {
 function openPopulateModal() {
     if (confirm('Import otomatis dari dokumen H2H (PIB/PEB dengan status SPPB/NPE)?')) {
         document.getElementById('populateForm').submit();
+    }
+}
+function populateMutasi() {
+    if (confirm('Ambil data mutasi otomatis dari ledger produksi? Data manual dengan kode barang yang sama akan diperbarui.')) {
+        document.getElementById('populateMutasiForm').submit();
     }
 }
 </script>

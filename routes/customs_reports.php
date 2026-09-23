@@ -38,5 +38,6 @@ if (config('customs.enabled')) {
         Route::post('/{period}/finalize', [ReportPeriodController::class, 'finalize'])->name('finalize');
         Route::post('/{period}/mark-uploaded', [ReportPeriodController::class, 'markUploaded'])->name('mark-uploaded');
         Route::post('/{period}/populate-from-h2h', [ReportPeriodController::class, 'populateFromH2H'])->name('populate-from-h2h');
+        Route::post('/{period}/populate-mutasi', [ReportPeriodController::class, 'populateMutasi'])->name('populate-mutasi');
     });
 }

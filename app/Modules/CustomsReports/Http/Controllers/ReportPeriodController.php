@@ -79,8 +79,11 @@ class ReportPeriodController extends Controller
     public function show(ReportPeriod $period)
     {
         $lines = $period->lines()->orderBy('id')->get();
+        $rejectAssistData = $period->report_type === ReportPeriod::TYPE_MUTASI_REJECT
+            ? $this->service->rejectAssistData($period->periode_bulan, $period->periode_tahun)
+            : [];
 
-        return view('customs-reports.show', compact('period', 'lines'));
+        return view('customs-reports.show', compact('period', 'lines', 'rejectAssistData'));
     }
 
     public function edit(ReportPeriod $period)
@@ -260,6 +263,28 @@ class ReportPeriodController extends Controller
             return back()->with('success', $message);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal populate dari H2H: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Auto-populate mutasi from read-only Manufacturing and Inventory ledgers.
+     */
+    public function populateMutasi(Request $request, ReportPeriod $period)
+    {
+        if (! $period->isDraft()) {
+            return back()->with('error', 'Hanya periode DRAFT yang dapat di-populate.');
+        }
+
+        try {
+            match ($period->report_type) {
+                ReportPeriod::TYPE_MUTASI_BAHAN_BAKU => $this->service->populateMutasiBahanBaku($period),
+                ReportPeriod::TYPE_MUTASI_BARANG_JADI => $this->service->populateMutasiBarangJadi($period),
+                default => throw new \RuntimeException('Auto-populate hanya tersedia untuk Mutasi Bahan Baku dan Mutasi Barang Jadi.'),
+            };
+
+            return back()->with('success', 'Data mutasi berhasil diambil otomatis dari data produksi.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal populate mutasi: ' . $e->getMessage());
         }
     }
 }

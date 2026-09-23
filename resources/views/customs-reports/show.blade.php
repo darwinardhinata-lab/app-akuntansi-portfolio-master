@@ -56,5 +56,20 @@
             @endif
         </div>
     </div>
+
+    @if($period->report_type === ReportPeriod::TYPE_MUTASI_REJECT)
+        <div class="card shadow-sm border-0 mt-3">
+            <div class="card-header bg-warning-subtle fw-bold">Data bantu — bukan otomatis mengisi laporan</div>
+            <div class="card-body">
+                <p class="text-muted small">Unit berbeda-beda per tahap. Gunakan data mentah ini sebagai referensi saat mengisi manual; data tidak dijumlahkan lintas tahap.</p>
+                @foreach(['grey_fabric' => 'Penerimaan Kain Grey', 'fabric' => 'Penerimaan Kain Jadi', 'cutting' => 'Pemeriksaan Cutting', 'finishing' => 'Tahap Finishing'] as $key => $title)
+                    <h6 class="mt-3">{{ $title }}</h6>
+                    <div class="table-responsive"><table class="table table-sm table-bordered mb-0"><thead><tr>@foreach(($rejectAssistData[$key]->first() ? array_keys((array) $rejectAssistData[$key]->first()) : []) as $column)<th>{{ str_replace('_', ' ', $column) }}</th>@endforeach</tr></thead><tbody>
+                    @forelse($rejectAssistData[$key] as $row)<tr>@foreach((array) $row as $value)<td>{{ $value }}</td>@endforeach</tr>@empty<tr><td class="text-muted">Tidak ada data reject/wastage.</td></tr>@endforelse
+                    </tbody></table></div>
+                @endforeach
+            </div>
+        </div>
+    @endif
 </div>
 @endsection
