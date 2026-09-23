@@ -19,6 +19,7 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_URL" value="http://localhost"/>
         <!-- CEISA_ENABLED=true HANYA di lingkungan test: route modul customs
              diregistrasi saat boot berdasarkan nilai env ini (lihat routes/customs.php),
              jadi feature test butuh route terdaftar. Perilaku runtime tiap test

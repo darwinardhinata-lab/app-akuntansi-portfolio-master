@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use Illuminate\Http\UploadedFile;
 
@@ -13,6 +14,11 @@ class JournalImportTest extends TestCase
     public function test_csv_import_creates_header_and_details()
     {
         $this->withoutMiddleware();
+
+        DB::table('accounts')->insert([
+            ['account_code' => '11100', 'account_name' => 'Kas', 'coa_type' => 'ASSET', 'normal_balance' => 'DEBET', 'report_pos' => 'NERACA', 'created_at' => now(), 'updated_at' => now()],
+            ['account_code' => '21100', 'account_name' => 'Hutang', 'coa_type' => 'LIABILITY', 'normal_balance' => 'KREDIT', 'report_pos' => 'NERACA', 'created_at' => now(), 'updated_at' => now()],
+        ]);
 
         // CSV header and two rows forming balanced journal (DEBET and KREDIT)
         $header = 'Tanggal,No Jurnal,No Bukti,Deskripsi,Col5,Col6,Nilai Debet,Nilai Kredit,Akun';
