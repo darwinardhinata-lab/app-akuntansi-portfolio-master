@@ -23,6 +23,10 @@ class SyncPODashboardToTempJob implements ShouldQueue
 
     public function handle()
     {
+        if (! config('platform.legacy_sync_enabled', true)) {
+            return;
+        }
+
         Log::info('SyncPODashboardToTempJob started.');
 
         try {

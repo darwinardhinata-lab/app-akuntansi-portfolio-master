@@ -290,3 +290,5 @@ Route::middleware(['auth'])->group(function () {
 // ==========================================
 require base_path('routes/customs.php');
 require base_path('routes/customs_reports.php');
+
+require base_path('routes/platform.php');

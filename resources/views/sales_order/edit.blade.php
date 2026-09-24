@@ -43,8 +43,12 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">Master Party <span class="text-muted fw-normal">(opsional)</span></label>
+                                <div class="small mb-1"><a href="{{ route('platform.company.edit') }}">Pilih perusahaan aktif</a> untuk daftar Party. Nama manual tetap tersedia.</div>
                                 <select name="party_id" id="party_id" class="form-select">
                                     <option value="">-- Gunakan nama customer manual --</option>
+                                    @if($so->party_id && ! $parties->contains('id', $so->party_id))
+                                        <option value="{{ $so->party_id }}" @selected((string) old('party_id', $so->party_id) === (string) $so->party_id)>Party tersimpan tidak tersedia — periksa perusahaan, status, dan peran</option>
+                                    @endif
                                     @foreach($parties as $party)
                                         <option value="{{ $party->id }}" data-legal-name="{{ $party->legal_name }}" {{ old('party_id', $so->party_id) == $party->id ? 'selected' : '' }}>{{ $party->code }} - {{ $party->legal_name }}</option>
                                     @endforeach

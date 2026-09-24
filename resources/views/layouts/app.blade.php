@@ -338,7 +338,7 @@
         @else
             <div class="icon"><i class="fa-solid fa-layer-group"></i></div>
         @endif
-        <div><div class="name">{{ $companyProfile->nama_perusahaan ?? 'ERP Accounting' }}</div><div class="sub">{{ __('erp.system_word') }}</div></div>
+        <div><div class="name">{{ $companyProfile->company_name ?? 'ERP Accounting' }}</div><div class="sub">{{ __('erp.system_word') }}</div></div>
     </a>
     <button class="btn-hamburger" onclick="window.history.back()"><i class="fa-solid fa-arrow-left"></i></button>
 </div>
@@ -351,10 +351,16 @@
         @else
             <div class="sidebar-brand-icon"><i class="fa-solid fa-layer-group"></i></div>
         @endif
-        <div class="sidebar-brand-text"><div class="name">{{ $companyProfile->nama_perusahaan ?? 'ERP Accounting' }}</div><div class="sub">{{ __('erp.system_word') }}</div></div>
+        <div class="sidebar-brand-text"><div class="name">{{ $companyProfile->company_name ?? 'ERP Accounting' }}</div><div class="sub">{{ __('erp.system_word') }}</div></div>
     </a>
 
     <div class="sidebar-inner custom-scrollbar">
+        @auth
+        <a href="{{ route('platform.company.edit') }}" class="nav-link {{ request()->routeIs('platform.*') ? 'active' : '' }}">
+            <span class="nav-icon"><i class="fa-solid fa-building"></i></span>
+            <span class="nav-text">Perusahaan &amp; Master Party</span>
+        </a>
+        @endauth
         {{-- MENU UTAMA (always visible) --}}
         <div class="nav-section">
             <div class="nav-section-label">{{ __('erp.main_menu') }}</div>

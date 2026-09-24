@@ -24,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(\App\Modules\Platform\Models\Party::class, \App\Modules\Platform\Policies\PartyPolicy::class);
+
         Event::listen(Login::class, LogUserLogin::class);
 
         // 2. PAKSA LARAVEL MENGGUNAKAN TAMPILAN BOOTSTRAP 5

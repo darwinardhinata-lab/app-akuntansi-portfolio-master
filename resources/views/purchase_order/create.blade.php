@@ -45,6 +45,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold small text-muted">Master Party <span class="text-muted fw-normal">(opsional)</span></label>
+                                <div class="small mb-1"><a href="{{ route('platform.company.edit') }}">Pilih perusahaan aktif</a> untuk daftar Party. Nama manual tetap tersedia.</div>
                                 <select name="party_id" id="party_id" class="form-select">
                                     <option value="">-- Gunakan nama supplier manual --</option>
                                     @foreach($parties as $party)

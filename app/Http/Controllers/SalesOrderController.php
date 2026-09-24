@@ -10,7 +10,6 @@ use App\Models\SystemLog;
 use App\Services\SalesOrderService;
 use App\Modules\Platform\Models\Party;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class SalesOrderController extends Controller
 {
@@ -478,16 +477,16 @@ class SalesOrderController extends Controller
             'so_number'        => 'required|unique:sales_orders,so_number',
             'transaction_date' => 'required|date',
             'contact_name'     => 'required|string',
-            'party_id'         => 'nullable|integer',
+            'party_id'         => 'nullable|integer|min:1',
             'receiver_name'    => 'required|string',
             'details'          => 'required|array|min:1',
             'details.*.qty'    => 'required|numeric|min:1',
             'details.*.price'  => 'required|numeric|min:0',
         ]);
 
+        $party = $this->resolveParty($request->input('party_id'));
         DB::beginTransaction();
         try {
-            $party = $this->resolveParty($request->input('party_id'));
             $contactName = $party?->legal_name ?? $request->contact_name;
             $subTotal = 0;
             $totalDiscItems = 0;
@@ -656,16 +655,16 @@ class SalesOrderController extends Controller
             'so_number'        => 'required|unique:sales_orders,so_number,'.$id,
             'transaction_date' => 'required|date',
             'contact_name'     => 'required|string',
-            'party_id'         => 'nullable|integer',
+            'party_id'         => 'nullable|integer|min:1',
             'receiver_name'    => 'required|string',
             'details'          => 'required|array|min:1',
             'details.*.qty'    => 'required|numeric|min:1',
             'details.*.price'  => 'required|numeric|min:0',
         ]);
 
+        $party = $this->resolveParty($request->input('party_id'));
         DB::beginTransaction();
         try {
-            $party = $this->resolveParty($request->input('party_id'));
             $contactName = $party?->legal_name ?? $request->contact_name;
             $subTotal = 0;
             $totalDiscItems = 0;
@@ -793,30 +792,13 @@ class SalesOrderController extends Controller
 
     private function availableParties()
     {
-        return Party::query()
-            ->where('active', true)
-            ->whereHas('roles', fn ($query) => $query->where('role', 'CUSTOMER')->where('active', true))
-            ->orderBy('legal_name')
-            ->get();
+        return app(\App\Modules\Platform\Support\PartySelection::class)
+            ->available(request(), ['CUSTOMER'])->orderBy('legal_name')->get();
     }
 
     private function resolveParty(?int $partyId): ?Party
     {
-        if (! $partyId) {
-            return null;
-        }
-
-        $party = Party::query()
-            ->whereKey($partyId)
-            ->where('active', true)
-            ->whereHas('roles', fn ($query) => $query->where('role', 'CUSTOMER')->where('active', true))
-            ->first();
-
-        if (! $party) {
-            throw ValidationException::withMessages(['party_id' => 'Party yang dipilih harus aktif dan memiliki peran customer.']);
-        }
-
-        return $party;
+        return app(\App\Modules\Platform\Support\PartySelection::class)
+            ->resolve(request(), $partyId, ['CUSTOMER']);
     }
-
 }

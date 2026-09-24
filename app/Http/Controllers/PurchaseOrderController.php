@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Tax;
 use App\Modules\Platform\Models\Party;
 use App\Support\NumberParser;
-use Illuminate\Validation\ValidationException;
 
 class PurchaseOrderController extends Controller
 {
@@ -118,15 +117,15 @@ class PurchaseOrderController extends Controller
             'po_number'        => 'required|unique:purchase_orders,po_number',
             'transaction_date' => 'required|date',
             'contact_name'     => 'required|string',
-            'party_id'         => 'nullable|integer',
+            'party_id'         => 'nullable|integer|min:1',
             'details'          => 'required|array|min:1',
             'details.*.qty'    => 'required|numeric|min:1',
             'details.*.price'  => 'required|numeric|min:0',
         ]);
 
+        $party = $this->resolveParty($request->input('party_id'));
         DB::beginTransaction();
         try {
-            $party = $this->resolveParty($request->input('party_id'));
             $contactName = $party?->legal_name ?? $request->contact_name;
             $subTotal = 0;
 
@@ -368,15 +367,15 @@ class PurchaseOrderController extends Controller
             'po_number'        => 'required|unique:purchase_orders,po_number,'.$id,
             'transaction_date' => 'required|date',
             'contact_name'     => 'required|string',
-            'party_id'         => 'nullable|integer',
+            'party_id'         => 'nullable|integer|min:1',
             'details'          => 'required|array|min:1',
             'details.*.qty'    => 'required|numeric|min:1',
             'details.*.price'  => 'required|numeric|min:0',
         ]);
 
+        $party = $this->resolveParty($request->input('party_id'));
         DB::beginTransaction();
         try {
-            $party = $this->resolveParty($request->input('party_id'));
             $contactName = $party?->legal_name ?? $request->contact_name;
             $subTotal = 0;
             foreach ($request->details as $det) {
@@ -528,29 +527,13 @@ class PurchaseOrderController extends Controller
 
     private function availableParties()
     {
-        return Party::query()
-            ->where('active', true)
-            ->whereHas('roles', fn ($query) => $query->whereIn('role', ['SUPPLIER', 'SUBCONTRACTOR'])->where('active', true))
-            ->orderBy('legal_name')
-            ->get();
+        return app(\App\Modules\Platform\Support\PartySelection::class)
+            ->available(request(), ['SUPPLIER', 'SUBCONTRACTOR'])->orderBy('legal_name')->get();
     }
 
     private function resolveParty(?int $partyId): ?Party
     {
-        if (! $partyId) {
-            return null;
-        }
-
-        $party = Party::query()
-            ->whereKey($partyId)
-            ->where('active', true)
-            ->whereHas('roles', fn ($query) => $query->whereIn('role', ['SUPPLIER', 'SUBCONTRACTOR'])->where('active', true))
-            ->first();
-
-        if (! $party) {
-            throw ValidationException::withMessages(['party_id' => 'Party yang dipilih harus aktif dan memiliki peran supplier atau subcontractor.']);
-        }
-
-        return $party;
+        return app(\App\Modules\Platform\Support\PartySelection::class)
+            ->resolve(request(), $partyId, ['SUPPLIER', 'SUBCONTRACTOR']);
     }
 }

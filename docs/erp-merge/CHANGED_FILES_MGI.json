@@ -1,0 +1,155 @@
+{
+  "package": "MGI Fresh Start (on A1)",
+  "source_baseline": "A1 as confirmed by user; source hash checked per modified file",
+  "runtime_validation": "NOT RUN in author environment",
+  "new_test_methods": 15,
+  "metadata_files": [
+    "docs/erp-merge/CHANGED_FILES_MGI.json"
+  ],
+  "files": [
+    {
+      "path": "app/Console/Commands/PrepareMgiFreshStart.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "17775098614c19f70f52040026b39d3861c70f8a24d7dcf1abe6c4cf0a279951"
+    },
+    {
+      "path": "app/Jobs/ProcessPendingBillTempJob.php",
+      "status": "modified",
+      "baseline_sha256": "07d746ca2d77d1c52bab01cd9f98466690dad002dd4b5b1b0e9e1fcb83d24144",
+      "result_sha256": "57d928599ad972cc95fc4cba411b9c43657ca06a6c082e62e579fef962ca8218"
+    },
+    {
+      "path": "app/Jobs/ProcessPendingInvTempJob.php",
+      "status": "modified",
+      "baseline_sha256": "c26fa0bb41c1deb7f3a0712764c3a537367eb1e01ff0dd2ceb6a525640480896",
+      "result_sha256": "be0ceec81b153889eab0d6314a39bbcb7581d842a117aebf7d93550a5f5aff8c"
+    },
+    {
+      "path": "app/Jobs/ProcessPendingPOTempJob.php",
+      "status": "modified",
+      "baseline_sha256": "4bf96da5f640617e1122a3881f5136f64d9b9f8d6ec50877bfd29111990c2acb",
+      "result_sha256": "a800a00fc11c24141ea83185a94fc806108c51b7dca91ccbc029cb52d9eca75c"
+    },
+    {
+      "path": "app/Jobs/ProcessPendingSOTempJob.php",
+      "status": "modified",
+      "baseline_sha256": "49755ac30ce598fd30175712d8b7da22532fdda4a987a1a12bf5e2813d0538ef",
+      "result_sha256": "3381cbd62181682b7044e29faec83aff7d15ef1b772370ccd191d80c87233fad"
+    },
+    {
+      "path": "app/Jobs/ProcessPendingTempJob.php",
+      "status": "modified",
+      "baseline_sha256": "64e81d940ba479ea36aa077f88435a2daf37cdc6bb2bab0cbbf68d1b187a5c2a",
+      "result_sha256": "a5940466fb289c403420492a6ca199897be14d4580d9d50b6f8728f28b98e00d"
+    },
+    {
+      "path": "app/Jobs/SyncBillDashboardToTempJob.php",
+      "status": "modified",
+      "baseline_sha256": "c1015ed63b043fa9a08a73cec42423d8d822c642f16b2554e87987d292622038",
+      "result_sha256": "005bf96bc55cce67d89d8a630365da1ac3797db5467c9b5fb74a2aacda59d62a"
+    },
+    {
+      "path": "app/Jobs/SyncDashboardToTempJob.php",
+      "status": "modified",
+      "baseline_sha256": "d3bffcd21d5639e0ead9cd7f173a9033d6058db96547631ed18a05165e2f0286",
+      "result_sha256": "ac4f5d3c250cf1dfd5bfddc3df31d19867c88a4a8843c5ace3b83899dc958b2c"
+    },
+    {
+      "path": "app/Jobs/SyncInvDashboardToTempJob.php",
+      "status": "modified",
+      "baseline_sha256": "d986c592650a76ab7fbba5ca532929af1dd2b7801d3128161d6b4f39aaf3854e",
+      "result_sha256": "c0221710648d7b46687d021dd9e408801d6421542541f30abc794eccc6e2996f"
+    },
+    {
+      "path": "app/Jobs/SyncPODashboardToTempJob.php",
+      "status": "modified",
+      "baseline_sha256": "59449d59b0c9bef8255c9beaa7d6b47a93a8f89364f546a7cfcba0d3a84d5775",
+      "result_sha256": "a26128d446c58898d8d0976cbf44f78b43be196c6d4bbd228a40c318c6c6add4"
+    },
+    {
+      "path": "app/Jobs/SyncProductDashboardJob.php",
+      "status": "modified",
+      "baseline_sha256": "cec4cf390d1e33f608669044a680bc1e34b14467b175225c0e352a07b7236788",
+      "result_sha256": "10d15fb8ba85c7367c606b1b1abe839825684fee7b8305db3e68c9e76ab4b0e6"
+    },
+    {
+      "path": "app/Jobs/SyncSODashboardToTempJob.php",
+      "status": "modified",
+      "baseline_sha256": "14d0743d15ccef2ae000212c1cf4d9ea4edc5c706282e0030852b63bd396909f",
+      "result_sha256": "07da63cd6b31810e57c9160d267c9c0c10bad27e809e3878fe0a072103a2284b"
+    },
+    {
+      "path": "app/Modules/Platform/Support/MgiFreshStartPolicy.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "9731e03a18901643ad827fd0b45de6bc5bbf5c329c2cd1e7f25a16467d7e5528"
+    },
+    {
+      "path": "config/platform.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "6dea9f66626b1fb9009d4b74a8584407a83f3122cff217e2a4ca93f0659bba51"
+    },
+    {
+      "path": "database/seeders/PlatformFoundationSeeder.php",
+      "status": "modified",
+      "baseline_sha256": "82bf4061906d85a3d8ecd1af471139bf38962ae46e54897d8ff11c39c8a33eef",
+      "result_sha256": "bf40a25a07ffb6de42af97c557a5da97cf8f6b7b581b8b71a4c381ca05449332"
+    },
+    {
+      "path": "docs/erp-merge/README_MGI_FRESH_START.md",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "7c5f0d854b2a3b681c2302135ba0beba92f744cea2490dafdecf96afa7b6d4d0"
+    },
+    {
+      "path": "phpunit.mgi-mysql.xml",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "66ac631c139ddc7762f3ba8934d9f63deb28b31f548446917ef89e0752faf966"
+    },
+    {
+      "path": "resources/views/layouts/app.blade.php",
+      "status": "modified",
+      "baseline_sha256": "de3a1b30c0b90de1be26dd51c11dea3ae43382f370013a0923db10f3a05e21ce",
+      "result_sha256": "48b07ed25b08043735db9fe29cdfe28532ca25a98f4ba890ffaacbf803f34753"
+    },
+    {
+      "path": "routes/console.php",
+      "status": "modified",
+      "baseline_sha256": "2c52ca3dfd27d96357cd9a48914a0b70a510350c72c9e9c3792032aacc4c4f3c",
+      "result_sha256": "4fdc0f6ec6ae9cfa40238dd25b29cbaa686bb8883fbdd4cf3777574704cdbba5"
+    },
+    {
+      "path": "tests/Feature/MgiFoundationSeederTest.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "26627d6ab7d697447b3941ba3d336a646c15b30dd9f6ee5cad4e7a76ea64323a"
+    },
+    {
+      "path": "tests/Feature/MgiLegacySyncGuardTest.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "fe534c7728eba1998f7cb52f9f78b4a6e1a8d7206f560bc64f973de580e6d27c"
+    },
+    {
+      "path": "tests/Integration/MgiFreshStartMysqlTest.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "dd0cf91531b6f9df4eef85a84b7d88598dc0a54a32aabae544abfd58d931d2a2"
+    },
+    {
+      "path": "tests/Unit/MgiFreshStartPolicyTest.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "0d33f980c16381b1e16a748cd2514b90013e4dd4d8da6b29d3c8ddd192e4f605"
+    },
+    {
+      "path": "tools/verify-mgi-fresh-start.ps1",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "24dce76826130997fe0a9299b622101e94c701eeb99cfbdcebe22ac3b9016f6e"
+    }
+  ]
+}

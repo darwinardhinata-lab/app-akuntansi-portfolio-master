@@ -1,0 +1,170 @@
+{
+  "package": "ERP Marvel-Dard A1",
+  "baseline_archive_sha256": "5c1250c68130785d458ae195e1f511da9cc6c0f8574cf51e2fe24604f73b46c1",
+  "runtime_validation": "NOT RUN: PHP/Composer/vendor absent",
+  "new_test_methods": 26,
+  "files": [
+    {
+      "path": "app/Console/Commands/SetPartyAccess.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "8550344760c34ec5826a0e1bb998a095f948928fd1d49d3bcb55121fc6d1c174"
+    },
+    {
+      "path": "app/Http/Controllers/PurchaseOrderController.php",
+      "status": "modified",
+      "baseline_sha256": "b09c136ac142dee742386743abe2cb144664e6bc94e706189f07118c068c67da",
+      "result_sha256": "0fd3444e3bec0467eec4218f8ccbdf008411c143289e83e9fedc10df1c58768a"
+    },
+    {
+      "path": "app/Http/Controllers/SalesOrderController.php",
+      "status": "modified",
+      "baseline_sha256": "e8e88bc6c7c79d98d716ea3d702f79c3c1711f3c1cdf3c4b9b09aa89c2340d5b",
+      "result_sha256": "36e63d2567caf2ec895636c9d138ae465c79a7d06cac6e014829214850c93596"
+    },
+    {
+      "path": "app/Modules/Platform/Http/Controllers/CompanyContextController.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "516f26300a0e21c48c8d71ff182fe1f835bef73129a1ae9d52b7fe7240c0cc40"
+    },
+    {
+      "path": "app/Modules/Platform/Http/Controllers/PartyController.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "cbf2d6373fd23db827a61807aca6281f90c7529163f81d3b66024f15623e2c59"
+    },
+    {
+      "path": "app/Modules/Platform/Http/Middleware/RequireCompany.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "9c1b0c74274dc13381ddb92dfe1d023bbc4336785e356878395ce962517659e4"
+    },
+    {
+      "path": "app/Modules/Platform/Policies/PartyPolicy.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "041bb02310707f0b3a68629d7e10c3d2c138c5208cbb4d0f5c48c226b6cc6852"
+    },
+    {
+      "path": "app/Modules/Platform/Support/CompanyContext.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "38fcdb2b6b270693a7a2fafbdac524f682c2f520ba7f1216339e3de7a1dd53b9"
+    },
+    {
+      "path": "app/Modules/Platform/Support/PartySelection.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "8611c3e71ca933e6a3550af36d0297b892304eba6b53040b226057d6a1987296"
+    },
+    {
+      "path": "app/Providers/AppServiceProvider.php",
+      "status": "modified",
+      "baseline_sha256": "e8e36e6dfc53db7d0375bafed9efba5dbfb6efcfb60a36a5e2a5fbc38e1a8e44",
+      "result_sha256": "4a37f098c33e522d25a32cc966a9d2a29cc9ac934a28b6e67555a2880c6b545a"
+    },
+    {
+      "path": "database/seeders/PlatformPermissionSeeder.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "3e3119a7f9785092b4ab77f4b49ea0225135aef8cef169bcb1e00f29c3688d4b"
+    },
+    {
+      "path": "docs/erp-merge/DESAIN_TRANSISI_GRN_PAYMENT.md",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "a048bb06d6e9e3f49499ec97c84171e275097e011f56507d866f2423599dae40"
+    },
+    {
+      "path": "docs/erp-merge/README_A1.md",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "68ee79b1503be501dac17bbb838f6fdb9b852e43bdf523021e05e4dd2d78e451"
+    },
+    {
+      "path": "resources/views/layouts/app.blade.php",
+      "status": "modified",
+      "baseline_sha256": "1bb9344a514b67b38a05900c38c47fe895bb52e8a7402b966e191906e35cda3b",
+      "result_sha256": "de3a1b30c0b90de1be26dd51c11dea3ae43382f370013a0923db10f3a05e21ce"
+    },
+    {
+      "path": "resources/views/platform/company.blade.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "aad30bc9326515979e0f1344f0afb176bb17a83a2d7cb9036865946f83e25ce1"
+    },
+    {
+      "path": "resources/views/platform/messages.blade.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "f1c6e5974e9a5b6d5334bbd09e8eefd54f7e1697202b5211503f73006c8bb365"
+    },
+    {
+      "path": "resources/views/platform/parties/form.blade.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "353356524ae73cd88b32e1e05d547556584d8f873c24572b77515b33ae3b95a2"
+    },
+    {
+      "path": "resources/views/platform/parties/index.blade.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "482aeda7ab9c2d2cc1d2aa3c49df350549bed2c7de1d3e5f4ae7d7501ef375a1"
+    },
+    {
+      "path": "resources/views/purchase_order/create.blade.php",
+      "status": "modified",
+      "baseline_sha256": "c5c37dc0f7709f3d7aedb458f8ea33e1765e724086de4a54563a99cc743948e9",
+      "result_sha256": "194cea1db6c8546d2ad568355927a1a794e951340da0dc5fa4941a32adc320a0"
+    },
+    {
+      "path": "resources/views/purchase_order/edit.blade.php",
+      "status": "modified",
+      "baseline_sha256": "5ce78f29ddd86b67a0fec37407fe973683a98e966ae50898ebd7db281ad3e646",
+      "result_sha256": "2641b604d4259684328e2f755d90933ec841a9301d3fd4ca22d947cb4d49a530"
+    },
+    {
+      "path": "resources/views/sales_order/create.blade.php",
+      "status": "modified",
+      "baseline_sha256": "87944770b9ac99f29c290584b59723437bd33fdec8d6a6579c2ce92e3f0c6ec5",
+      "result_sha256": "e1737be1fd971f28aad3e5d7d3439338b9c10f0374c1e02029b2fe5fd2b4b04f"
+    },
+    {
+      "path": "resources/views/sales_order/edit.blade.php",
+      "status": "modified",
+      "baseline_sha256": "ac2a5554d414188d89159221d2e69f743071d8dcdf20c3c3087ea1118061043f",
+      "result_sha256": "3c18e73985ae00d6495be43eea83ee889b3e38a26fc0ae7b00f4165cf1664e1e"
+    },
+    {
+      "path": "routes/platform.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "da537d111aecc070b60be1bbe8c5fbe31c187329497736d8c7577ede07835340"
+    },
+    {
+      "path": "routes/web.php",
+      "status": "modified",
+      "baseline_sha256": "30b8dbf77d0b51503d84a01fba75e9a73e21d32e03f323ae2e95c14c62cf0a7b",
+      "result_sha256": "11ecdd3e5bf14b45acb8262495eb6b077f477f60bf3c4cffc28858ddfd26f21a"
+    },
+    {
+      "path": "tests/Feature/PartyLinkageTest.php",
+      "status": "modified",
+      "baseline_sha256": "7e66a4719fdf81038249354ab8c5b0507a381a33354547daa6b7628872b8727e",
+      "result_sha256": "9774c1809dc046df5093945293a296611630c677796b02582792a636c48056ce"
+    },
+    {
+      "path": "tests/Feature/PlatformAccessTest.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "aa9cbe3311f3ab062603ff5b95e9b8ec12bc8b2edab344a457e8c375c2ece7c8"
+    },
+    {
+      "path": "tools/verify-platform-a1.ps1",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "4add23f97bbb107335db4a21c9d854fed5969735e62bbac45b1995c378127546"
+    }
+  ]
+}

@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
  *
  * Membuat data awal skema Platform baru dari data lama yang sudah ada,
  * TANPA mengubah/menghapus data lama:
- *  - company_profiles (BBW)      -> satu baris companies
+ *  - company_profiles            -> company existing atau MGI baru
  *  - master_divisi                -> org_units tipe DEPARTMENT (PLACEHOLDER,
  *    lihat catatan AS05 di bawah - bukan keputusan final)
  *  - users.role (ADMIN/FINANCE/STAFF) -> roles + user_role
@@ -39,8 +39,9 @@ class PlatformFoundationSeeder extends Seeder
 
     private function seedDefaultCompany(): Company
     {
-        // Status guard: jangan buat company kedua kalau sudah pernah di-seed.
-        $existing = Company::where('code', 'BBW')->first();
+        // Prioritaskan MGI setelah fresh start; pertahankan BBW pada instalasi legacy.
+        $existing = Company::where('code', 'MGI')->first()
+            ?? Company::where('code', 'BBW')->first();
         if ($existing) {
             return $existing;
         }
@@ -48,8 +49,8 @@ class PlatformFoundationSeeder extends Seeder
         $profile = CompanyProfile::first();
 
         return Company::create([
-            'code' => 'BBW',
-            'name' => $profile?->company_name ?? 'CV. Berkarya Bersama Warna',
+            'code' => 'MGI',
+            'name' => 'PT. Magicase Group Indonesia',
             'base_currency' => 'IDR',
             'timezone' => 'Asia/Jakarta',
             'legacy_company_profile_id' => $profile?->id,

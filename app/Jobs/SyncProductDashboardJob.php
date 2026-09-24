@@ -29,6 +29,10 @@ class SyncProductDashboardJob implements ShouldQueue
 
     public function handle()
     {
+        if (! config('platform.legacy_sync_enabled', true)) {
+            return;
+        }
+
         Log::info('SyncProductDashboardJob started. ForceFullSync: ' . ($this->forceFullSync ? 'YES' : 'NO'));
 
         try {

@@ -22,6 +22,10 @@ class ProcessPendingBillTempJob implements ShouldQueue
 
     public function handle()
     {
+        if (! config('platform.legacy_sync_enabled', true)) {
+            return;
+        }
+
         Log::info('ProcessPendingBillTempJob started.');
 
         try {
