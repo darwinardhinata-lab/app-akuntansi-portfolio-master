@@ -42,8 +42,17 @@
                                 <input type="date" name="transaction_date" class="form-control" value="{{ date('Y-m-d', strtotime($so->transaction_date)) }}" required>
                             </div>
                             <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Master Party <span class="text-muted fw-normal">(opsional)</span></label>
+                                <select name="party_id" id="party_id" class="form-select">
+                                    <option value="">-- Gunakan nama customer manual --</option>
+                                    @foreach($parties as $party)
+                                        <option value="{{ $party->id }}" data-legal-name="{{ $party->legal_name }}" {{ old('party_id', $so->party_id) == $party->id ? 'selected' : '' }}>{{ $party->code }} - {{ $party->legal_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.customer_label') }} <span class="text-danger">*</span></label>
-                                <input type="text" name="contact_name" class="form-control" value="{{ $so->contact_name }}" required>
+                                <input type="text" name="contact_name" id="contact_name" class="form-control" value="{{ old('contact_name', $so->contact_name) }}" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.ref_no_optional') }}</label>
@@ -355,6 +364,13 @@
 
         $(document).on('input', '.line-price, .line-qty, .line-disc, .calc-trigger', function() {
             kalkulasiTotal();
+        });
+
+        $('#party_id').on('change', function() {
+            let legalName = $(this).find(':selected').data('legal-name');
+            if (legalName) {
+                $('#contact_name').val(legalName);
+            }
         });
 
         kalkulasiTotal();

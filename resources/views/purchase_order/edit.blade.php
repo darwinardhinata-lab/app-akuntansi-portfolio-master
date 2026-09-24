@@ -45,8 +45,17 @@
                                 <input type="date" name="transaction_date" class="form-control fw-bold" value="{{ date('Y-m-d', strtotime($po->transaction_date)) }}" required>
                             </div>
                             <div class="col-md-4">
+                                <label class="form-label fw-bold small text-muted">Master Party <span class="text-muted fw-normal">(opsional)</span></label>
+                                <select name="party_id" id="party_id" class="form-select">
+                                    <option value="">-- Gunakan nama supplier manual --</option>
+                                    @foreach($parties as $party)
+                                        <option value="{{ $party->id }}" data-legal-name="{{ $party->legal_name }}" {{ old('party_id', $po->party_id) == $party->id ? 'selected' : '' }}>{{ $party->code }} - {{ $party->legal_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label fw-bold small text-muted">{{ __('erp.supplier_vendor_name') }} <span class="text-danger">*</span></label>
-                                <input type="text" name="contact_name" class="form-control" value="{{ $po->contact_name }}" required>
+                                <input type="text" name="contact_name" id="contact_name" class="form-control" value="{{ old('contact_name', $po->contact_name) }}" required>
                             </div>
                         </div>
                     </div>
@@ -235,6 +244,12 @@
         });
         $('#is_include_ppn, #tax_addition_id, #tax_deduction_id').on('change', function() {
             window.calculateGrandTotal();
+        });
+        $('#party_id').on('change', function() {
+            const legalName = $(this).find(':selected').data('legal-name');
+            if (legalName) {
+                $('#contact_name').val(legalName);
+            }
         });
         window.calculateGrandTotal();
     });

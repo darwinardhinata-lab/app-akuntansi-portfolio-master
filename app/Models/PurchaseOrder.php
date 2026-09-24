@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Modules\Platform\Models\Party;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PurchaseOrder extends Model
 {
@@ -11,7 +13,7 @@ class PurchaseOrder extends Model
     // FIX: Tambah semua kolom dari migration 2026_06_05_083603_add_tax_columns_to_purchase_orders
     // Sebelumnya: PurchaseOrder::create(['tax_addition_id' => ...]) tidak menyimpan field pajak
     protected $fillable = [
-        'po_number', 'transaction_date', 'contact_name', 'location_name',
+        'po_number', 'transaction_date', 'contact_name', 'party_id', 'location_name',
         'status', 'sub_total', 'grand_total',
         'is_include_ppn',        // ← DITAMBAH
         'tax_addition_id',       // ← DITAMBAH
@@ -27,5 +29,10 @@ class PurchaseOrder extends Model
     public function details()
     {
         return $this->hasMany(PurchaseOrderDetail::class, 'purchase_order_id');
+    }
+
+    public function party(): BelongsTo
+    {
+        return $this->belongsTo(Party::class);
     }
 }

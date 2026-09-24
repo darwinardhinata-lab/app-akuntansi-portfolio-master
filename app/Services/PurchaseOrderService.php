@@ -5,9 +5,9 @@ namespace App\Services;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderDetail;
 use App\Models\JournalHeader;
-use App\Models\JournalDetail;
 use App\Models\Product;
 use App\Models\InventoryLedger;
+use App\Support\PostingService;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -149,18 +149,19 @@ class PurchaseOrderService
             }
 
             // Single INSERT: Jurnal Keuangan
-            $journalHeader = JournalHeader::create([
-                'transaction_date' => $receiveDate,
-                'evidence_number'  => $evidenceNumber,
-                'description'      => "Tagihan Pembelian (Bill) Ref PO: {$po->po_number} - Supplier: {$po->contact_name}",
-                'source_doc_no'    => $billNumber,
-                'transaction_type' => 'Purchase Bill',
-            ]);
-
-            JournalDetail::insert([
-                ['journal_id' => $journalHeader->getKey(), 'account_code' => config('coa.persediaan'), 'helper_code' => null, 'position' => 'DEBET',  'amount' => $totalNominalDiterimaSkrg, 'created_at' => $now, 'updated_at' => $now],
-                ['journal_id' => $journalHeader->getKey(), 'account_code' => $akunKredit, 'helper_code' => null, 'position' => 'KREDIT', 'amount' => $totalNominalDiterimaSkrg, 'created_at' => $now, 'updated_at' => $now],
-            ]);
+            $journalHeader = PostingService::post(
+                [
+                    'transaction_date' => $receiveDate,
+                    'evidence_number'  => $evidenceNumber,
+                    'description'      => "Tagihan Pembelian (Bill) Ref PO: {$po->po_number} - Supplier: {$po->contact_name}",
+                    'source_doc_no'    => $billNumber,
+                    'transaction_type' => 'Purchase Bill',
+                ],
+                [
+                    ['account_code' => config('coa.persediaan'), 'helper_code' => null, 'position' => 'DEBET',  'amount' => $totalNominalDiterimaSkrg, 'created_at' => $now, 'updated_at' => $now],
+                    ['account_code' => $akunKredit, 'helper_code' => null, 'position' => 'KREDIT', 'amount' => $totalNominalDiterimaSkrg, 'created_at' => $now, 'updated_at' => $now],
+                ]
+            );
 
             // FIX: Link journal_id FK ke PurchaseBill (backlog item "journal_id FK columns")
             DB::table('purchase_bills')

@@ -10,7 +10,9 @@ use App\Models\SystemLog;
 use App\Services\PurchaseOrderService;
 use Illuminate\Support\Facades\DB;
 use App\Models\Tax;
+use App\Modules\Platform\Models\Party;
 use App\Support\NumberParser;
+use Illuminate\Validation\ValidationException;
 
 class PurchaseOrderController extends Controller
 {
@@ -105,7 +107,9 @@ class PurchaseOrderController extends Controller
 
     // 3. Kirim data tersebut ke View menggunakan compact()
     // (Pastikan nama view 'purchase_order.create' sesuai dengan struktur folder Anda)
-    return view('purchase_order.create', compact('taxesAddition', 'taxesDeduction'));
+    $parties = $this->availableParties();
+
+    return view('purchase_order.create', compact('taxesAddition', 'taxesDeduction', 'parties'));
 }
 
     public function store(Request $request)
@@ -114,6 +118,7 @@ class PurchaseOrderController extends Controller
             'po_number'        => 'required|unique:purchase_orders,po_number',
             'transaction_date' => 'required|date',
             'contact_name'     => 'required|string',
+            'party_id'         => 'nullable|integer',
             'details'          => 'required|array|min:1',
             'details.*.qty'    => 'required|numeric|min:1',
             'details.*.price'  => 'required|numeric|min:0',
@@ -121,6 +126,8 @@ class PurchaseOrderController extends Controller
 
         DB::beginTransaction();
         try {
+            $party = $this->resolveParty($request->input('party_id'));
+            $contactName = $party?->legal_name ?? $request->contact_name;
             $subTotal = 0;
 
             foreach ($request->details as $det) {
@@ -155,7 +162,8 @@ class PurchaseOrderController extends Controller
             $po = PurchaseOrder::create([
                 'po_number'            => $request->po_number,
                 'transaction_date'     => $request->transaction_date,
-                'contact_name'         => $request->contact_name,
+                'contact_name'         => $contactName,
+                'party_id'             => $party?->id,
                 'location_name'        => 'Pusat',
                 'status'               => 'APPROVED',
                 'sub_total'            => $subTotal,
@@ -343,7 +351,9 @@ class PurchaseOrderController extends Controller
         $taxesAddition = Tax::where('is_active', true)->where('tax_type', 'ADDITION')->get();
         $taxesDeduction = Tax::where('is_active', true)->where('tax_type', 'DEDUCTION')->get();
 
-        return view('purchase_order.edit', compact('po', 'taxesAddition', 'taxesDeduction'));
+        $parties = $this->availableParties();
+
+        return view('purchase_order.edit', compact('po', 'taxesAddition', 'taxesDeduction', 'parties'));
     }
 
     public function update(Request $request, $id)
@@ -358,6 +368,7 @@ class PurchaseOrderController extends Controller
             'po_number'        => 'required|unique:purchase_orders,po_number,'.$id,
             'transaction_date' => 'required|date',
             'contact_name'     => 'required|string',
+            'party_id'         => 'nullable|integer',
             'details'          => 'required|array|min:1',
             'details.*.qty'    => 'required|numeric|min:1',
             'details.*.price'  => 'required|numeric|min:0',
@@ -365,6 +376,8 @@ class PurchaseOrderController extends Controller
 
         DB::beginTransaction();
         try {
+            $party = $this->resolveParty($request->input('party_id'));
+            $contactName = $party?->legal_name ?? $request->contact_name;
             $subTotal = 0;
             foreach ($request->details as $det) {
                 if(isset($det['qty']) && $det['qty'] > 0) {
@@ -398,7 +411,8 @@ class PurchaseOrderController extends Controller
             $po->update([
                 'po_number'            => $request->po_number,
                 'transaction_date'     => $request->transaction_date,
-                'contact_name'         => $request->contact_name,
+                'contact_name'         => $contactName,
+                'party_id'             => $party?->id,
                 'sub_total'            => $subTotal,
                 'grand_total'          => $grandTotal,
                 'is_include_ppn'       => $isIncludePPN,
@@ -510,5 +524,33 @@ class PurchaseOrderController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    private function availableParties()
+    {
+        return Party::query()
+            ->where('active', true)
+            ->whereHas('roles', fn ($query) => $query->whereIn('role', ['SUPPLIER', 'SUBCONTRACTOR'])->where('active', true))
+            ->orderBy('legal_name')
+            ->get();
+    }
+
+    private function resolveParty(?int $partyId): ?Party
+    {
+        if (! $partyId) {
+            return null;
+        }
+
+        $party = Party::query()
+            ->whereKey($partyId)
+            ->where('active', true)
+            ->whereHas('roles', fn ($query) => $query->whereIn('role', ['SUPPLIER', 'SUBCONTRACTOR'])->where('active', true))
+            ->first();
+
+        if (! $party) {
+            throw ValidationException::withMessages(['party_id' => 'Party yang dipilih harus aktif dan memiliki peran supplier atau subcontractor.']);
+        }
+
+        return $party;
     }
 }

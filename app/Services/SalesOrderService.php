@@ -10,7 +10,7 @@ use App\Models\JournalDetail;
 use App\Models\Product;
 use App\Models\InventoryLedger;
 use Illuminate\Support\Facades\DB;
-use App\Support\JournalBalanceValidator;
+use App\Support\PostingService;
 use Exception;
 
 class SalesOrderService
@@ -173,68 +173,61 @@ class SalesOrderService
             }
 
             if (!$skipJournal && ($invoice->grand_total > 0 || $totalCogsValue > 0)) {
-                $journalHeader = JournalHeader::create([
-                    'transaction_date' => $shipDate,
-                    'evidence_number'  => $invoiceNumber,
-                    'description'      => "Faktur Penjualan: {$invoiceNumber} - Pelanggan: {$so->contact_name}",
-                    'source_doc_no'    => $invoiceNumber,
-                    'transaction_type' => 'Faktur',
-                    'tags'             => $so->store_name,
-                ]);
-
-                $primaryId = $journalHeader->getKey();
                 $now = now();
                 $journalLines = [];
 
                 if ($invoice->grand_total > 0) {
                     // Piutang Usaha
-                    $journalLines[] = ['journal_id' => $primaryId, 'account_code' => config('coa.piutang_usaha'), 'position' => 'DEBET',  'amount' => $invoice->grand_total,  'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
+                    $journalLines[] = ['account_code' => config('coa.piutang_usaha'), 'position' => 'DEBET',  'amount' => $invoice->grand_total,  'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
 
                     // Pecah Potongan sesuai mapping COA
                     if ($invoice->disc_amount > 0) {
-                        $journalLines[] = ['journal_id' => $primaryId, 'account_code' => config('coa.diskon_penjualan'), 'position' => 'DEBET', 'amount' => $invoice->disc_amount, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
+                        $journalLines[] = ['account_code' => config('coa.diskon_penjualan'), 'position' => 'DEBET', 'amount' => $invoice->disc_amount, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
                     }
                     if ($shippingDiscount > 0) {
-                        $journalLines[] = ['journal_id' => $primaryId, 'account_code' => config('coa.diskon_ongkir'), 'position' => 'DEBET', 'amount' => $shippingDiscount, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
+                        $journalLines[] = ['account_code' => config('coa.diskon_ongkir'), 'position' => 'DEBET', 'amount' => $shippingDiscount, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
                     }
                     
                     $otherDiscAndReturn = ($so->other_discount ?? 0) + $returnRemaining;
                     if ($otherDiscAndReturn > 0) {
-                        $journalLines[] = ['journal_id' => $primaryId, 'account_code' => config('coa.diskon_lain'), 'position' => 'DEBET', 'amount' => $otherDiscAndReturn, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
+                        $journalLines[] = ['account_code' => config('coa.diskon_lain'), 'position' => 'DEBET', 'amount' => $otherDiscAndReturn, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
                     }
 
                     // Penjualan
-                    $journalLines[] = ['journal_id' => $primaryId, 'account_code' => config('coa.penjualan'), 'position' => 'KREDIT', 'amount' => $invoice->sub_total,   'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
+                    $journalLines[] = ['account_code' => config('coa.penjualan'), 'position' => 'KREDIT', 'amount' => $invoice->sub_total,   'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
                     
                     // Ongkos Kirim
                     if ($invoice->shipping_cost > 0) {
-                        $journalLines[] = ['journal_id' => $primaryId, 'account_code' => config('coa.ongkos_kirim'), 'position' => 'KREDIT', 'amount' => $invoice->shipping_cost, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
+                        $journalLines[] = ['account_code' => config('coa.ongkos_kirim'), 'position' => 'KREDIT', 'amount' => $invoice->shipping_cost, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
                     }
                     
                     if ($invoice->tax_amount > 0) {
-                        $journalLines[] = ['journal_id' => $primaryId, 'account_code' => config('coa.pajak_keluaran'), 'position' => 'KREDIT', 'amount' => $invoice->tax_amount, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
+                        $journalLines[] = ['account_code' => config('coa.pajak_keluaran'), 'position' => 'KREDIT', 'amount' => $invoice->tax_amount, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
                     }
                     
                     // Biaya Lain-Lain (Ditagihkan ke pelanggan -> Pendapatan Lain Marketplace / Selisih Ongkir +)
                     if ($otherCost > 0) {
-                        $journalLines[] = ['journal_id' => $primaryId, 'account_code' => config('coa.biaya_lain'), 'position' => 'KREDIT', 'amount' => $otherCost, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
+                        $journalLines[] = ['account_code' => config('coa.biaya_lain'), 'position' => 'KREDIT', 'amount' => $otherCost, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
                     }
                 }
                 
                 if ($totalCogsValue > 0) {
-                    $journalLines[] = ['journal_id' => $primaryId, 'account_code' => config('coa.hpp'), 'position' => 'DEBET',  'amount' => $totalCogsValue, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
-                    $journalLines[] = ['journal_id' => $primaryId, 'account_code' => config('coa.persediaan'), 'position' => 'KREDIT', 'amount' => $totalCogsValue, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
+                    $journalLines[] = ['account_code' => config('coa.hpp'), 'position' => 'DEBET',  'amount' => $totalCogsValue, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
+                    $journalLines[] = ['account_code' => config('coa.persediaan'), 'position' => 'KREDIT', 'amount' => $totalCogsValue, 'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
                 }
 
-                // FIX BALANCE: guard mutlak menggunakan validator terpusat
-                if (!JournalBalanceValidator::isBalanced($journalLines)) {
-                    $selisih = JournalBalanceValidator::getDifference($journalLines);
-                    throw new Exception("Jurnal tidak balance untuk SO {$so->so_number}. Selisih: Rp " . number_format($selisih, 2, ',', '.'));
-                }
-
-                if (!empty($journalLines)) {
-                    JournalDetail::insert($journalLines);
-                }
+                $journalHeader = PostingService::post(
+                    [
+                        'transaction_date' => $shipDate,
+                        'evidence_number'  => $invoiceNumber,
+                        'description'      => "Faktur Penjualan: {$invoiceNumber} - Pelanggan: {$so->contact_name}",
+                        'source_doc_no'    => $invoiceNumber,
+                        'transaction_type' => 'Faktur',
+                        'tags'             => $so->store_name,
+                    ],
+                    $journalLines,
+                    fn (float $selisih) => "Jurnal tidak balance untuk SO {$so->so_number}. Selisih: Rp " . number_format($selisih, 2, ',', '.')
+                );
 
                 // FIX: Link journal_id FK ke SalesInvoice (backlog item "journal_id FK columns")
                 $invoice->update(['journal_id' => $journalHeader->getKey()]);

@@ -8,7 +8,9 @@ use App\Models\SalesOrderDetail;
 use App\Models\Product;
 use App\Models\SystemLog;
 use App\Services\SalesOrderService;
+use App\Modules\Platform\Models\Party;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class SalesOrderController extends Controller
 {
@@ -465,7 +467,9 @@ class SalesOrderController extends Controller
             'sales_orders', 'so_number', 'SO-' . date('ymd') . '-'
         );
 
-        return view('sales_order.create', compact('products', 'taxes', 'autoNumber'));
+        $parties = $this->availableParties();
+
+        return view('sales_order.create', compact('products', 'taxes', 'autoNumber', 'parties'));
     }
 
     public function store(Request $request)
@@ -474,6 +478,7 @@ class SalesOrderController extends Controller
             'so_number'        => 'required|unique:sales_orders,so_number',
             'transaction_date' => 'required|date',
             'contact_name'     => 'required|string',
+            'party_id'         => 'nullable|integer',
             'receiver_name'    => 'required|string',
             'details'          => 'required|array|min:1',
             'details.*.qty'    => 'required|numeric|min:1',
@@ -482,6 +487,8 @@ class SalesOrderController extends Controller
 
         DB::beginTransaction();
         try {
+            $party = $this->resolveParty($request->input('party_id'));
+            $contactName = $party?->legal_name ?? $request->contact_name;
             $subTotal = 0;
             $totalDiscItems = 0;
 
@@ -515,7 +522,8 @@ class SalesOrderController extends Controller
             $so = SalesOrder::create([
                 'so_number'           => $request->so_number,
                 'transaction_date'    => $request->transaction_date,
-                'contact_name'        => $request->contact_name,
+                'contact_name'        => $contactName,
+                'party_id'            => $party?->id,
                 'ref_number'          => $request->ref_number,
                 'salesman'            => $request->salesman,
                 'source'              => $request->source,
@@ -631,7 +639,9 @@ class SalesOrderController extends Controller
 
         $products = Product::orderBy('name', 'asc')->get();
 
-        return view('sales_order.edit', compact('so', 'products'));
+        $parties = $this->availableParties();
+
+        return view('sales_order.edit', compact('so', 'products', 'parties'));
     }
 
     public function update(Request $request, $id)
@@ -646,6 +656,7 @@ class SalesOrderController extends Controller
             'so_number'        => 'required|unique:sales_orders,so_number,'.$id,
             'transaction_date' => 'required|date',
             'contact_name'     => 'required|string',
+            'party_id'         => 'nullable|integer',
             'receiver_name'    => 'required|string',
             'details'          => 'required|array|min:1',
             'details.*.qty'    => 'required|numeric|min:1',
@@ -654,6 +665,8 @@ class SalesOrderController extends Controller
 
         DB::beginTransaction();
         try {
+            $party = $this->resolveParty($request->input('party_id'));
+            $contactName = $party?->legal_name ?? $request->contact_name;
             $subTotal = 0;
             $totalDiscItems = 0;
 
@@ -683,7 +696,8 @@ class SalesOrderController extends Controller
             $so->update([
                 'so_number'           => $request->so_number,
                 'transaction_date'    => $request->transaction_date,
-                'contact_name'        => $request->contact_name,
+                'contact_name'        => $contactName,
+                'party_id'            => $party?->id,
                 'ref_number'          => $request->ref_number,
                 'salesman'            => $request->salesman,
                 'source'              => $request->source,
@@ -775,6 +789,34 @@ class SalesOrderController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal menghapus SO: ' . $e->getMessage());
         }
+    }
+
+    private function availableParties()
+    {
+        return Party::query()
+            ->where('active', true)
+            ->whereHas('roles', fn ($query) => $query->where('role', 'CUSTOMER')->where('active', true))
+            ->orderBy('legal_name')
+            ->get();
+    }
+
+    private function resolveParty(?int $partyId): ?Party
+    {
+        if (! $partyId) {
+            return null;
+        }
+
+        $party = Party::query()
+            ->whereKey($partyId)
+            ->where('active', true)
+            ->whereHas('roles', fn ($query) => $query->where('role', 'CUSTOMER')->where('active', true))
+            ->first();
+
+        if (! $party) {
+            throw ValidationException::withMessages(['party_id' => 'Party yang dipilih harus aktif dan memiliki peran customer.']);
+        }
+
+        return $party;
     }
 
 }

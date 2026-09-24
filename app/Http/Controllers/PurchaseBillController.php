@@ -13,7 +13,7 @@ use App\Models\Product;
 use App\Models\SystemLog;
 use Illuminate\Support\Facades\DB;
 use App\Support\DocumentSequence;
-use App\Support\JournalBalanceValidator;
+use App\Support\PostingService;
 use App\Services\InventorySyncService;
 
 class PurchaseBillController extends Controller
@@ -111,36 +111,35 @@ class PurchaseBillController extends Controller
             // Jurnal Akuntansi Otomatis
             $journalId = null;
             if ($grandTotal > 0) {
-                $journalHeader = JournalHeader::create([
-                    'transaction_date' => $request->bill_date,
-                    'evidence_number' => $bill->bill_number,
-                    'description' => "Tagihan Pembelian: {$bill->vendor_name} (" . $request->notes . ")",
-                    'source_doc_no' => $bill->bill_number,
-                    'transaction_type' => 'Purchase Bill',
-                ]);
-
-                $journalId = $journalHeader->getKey();
                 $now = now();
                 $jDetails = [];
 
                 // Debet: Akun Biaya / Persediaan per baris
                 foreach ($detailsToInsert as $d) {
-                    $jDetails[] = ['journal_id' => $journalId, 'account_code' => $d['account_code'], 'position' => 'DEBET', 'amount' => $d['amount'], 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null];
+                    $jDetails[] = ['account_code' => $d['account_code'], 'position' => 'DEBET', 'amount' => $d['amount'], 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null];
                 }
 
                 // Debet: Pajak (Jika ada PPN Masukan)
                 if ($taxAmount > 0) {
-                    $jDetails[] = ['journal_id' => $journalId, 'account_code' => config('coa.pajak_masukan'), 'position' => 'DEBET', 'amount' => $taxAmount, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null];
+                    $jDetails[] = ['account_code' => config('coa.pajak_masukan'), 'position' => 'DEBET', 'amount' => $taxAmount, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null];
                 }
 
                 // Kredit: Hutang / Kas Bank
-                $jDetails[] = ['journal_id' => $journalId, 'account_code' => $request->credit_account, 'position' => 'KREDIT', 'amount' => $grandTotal, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null];
+                $jDetails[] = ['account_code' => $request->credit_account, 'position' => 'KREDIT', 'amount' => $grandTotal, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null];
 
-                if (!JournalBalanceValidator::isBalanced($jDetails)) {
-                    throw new \Exception("Jurnal tagihan pembelian tidak balance. Silakan periksa konfigurasi pajak dan total.");
-                }
+                $journalHeader = PostingService::post(
+                    [
+                        'transaction_date' => $request->bill_date,
+                        'evidence_number' => $bill->bill_number,
+                        'description' => "Tagihan Pembelian: {$bill->vendor_name} (" . $request->notes . ")",
+                        'source_doc_no' => $bill->bill_number,
+                        'transaction_type' => 'Purchase Bill',
+                    ],
+                    $jDetails,
+                    "Jurnal tagihan pembelian tidak balance. Silakan periksa konfigurasi pajak dan total."
+                );
 
-                JournalDetail::insert($jDetails);
+                $journalId = $journalHeader->getKey();
             }
 
             // ============================================================

@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Modules\Platform\Models\Party;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SalesOrder extends Model
@@ -10,7 +12,7 @@ class SalesOrder extends Model
     protected $table = 'sales_orders';
 
     protected $fillable = [
-        'so_number', 'invoice_id', 'invoice_no', 'transaction_date', 'contact_name', 'ref_number', 'salesman',
+        'so_number', 'invoice_id', 'invoice_no', 'transaction_date', 'contact_name', 'party_id', 'ref_number', 'salesman',
         'source', 'store_name', 'location_name', 'remarks', 'is_tax_included',
         'receiver_name', 'receiver_address', 'receiver_phone', 'is_cod',
         'tracking_number', 'total_weight', 'is_marketplace_shipment', 'courier',
@@ -22,6 +24,11 @@ class SalesOrder extends Model
     public function details(): HasMany
     {
         return $this->hasMany(SalesOrderDetail::class, 'sales_order_id', 'id');
+    }
+
+    public function party(): BelongsTo
+    {
+        return $this->belongsTo(Party::class);
     }
 
     public function salesInvoice(): \Illuminate\Database\Eloquent\Relations\HasOne
