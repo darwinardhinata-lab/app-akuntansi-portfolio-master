@@ -195,7 +195,7 @@ class PlatformAccessTest extends TestCase
     {
         $foreign = $this->party($this->b);
         $base = ['transaction_date' => '2026-09-24', 'contact_name' => 'Forged', 'party_id' => $foreign->id,
-            'details' => [['qty' => 1, 'price' => 100]]];
+            'details' => [['item_code' => 'TEST-SKU', 'qty' => 1, 'price' => 100]]];
         $this->post(route('po.store'), $base + ['po_number' => 'PO-FORGED'])->assertSessionHasErrors('party_id');
         $this->post(route('so.store'), $base + ['so_number' => 'SO-FORGED', 'receiver_name' => 'Receiver'])->assertSessionHasErrors('party_id');
         $this->assertDatabaseMissing('purchase_orders', ['po_number' => 'PO-FORGED']);
@@ -207,7 +207,7 @@ class PlatformAccessTest extends TestCase
         $party = $this->party($this->a);
         $party->roles()->update(['active' => false]);
         $this->post(route('po.store'), ['po_number' => 'PO-INACTIVE', 'transaction_date' => '2026-09-24',
-            'contact_name' => 'Fallback', 'party_id' => $party->id, 'details' => [['qty' => 1, 'price' => 100]]])
+            'contact_name' => 'Fallback', 'party_id' => $party->id, 'details' => [['item_code' => 'TEST-SKU', 'qty' => 1, 'price' => 100]]])
             ->assertSessionHasErrors('party_id');
         $this->assertDatabaseMissing('purchase_orders', ['po_number' => 'PO-INACTIVE']);
     }

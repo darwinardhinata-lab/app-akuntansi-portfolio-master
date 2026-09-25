@@ -272,6 +272,10 @@ class SalesInvoiceController extends Controller
         DB::beginTransaction();
         try {
             $invoice = SalesInvoice::findOrFail($id);
+            if (config('platform.order_company_scope_enabled') && $invoice->sales_order_id) {
+                \App\Models\SalesOrder::whereKey($invoice->sales_order_id)->firstOrFail();
+            }
+
 
             // 1. Hapus Jurnal Akuntansi yang tercipta dari Faktur Ini
             $journalIds = JournalHeader::where('evidence_number', $invoice->invoice_number)->pluck('journal_id');
@@ -295,7 +299,11 @@ class SalesInvoiceController extends Controller
 
             // 3. Jika Faktur berasal dari SO, ubah status SO kembali ke APPROVED agar bisa diproses ulang
             if ($invoice->sales_order_id) {
-                DB::table('sales_orders')->where('id', $invoice->sales_order_id)->update(['status' => 'APPROVED']);
+                $orders = DB::table('sales_orders')->where('id', $invoice->sales_order_id);
+                if (config('platform.order_company_scope_enabled')) {
+                    $orders->where('company_id', app(\App\Modules\Platform\Support\OperationalCompany::class)->id());
+                }
+                $orders->update(['status' => 'APPROVED']);
             }
 
             // 4. Hapus Detail & Header Invoice

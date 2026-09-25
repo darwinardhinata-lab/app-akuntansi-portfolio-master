@@ -307,11 +307,14 @@ class ImportHistoricalSales extends Command
                     }
                     $inClause = implode(',', $chunkIds);
                     
+                    $ownerClause = config('platform.order_company_scope_enabled')
+                        ? ' AND company_id = '.(int) app(\App\Modules\Platform\Support\OperationalCompany::class)->id()
+                        : '';
                     DB::statement("
                         UPDATE sales_orders 
                         SET sub_total = CASE id {$cases} END, 
                             grand_total = CASE id {$cases} END 
-                        WHERE id IN ({$inClause})
+                        WHERE id IN ({$inClause}) {$ownerClause}
                     ");
                 }
             }

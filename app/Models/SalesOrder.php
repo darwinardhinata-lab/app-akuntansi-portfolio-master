@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SalesOrder extends Model
 {
+    use \App\Modules\Platform\Models\Concerns\OwnedByOperationalCompany;
+
     protected $table = 'sales_orders';
 
     protected $fillable = [

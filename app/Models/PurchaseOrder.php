@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PurchaseOrder extends Model
 {
+    use \App\Modules\Platform\Models\Concerns\OwnedByOperationalCompany;
+
     protected $table = 'purchase_orders';
 
     // FIX: Tambah semua kolom dari migration 2026_06_05_083603_add_tax_columns_to_purchase_orders

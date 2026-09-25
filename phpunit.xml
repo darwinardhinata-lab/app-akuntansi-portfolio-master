@@ -18,6 +18,7 @@
         </include>
     </source>
     <php>
+        <env name="PLATFORM_ORDER_COMPANY_SCOPE_ENABLED" value="false" force="true"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_URL" value="http://localhost"/>
         <!-- CEISA_ENABLED=true HANYA di lingkungan test: route modul customs

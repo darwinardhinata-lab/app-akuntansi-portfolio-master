@@ -315,11 +315,14 @@ class SalesOrderController extends Controller
                     }
                     $inClause = implode(',', $chunkIds);
                     
+                    $ownerClause = config('platform.order_company_scope_enabled')
+                        ? ' AND company_id = '.(int) app(\App\Modules\Platform\Support\OperationalCompany::class)->id()
+                        : '';
                     DB::statement("
                         UPDATE sales_orders 
                         SET sub_total = CASE id {$cases} END, 
                             grand_total = CASE id {$cases} END 
-                        WHERE id IN ({$inClause})
+                        WHERE id IN ({$inClause}) {$ownerClause}
                     ");
                 }
             }
@@ -480,6 +483,8 @@ class SalesOrderController extends Controller
             'party_id'         => 'nullable|integer|min:1',
             'receiver_name'    => 'required|string',
             'details'          => 'required|array|min:1',
+            'details.*.item_code' => 'required|string|max:100',
+            'details.*.description' => 'nullable|string|max:255',
             'details.*.qty'    => 'required|numeric|min:1',
             'details.*.price'  => 'required|numeric|min:0',
         ]);
@@ -525,7 +530,9 @@ class SalesOrderController extends Controller
                 'party_id'            => $party?->id,
                 'ref_number'          => $request->ref_number,
                 'salesman'            => $request->salesman,
-                'source'              => $request->source,
+                // sales_orders.source NOT NULL default 'MANUAL' (migration add_advanced_fields).
+                // Kirim NULL eksplisit akan melanggar constraint; pakai default kolom bila kosong.
+                'source'              => $request->input('source') ?: 'MANUAL',
                 'store_name'          => $request->store_name,
                 'location_name'       => $request->location_name,
                 'remarks'             => $request->remarks,
@@ -658,6 +665,8 @@ class SalesOrderController extends Controller
             'party_id'         => 'nullable|integer|min:1',
             'receiver_name'    => 'required|string',
             'details'          => 'required|array|min:1',
+            'details.*.item_code' => 'required|string|max:100',
+            'details.*.description' => 'nullable|string|max:255',
             'details.*.qty'    => 'required|numeric|min:1',
             'details.*.price'  => 'required|numeric|min:0',
         ]);
@@ -699,7 +708,7 @@ class SalesOrderController extends Controller
                 'party_id'            => $party?->id,
                 'ref_number'          => $request->ref_number,
                 'salesman'            => $request->salesman,
-                'source'              => $request->source,
+                'source'              => $request->input('source') ?: 'MANUAL',
                 'store_name'          => $request->store_name,
                 'location_name'       => $request->location_name,
                 'remarks'             => $request->remarks,

@@ -13,6 +13,9 @@
 <div class="container-fluid mx-auto mt-4 mb-5" style="max-width: 1400px;">
     <form action="{{ route('so.update', $so->id) }}" method="POST" id="form-so">
         @csrf
+        @if(config('platform.order_company_scope_enabled'))
+            <input type="hidden" name="context_company_id" value="{{ app(\App\Modules\Platform\Support\OperationalCompany::class)->id() }}">
+        @endif
         @method('PUT')
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="fw-bold mb-0 text-dark">{{ __('erp.edit_sales_order') }}</h4>

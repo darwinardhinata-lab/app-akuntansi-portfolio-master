@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withEvents(discover: false)
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
+            \App\Modules\Platform\Http\Middleware\RequireOperationalCompany::class,
             \App\Http\Middleware\SetLocaleMiddleware::class, // 💉 Injeksi Middleware Bahasa
         ]);
     })

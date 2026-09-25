@@ -65,7 +65,7 @@ class PurchaseReturnController extends Controller
             // OPTIMASI N+1 (N3): Preload semua PO detail & produk sekali saja,
             // bukan query per item (2 query per baris retur).
             $itemIds  = array_keys($request->items);
-            $poDetails = PurchaseOrderDetail::whereIn('id', $itemIds)->get()->keyBy('id');
+            $poDetails = PurchaseOrderDetail::where('purchase_order_id', $po->id)->whereIn('id', $itemIds)->get()->keyBy('id');
             $productIds = $poDetails->pluck('product_id')->filter()->unique()->toArray();
             $products   = Product::whereIn('id', $productIds)->get()->keyBy('id');
 

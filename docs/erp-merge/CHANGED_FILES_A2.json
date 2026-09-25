@@ -1,0 +1,188 @@
+{
+  "package": "ERP Marvel-Dard A2 — MGI order ownership and login identity",
+  "source_baseline": "Confirmed A1 + MGI Fresh Start source; compare individual baseline hashes before installing",
+  "deployment_scope": "Single active MGI deployment only; not full ERP multi-company",
+  "feature_flag": "PLATFORM_ORDER_COMPANY_SCOPE_ENABLED (default false)",
+  "runtime_validation": "NOT RUN in author environment; run targeted/full/MySQL verifier before activation",
+  "new_feature_test_methods": 26,
+  "new_mysql_test_methods": 4,
+  "metadata_files": [
+    "docs/erp-merge/CHANGED_FILES_A2.json"
+  ],
+  "files": [
+    {
+      "path": "app/Console/Commands/CheckOrderOwnership.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "b14a49b1d50d43fa429c4cda44fedabfee251d2cc6d52b7ee8643d3f3647f74c"
+    },
+    {
+      "path": "app/Console/Commands/ImportHistoricalSales.php",
+      "status": "modified",
+      "baseline_sha256": "bb8fdce2a9a041705111cc12aec6729ef3d17099c694c7ed95ca166eddf4fe60",
+      "result_sha256": "42af1c1ee3f034d55338c46e446e83f436355a58c36c075893ea794b73a29cf8"
+    },
+    {
+      "path": "app/Http/Controllers/PurchaseOrderController.php",
+      "status": "modified",
+      "baseline_sha256": "0fd3444e3bec0467eec4218f8ccbdf008411c143289e83e9fedc10df1c58768a",
+      "result_sha256": "d00a4a35adcdea7aeaa268dfe7d9ad8e64be67d8824daddddeb87673a98b1ce8"
+    },
+    {
+      "path": "app/Http/Controllers/PurchaseReturnController.php",
+      "status": "modified",
+      "baseline_sha256": "a1d182cddd5e19e9126ac37ca32369797c4f24bd549f203e2224fa8f8f6c7f9d",
+      "result_sha256": "364dc2aadae3143b32c43a1d58f09522126557fd5e2cd5b7c1441ffb2a8a1622"
+    },
+    {
+      "path": "app/Http/Controllers/SalesInvoiceController.php",
+      "status": "modified",
+      "baseline_sha256": "ed8f2dff090412d12df94cf6619b277814417aee7a9ed847e60046cd2509180c",
+      "result_sha256": "6d28c7a6c602d0ecd18d2bad0881d1dd12b3707097ae9574d667c5b9997adc5d"
+    },
+    {
+      "path": "app/Http/Controllers/SalesOrderController.php",
+      "status": "modified",
+      "baseline_sha256": "36e63d2567caf2ec895636c9d138ae465c79a7d06cac6e014829214850c93596",
+      "result_sha256": "40ad8d0af7257c91c30179774aeffef8364e66000fd89e821700cc029029be9f"
+    },
+    {
+      "path": "app/Models/PurchaseOrder.php",
+      "status": "modified",
+      "baseline_sha256": "12fecabd83ede8dc5ab59ba69b68dfc6a0af1693b3cc25df943bcf03d71ecfab",
+      "result_sha256": "6ebc126f010fa834910903e08ac44979eb9f058475f43e1eef7a7d0b56f61966"
+    },
+    {
+      "path": "app/Models/SalesOrder.php",
+      "status": "modified",
+      "baseline_sha256": "a49e9ed3e339ecc2ed402b3890aaa437f4510ea45eed82dcaed0f2edab23c840",
+      "result_sha256": "e63e3e610927710cdf4f1b5188f257f2758b9d0f39b8fe639af3c8f8e0e40094"
+    },
+    {
+      "path": "app/Modules/Platform/Http/Middleware/RequireOperationalCompany.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "982bc0a3c52231039938e4185b62d52297b6de8210b17a89869373e5aa9477e9"
+    },
+    {
+      "path": "app/Modules/Platform/Models/Concerns/OwnedByOperationalCompany.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "2ccc999c2679f2904b17fba1e0d39f34b46a905562f1c96923918f87cdb9b845"
+    },
+    {
+      "path": "app/Modules/Platform/Support/OperationalCompany.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "29fec528e111ab82a81570b5fe63d5f0ef64ae74a99c110f37994695b4b29716"
+    },
+    {
+      "path": "bootstrap/app.php",
+      "status": "modified",
+      "baseline_sha256": "964cc9f9c72b611b8c9546448f28b673515ad03c80f60ad6ff13316f09b1939f",
+      "result_sha256": "37af45688231e9342ae9a57f75c1f89c194d64b12f305750cd84cbaa561e1c50"
+    },
+    {
+      "path": "config/platform.php",
+      "status": "modified",
+      "baseline_sha256": "6dea9f66626b1fb9009d4b74a8584407a83f3122cff217e2a4ca93f0659bba51",
+      "result_sha256": "0d3de3f34d38311d89a5408fe77536db166c2dfc0341fc473718983b91c793d1"
+    },
+    {
+      "path": "database/migrations/2026_09_24_150001_add_company_id_to_purchase_orders.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "14b3b778c9f9e44ae1161eda995241a73e65b1bd623918eedae154c4964c4ebe"
+    },
+    {
+      "path": "database/migrations/2026_09_24_150002_add_company_id_to_sales_orders.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "865720254bc949ae12bc1bc7bd8b41e6cd0bee32272fe95886dd8dc5e746429d"
+    },
+    {
+      "path": "docs/erp-merge/PROMPT_ANTIGRAVITY_A2.md",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "95b845ac8777e43544d16f4a40cd919d3b3c3dad529f70bb6b37d6c85b564329"
+    },
+    {
+      "path": "docs/erp-merge/README_A2.md",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "74f8acf50be7f76f06a82808b9675959813ac3cd61a96c80e56b4cac82b980c0"
+    },
+    {
+      "path": "phpunit.a2-mysql.xml",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "bb8413dd8760346955e091c2aa0aa43733035a4bd767554e8aeaa4695cd77d11"
+    },
+    {
+      "path": "phpunit.mgi-mysql.xml",
+      "status": "modified",
+      "baseline_sha256": "66ac631c139ddc7762f3ba8934d9f63deb28b31f548446917ef89e0752faf966",
+      "result_sha256": "ee3c21f54676c28edb373f61e2b0131fa0dc52b017c325e56d5100379e343230"
+    },
+    {
+      "path": "phpunit.xml",
+      "status": "modified",
+      "baseline_sha256": "42b587a37339337b1ed2967fca4c6fb62f6a2382f5106ee81c2e90d2fdb0ccf9",
+      "result_sha256": "beeb43e76013ee02145e11b06a2c1f12ab90fa49b2032dbbcedc9168f9677aab"
+    },
+    {
+      "path": "resources/views/auth/login.blade.php",
+      "status": "modified",
+      "baseline_sha256": "61057bfde8b46329094d30ce40f7a124eecae8736eab18dda96c5a78fc661a4e",
+      "result_sha256": "e2eb8548b1e3b84a28aa41b9f0fa9de60794d3cf0b14abd6a6a0eea76d1bd3b9"
+    },
+    {
+      "path": "resources/views/purchase_order/create.blade.php",
+      "status": "modified",
+      "baseline_sha256": "194cea1db6c8546d2ad568355927a1a794e951340da0dc5fa4941a32adc320a0",
+      "result_sha256": "77944af245a71632b5119f1d085bafaab4f778210d8fa87261bc0fe5d370b2cb"
+    },
+    {
+      "path": "resources/views/purchase_order/edit.blade.php",
+      "status": "modified",
+      "baseline_sha256": "2641b604d4259684328e2f755d90933ec841a9301d3fd4ca22d947cb4d49a530",
+      "result_sha256": "8c3128ad21b6840ea7cf66f813bb7fdb31b909686690d50803e6d9049139e098"
+    },
+    {
+      "path": "resources/views/sales_order/create.blade.php",
+      "status": "modified",
+      "baseline_sha256": "e1737be1fd971f28aad3e5d7d3439338b9c10f0374c1e02029b2fe5fd2b4b04f",
+      "result_sha256": "e192876d0fb2a2fc9dc71a523579bfb72b2dd7dfc8b57cb01c355d1a326dc1d6"
+    },
+    {
+      "path": "resources/views/sales_order/edit.blade.php",
+      "status": "modified",
+      "baseline_sha256": "3c18e73985ae00d6495be43eea83ee889b3e38a26fc0ae7b00f4165cf1664e1e",
+      "result_sha256": "e1eff9b860e3e9ed0f6632bcd7589b5b3ef1a60606423468de7901bab79f845f"
+    },
+    {
+      "path": "tests/Feature/OrderCompanyOwnershipTest.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "d5a9a7bf3f96983a6bd02b4b2b8d8df697efe9ba273a289d031fb7177d736045"
+    },
+    {
+      "path": "tests/Feature/PlatformAccessTest.php",
+      "status": "modified",
+      "baseline_sha256": "aa9cbe3311f3ab062603ff5b95e9b8ec12bc8b2edab344a457e8c375c2ece7c8",
+      "result_sha256": "04ed0b5efddeba59d366a64c49179e97ceabf044b209923195250f4dfbd171c7"
+    },
+    {
+      "path": "tests/Integration/OrderOwnershipMysqlTest.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "80d9f244021b1a9f4ee38c06a8d6fad483cffa89e707fa5a66a05e1fef15445d"
+    },
+    {
+      "path": "tools/verify-platform-a2.ps1",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "00bbcc13c71456af0e41d739841d5067746339ead63b57a8269266f184afee11"
+    }
+  ]
+}

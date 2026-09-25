@@ -119,6 +119,8 @@ class PurchaseOrderController extends Controller
             'contact_name'     => 'required|string',
             'party_id'         => 'nullable|integer|min:1',
             'details'          => 'required|array|min:1',
+            'details.*.item_code' => 'required|string|max:100',
+            'details.*.description' => 'nullable|string|max:255',
             'details.*.qty'    => 'required|numeric|min:1',
             'details.*.price'  => 'required|numeric|min:0',
         ]);
@@ -181,7 +183,11 @@ class PurchaseOrderController extends Controller
                 if(isset($det['qty']) && $det['qty'] > 0) {
                     $detailsToInsert[] = [
                         'purchase_order_id' => $po->id,
-                        'product_id'        => $det['product_id'],
+                        'product_id'        => null,
+                        'item_code'         => $det['item_code'],
+                        'description'       => $det['description'] ?? '-',
+                        'qty_received'      => 0,
+                        'amount'            => $det['price'] * $det['qty'],
                         'qty'               => $det['qty'],
                         'price'             => $det['price'],
                         'created_at'        => $now,
@@ -194,7 +200,7 @@ class PurchaseOrderController extends Controller
 
             DB::commit();
             SystemLog::record('CREATE', 'Purchase Order', 'Menambahkan PO: ' . $request->po_number);
-            return redirect()->route('purchase-order.index')->with('success', 'Data berhasil disimpan.');
+            return redirect()->route('po.index')->with('success', 'Data berhasil disimpan.');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
@@ -282,12 +288,11 @@ class PurchaseOrderController extends Controller
                     'item_code'         => $itemCode,
                     'description'       => trim($r[3] ?? ''),
                     'price'             => $price,
-                    'qty_ordered'       => $qty,
+                    'qty'               => $qty,
                     'qty_received'      => 0, // Default belum datang (Gudang yang update)
                     'disc_amount'       => $discAmount,
                     'tax_amount'        => $taxAmount,
                     'amount'            => $amount,
-                    'subtotal'          => $amount, // Sama dengan amount
                     'created_at'        => now(),
                     'updated_at'        => now(),
                 ];
@@ -369,6 +374,8 @@ class PurchaseOrderController extends Controller
             'contact_name'     => 'required|string',
             'party_id'         => 'nullable|integer|min:1',
             'details'          => 'required|array|min:1',
+            'details.*.item_code' => 'required|string|max:100',
+            'details.*.description' => 'nullable|string|max:255',
             'details.*.qty'    => 'required|numeric|min:1',
             'details.*.price'  => 'required|numeric|min:0',
         ]);

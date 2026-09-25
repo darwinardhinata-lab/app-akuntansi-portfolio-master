@@ -5,7 +5,7 @@
          colors="true"
 >
     <testsuites>
-        <testsuite name="MGI MySQL Integration"><directory>tests/Integration</directory></testsuite>
+        <testsuite name="A2 MySQL Integration"><file>tests/Integration/OrderOwnershipMysqlTest.php</file></testsuite>
     </testsuites>
     <source>
         <include>
