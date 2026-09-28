@@ -32,6 +32,16 @@ class PostingService
             throw new Exception($message);
         }
 
+        // FIX: Kolom 'description' tidak ada di journal_headers dan tidak masuk $fillable, sehingga
+        // narasi jurnal dari semua pemanggil terbuang diam-diam. Petakan ke 'notes' (kolom yang
+        // dibaca JournalController/LedgerController sebagai keterangan) bila 'notes' belum diisi.
+        if (array_key_exists('description', $headerAttributes)) {
+            if (! isset($headerAttributes['notes']) || $headerAttributes['notes'] === '') {
+                $headerAttributes['notes'] = $headerAttributes['description'];
+            }
+            unset($headerAttributes['description']);
+        }
+
         $header = JournalHeader::create($headerAttributes);
         $rows = [];
 
