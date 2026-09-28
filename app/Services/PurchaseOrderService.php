@@ -214,15 +214,26 @@ class PurchaseOrderService
 
             // FIX: Temukan semua evidence_number terkait penerimaan PO ini melalui Inventory Ledger
             // Karena saat penerimaan, evidence bisa berupa 'BIL-...' atau inputan manual user, BUKAN RCV-
+            // FIX: Prefix LIKE lama ("Penerimaan PO: PO-1%") ikut mencocokkan PO-10, PO-100, dst,
+            // sehingga void satu PO bisa menghapus jurnal/kartu stok PO lain. Sekarang dicocokkan
+            // persis sampai kata " dari " dan karakter wildcard (% _ \) pada nomor PO di-escape.
+            $escapedPoNumber = addcslashes((string) $po->po_number, '%_\\');
             $evidenceNumbers = DB::table('inventory_ledgers')
-                ->where('description', 'LIKE', "Penerimaan PO: {$po->po_number}%")
+                ->where('description', 'LIKE', "Penerimaan PO: {$escapedPoNumber} dari %")
                 ->pluck('evidence_number')
+                ->unique()
+                ->values()
                 ->toArray();
 
             if (!empty($evidenceNumbers)) {
                 // 1. Batch delete jurnal akuntansi
                 $journalIds = JournalHeader::whereIn('evidence_number', $evidenceNumbers)->pluck('journal_id');
                 if ($journalIds->isNotEmpty()) {
+                    // FIX: Lepas tautan purchase_bills.journal_id sebelum jurnal dihapus agar tidak
+                    // menyisakan referensi menggantung ke jurnal yang sudah tidak ada.
+                    DB::table('purchase_bills')
+                        ->whereIn('journal_id', $journalIds)
+                        ->update(['journal_id' => null, 'updated_at' => now()]);
                     DB::table('journal_details')->whereIn('journal_id', $journalIds)->delete();
                     DB::table('journal_headers')->whereIn('journal_id', $journalIds)->delete();
                 }
