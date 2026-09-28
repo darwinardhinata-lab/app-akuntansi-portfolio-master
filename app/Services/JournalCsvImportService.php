@@ -228,6 +228,7 @@ class JournalCsvImportService
                 if ($allHeadersToDelete->isNotEmpty()) {
                     $chunks = array_chunk($allHeadersToDelete->toArray(), 200);
                     foreach ($chunks as $chunk) {
+                        \App\Support\GrnProtection::journals($chunk);
                         DB::table('journal_details')->whereIn('journal_id', $chunk)->delete();
                         DB::table('journal_headers')->whereIn('journal_id', $chunk)->delete();
                     }

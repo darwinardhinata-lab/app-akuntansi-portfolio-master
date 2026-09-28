@@ -276,6 +276,7 @@ class JournalController extends Controller
             }
 
             $journalIds = $journals->pluck('journal_id')->toArray();
+            \App\Support\GrnProtection::journals($journalIds);
 
             if (!empty($journalIds)) {
                 // Hapus aset tetap yang terhubung ke detail jurnal yang akan dihapus

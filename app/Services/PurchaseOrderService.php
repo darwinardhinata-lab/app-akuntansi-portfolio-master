@@ -13,7 +13,26 @@ use Exception;
 
 class PurchaseOrderService
 {
-    public function receivePartialOrder($poId, $receiveDate, $itemsToReceive, $billNumber = null, $dueDate = null)
+    public function receivePartialOrder($poId, $receiveDate, $itemsToReceive, $billNumber = null, $dueDate = null, $requestKey = null)
+    {
+        $po = PurchaseOrder::findOrFail($poId);
+        if (config('platform.grn_enabled', false) || $po->receipt_mode === 'GRN_V1') {
+            return app(GrnReceivingService::class)->receive($poId, $receiveDate, $itemsToReceive, $billNumber, $dueDate, $requestKey,
+                fn ($id, $date, $items, $bill, $due, $accounts) => $this->receiveLegacy($id, $date, $items, $bill, $due, $accounts));
+        }
+        return DB::transaction(function () use ($poId, $receiveDate, $itemsToReceive, $billNumber, $dueDate) {
+            $locked = PurchaseOrder::lockForUpdate()->findOrFail($poId);
+            // Recheck after waiting on the lock: a concurrent GRN may have bound the PO.
+            \App\Support\GrnProtection::po($locked);
+            if (\Illuminate\Support\Facades\Schema::hasColumn('purchase_orders', 'receipt_mode')) {
+                $locked->receipt_mode = 'LEGACY';
+                $locked->save();
+            }
+            return $this->receiveLegacy($poId, $receiveDate, $itemsToReceive, $billNumber, $dueDate);
+        });
+    }
+
+    protected function receiveLegacy($poId, $receiveDate, $itemsToReceive, $billNumber = null, $dueDate = null, ?array $grnAccounts = null)
     {
         DB::beginTransaction();
         try {
@@ -40,7 +59,8 @@ class PurchaseOrderService
                     ->first();
             }
 
-            $akunKredit = $paymentPlan ? config('coa.uang_muka_beli') : config('coa.hutang_usaha');
+            $akunDebet = $grnAccounts['inventory'] ?? config('coa.persediaan');
+            $akunKredit = $grnAccounts['payable'] ?? ($paymentPlan ? config('coa.uang_muka_beli') : config('coa.hutang_usaha'));
 
             $totalNominalDiterimaSkrg = 0;
             $allCompleted = true;
@@ -158,7 +178,7 @@ class PurchaseOrderService
                     'transaction_type' => 'Purchase Bill',
                 ],
                 [
-                    ['account_code' => config('coa.persediaan'), 'helper_code' => null, 'position' => 'DEBET',  'amount' => $totalNominalDiterimaSkrg, 'created_at' => $now, 'updated_at' => $now],
+                    ['account_code' => $akunDebet, 'helper_code' => null, 'position' => 'DEBET',  'amount' => $totalNominalDiterimaSkrg, 'created_at' => $now, 'updated_at' => $now],
                     ['account_code' => $akunKredit, 'helper_code' => null, 'position' => 'KREDIT', 'amount' => $totalNominalDiterimaSkrg, 'created_at' => $now, 'updated_at' => $now],
                 ]
             );
@@ -186,6 +206,7 @@ class PurchaseOrderService
         try {
             // B13 FIX: Lock baris PO agar void tidak bentrok dengan receive paralel
             $po = PurchaseOrder::lockForUpdate()->findOrFail($poId);
+            \App\Support\GrnProtection::po($po);
 
             if ($po->status === 'APPROVED') {
                 throw new Exception("Gagal: PO ini belum pernah diterima.");

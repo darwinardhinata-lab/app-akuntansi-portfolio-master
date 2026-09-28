@@ -41,7 +41,10 @@ class JournalHeader extends Model
 
     protected static function booted(): void
     {
+        static::updating(fn (JournalHeader $header) => \App\Support\GrnProtection::journals([$header->getKey()]));
+        static::deleting(fn (JournalHeader $header) => \App\Support\GrnProtection::journals([$header->getKey()]));
         static::creating(function (JournalHeader $header) {
+            \App\Support\GrnProtection::evidence($header->evidence_number);
             // Jika jurnal dibuat manual (ID kosong), pakai generator JRN- Anda
             if (empty($header->journal_id)) {
                 $header->journal_id = static::generateNextId();

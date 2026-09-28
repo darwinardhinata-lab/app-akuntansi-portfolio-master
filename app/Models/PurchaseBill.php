@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class PurchaseBill extends Model
 {
     protected $fillable = [
+        'bill_date', 'due_date', 'vendor_name', 'credit_account', 'notes',
         'bill_number',
         'purchase_order_id',
         'transaction_date',

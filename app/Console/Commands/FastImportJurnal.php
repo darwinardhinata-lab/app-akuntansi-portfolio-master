@@ -106,6 +106,7 @@ class FastImportJurnal extends Command
         foreach (array_chunk($evList, 500) as $chunk) {
             $idsToDelete = DB::table('journal_headers')->whereIn('evidence_number', $chunk)->pluck('journal_id');
             if ($idsToDelete->isNotEmpty()) {
+                \App\Support\GrnProtection::journals($idsToDelete);
                 DB::table('journal_details')->whereIn('journal_id', $idsToDelete)->delete();
                 DB::table('journal_headers')->whereIn('journal_id', $idsToDelete)->delete();
                 $deletedCount += $idsToDelete->count();

@@ -18,6 +18,7 @@
         </include>
     </source>
     <php>
+        <env name="PLATFORM_GRN_ENABLED" value="false" force="true"/>
         <env name="PLATFORM_ORDER_COMPANY_SCOPE_ENABLED" value="false" force="true"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_URL" value="http://localhost"/>
@@ -27,7 +28,9 @@
              tetap dikontrol eksplisit via config(['customs.enabled' => ...]).
              Default di config/customs.php, .env, dan .env.example TETAP false. -->
         <env name="CEISA_ENABLED" value="true"/>
-        <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <!-- Isolate PHPUnit HTTP tests from storage/framework/down in the deployed app. -->
+        <env name="APP_MAINTENANCE_DRIVER" value="cache" force="true"/>
+        <env name="APP_MAINTENANCE_STORE" value="array" force="true"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>

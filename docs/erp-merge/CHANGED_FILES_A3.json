@@ -1,0 +1,225 @@
+{
+  "package": "ERP Marvel-Dard A3 — GRN compatibility V1",
+  "source_baseline": "A2 Activated uploaded 2026-09-25",
+  "baseline_archive_sha256": "020d5346b0b51e313f84f1b9c688df92edd7e8a4e2a9f1ed217a6b17929f410f",
+  "runtime_validation": "NOT RUN: PHP/MySQL/PowerShell unavailable in author environment",
+  "feature_flag": "PLATFORM_GRN_ENABLED (default false; durable GRN documents remain routed to GRN)",
+  "business_scope": "Single MGI; plain AP without tax/discount/advance; one new Bill per receipt; reversal not implemented",
+  "sqlite_a3_tests_prepared": 20,
+  "mysql_a3_tests_prepared": 19,
+  "metadata_files": [
+    "docs/erp-merge/CHANGED_FILES_A3.json"
+  ],
+  "files": [
+    {
+      "path": "app/Console/Commands/CheckGrnReadiness.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "ff98e5020f7e1a553f1bdfa47d330226d30ab070d6faf443d4f7a8f37eddc948"
+    },
+    {
+      "path": "app/Console/Commands/FastImportJurnal.php",
+      "status": "modified",
+      "baseline_sha256": "350c9357aed9598adbb36b7833813b05dbb289ff97a3a3433f0f8f43874ce9f5",
+      "result_sha256": "3aca90f033aa6bfecd834c26d691f09565550e0754351e5fc4ce9d064386b860"
+    },
+    {
+      "path": "app/Console/Commands/FastImportPO.php",
+      "status": "modified",
+      "baseline_sha256": "e8abd02b80031d460ec2eb40393d5d9939e225c385dfac4d8285d64f78b4e0a8",
+      "result_sha256": "786cc1eab99b0b0a436ef7872aa43b5797771413cc39969114d3037adfce8362"
+    },
+    {
+      "path": "app/Console/Commands/FastSyncJurnal.php",
+      "status": "modified",
+      "baseline_sha256": "fccab2a2fe7ca5b908f3db8d2b359ee8e738679b721ed86bf7984453bf60880d",
+      "result_sha256": "87b91289e5ff57ec580d32abfcf88583b248576c485de9149d73dbddfa027dcc"
+    },
+    {
+      "path": "app/Http/Controllers/JournalController.php",
+      "status": "modified",
+      "baseline_sha256": "d29e4e40ac2f989d27a8cf698825f5a3dbe5266e9e2d42411839c7e8d1b5c228",
+      "result_sha256": "3d67357e1271be6cdc6f20b0d7ac2731b4262d95c9827077703abbad6cd307d0"
+    },
+    {
+      "path": "app/Http/Controllers/PurchaseBillController.php",
+      "status": "modified",
+      "baseline_sha256": "928a1763d8713208880e02cd7bb550282cd4370bb91fd23b85ff669e796ab623",
+      "result_sha256": "1cbddb5f03efe0058aaa0ed2753f0186bc874624bfe98ab50e2c3ac89d9164ff"
+    },
+    {
+      "path": "app/Http/Controllers/PurchaseOrderController.php",
+      "status": "modified",
+      "baseline_sha256": "d00a4a35adcdea7aeaa268dfe7d9ad8e64be67d8824daddddeb87673a98b1ce8",
+      "result_sha256": "316d8707657a9cbff26be885ef218c0ce161a5498839db399bc7d1d7379cebfb"
+    },
+    {
+      "path": "app/Http/Controllers/PurchaseReceiptController.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "c4dfbd582adbfa0c664093f6d7e66fe9c13a459611def86d044c2433bda486a5"
+    },
+    {
+      "path": "app/Imports/JournalImport.php",
+      "status": "modified",
+      "baseline_sha256": "193cc8ae336b31c3837cfe4ea01e62150242414e9e88c21517e3f588e3a30140",
+      "result_sha256": "0681d80b984f5edfe6a1a53e86c339a1f061cb2a1177d071bf17d1e2004df8b6"
+    },
+    {
+      "path": "app/Models/JournalHeader.php",
+      "status": "modified",
+      "baseline_sha256": "9edff309b7f0d5ae5e9806bf8335069eeebb542ab7d892909a5deaa5e3c6ab12",
+      "result_sha256": "db6ef1553277a967b10225c31863d21a7bc9600c8a87c8b7660da1558a1bc951"
+    },
+    {
+      "path": "app/Models/PurchaseBill.php",
+      "status": "modified",
+      "baseline_sha256": "a52f722f7decb7a438c95a90f1556c2c7a2abeee92f172c62d991a35fb534604",
+      "result_sha256": "2c36a77a7d55fb3f435d81e88090f08d4597516d0ed945158f87ce18f62a9a90"
+    },
+    {
+      "path": "app/Services/GrnReceivingService.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "39af03c55f870d67639a40972c107bca9929a9a524d3c87e5ae148bdf3618b24"
+    },
+    {
+      "path": "app/Services/InventorySyncService.php",
+      "status": "modified",
+      "baseline_sha256": "6dfe4bd26d48a732809c0178a2d8de559ddb2852f7116d1c253457a8aac6ef24",
+      "result_sha256": "39e68696731207a706baeff5e3bf198e4aae177a6bed911705216ef17e9a9ff6"
+    },
+    {
+      "path": "app/Services/JournalCsvImportService.php",
+      "status": "modified",
+      "baseline_sha256": "e421364eb0e90b2293ef030b218734164ff3b1f1afa3ebc2dc8f5170054b622f",
+      "result_sha256": "832ed639a4621dee3aa1e42afd5b2eb60f2421088763dd3b1468357f194ecd9e"
+    },
+    {
+      "path": "app/Services/PurchaseOrderService.php",
+      "status": "modified",
+      "baseline_sha256": "99c69e11562ffc983f8ec802ba3b5b99e08ce2caccf6aea17c67667ac968b34f",
+      "result_sha256": "f381ef45399a5833d2678e8b40b3c25d6620a03d33599fa43f0339e8573c93fa"
+    },
+    {
+      "path": "app/Support/GrnProtection.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "c77ed821c8e3ad0ec7d70c210c3980a4c6619bc74f00ec129593ba4ab4f6cdc0"
+    },
+    {
+      "path": "config/platform.php",
+      "status": "modified",
+      "baseline_sha256": "0d3de3f34d38311d89a5408fe77536db166c2dfc0341fc473718983b91c793d1",
+      "result_sha256": "1dcdae74155a3021b96e047d3f9c43dfe6c97224dc04247f91373f31ad2aeebd"
+    },
+    {
+      "path": "database/migrations/2026_09_25_090001_add_grn_posting_contract.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "3c4b86618a60c1a5e076b1cda0e72cc9170a1ff21b9406ce32358889ba2c15b9"
+    },
+    {
+      "path": "docs/erp-merge/PROMPT_ANTIGRAVITY_A3.md",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "0e51bb062c7874073fba1461bceb83ebedfe822317f6ecd9b8974c487cd03506"
+    },
+    {
+      "path": "docs/erp-merge/README_A3.md",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "3389eb7c323be1de9a1acdf009f6771fd07243f391023d34c3f8a7338a98a0e7"
+    },
+    {
+      "path": "phpunit.a2-mysql.xml",
+      "status": "modified",
+      "baseline_sha256": "bb8413dd8760346955e091c2aa0aa43733035a4bd767554e8aeaa4695cd77d11",
+      "result_sha256": "19bfe865c0d5e4cb0d952f1a8d1855cf7e3feb525d80a6d8e04ae7746d870a22"
+    },
+    {
+      "path": "phpunit.a3-mysql.xml",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "6f5f49dc5f3d0e6d9b8a0f28a7cbf9500cff78551f9cf57c7af36bf87b0cf0f6"
+    },
+    {
+      "path": "phpunit.mgi-mysql.xml",
+      "status": "modified",
+      "baseline_sha256": "ee3c21f54676c28edb373f61e2b0131fa0dc52b017c325e56d5100379e343230",
+      "result_sha256": "683877c540114183abf98bda66ef32161194144a38bdd43e33469f483659ed34"
+    },
+    {
+      "path": "phpunit.xml",
+      "status": "modified",
+      "baseline_sha256": "beeb43e76013ee02145e11b06a2c1f12ab90fa49b2032dbbcedc9168f9677aab",
+      "result_sha256": "544bf4c886142dd18d493aaae5fe3a882f8b292886229cbc878f4954659b4c77"
+    },
+    {
+      "path": "resources/views/purchase_bill/index.blade.php",
+      "status": "modified",
+      "baseline_sha256": "41bcde3681a110a6e4fc8db024931abcd1bf91c44d122c24629c628af2e0da8e",
+      "result_sha256": "2f90d59d1881e00f48f3612c1ddb6e8061fa55f9788758a054613288fc95c816"
+    },
+    {
+      "path": "resources/views/purchase_order/index.blade.php",
+      "status": "modified",
+      "baseline_sha256": "fad134e71e11bd3de5bcc50c789154dd720a4fef92097d65f8355949f9d2cb4e",
+      "result_sha256": "3e6cd4bcf3fad3c813117338c0a979e4518464331fa66ad2156f7038c185af7a"
+    },
+    {
+      "path": "resources/views/purchase_receipts/context.blade.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "5fd59a193173be3c0c0de201bcc760293cace4d9fb429c75d4abcf9cadfe46dd"
+    },
+    {
+      "path": "resources/views/purchase_receipts/index.blade.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "b3b2ec7679a5ecd6c86d5b6b086f134706dea66d28eddf7c7d907be307f489f8"
+    },
+    {
+      "path": "resources/views/purchase_receipts/show.blade.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "7d9b77bc390eaba3917000b7bcd9e57201676f3138725041536cf788d6d66f1c"
+    },
+    {
+      "path": "resources/views/warehouse/create_inbound.blade.php",
+      "status": "modified",
+      "baseline_sha256": "9fdf117b73673bbe2b6248d7c8fe3b9599fab5538905f61939f236228250b25b",
+      "result_sha256": "8e84da0ef6d137111ff46032993afd36b96e29dc0e60aea2cb159f90c75625fa"
+    },
+    {
+      "path": "routes/web.php",
+      "status": "modified",
+      "baseline_sha256": "11ecdd3e5bf14b45acb8262495eb6b077f477f60bf3c4cffc28858ddfd26f21a",
+      "result_sha256": "e3f6e905e16bd7292e73d117f9b428684afe1db75a0a4f92e3b81163e7f2c95b"
+    },
+    {
+      "path": "tests/Concerns/GrnScenarios.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "b811028115d928d9d2a09ed13aebdc9ae84ba17d7b34b65d1fbd9e7e77a25b76"
+    },
+    {
+      "path": "tests/Feature/GrnReceivingTest.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "906fbf60bf4ce933e76e565ddd02088cb34bc5be2bd03d95f4cd18f8d9ed53fd"
+    },
+    {
+      "path": "tests/Integration/GrnReceivingMysqlTest.php",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "5de150abedec7e7a6259072fcbde011a1879b7029ddf52719b7f64068b5890ca"
+    },
+    {
+      "path": "tools/verify-platform-a3.ps1",
+      "status": "added",
+      "baseline_sha256": null,
+      "result_sha256": "8c114c349bfe080cdfb8eddc689bcc28c7f5610dcf9ffcfffad56777f9c7c300"
+    }
+  ]
+}

@@ -86,6 +86,7 @@ class InventorySyncService
         string $description = '',
         bool $execute = true
     ): array {
+        \App\Support\GrnProtection::evidence($evidenceNumber);
         // 1. Map doc type to direction
         $direction = self::STOCK_DIRECTIONS[$docType] ?? null;
         if ($direction === null) {
@@ -265,6 +266,7 @@ class InventorySyncService
      */
     public function reverseStockMovements(string $evidenceNumber, string $docType): array
     {
+        \App\Support\GrnProtection::evidence($evidenceNumber);
         $direction = self::STOCK_DIRECTIONS[$docType] ?? 'IN';
         $reverseDirection = $direction === 'IN' ? 'OUT' : 'IN';
 

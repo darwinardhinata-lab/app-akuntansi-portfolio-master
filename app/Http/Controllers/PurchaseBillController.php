@@ -36,8 +36,8 @@ class PurchaseBillController extends Controller
         $search = $request->get('search');
         $bills = PurchaseBill::when($search, function($q) use ($search) {
                 $q->where('bill_number', 'like', "%{$search}%")
-                  ->orWhere('contact_name', 'like', "%{$search}%");
-            })->orderBy('transaction_date', 'desc')->paginate(50);
+                  ->orWhere('vendor_name', 'like', "%{$search}%");
+            })->orderBy('bill_date', 'desc')->paginate(50);
 
         return view('purchase_bill.index', compact('bills', 'search'));
     }
@@ -179,7 +179,8 @@ class PurchaseBillController extends Controller
     {
         DB::beginTransaction();
         try {
-            $bill = PurchaseBill::findOrFail($id);
+            $bill = PurchaseBill::lockForUpdate()->findOrFail($id);
+            \App\Support\GrnProtection::bill((int) $bill->id);
 
             // 1. Reverse stock movements (BIL → IN) jika ada inventory ledger
             $inventoryService = new InventorySyncService();

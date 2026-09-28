@@ -67,6 +67,7 @@ class FastImportPO extends Command
 
                 // Generate / Cek Header
                 if (!isset($poHeaders[$poNumber])) {
+                    \App\Support\GrnProtection::po(PurchaseOrder::where('po_number', $poNumber)->lockForUpdate()->first());
                     $po = PurchaseOrder::updateOrCreate(
                         ['po_number' => $poNumber],
                         [

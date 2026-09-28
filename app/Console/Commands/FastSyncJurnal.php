@@ -125,6 +125,7 @@ class FastSyncJurnal extends Command
 
             if ($deletedCount > 0) {
                 $headersToDelete->chunk(5000)->each(function ($chunk) {
+                    \App\Support\GrnProtection::journals($chunk);
                     DB::table('journal_details')->whereIn('journal_id', $chunk)->delete();
                     DB::table('journal_headers')->whereIn('journal_id', $chunk)->delete();
                 });

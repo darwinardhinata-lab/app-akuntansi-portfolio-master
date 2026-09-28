@@ -22,6 +22,7 @@
         </div>
     </div>
 
+    @if(session('error')) <div class="alert alert-danger">{{ session('error') }}</div> @endif
     @if(session('success')) <div class="alert alert-success shadow-sm fw-bold">{{ session('success') }}</div> @endif
 
     <div class="card border-0 shadow-sm rounded-3">
@@ -40,9 +41,9 @@
                 <tbody>
                     @forelse($bills as $b)
                     <tr>
-                        <td class="ps-4 fw-medium">{{ date('d M Y', strtotime($b->transaction_date)) }}</td>
+                        <td class="ps-4 fw-medium">{{ date('d M Y', strtotime($b->bill_date)) }}</td>
                         <td class="fw-bold text-primary">{{ $b->bill_number }}</td>
-                        <td class="fw-bold text-dark">{{ $b->contact_name }}</td>
+                        <td class="fw-bold text-dark">{{ $b->vendor_name }}</td>
                         <td class="text-end fw-bold text-danger">Rp {{ number_format($b->grand_total, 0, ',', '.') }}</td>
                         <td class="text-center">
                             @if($b->payment_status == 'PAID') <span class="badge bg-success">{{ __('erp.status_paid_off') }}</span>

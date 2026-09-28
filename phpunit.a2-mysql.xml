@@ -13,6 +13,7 @@
         </include>
     </source>
     <php>
+        <env name="PLATFORM_GRN_ENABLED" value="false" force="true"/>
         <env name="PLATFORM_ORDER_COMPANY_SCOPE_ENABLED" value="false" force="true"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_URL" value="http://localhost"/>

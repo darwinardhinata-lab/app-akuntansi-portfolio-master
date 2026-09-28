@@ -32,6 +32,7 @@
     @if($tab == 'pembelian')
         <form action="#" method="POST" id="form-pembelian">
             @csrf
+            @include('purchase_receipts.context')
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-header bg-white py-3"><h6 class="fw-bold m-0 text-primary">{{ __('erp.receive_goods_from_po') }}</h6></div>
                 <div class="card-body row g-3">

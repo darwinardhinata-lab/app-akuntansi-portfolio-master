@@ -5,6 +5,9 @@
 @endsection
 
 @section('content')
+@if(config('platform.grn_enabled') || \Illuminate\Support\Facades\Schema::hasColumn('purchase_receipts', 'purchase_bill_id'))
+<div class="mb-3"><a class="btn btn-outline-primary" href="{{ route('grn.index') }}">Riwayat Penerimaan / GRN</a></div>
+@endif
 <div class="container-fluid px-0">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
@@ -170,6 +173,7 @@
                                 <div class="modal-dialog modal-xl modal-dialog-centered">
                                     <form action="{{ route('po.receive', $o->id) }}" method="POST" class="modal-content border-0 shadow-lg">
                                         @csrf
+                                        @include('purchase_receipts.context')
                                         <div class="modal-header bg-success text-white py-3">
                                             <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-invoice-dollar me-2"></i> {{ __('erp.create_bill_receive_goods') }}</h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -200,7 +204,7 @@
                                             </div>
 
                                             <div class="alert alert-warning py-2 small mb-3 border-warning text-dark">
-                                                <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> <strong>{{ __('erp.important_colon') }}</strong> {{ __('erp.fill_column') }} <b>{{ __('erp.receive_now_short') }}</b> sesuai dengan barang fisik yang lolos QC/kondisi baik. Barang reject/cacat jangan dimasukkan agar Jurnal Aset tetap akurat. Jika ada barang datang lebih dari pesanan (Over-Receipt), Anda bisa mengisi melebihi angka pesanan.
+                                                <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> <strong>{{ __('erp.important_colon') }}</strong> {{ __('erp.fill_column') }} <b>{{ __('erp.receive_now_short') }}</b> sesuai dengan barang fisik yang lolos QC/kondisi baik. Barang reject/cacat jangan dimasukkan agar Jurnal Aset tetap akurat. Jumlah penerimaan tidak boleh melebihi sisa pesanan.
                                             </div>
 
                                             <div class="table-responsive bg-white border rounded">

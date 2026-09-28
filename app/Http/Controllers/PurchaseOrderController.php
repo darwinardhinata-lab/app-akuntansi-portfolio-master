@@ -263,6 +263,7 @@ class PurchaseOrderController extends Controller
 
                 // Simpan Header Unik ke Memory
                 if (!isset($poHeaders[$poNumber])) {
+                    \App\Support\GrnProtection::po(PurchaseOrder::where('po_number', $poNumber)->lockForUpdate()->first());
                     $po = PurchaseOrder::updateOrCreate(
                         ['po_number' => $poNumber],
                         [
@@ -321,6 +322,14 @@ class PurchaseOrderController extends Controller
 
     public function receiveItems(Request $request, $id)
     {
+        $ownerPo = PurchaseOrder::findOrFail($id);
+        if (config('platform.grn_enabled') || $ownerPo->receipt_mode === 'GRN_V1') {
+            $companyId = app(\App\Modules\Platform\Support\OperationalCompany::class)->id();
+            abort_unless((string) $request->input('context_company_id') === (string) $companyId, 409, 'Konteks form penerimaan sudah tidak sesuai.');
+            abort_if(array_key_exists('company_id', $request->all()), 422, 'Pemilik ditetapkan server.');
+            $request->validate(['request_key' => 'required|uuid']);
+        }
+
         $request->validate([
             'bill_number'  => 'required|string|max:100',
             'receive_date' => 'required|date',
@@ -334,7 +343,8 @@ class PurchaseOrderController extends Controller
                 $request->receive_date,
                 $request->items,
                 $request->bill_number,
-                $request->due_date
+                $request->due_date,
+                $request->input('request_key')
             );
             return redirect()->back()->with('success', 'Tagihan (Bill) berhasil dicatat! Jurnal Hutang dan Persediaan telah digenerate otomatis.');
         } catch (\Exception $e) {

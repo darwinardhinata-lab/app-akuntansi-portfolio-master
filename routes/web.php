@@ -36,6 +36,8 @@ Route::post('/form-pengajuan/kirim', [App\Http\Controllers\PaymentPlanController
 
 // ── Authenticated ERP routes ──────────────────────────────────
 Route::middleware(['auth'])->group(function () {
+    Route::get('/purchase-receipts', [\App\Http\Controllers\PurchaseReceiptController::class, 'index'])->name('grn.index');
+    Route::get('/purchase-receipts/{id}', [\App\Http\Controllers\PurchaseReceiptController::class, 'show'])->name('grn.show');
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
