@@ -13,6 +13,12 @@
             <p class="text-muted small mb-0">{{ __('erp.tax_desc') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
+            <form action="{{ route('tax.generate') }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-outline-primary fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
+                    <i class="fa-solid fa-arrows-rotate me-1"></i> Sinkronkan Pajak Indonesia
+                </button>
+            </form>
             <button type="submit" form="filterForm" name="export" value="excel" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
                 <i class="fa-solid fa-file-excel me-1"></i> {{ __('erp.export_excel_btn') }}
             </button>
@@ -24,6 +30,9 @@
 
     @if(session('success'))
         <div class="alert alert-success fw-bold shadow-sm">{{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger fw-bold shadow-sm">{{ session('error') }}</div>
     @endif
 
     <div class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
@@ -59,8 +68,8 @@
                     <tr>
                         <td class="ps-4 py-3 fw-bold text-dark">{{ $tax->tax_name }}</td>
                         <td class="text-center py-3">
-                            <span class="badge {{ $tax->type == 'addition' ? 'bg-success' : 'bg-danger' }}">
-                                {{ $tax->type == 'addition' ? 'PENAMBAH (PPN)' : 'PEMOTONG (PPh)' }}
+                            <span class="badge {{ $tax->tax_type === 'ADDITION' ? 'bg-success' : 'bg-danger' }}">
+                                {{ $tax->tax_type === 'ADDITION' ? 'PENAMBAH' : 'PEMOTONG' }}
                             </span>
                         </td>
                         <td class="text-center py-3 fw-bold">{{ number_format($tax->rate, 0) }}%</td>

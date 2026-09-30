@@ -10,13 +10,14 @@ class ScanHardcodedStrings extends Command
 {
     protected $signature = 'i18n:scan-hardcoded 
                             {--path=resources/views : Path to scan}
-                            {--output=hardcoded_report.json : Output file}
-                            {--verbose : Show detailed output}';
+                            {--output=hardcoded_report.json : Output file}';
 
     protected $description = 'Scan blade files for hardcoded strings that should be translated';
 
     private $existingTranslations = [];
+
     private $hardcodedStrings = [];
+
     private $stats = [
         'files_scanned' => 0,
         'hardcoded_found' => 0,
@@ -29,15 +30,16 @@ class ScanHardcodedStrings extends Command
         $this->loadExistingTranslations();
 
         $path = base_path($this->option('path'));
-        if (!File::exists($path)) {
+        if (! File::exists($path)) {
             $this->error("❌ Path tidak ditemukan: {$path}");
+
             return 1;
         }
 
         $files = File::allFiles($path);
-        $bladeFiles = array_filter($files, fn($f) => Str::endsWith($f->getFilename(), '.blade.php'));
+        $bladeFiles = array_filter($files, fn ($f) => Str::endsWith($f->getFilename(), '.blade.php'));
 
-        $this->info("📁 Ditemukan " . count($bladeFiles) . " file blade");
+        $this->info('📁 Ditemukan '.count($bladeFiles).' file blade');
 
         $bar = $this->output->createProgressBar(count($bladeFiles));
         $bar->start();
@@ -59,7 +61,7 @@ class ScanHardcodedStrings extends Command
     private function loadExistingTranslations()
     {
         $this->info('📚 Memuat terjemahan existing...');
-        
+
         foreach (['id', 'en', 'zh_CN'] as $locale) {
             $file = base_path("lang/{$locale}/erp.php");
             if (File::exists($file)) {
@@ -76,7 +78,7 @@ class ScanHardcodedStrings extends Command
     {
         foreach ($array as $key => $value) {
             $fullKey = $prefix ? "{$prefix}.{$key}" : $key;
-            
+
             if (is_array($value)) {
                 $this->flattenArray($value, $fullKey, $locale);
             } else {
@@ -90,7 +92,7 @@ class ScanHardcodedStrings extends Command
     {
         $this->stats['files_scanned']++;
         $content = File::get($file->getPathname());
-        $relativePath = Str::after($file->getPathname(), base_path() . '/');
+        $relativePath = Str::after($file->getPathname(), base_path().'/');
 
         // Pattern 1: HTML text nodes >Text<
         preg_match_all('/>([^<]{3,200})</', $content, $matches);
@@ -120,29 +122,38 @@ class ScanHardcodedStrings extends Command
     private function processText(string $text, string $file, string $type)
     {
         $text = trim(strip_tags($text));
-        
+
         // Skip if too short
-        if (strlen($text) < 3) return;
-        
+        if (strlen($text) < 3) {
+            return;
+        }
+
         // Skip if contains Blade syntax
-        if (preg_match('/\{\{!!|@if|@foreach|@endphp/', $text)) return;
-        
+        if (preg_match('/\{\{!!|@if|@foreach|@endphp/', $text)) {
+            return;
+        }
+
         // Skip if contains PHP/JS code patterns
-        if (preg_match('/^[\s]*[\#\.@\$]|where\(|route\(|function\(|var |let |const /', $text)) return;
-        
+        if (preg_match('/^[\s]*[\#\.@\$]|where\(|route\(|function\(|var |let |const /', $text)) {
+            return;
+        }
+
         // Skip if no letters (only numbers/symbols)
-        if (!preg_match('/[a-zA-Z\x{4e00}-\x{9fff}]/u', $text)) return;
-        
+        if (! preg_match('/[a-zA-Z\x{4e00}-\x{9fff}]/u', $text)) {
+            return;
+        }
+
         // Check if already translated
         if (isset($this->existingTranslations['by_value'][$text])) {
             $this->stats['already_translated']++;
+
             return;
         }
 
         // It's hardcoded!
         $this->stats['hardcoded_found']++;
-        
-        if (!isset($this->hardcodedStrings[$text])) {
+
+        if (! isset($this->hardcodedStrings[$text])) {
             $this->hardcodedStrings[$text] = [
                 'text' => $text,
                 'files' => [],
@@ -150,12 +161,12 @@ class ScanHardcodedStrings extends Command
                 'occurrences' => 0,
             ];
         }
-        
+
         $this->hardcodedStrings[$text]['files'][] = $file;
         $this->hardcodedStrings[$text]['types'][] = $type;
         $this->hardcodedStrings[$text]['occurrences']++;
 
-        if ($this->option('verbose')) {
+        if ($this->output->isVerbose()) {
             $this->line("  ⚠️  [{$type}] {$text}");
             $this->line("     → {$file}");
         }
@@ -164,9 +175,9 @@ class ScanHardcodedStrings extends Command
     private function generateReport()
     {
         $outputFile = base_path($this->option('output'));
-        
+
         // Sort by occurrences (most common first)
-        uasort($this->hardcodedStrings, fn($a, $b) => $b['occurrences'] <=> $a['occurrences']);
+        uasort($this->hardcodedStrings, fn ($a, $b) => $b['occurrences'] <=> $a['occurrences']);
 
         $report = [
             'generated_at' => now()->toIso8601String(),
@@ -175,7 +186,7 @@ class ScanHardcodedStrings extends Command
         ];
 
         File::put($outputFile, json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        
+
         $this->info("✅ Report saved to: {$outputFile}");
     }
 
@@ -195,9 +206,9 @@ class ScanHardcodedStrings extends Command
 
         if ($this->stats['hardcoded_found'] > 0) {
             $this->warn("⚠️  Found {$this->stats['hardcoded_found']} hardcoded strings that need translation!");
-            $this->line("   Run: php scripts/batch_translate.php to translate them");
+            $this->line('   Run: php scripts/batch_translate.php to translate them');
         } else {
-            $this->info("✅ No hardcoded strings found!");
+            $this->info('✅ No hardcoded strings found!');
         }
     }
 }

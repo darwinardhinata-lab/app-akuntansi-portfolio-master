@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\JournalHeader;
-use App\Models\JournalDetail;
+use App\Exports\JournalExport;
+use App\Jobs\SyncDashboardToTempJob;
 use App\Models\Account;
-use App\Models\HelperCode;
 use App\Models\Asset;
+use App\Models\HelperCode;
+use App\Models\JournalDetail;
+use App\Models\JournalHeader;
 use App\Models\SystemLog;
+use App\Services\JournalCsvImportService;
+use App\Support\GrnProtection;
+use App\Support\JournalBalanceValidator;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\JournalImport;
-use App\Jobs\SyncDashboardToTempJob;
-use App\Services\JournalCsvImportService;
-use App\Support\JournalBalanceValidator;
 
 class JournalController extends Controller
 {
@@ -27,30 +28,30 @@ class JournalController extends Controller
 
     public function index(Request $request)
     {
-        $perPage   = $request->get('per_page', 50);
-        $search    = $request->get('search');
+        $perPage = $request->get('per_page', 50);
+        $search = $request->get('search');
         $startDate = $request->get('start_date');
-        $endDate   = $request->get('end_date');
+        $endDate = $request->get('end_date');
 
         $query = JournalHeader::with(['details.account']);
 
-        if (!empty($startDate)) {
+        if (! empty($startDate)) {
             $query->whereDate('transaction_date', '>=', $startDate);
         }
-        if (!empty($endDate)) {
+        if (! empty($endDate)) {
             $query->whereDate('transaction_date', '<=', $endDate);
         }
 
-        if (!empty($search)) {
-            $query->where(function($q) use ($search) {
-                $q->where('evidence_number', 'like', '%' . $search . '%')
-                  ->orWhere('description', 'like', '%' . $search . '%')
-                  ->orWhereHas('details', function($qDet) use ($search) {
-                      $qDet->where('account_code', 'like', '%' . $search . '%')
-                           ->orWhereHas('account', function($qAcc) use ($search) {
-                               $qAcc->where('account_name', 'like', '%' . $search . '%');
-                           });
-                  });
+        if (! empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('evidence_number', 'like', '%'.$search.'%')
+                    ->orWhere('description', 'like', '%'.$search.'%')
+                    ->orWhereHas('details', function ($qDet) use ($search) {
+                        $qDet->where('account_code', 'like', '%'.$search.'%')
+                            ->orWhereHas('account', function ($qAcc) use ($search) {
+                                $qAcc->where('account_name', 'like', '%'.$search.'%');
+                            });
+                    });
             });
         }
 
@@ -58,10 +59,10 @@ class JournalController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate($perPage)
             ->appends([
-                'per_page'   => $perPage,
-                'search'     => $search,
+                'per_page' => $perPage,
+                'search' => $search,
                 'start_date' => $startDate,
-                'end_date'   => $endDate,
+                'end_date' => $endDate,
             ]);
 
         return view('journal.index', compact('journals', 'perPage', 'search', 'startDate', 'endDate'));
@@ -70,7 +71,7 @@ class JournalController extends Controller
     public function create()
     {
         $accounts = Account::orderBy('account_code', 'asc')->get();
-        $helpers  = HelperCode::orderBy('helper_code', 'asc')->get();
+        $helpers = HelperCode::orderBy('helper_code', 'asc')->get();
 
         return view('journal.create', compact('accounts', 'helpers'));
     }
@@ -79,39 +80,34 @@ class JournalController extends Controller
     {
         $request->validate([
             'transaction_date' => 'required|date',
-            'evidence_number'  => 'nullable|string|max:100',
-            'description'      => 'required|string|max:255',
-            'details'          => 'required|array|min:2',
+            'evidence_number' => 'nullable|string|max:100',
+            'description' => 'required|string|max:255',
+            'details' => 'required|array|min:2',
             'details.*.account_code' => 'required|string',
-            'details.*.position'     => 'required|in:DEBET,KREDIT',
-            'details.*.amount'       => 'required|numeric|min:0.01',
-            'details.*.helper_code'  => 'nullable|string',
+            'details.*.position' => 'required|in:DEBET,KREDIT',
+            'details.*.amount' => 'required|numeric|min:0.01',
+            'details.*.helper_code' => 'nullable|string',
         ]);
 
         // FIX 5: Tambahkan validasi perlindungan Balance Jurnal dari serangan Bypass
-        if (!JournalBalanceValidator::isBalanced($request->details)) {
+        if (! JournalBalanceValidator::isBalanced($request->details)) {
             $selisih = JournalBalanceValidator::getDifference($request->details);
-            return redirect()->back()->withInput()->with('error', 'Gagal: Total Debet dan Kredit pada jurnal tidak seimbang (Unbalanced). Selisih: Rp ' . number_format($selisih, 2, ',', '.'));
-        }
 
-        $validatedData = $request->only([
-            'transaction_date',
-            'evidence_number',
-            'description'
-        ]);
+            return redirect()->back()->withInput()->with('error', 'Gagal: Total Debet dan Kredit pada jurnal tidak seimbang (Unbalanced). Selisih: Rp '.number_format($selisih, 2, ',', '.'));
+        }
 
         try {
             DB::beginTransaction();
 
             $journal = JournalHeader::create([
                 'transaction_date' => $request->transaction_date,
-                'evidence_number'  => $request->evidence_number,
-                'description'      => $request->description,
+                'evidence_number' => $request->evidence_number,
+                'notes' => $request->description,
             ]);
 
             // B9 FIX: Gunakan empty() eksplisit — operator ?? tidak menangkap string kosong ''
             // jika kolom journal_id ada di DB tapi isinya null/kosong, ?? tidak terpicu.
-            $primaryKeyId = !empty($journal->journal_id) ? $journal->journal_id : $journal->id;
+            $primaryKeyId = ! empty($journal->journal_id) ? $journal->journal_id : $journal->id;
             if (empty($primaryKeyId)) {
                 throw new \Exception('Gagal membuat jurnal: primary key tidak terbentuk. Cek model JournalHeader.');
             }
@@ -131,11 +127,11 @@ class JournalController extends Controller
                 if (isset($detail['amount']) && $detail['amount'] != 0) {
 
                     $savedDetail = JournalDetail::create([
-                        'journal_id'   => $primaryKeyId,
+                        'journal_id' => $primaryKeyId,
                         'account_code' => $detail['account_code'],
-                        'helper_code'  => $detail['helper_code'] ?? null,
-                        'position'     => $detail['position'],
-                        'amount'       => $detail['amount'],
+                        'helper_code' => $detail['helper_code'] ?? null,
+                        'position' => $detail['position'],
+                        'amount' => $detail['amount'],
                     ]);
 
                     // DETEKSI AKUN ASET TETAP: Hanya akun kode 12000
@@ -144,10 +140,10 @@ class JournalController extends Controller
                         Asset::updateOrCreate(
                             ['journal_detail_id' => $savedDetail->getKey()],
                             [
-                                'asset_code'         => 'AST-' . $savedDetail->getKey() . '-' . date('Ymd', strtotime($request->transaction_date)),
-                                'asset_name'         => $request->description,
-                                'purchase_date'      => $request->transaction_date,
-                                'purchase_price'     => $detail['amount'],
+                                'asset_code' => 'AST-'.$savedDetail->getKey().'-'.date('Ymd', strtotime($request->transaction_date)),
+                                'asset_name' => $request->description,
+                                'purchase_date' => $request->transaction_date,
+                                'purchase_price' => $detail['amount'],
                                 'useful_life_months' => 0,
                             ]
                         );
@@ -156,29 +152,32 @@ class JournalController extends Controller
             }
 
             DB::commit();
-            SystemLog::record('CREATE', 'Jurnal Umum', 'Menambahkan transaksi jurnal: ' . ($request->evidence_number ?? 'OTOMATIS'));
+            SystemLog::record('CREATE', 'Jurnal Umum', 'Menambahkan transaksi jurnal: '.($request->evidence_number ?? 'OTOMATIS'));
+
             return redirect()->route('jurnal.index')->with('success', 'Transaksi Jurnal berhasil disimpan!');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal menyimpan: '.$e->getMessage());
         }
     }
 
     public function edit($id)
     {
-        $journal  = JournalHeader::with('details')->findOrFail($id);
+        $journal = JournalHeader::with('details')->findOrFail($id);
         $accounts = Account::orderBy('account_code', 'asc')->get();
-        $helpers  = HelperCode::orderBy('helper_code', 'asc')->get();
+        $helpers = HelperCode::orderBy('helper_code', 'asc')->get();
 
         return view('journal.edit', compact('journal', 'accounts', 'helpers'));
     }
 
     public function update(Request $request, $id)
     {
-        if (!JournalBalanceValidator::isBalanced($request->details)) {
+        if (! JournalBalanceValidator::isBalanced($request->details)) {
             $selisih = JournalBalanceValidator::getDifference($request->details);
-            return redirect()->back()->with('error', 'Gagal: Total Debet dan Kredit pada perubahan jurnal tidak seimbang. Selisih: Rp ' . number_format($selisih, 2, ',', '.'));
+
+            return redirect()->back()->with('error', 'Gagal: Total Debet dan Kredit pada perubahan jurnal tidak seimbang. Selisih: Rp '.number_format($selisih, 2, ',', '.'));
         }
 
         try {
@@ -187,14 +186,14 @@ class JournalController extends Controller
 
             $journal->update([
                 'transaction_date' => $request->transaction_date,
-                'evidence_number'  => $request->evidence_number,
-                'description'      => $request->description,
+                'evidence_number' => $request->evidence_number,
+                'notes' => $request->description,
             ]);
 
             // Hapus aset tetap lama yang terkait detail jurnal ini sebelum detail di-recreate
             $oldDetailIds = $journal->details()->pluck('id')->toArray();
-            if (!empty($oldDetailIds)) {
-                \App\Models\Asset::whereIn('journal_detail_id', $oldDetailIds)->delete();
+            if (! empty($oldDetailIds)) {
+                Asset::whereIn('journal_detail_id', $oldDetailIds)->delete();
             }
 
             $journal->details()->delete();
@@ -203,11 +202,11 @@ class JournalController extends Controller
             foreach ($request->details as $detail) {
                 if (isset($detail['amount']) && $detail['amount'] != 0) {
                     $savedDetail = JournalDetail::create([
-                        'journal_id'   => $id,
+                        'journal_id' => $id,
                         'account_code' => $detail['account_code'],
-                        'helper_code'  => $detail['helper_code'] ?? null,
-                        'position'     => $detail['position'],
-                        'amount'       => $detail['amount'],
+                        'helper_code' => $detail['helper_code'] ?? null,
+                        'position' => $detail['position'],
+                        'amount' => $detail['amount'],
                     ]);
 
                     // DETEKSI AKUN ASET TETAP: Re-create aset jika akun 12000 DEBET
@@ -215,10 +214,10 @@ class JournalController extends Controller
                         Asset::updateOrCreate(
                             ['journal_detail_id' => $savedDetail->getKey()],
                             [
-                                'asset_code'         => 'AST-' . $savedDetail->getKey() . '-' . date('Ymd', strtotime($request->transaction_date)),
-                                'asset_name'         => $request->description,
-                                'purchase_date'      => $request->transaction_date,
-                                'purchase_price'     => $detail['amount'],
+                                'asset_code' => 'AST-'.$savedDetail->getKey().'-'.date('Ymd', strtotime($request->transaction_date)),
+                                'asset_name' => $request->description,
+                                'purchase_date' => $request->transaction_date,
+                                'purchase_price' => $detail['amount'],
                                 'useful_life_months' => 0,
                             ]
                         );
@@ -227,12 +226,14 @@ class JournalController extends Controller
             }
 
             DB::commit();
-            SystemLog::record('UPDATE', 'Jurnal Umum', 'Mengubah transaksi jurnal: ' . ($journal->evidence_number ?? $id));
+            SystemLog::record('UPDATE', 'Jurnal Umum', 'Mengubah transaksi jurnal: '.($journal->evidence_number ?? $id));
+
             return redirect()->route('jurnal.index')->with('success', 'Perubahan jurnal berhasil disimpan!');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal update: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal update: '.$e->getMessage());
         }
     }
 
@@ -244,18 +245,20 @@ class JournalController extends Controller
 
             // Hapus aset tetap yang terhubung ke detail jurnal ini sebelum detail dihapus
             $detailIds = $journal->details()->pluck('id')->toArray();
-            if (!empty($detailIds)) {
-                \App\Models\Asset::whereIn('journal_detail_id', $detailIds)->delete();
+            if (! empty($detailIds)) {
+                Asset::whereIn('journal_detail_id', $detailIds)->delete();
             }
 
             $journal->details()->delete();
             $journal->delete();
             DB::commit();
-            SystemLog::record('DELETE', 'Jurnal Umum', 'Menghapus transaksi jurnal: ' . ($journal->evidence_number ?? $id));
+            SystemLog::record('DELETE', 'Jurnal Umum', 'Menghapus transaksi jurnal: '.($journal->evidence_number ?? $id));
+
             return redirect()->back()->with('success', 'Transaksi Jurnal berhasil dihapus!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal menghapus: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal menghapus: '.$e->getMessage());
         }
     }
 
@@ -263,7 +266,7 @@ class JournalController extends Controller
     {
         $ids = $request->input('ids');
 
-        if (empty($ids) || !is_array($ids)) {
+        if (empty($ids) || ! is_array($ids)) {
             return redirect()->back()->with('error', 'Pilih minimal satu transaksi jurnal yang ingin dihapus.');
         }
 
@@ -276,13 +279,13 @@ class JournalController extends Controller
             }
 
             $journalIds = $journals->pluck('journal_id')->toArray();
-            \App\Support\GrnProtection::journals($journalIds);
+            GrnProtection::journals($journalIds);
 
-            if (!empty($journalIds)) {
+            if (! empty($journalIds)) {
                 // Hapus aset tetap yang terhubung ke detail jurnal yang akan dihapus
                 $detailIds = JournalDetail::whereIn('journal_id', $journalIds)->pluck('id')->toArray();
-                if (!empty($detailIds)) {
-                    \App\Models\Asset::whereIn('journal_detail_id', $detailIds)->delete();
+                if (! empty($detailIds)) {
+                    Asset::whereIn('journal_detail_id', $detailIds)->delete();
                 }
 
                 JournalDetail::whereIn('journal_id', $journalIds)->delete();
@@ -292,11 +295,13 @@ class JournalController extends Controller
             $deletedCount = count($journalIds);
 
             DB::commit();
-            SystemLog::record('DELETE', 'Jurnal Umum', 'Menghapus ' . $deletedCount . ' transaksi jurnal secara massal.');
-            return redirect()->back()->with('success', $deletedCount . ' transaksi jurnal berhasil dihapus secara massal!');
+            SystemLog::record('DELETE', 'Jurnal Umum', 'Menghapus '.$deletedCount.' transaksi jurnal secara massal.');
+
+            return redirect()->back()->with('success', $deletedCount.' transaksi jurnal berhasil dihapus secara massal!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal melakukan hapus massal: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal melakukan hapus massal: '.$e->getMessage());
         }
     }
 
@@ -309,7 +314,7 @@ class JournalController extends Controller
         DB::disableQueryLog();
 
         // 1. TANGKAP SILENT ERROR JIKA UKURAN FILE TERLALU BESAR UNTUK SERVER
-        if (!$request->hasFile('file_excel') || !$request->file('file_excel')->isValid()) {
+        if (! $request->hasFile('file_excel') || ! $request->file('file_excel')->isValid()) {
             return redirect()->back()->with('error', 'GAGAL UPLOAD: File kosong atau ukuran melebihi batas maksimal server. Jika data terlalu besar, pisahkan/pecah file CSV menjadi 2 bagian lalu upload berurutan.');
         }
 
@@ -330,13 +335,13 @@ class JournalController extends Controller
             'Content-Disposition' => 'attachment; filename="Template_Jurnal.csv"',
         ];
 
-        $callback = function() {
+        $callback = function () {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            fputcsv($file, array('Tanggal', 'No Jurnal', 'No Bukti', 'Deskripsi', 'Total Debet', 'Total Kredit', 'Nilai Debet', 'Nilai Kredit', 'Akun'), ',');
-            fputcsv($file, array('20 May 2026', 'GJ-1424034', 'INV-001151700', 'TOTAL', '142.000,00', '142.000,00', '42.000,00', '0,00', '5-5000 - Harga Pokok Penjualan'), ',');
-            fputcsv($file, array('20 May 2026', 'GJ-1424034', 'INV-001151700', 'TOTAL', '142.000,00', '142.000,00', '0,00', '42.000,00', '1-1200 - Persediaan Barang'), ',');
+            fputcsv($file, ['Tanggal', 'No Jurnal', 'No Bukti', 'Deskripsi', 'Total Debet', 'Total Kredit', 'Nilai Debet', 'Nilai Kredit', 'Akun'], ',');
+            fputcsv($file, ['20 May 2026', 'GJ-1424034', 'INV-001151700', 'TOTAL', '142.000,00', '142.000,00', '42.000,00', '0,00', '5-5000 - Harga Pokok Penjualan'], ',');
+            fputcsv($file, ['20 May 2026', 'GJ-1424034', 'INV-001151700', 'TOTAL', '142.000,00', '142.000,00', '0,00', '42.000,00', '1-1200 - Persediaan Barang'], ',');
 
             fclose($file);
         };
@@ -350,14 +355,14 @@ class JournalController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Proses sinkronisasi berhasil dijalankan di background.'
+            'message' => 'Proses sinkronisasi berhasil dijalankan di background.',
         ]);
     }
 
     public function getJournalDetailsAjax(Request $request)
     {
         $evidence = $request->get('evidence_number');
-        if (!$evidence) {
+        if (! $evidence) {
             return response()->json(['status' => 'error', 'message' => 'Nomor Bukti tidak valid.']);
         }
 
@@ -386,7 +391,7 @@ class JournalController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'html' => $html
+            'html' => $html,
         ]);
     }
 
@@ -396,8 +401,8 @@ class JournalController extends Controller
         $endDate = $request->get('end_date');
         $search = $request->get('search');
 
-        $filename = 'Jurnal_Umum_' . date('Ymd_His') . '.xlsx';
+        $filename = 'Jurnal_Umum_'.date('Ymd_His').'.xlsx';
 
-        return Excel::download(new \App\Exports\JournalExport($startDate, $endDate, $search), $filename);
+        return Excel::download(new JournalExport($startDate, $endDate, $search), $filename);
     }
 }

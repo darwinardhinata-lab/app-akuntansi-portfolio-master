@@ -144,6 +144,8 @@
                         @php 
                             $deb = $tx->position == 'DEBET' ? $tx->amount : 0;
                             $kre = $tx->position == 'KREDIT' ? $tx->amount : 0;
+                            $traceNumber = filled($tx->evidence_number) ? $tx->evidence_number : $tx->journal_id;
+                            $displayNumber = filled($tx->evidence_number) ? $tx->evidence_number : $tx->journal_id;
                             
                             if ($isDebetNormal) {
                                 $runningBalance += ($deb - $kre);
@@ -156,10 +158,10 @@
                         <tr>
                             <td class="ps-4 fw-medium text-nowrap">{{ date('d M Y', strtotime($tx->transaction_date)) }}</td>
                             <td>
-                                <a href="{{ route('trace.document', $tx->evidence_number) }}" 
-                                   class="text-primary text-decoration-none fw-bold" 
+                                <a href="{{ route('trace.document', $traceNumber) }}"
+                                   class="text-primary text-decoration-none fw-bold"
                                    title="{{ __('erp.trace_origin_doc') }}">
-                                   <i class="fa-solid fa-link fa-sm me-1"></i> {{ $tx->evidence_number }}
+                                    <i class="fa-solid fa-link fa-sm me-1"></i> {{ $displayNumber }}
                                 </a>
                             </td>
                             <td class="fw-medium text-dark">{{ $tx->notes }}</td>
