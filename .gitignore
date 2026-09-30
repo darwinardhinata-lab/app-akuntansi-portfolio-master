@@ -44,3 +44,10 @@ Thumbs.db
 
 # Local agent task prompts
 /ANTIGRAVITY_PROMPT_*.md
+
+# Local artifact archives & audit dumps (never track)
+/*.zip
+/hardcoded_report.json
+/routes_dump.txt
+/marvel-dard.txt
+*.bak
