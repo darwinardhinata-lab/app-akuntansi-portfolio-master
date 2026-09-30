@@ -14,6 +14,7 @@ class MaterialPurchaseOrderDetail extends Model
 
     protected $fillable = [
         'po_id',
+        'source_request_detail_id',
         'item_type',
         'yarn_id',
         'fabric_id',
@@ -29,6 +30,11 @@ class MaterialPurchaseOrderDetail extends Model
     public function purchaseOrder()
     {
         return $this->belongsTo(MaterialPurchaseOrder::class, 'po_id');
+    }
+
+    public function sourceRequestDetail()
+    {
+        return $this->belongsTo(MaterialPurchaseRequestDetail::class, 'source_request_detail_id');
     }
 
     public function yarn()

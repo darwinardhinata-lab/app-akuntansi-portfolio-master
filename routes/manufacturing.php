@@ -13,6 +13,7 @@ use App\Modules\Manufacturing\Http\Controllers\YarnController;
 use App\Modules\Manufacturing\Http\Controllers\FabricController;
 use App\Modules\Manufacturing\Http\Controllers\SupplierController;
 use App\Modules\Manufacturing\Http\Controllers\ManufacturingProcessController;
+use App\Modules\Manufacturing\Http\Controllers\MaterialProcurementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +47,23 @@ Route::prefix('manufaktur/mrn')->name('mfg.material-receipts.')->controller(Mate
     Route::get('/download-template', 'downloadTemplate')->name('download-template');
     Route::get('/{id}', 'show')->name('show');
     Route::post('/{id}/void', 'void')->name('void');
+});
+
+Route::prefix('manufaktur/material-request')->name('mfg.material-requests.')->controller(MaterialProcurementController::class)->group(function () {
+    Route::get('/', 'requestIndex')->name('index');
+    Route::get('/create', 'requestCreate')->name('create');
+    Route::post('/', 'requestStore')->name('store');
+    Route::post('/{id}/submit', 'requestSubmit')->name('submit');
+    Route::post('/{id}/approve', 'requestApprove')->name('approve');
+    Route::post('/{id}/reject', 'requestReject')->name('reject');
+});
+
+Route::prefix('manufaktur/material-order')->name('mfg.material-orders.')->controller(MaterialProcurementController::class)->group(function () {
+    Route::get('/', 'orderIndex')->name('index');
+    Route::get('/create', 'orderCreate')->name('create');
+    Route::post('/', 'orderStore')->name('store');
+    Route::post('/{id}/submit', 'orderSubmit')->name('submit');
+    Route::post('/{id}/approve', 'orderApprove')->name('approve');
 });
 
 Route::prefix('manufaktur/knit-order')->name('mfg.knit-orders.')->controller(KnitOrderController::class)->group(function () {

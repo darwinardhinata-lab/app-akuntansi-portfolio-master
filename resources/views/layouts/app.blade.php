@@ -321,6 +321,7 @@
     @stack('styles')
 </head>
 <body>
+<div id="google_translate_element" class="d-none" aria-hidden="true"></div>
 @php
     $companyProfile = \App\Models\CompanyProfile::first();
     $hasLogo = isset($companyProfile) && $companyProfile->logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($companyProfile->logo);
@@ -537,6 +538,14 @@
                 <a href="{{ route('mfg.work-orders.index') }}" class="nav-link {{ request()->routeIs('mfg.work-orders.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-clipboard-list text-primary"></i></span>
                     <span class="nav-text">{{ __('erp.spk_work_order_label') }}</span>
+                </a>
+                <a href="{{ route('mfg.material-requests.index') }}" class="nav-link {{ request()->routeIs('mfg.material-requests.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-clipboard-check text-info"></i></span>
+                    <span class="nav-text">Material PR</span>
+                </a>
+                <a href="{{ route('mfg.material-orders.index') }}" class="nav-link {{ request()->routeIs('mfg.material-orders.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-file-signature text-primary"></i></span>
+                    <span class="nav-text">Material PO</span>
                 </a>
                 <a href="{{ route('mfg.material-receipts.index') }}" class="nav-link {{ request()->routeIs('mfg.material-receipts.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-truck-loading text-warning"></i></span>
@@ -768,10 +777,10 @@
             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2" style="width: 250px; border-radius: 12px;">
                 <li class="px-3 py-2">
                     <small class="text-muted d-block mb-2 fw-bold"><i class="fa-solid fa-language me-2"></i>{{ __('erp.select_language') ?? 'Pilih Bahasa' }}</small>
-                    <div class="d-flex gap-2">
-                        <a href="{{ route('lang.switch', 'id') }}" class="btn btn-sm w-100 fw-bold {{ app()->getLocale() == 'id' ? 'btn-primary' : 'btn-light text-dark' }}">🇮🇩 ID</a>
-                        <a href="{{ route('lang.switch', 'en') }}" class="btn btn-sm w-100 fw-bold {{ app()->getLocale() == 'en' ? 'btn-primary' : 'btn-light text-dark' }}">🇬🇧 EN</a>
-                        <a href="{{ route('lang.switch', 'zh_CN') }}" class="btn btn-sm w-100 fw-bold {{ app()->getLocale() == 'zh_CN' ? 'btn-primary' : 'btn-light text-dark' }}">🇨🇳 中文</a>
+                    <div class="d-flex gap-2" role="group" aria-label="{{ __('erp.select_language') }}">
+                        <button type="button" class="btn btn-sm w-100 fw-bold google-translate-language" data-google-language="id">🇮🇩 ID</button>
+                        <button type="button" class="btn btn-sm w-100 fw-bold google-translate-language" data-google-language="en">🇬🇧 EN</button>
+                        <button type="button" class="btn btn-sm w-100 fw-bold google-translate-language" data-google-language="zh-CN">🇨🇳 中文</button>
                     </div>
                 </li>
                 <li><hr class="dropdown-divider"></li>
@@ -811,6 +820,43 @@
 
 {{-- SCRIPTS --}}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    window.googleTranslateElementInit = function () {
+        new google.translate.TranslateElement({
+            pageLanguage: 'id',
+            includedLanguages: 'id,en,zh-CN',
+            autoDisplay: false,
+        }, 'google_translate_element');
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var sourceLanguage = 'id';
+
+        function setGoogleTranslateCookie(value) {
+            var expires = new Date(Date.now() + 31536000000).toUTCString();
+            document.cookie = 'googtrans=' + value + '; expires=' + expires + '; path=/; SameSite=Lax';
+
+            if (location.hostname) {
+                document.cookie = 'googtrans=' + value + '; expires=' + expires + '; path=/; domain=' + location.hostname + '; SameSite=Lax';
+            }
+        }
+
+        document.querySelectorAll('.google-translate-language').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var targetLanguage = button.dataset.googleLanguage;
+
+                if (targetLanguage === sourceLanguage) {
+                    setGoogleTranslateCookie('');
+                } else {
+                    setGoogleTranslateCookie('/' + sourceLanguage + '/' + targetLanguage);
+                }
+
+                window.location.reload();
+            });
+        });
+    });
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 {{-- MODAL GLOBAL HISTORY LOG (AJAX) --}}
 <div class="modal fade" id="globalLogModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">

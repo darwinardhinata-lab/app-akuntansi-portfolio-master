@@ -45,6 +45,28 @@ class PurchaseOrderVoidReceiptTest extends TestCase
         $this->assertNull(DB::table('purchase_bills')->where('bill_number', 'BIL-VOID-1')->value('journal_id'));
     }
 
+    public function test_void_receipt_memperlakukan_underscore_pada_nomor_po_sebagai_literal(): void
+    {
+        $poUnderscore = $this->receivePo('PO_7', 'SKU-VU', 'BIL-VOID-U', 5);
+        $poWildcard = $this->receivePo('POX7', 'SKU-VX', 'BIL-VOID-X', 7);
+
+        app(PurchaseOrderService::class)->voidReceipt($poUnderscore);
+
+        // '_' adalah wildcard LIKE. POX7 tidak boleh ikut terpilih ketika void PO_7.
+        $this->assertDatabaseHas('journal_headers', ['evidence_number' => 'BIL-VOID-X', 'transaction_type' => 'Purchase Bill']);
+        $this->assertDatabaseHas('inventory_ledgers', ['evidence_number' => 'BIL-VOID-X']);
+        $this->assertDatabaseHas('purchase_orders', ['id' => $poWildcard, 'status' => 'RECEIVED']);
+        $this->assertDatabaseHas('purchase_order_details', ['purchase_order_id' => $poWildcard, 'qty_received' => 7]);
+        $this->assertEquals(7, (float) Product::where('sku', 'SKU-VX')->value('stock_quantity'));
+        $this->assertNotNull(DB::table('purchase_bills')->where('bill_number', 'BIL-VOID-X')->value('journal_id'));
+
+        $this->assertDatabaseMissing('journal_headers', ['evidence_number' => 'BIL-VOID-U']);
+        $this->assertDatabaseMissing('inventory_ledgers', ['evidence_number' => 'BIL-VOID-U']);
+        $this->assertDatabaseHas('purchase_orders', ['id' => $poUnderscore, 'status' => 'APPROVED']);
+        $this->assertEquals(0, (float) Product::where('sku', 'SKU-VU')->value('stock_quantity'));
+        $this->assertNull(DB::table('purchase_bills')->where('bill_number', 'BIL-VOID-U')->value('journal_id'));
+    }
+
     private function receivePo(string $poNumber, string $sku, string $billNumber, int $qty): int
     {
         Product::create(['sku' => $sku, 'name' => $sku, 'unit' => 'PCS', 'stock_quantity' => 0, 'average_cost' => 0]);

@@ -9,21 +9,22 @@ class CheckMissingTranslations extends Command
 {
     protected $signature = 'lang:check-missing 
                             {--fix : Auto-fix missing keys by copying from fallback}
-                            {--locale= : Check specific locale only}
-                            {--verbose : Show detailed missing keys}';
+                            {--locale= : Check specific locale only}';
 
     protected $description = 'Check for missing translation keys across all language files';
 
     private $translations = [];
+
     private $allKeys = [];
+
     private $missingKeys = [];
 
     public function handle()
     {
         $this->info('🔍 Checking translation completeness...');
 
-        $locales = $this->option('locale') 
-            ? [$this->option('locale')] 
+        $locales = $this->option('locale')
+            ? [$this->option('locale')]
             : ['id', 'en', 'zh_CN'];
 
         // Load all translations
@@ -39,7 +40,7 @@ class CheckMissingTranslations extends Command
         $this->allKeys = array_unique($this->allKeys);
         sort($this->allKeys);
 
-        $this->info("📊 Total unique keys: " . count($this->allKeys));
+        $this->info('📊 Total unique keys: '.count($this->allKeys));
 
         // Check missing keys per locale
         foreach ($locales as $locale) {
@@ -58,10 +59,11 @@ class CheckMissingTranslations extends Command
     private function loadLocale(string $locale)
     {
         $file = base_path("lang/{$locale}/erp.php");
-        
-        if (!File::exists($file)) {
+
+        if (! File::exists($file)) {
             $this->warn("⚠️  File tidak ditemukan: {$file}");
             $this->translations[$locale] = [];
+
             return;
         }
 
@@ -72,7 +74,7 @@ class CheckMissingTranslations extends Command
     {
         foreach ($array as $key => $value) {
             $fullKey = $prefix ? "{$prefix}.{$key}" : $key;
-            
+
             if (is_array($value)) {
                 $this->extractKeys($value, $fullKey, $locale);
             } else {
@@ -91,13 +93,13 @@ class CheckMissingTranslations extends Command
         if (count($missing) > 0) {
             $this->missingKeys[$locale] = $missing;
 
-            if ($this->option('verbose')) {
-                $this->error("❌ {$locale}: Missing " . count($missing) . " keys");
+            if ($this->output->isVerbose()) {
+                $this->error("❌ {$locale}: Missing ".count($missing).' keys');
                 foreach (array_slice($missing, 0, 10) as $key) {
                     $this->line("   - {$key}");
                 }
                 if (count($missing) > 10) {
-                    $this->line("   ... and " . (count($missing) - 10) . " more");
+                    $this->line('   ... and '.(count($missing) - 10).' more');
                 }
             }
         }
@@ -107,7 +109,7 @@ class CheckMissingTranslations extends Command
     {
         foreach ($array as $key => $value) {
             $fullKey = $prefix ? "{$prefix}.{$key}" : $key;
-            
+
             if (is_array($value)) {
                 $this->flattenForCheck($value, $fullKey, $result);
             } else {
@@ -146,11 +148,11 @@ class CheckMissingTranslations extends Command
         $totalMissing = array_sum(array_map('count', $this->missingKeys));
         if ($totalMissing > 0) {
             $this->warn("⚠️  Total {$totalMissing} missing keys across all locales");
-            if (!$this->option('fix')) {
-                $this->line("   Run with --fix to auto-copy from fallback (id)");
+            if (! $this->option('fix')) {
+                $this->line('   Run with --fix to auto-copy from fallback (id)');
             }
         } else {
-            $this->info("✅ All translations are complete!");
+            $this->info('✅ All translations are complete!');
         }
     }
 
@@ -163,7 +165,9 @@ class CheckMissingTranslations extends Command
         $this->flattenForCheck($fallback, '', $flatFallback);
 
         foreach ($this->missingKeys as $locale => $missing) {
-            if ($locale === 'id') continue; // Don't fix fallback
+            if ($locale === 'id') {
+                continue;
+            } // Don't fix fallback
 
             $file = base_path("lang/{$locale}/erp.php");
             $data = $this->translations[$locale];
@@ -178,7 +182,7 @@ class CheckMissingTranslations extends Command
             $export = str_replace(['array (', ')'], ['[', ']'], $export);
             File::put($file, "<?php\n\nreturn {$export};\n");
 
-            $this->info("✅ Fixed " . count($missing) . " keys in {$locale}");
+            $this->info('✅ Fixed '.count($missing)." keys in {$locale}");
         }
     }
 
@@ -188,7 +192,7 @@ class CheckMissingTranslations extends Command
         $ref = &$array;
 
         foreach ($keys as $k) {
-            if (!isset($ref[$k])) {
+            if (! isset($ref[$k])) {
                 $ref[$k] = [];
             }
             $ref = &$ref[$k];

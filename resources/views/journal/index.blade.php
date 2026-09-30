@@ -177,6 +177,8 @@
                                 @php 
                                     $detailsCount = $header->details->count(); 
                                     $primaryId = $header->journal_id ?? $header->id;
+                                    $traceNumber = filled($header->evidence_number) ? $header->evidence_number : $primaryId;
+                                    $displayNumber = filled($header->evidence_number) ? $header->evidence_number : $primaryId;
                                     
                                     // Hitung Total Balance
                                     $totDebet = $header->details->where('position', 'DEBET')->sum('amount');
@@ -190,10 +192,10 @@
                                         </td>
                                         <td class="ps-2 align-middle fw-medium">{{ date('d M Y', strtotime($header->transaction_date)) }}</td>
                                         <td class="align-middle">
-                                            <a href="{{ route('trace.document', $header->evidence_number) }}" 
-                                               class="text-primary text-decoration-none fw-bold" 
+                                            <a href="{{ route('trace.document', $traceNumber) }}"
+                                               class="text-primary text-decoration-none fw-bold"
                                                title="{{ __('erp.trace_origin_doc') }}">
-                                               <i class="fa-solid fa-link fa-sm me-1"></i> {{ $header->evidence_number }}
+                                                <i class="fa-solid fa-link fa-sm me-1"></i> {{ $displayNumber }}
                                             </a>
                                         </td>
                                                 <td class="align-middle fw-medium">@linkify($header->description)</td>
@@ -217,10 +219,10 @@
                                                 </td>
                                                 <td rowspan="{{ $detailsCount + 1 }}" class="ps-2 align-top pt-3 fw-medium" style="background-color: #f8fafc;">{{ date('d M Y', strtotime($header->transaction_date)) }}</td>
                                                 <td rowspan="{{ $detailsCount + 1 }}" class="align-top pt-3" style="background-color: #f8fafc;">
-                                                    <a href="{{ route('trace.document', $header->evidence_number) }}" 
-                                                       class="text-primary text-decoration-none fw-bold" 
+                                                     <a href="{{ route('trace.document', $traceNumber) }}"
+                                                        class="text-primary text-decoration-none fw-bold"
                                                        title="{{ __('erp.trace_origin_doc') }}">
-                                                       <i class="fa-solid fa-link fa-sm me-1"></i> {{ $header->evidence_number }}
+                                                        <i class="fa-solid fa-link fa-sm me-1"></i> {{ $displayNumber }}
                                                     </a>
                                                     @if($header->source_doc_no)
                                                         <br><small class="text-success fw-bold">

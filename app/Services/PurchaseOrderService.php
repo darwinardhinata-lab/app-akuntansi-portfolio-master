@@ -216,10 +216,11 @@ class PurchaseOrderService
             // Karena saat penerimaan, evidence bisa berupa 'BIL-...' atau inputan manual user, BUKAN RCV-
             // FIX: Prefix LIKE lama ("Penerimaan PO: PO-1%") ikut mencocokkan PO-10, PO-100, dst,
             // sehingga void satu PO bisa menghapus jurnal/kartu stok PO lain. Sekarang dicocokkan
-            // persis sampai kata " dari " dan karakter wildcard (% _ \) pada nomor PO di-escape.
-            $escapedPoNumber = addcslashes((string) $po->po_number, '%_\\');
+            // persis sampai kata " dari ". Gunakan ESCAPE eksplisit agar perilaku wildcard
+            // (% dan _) konsisten pada SQLite test dan MySQL produksi.
+            $escapedPoNumber = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], (string) $po->po_number);
             $evidenceNumbers = DB::table('inventory_ledgers')
-                ->where('description', 'LIKE', "Penerimaan PO: {$escapedPoNumber} dari %")
+                ->whereRaw("description LIKE ? ESCAPE '!'", ["Penerimaan PO: {$escapedPoNumber} dari %"])
                 ->pluck('evidence_number')
                 ->unique()
                 ->values()

@@ -98,10 +98,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/jurnal/sync-temp', [JournalController::class, 'dispatchSyncJob'])->name('jurnal.sync_temp');
     Route::get('/jurnal/detail/ajax', [JournalController::class, 'getJournalDetailsAjax'])->name('jurnal.detail.ajax');
     Route::get('/jurnal/export', [JournalController::class, 'export'])->name('jurnal.export');
+    // Route statis harus dideklarasikan sebelum parameter dinamis {journal_id}.
+    Route::delete('/jurnal/mass-delete', [JournalController::class, 'massDestroy'])->name('jurnal.massDestroy');
     Route::get('/jurnal/{journal_id}/edit', [JournalController::class, 'edit'])->name('jurnal.edit');
     Route::put('/jurnal/{journal_id}', [JournalController::class, 'update'])->name('jurnal.update');
     Route::delete('/jurnal/{journal_id}', [JournalController::class, 'destroy'])->name('jurnal.destroy');
-    Route::delete('/jurnal/mass-delete', [JournalController::class, 'massDestroy'])->name('jurnal.massDestroy');
 
     Route::get('/aset', [AssetController::class, 'index'])->name('aset.index');
     Route::get('/aset/create', [AssetController::class, 'create'])->name('aset.create');
@@ -214,7 +215,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/penerimaan-barang', [\App\Http\Controllers\PurchaseOrderController::class, 'inboundIndex'])->name('inbound.index');
 
     // --- MASTER PAJAK ---
-    Route::get('/tax/generate-default', [App\Http\Controllers\TaxController::class, 'generateDefault'])->name('tax.generate');
+    Route::post('/tax/generate-default', [App\Http\Controllers\TaxController::class, 'generateDefault'])->name('tax.generate');
     Route::resource('tax', App\Http\Controllers\TaxController::class);
     
     // --- MANAJEMEN PENJUALAN (SALES ORDER) ---
