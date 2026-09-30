@@ -14,6 +14,11 @@ use App\Modules\Manufacturing\Http\Controllers\FabricController;
 use App\Modules\Manufacturing\Http\Controllers\SupplierController;
 use App\Modules\Manufacturing\Http\Controllers\ManufacturingProcessController;
 use App\Modules\Manufacturing\Http\Controllers\MaterialProcurementController;
+use App\Modules\Manufacturing\Http\Controllers\ProductionLineController;
+use App\Modules\Manufacturing\Http\Controllers\AuxiliaryMaterialController;
+use App\Modules\Manufacturing\Http\Controllers\AuxiliaryMaterialIssueController;
+use App\Modules\Manufacturing\Http\Controllers\ProductBomController;
+use App\Modules\Manufacturing\Http\Controllers\MaterialLedgerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +42,8 @@ Route::prefix('manufaktur/spk')->name('mfg.work-orders.')->controller(WorkOrderC
     Route::get('/{id}', 'show')->name('show');
     Route::post('/{id}/complete', 'complete')->name('complete');
     Route::post('/{id}/void-completion', 'voidCompletion')->name('void-completion');
+    Route::post('/{id}/generate-material-pr', 'generateMaterialShortageRequest')->name('generate-material-pr');
+    Route::get('/{id}/preview-material-pr', 'previewMaterialShortageRequest')->name('preview-material-pr');
 });
 
 Route::prefix('manufaktur/mrn')->name('mfg.material-receipts.')->controller(MaterialReceiptController::class)->group(function () {
@@ -105,6 +112,7 @@ Route::prefix('manufaktur/barcode')->name('mfg.barcode-labels.')->controller(Bar
 
 Route::prefix('manufaktur/laporan')->name('mfg.reports.')->group(function () {
     Route::get('/hpp', [\App\Modules\Manufacturing\Http\Controllers\ManufacturingReportController::class, 'hpp'])->name('hpp');
+    Route::get('/bom-vs-aktual', [\App\Modules\Manufacturing\Http\Controllers\ManufacturingReportController::class, 'bomActual'])->name('bom-actual');
 });
 
 // --- Master Data Manufaktur ---
@@ -143,3 +151,36 @@ Route::prefix('manufaktur/process')->name('mfg.processes.')->controller(Manufact
     Route::post('/import', 'import')->middleware('throttle:5,1')->name('import');
     Route::get('/download-template', 'downloadTemplate')->name('download-template');
 });
+
+Route::prefix('manufaktur/production-line')->name('mfg.production-lines.')->controller(ProductionLineController::class)->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::post('/', 'store')->name('store');
+    Route::put('/{id}', 'update')->name('update');
+    Route::delete('/{id}', 'destroy')->name('destroy');
+});
+
+Route::prefix('manufaktur/bom')->name('mfg.product-boms.')->controller(ProductBomController::class)->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::post('/import', 'import')->name('import');
+    Route::get('/download-template', 'downloadTemplate')->name('download-template');
+    Route::get('/produk/{productId}', 'show')->name('show');
+    Route::post('/produk/{productId}', 'store')->name('store');
+    Route::delete('/produk/{productId}/{id}', 'destroy')->name('destroy');
+});
+
+Route::get('manufaktur/kartu-stok-bahan', [MaterialLedgerController::class, 'index'])->name('mfg.material-ledger.index');
+
+Route::prefix('manufaktur/bahan-penolong')->name('mfg.auxiliary-materials.')->controller(AuxiliaryMaterialController::class)->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::post('/', 'store')->name('store');
+    Route::put('/{id}', 'update')->name('update');
+    Route::delete('/{id}', 'destroy')->name('destroy');
+    Route::post('/import', 'import')->name('import');
+    Route::get('/download-template', 'downloadTemplate')->name('download-template');
+});
+
+Route::prefix('manufaktur/issue-bahan-penolong')->name('mfg.auxiliary-material-issues.')->controller(AuxiliaryMaterialIssueController::class)->group(function () {
+    Route::post('/', 'store')->name('store');
+    Route::post('/{id}/void', 'void')->name('void');
+});
+

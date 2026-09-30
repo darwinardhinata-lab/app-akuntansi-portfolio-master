@@ -32,13 +32,14 @@ class YarnController extends Controller
     {
         $request->validate([
             'yarn_code' => 'required|string|max:50|unique:mfg_yarns,yarn_code',
-            'yarn_type' => 'required|string|max:100',
+            'yarn_type' => 'nullable|string|max:255',
+            'hs_code' => 'nullable|string|max:50', 'description' => 'required|string|max:255', 'material_name' => 'nullable|string|max:255', 'english_name' => 'nullable|string|max:255', 'category' => 'nullable|string|max:100', 'specification' => 'nullable|string', 'meters_per_roll' => 'nullable|numeric|min:0',
             'unit'      => 'required|string|max:20',
         ]);
 
-        Yarn::create($request->only([
-            'yarn_code', 'yarn_type', 'yarn_count', 'composition', 'color', 'unit',
-        ]) + ['stock_quantity' => 0, 'average_cost' => 0, 'is_active' => true]);
+        Yarn::create(array_merge($request->only([
+            'yarn_code', 'yarn_type', 'hs_code', 'description', 'material_name', 'english_name', 'category', 'specification', 'meters_per_roll', 'yarn_count', 'composition', 'color', 'unit',
+        ]), ['yarn_type' => $request->input('description'), 'stock_quantity' => 0, 'average_cost' => 0, 'is_active' => true]));
 
         SystemLog::record('CREATE', 'Manufacturing Yarn Master', 'Menambahkan Yarn: ' . $request->yarn_code);
         return redirect()->back()->with('success', 'Data yarn berhasil ditambahkan.');
@@ -49,13 +50,14 @@ class YarnController extends Controller
         $yarn = Yarn::findOrFail($id);
         $request->validate([
             'yarn_code' => 'required|string|max:50|unique:mfg_yarns,yarn_code,' . $id,
-            'yarn_type' => 'required|string|max:100',
+            'yarn_type' => 'nullable|string|max:255',
+            'hs_code' => 'nullable|string|max:50', 'description' => 'required|string|max:255', 'material_name' => 'nullable|string|max:255', 'english_name' => 'nullable|string|max:255', 'category' => 'nullable|string|max:100', 'specification' => 'nullable|string', 'meters_per_roll' => 'nullable|numeric|min:0',
             'unit'      => 'required|string|max:20',
         ]);
 
-        $yarn->update($request->only([
-            'yarn_code', 'yarn_type', 'yarn_count', 'composition', 'color', 'unit',
-        ]) + ['is_active' => $request->has('is_active')]);
+        $yarn->update(array_merge($request->only([
+            'yarn_code', 'yarn_type', 'hs_code', 'description', 'material_name', 'english_name', 'category', 'specification', 'meters_per_roll', 'yarn_count', 'composition', 'color', 'unit',
+        ]), ['yarn_type' => $request->input('description'), 'is_active' => $request->has('is_active')]));
 
         return redirect()->back()->with('success', 'Data yarn berhasil diperbarui.');
     }
@@ -100,8 +102,8 @@ class YarnController extends Controller
             ['TEMPLATE IMPORT MASTER YARN'],
             ['Pastikan format kolom tidak diubah. Kolom stok & HPP TIDAK diimport lewat sini (hanya via transaksi MRN).'],
             [''], [''], [''],
-            ['KODE YARN', 'JENIS', 'COUNT', 'KOMPOSISI', 'WARNA', 'SATUAN'],
-            ['Y-COTTON-30S', 'Cotton Combed', '30s', '100% Cotton', 'Putih', 'KGS'],
+            ['HS CODE', 'KODE BAHAN', 'DESCRIPTION', 'NAMA BAHAN', 'NAMA MATERIAL INGGRIS', 'KATEGORI', 'WARNA', 'SPESIFIKASI/DESKRIPSI', 'SATUAN', 'METER PER GULUNG'],
+            ['5205120000', 'Y-COTTON-30S', 'Cotton Yarn', 'Benang Katun 30S', 'Cotton Yarn 30S', 'Bahan Utama', 'Putih', '100% cotton combed', 'KGS', ''],
         ];
 
         $callback = function () use ($rows) {

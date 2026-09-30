@@ -45,7 +45,7 @@ class JournalController extends Controller
         if (! empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('evidence_number', 'like', '%'.$search.'%')
-                    ->orWhere('description', 'like', '%'.$search.'%')
+                    ->orWhere('notes', 'like', '%'.$search.'%')
                     ->orWhereHas('details', function ($qDet) use ($search) {
                         $qDet->where('account_code', 'like', '%'.$search.'%')
                             ->orWhereHas('account', function ($qAcc) use ($search) {

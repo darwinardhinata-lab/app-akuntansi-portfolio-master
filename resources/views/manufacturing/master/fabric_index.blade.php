@@ -50,19 +50,19 @@
                 <table class="table table-bordered table-striped table-hover align-middle mb-0 text-nowrap" style="font-size: 13.5px;">
                     <thead class="bg-primary text-white text-center align-middle">
                         <tr>
-                            <th>{{ __('erp.code_label') }}</th><th>{{ __('erp.kind_label') }}</th><th>{{ __('erp.state_label') }}</th><th>{{ __('erp.gsm_label') }}</th><th>{{ __('erp.color_label') }}</th>
-                            <th>{{ __('erp.unit') }}</th><th>{{ __('erp.stock_label') }}</th><th>{{ __('erp.average_cogs') }}</th><th>{{ __('erp.status') }}</th><th>{{ __('erp.action') }}</th>
+                            <th>HS Code</th><th>{{ __('erp.code_label') }}</th><th>Description</th><th>Nama Bahan</th><th>Nama Inggris</th><th>Kategori</th><th>{{ __('erp.color_label') }}</th><th>Spesifikasi</th><th>{{ __('erp.unit') }}</th><th>Meter/Gulung</th>
+                            <th>{{ __('erp.stock_label') }}</th><th>{{ __('erp.average_cogs') }}</th><th>{{ __('erp.status') }}</th><th>{{ __('erp.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($fabrics as $fabric)
                             <tr>
                                 <td class="fw-bold py-2">{{ $fabric->fabric_code }}</td>
-                                <td class="py-2">{{ $fabric->fabric_type }} @if($fabric->subtype)<br><small class="text-muted">{{ $fabric->subtype }}</small>@endif</td>
-                                <td class="text-center py-2"><span class="badge {{ $fabric->state === 'GREY' ? 'bg-secondary' : 'bg-info text-dark' }}">{{ $fabric->state }}</span></td>
-                                <td class="text-center py-2">{{ $fabric->gsm ?? '-' }}</td>
+                                <td>{{ $fabric->hs_code ?? '-' }}</td><td class="py-2">{{ $fabric->description ?? $fabric->fabric_type }}</td><td>{{ $fabric->material_name ?? '-' }}</td><td>{{ $fabric->english_name ?? '-' }}</td><td>{{ $fabric->category ?? '-' }}</td>
                                 <td class="py-2">{{ $fabric->color ?? '-' }}</td>
+                                <td>{{ $fabric->specification ?? '-' }}</td>
                                 <td class="text-center py-2">{{ $fabric->unit }}</td>
+                                <td class="text-end">{{ $fabric->meters_per_roll !== null ? number_format($fabric->meters_per_roll, 2) : '-' }}</td>
                                 <td class="text-end py-2">{{ number_format($fabric->stock_quantity, 2) }}</td>
                                 <td class="text-end py-2">Rp {{ number_format($fabric->average_cost, 2) }}</td>
                                 <td class="text-center py-2">
@@ -70,6 +70,7 @@
                                 </td>
                                 <td class="text-center py-2">
                                     <div class="btn-group">
+                                        <a href="{{ route('mfg.material-ledger.index', ['item_type' => 'FABRIC', 'item_id' => $fabric->id]) }}" class="btn btn-sm btn-outline-info" title="Kartu Stok"><i class="fa-solid fa-clipboard-list"></i></a>
                                         <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal"
                                             data-bs-target="#modalEdit{{ $fabric->id }}"><i class="fas fa-edit"></i></button>
                                         <form action="{{ route('mfg.fabrics.destroy', $fabric->id) }}" method="POST" class="d-inline"
@@ -92,7 +93,9 @@
                                                 <div class="mb-2"><label class="form-label">{{ __('erp.fabric_code') }}</label>
                                                     <input type="text" name="fabric_code" class="form-control" value="{{ $fabric->fabric_code }}" required></div>
                                                 <div class="mb-2"><label class="form-label">{{ __('erp.kind_label') }}</label>
-                                                    <input type="text" name="fabric_type" class="form-control" value="{{ $fabric->fabric_type }}" required></div>
+                                                    <input type="text" name="description" class="form-control" value="{{ $fabric->description ?? $fabric->fabric_type }}" required></div>
+                                                <input type="hidden" name="fabric_type" value="{{ $fabric->description ?? $fabric->fabric_type }}">
+                                                <div class="mb-2"><label class="form-label">HS Code</label><input name="hs_code" class="form-control" value="{{ $fabric->hs_code }}"></div><div class="mb-2"><label class="form-label">Nama Bahan</label><input name="material_name" class="form-control" value="{{ $fabric->material_name }}"></div><div class="mb-2"><label class="form-label">Nama Material Inggris</label><input name="english_name" class="form-control" value="{{ $fabric->english_name }}"></div><div class="mb-2"><label class="form-label">Kategori</label><input name="category" class="form-control" value="{{ $fabric->category }}"></div><div class="mb-2"><label class="form-label">Spesifikasi/Deskripsi</label><textarea name="specification" class="form-control">{{ $fabric->specification }}</textarea></div><div class="mb-2"><label class="form-label">Meter per Gulung</label><input type="number" step="0.01" min="0" name="meters_per_roll" class="form-control" value="{{ $fabric->meters_per_roll }}"></div>
                                                 <div class="mb-2"><label class="form-label">{{ __('erp.subtype_label') }}</label>
                                                     <input type="text" name="subtype" class="form-control" value="{{ $fabric->subtype }}"></div>
                                                 <div class="mb-2"><label class="form-label">{{ __('erp.state_label') }}</label>
@@ -121,7 +124,7 @@
                                 </div>
                             </div>
                         @empty
-                            <tr><td colspan="10" class="text-center py-5 text-muted">{{ __('erp.no_fabric_data') }}</td></tr>
+                            <tr><td colspan="14" class="text-center py-5 text-muted">{{ __('erp.no_fabric_data') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -142,7 +145,8 @@
                     <div class="mb-2"><label class="form-label">{{ __('erp.fabric_code') }}</label>
                         <input type="text" name="fabric_code" class="form-control" required placeholder="FB-GREY-180"></div>
                     <div class="mb-2"><label class="form-label">{{ __('erp.kind_label') }}</label>
-                        <input type="text" name="fabric_type" class="form-control" required placeholder="Single Jersey"></div>
+                        <input type="text" name="description" class="form-control" maxlength="255" required placeholder="Polyester Fabric"></div>
+                    <input type="hidden" name="fabric_type" value=""><div class="mb-2"><label class="form-label">HS Code</label><input name="hs_code" class="form-control"></div><div class="mb-2"><label class="form-label">Nama Bahan</label><input name="material_name" class="form-control"></div><div class="mb-2"><label class="form-label">Nama Material Inggris</label><input name="english_name" class="form-control"></div><div class="mb-2"><label class="form-label">Kategori</label><input name="category" class="form-control"></div><div class="mb-2"><label class="form-label">Spesifikasi/Deskripsi</label><textarea name="specification" class="form-control"></textarea></div><div class="mb-2"><label class="form-label">Meter per Gulung</label><input type="number" step="0.01" min="0" name="meters_per_roll" class="form-control"></div>
                     <div class="mb-2"><label class="form-label">{{ __('erp.subtype_label') }}</label>
                         <input type="text" name="subtype" class="form-control"></div>
                     <div class="mb-2"><label class="form-label">{{ __('erp.state_label') }}</label>

@@ -24,6 +24,9 @@ class StitchingOrder extends Model
         'status',
         'stitching_rate',
         'total_stitching_cost',
+        'journal_id',
+        'voided_at',
+        'reversal_journal_id',
         'remarks',
         'created_by',
     ];
@@ -31,6 +34,7 @@ class StitchingOrder extends Model
     protected $casts = [
         'order_date' => 'date',
         'target_date' => 'date',
+        'voided_at' => 'datetime',
         'size_breakdown' => 'array',
     ];
 
@@ -53,6 +57,16 @@ class StitchingOrder extends Model
     public function finishingStages()
     {
         return $this->hasMany(FinishingStage::class, 'stitching_order_id');
+    }
+
+    public function journal()
+    {
+        return $this->belongsTo(\App\Models\JournalHeader::class, 'journal_id', 'journal_id');
+    }
+
+    public function reversalJournal()
+    {
+        return $this->belongsTo(\App\Models\JournalHeader::class, 'reversal_journal_id', 'journal_id');
     }
 
 }

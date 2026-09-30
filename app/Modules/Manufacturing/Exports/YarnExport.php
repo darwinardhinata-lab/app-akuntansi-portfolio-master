@@ -23,18 +23,22 @@ class YarnExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
 
     public function headings(): array
     {
-        return ['Kode Yarn', 'Jenis', 'Count', 'Komposisi', 'Warna', 'Satuan', 'Stok', 'HPP Rata-rata (Rp)', 'Status'];
+        return ['HS Code', 'Kode Bahan', 'Description', 'Nama Bahan', 'Nama Material Inggris', 'Kategori', 'Warna', 'Spesifikasi/Deskripsi', 'Satuan', 'Meter per Gulung', 'Stok', 'HPP Rata-rata (Rp)', 'Status'];
     }
 
     public function map($yarn): array
     {
         return [
+            $yarn->hs_code ?? '-',
             $yarn->yarn_code,
-            $yarn->yarn_type,
-            $yarn->yarn_count ?? '-',
-            $yarn->composition ?? '-',
+            $yarn->description ?? $yarn->yarn_type,
+            $yarn->material_name ?? '-',
+            $yarn->english_name ?? '-',
+            $yarn->category ?? '-',
             $yarn->color ?? '-',
+            $yarn->specification ?? '-',
             $yarn->unit,
+            $yarn->meters_per_roll ?? '-',
             $yarn->stock_quantity,
             $yarn->average_cost,
             $yarn->is_active ? 'AKTIF' : 'NONAKTIF',

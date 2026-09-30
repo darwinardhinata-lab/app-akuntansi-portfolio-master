@@ -89,7 +89,7 @@ class MaterialCostHelper
 
         if ($qty > $oldStock) {
             throw new \Exception(
-                "Stok {$itemType} '{$item->getAttribute($itemType === 'YARN' ? 'yarn_code' : 'fabric_code')}' tidak mencukupi. " .
+                "Stok {$itemType} '{$item->getAttribute($itemType === 'YARN' ? 'yarn_code' : ($itemType === 'FABRIC' ? 'fabric_code' : 'material_code'))}' tidak mencukupi. " .
                 "Tersedia: {$oldStock}, diminta: {$qty}."
             );
         }

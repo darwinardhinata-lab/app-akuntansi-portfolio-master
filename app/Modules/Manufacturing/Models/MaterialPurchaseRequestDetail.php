@@ -9,7 +9,7 @@ class MaterialPurchaseRequestDetail extends Model
 {
     protected $table = 'mfg_material_purchase_request_details';
 
-    protected $fillable = ['request_id', 'item_type', 'yarn_id', 'fabric_id', 'item_name', 'qty_requested', 'qty_ordered', 'unit', 'remarks'];
+    protected $fillable = ['request_id', 'item_type', 'yarn_id', 'fabric_id', 'auxiliary_material_id', 'item_name', 'qty_requested', 'qty_ordered', 'unit', 'remarks'];
 
     public function request(): BelongsTo
     {

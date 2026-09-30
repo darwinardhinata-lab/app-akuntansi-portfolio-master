@@ -16,6 +16,7 @@ class CuttingOrder extends Model
         'cutting_order_number',
         'order_date',
         'work_order_id',
+        'line_id',
         'fabric_id',
         'fabric_qty_issued',
         'fabric_unit_cost',
@@ -42,6 +43,11 @@ class CuttingOrder extends Model
     public function fabric()
     {
         return $this->belongsTo(Fabric::class, 'fabric_id');
+    }
+
+    public function productionLine()
+    {
+        return $this->belongsTo(ProductionLine::class, 'line_id');
     }
 
     public function checks()

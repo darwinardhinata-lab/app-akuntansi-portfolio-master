@@ -32,15 +32,16 @@ class FabricController extends Controller
     {
         $request->validate([
             'fabric_code' => 'required|string|max:50|unique:mfg_fabrics,fabric_code',
-            'fabric_type' => 'required|string|max:50',
+            'fabric_type' => 'nullable|string|max:255',
+            'hs_code' => 'nullable|string|max:50', 'description' => 'required|string|max:255', 'material_name' => 'nullable|string|max:255', 'english_name' => 'nullable|string|max:255', 'category' => 'nullable|string|max:100', 'specification' => 'nullable|string', 'meters_per_roll' => 'nullable|numeric|min:0',
             'state'       => 'required|in:GREY,FINISHED',
             'unit'        => 'required|string|max:20',
         ]);
 
-        Fabric::create($request->only([
-            'fabric_code', 'fabric_type', 'subtype', 'state', 'gsm',
+        Fabric::create(array_merge($request->only([
+            'fabric_code', 'fabric_type', 'hs_code', 'description', 'material_name', 'english_name', 'category', 'specification', 'meters_per_roll', 'subtype', 'state', 'gsm',
             'composition', 'width', 'color', 'unit',
-        ]) + ['stock_quantity' => 0, 'average_cost' => 0, 'is_active' => true]);
+        ]), ['fabric_type' => $request->input('description'), 'stock_quantity' => 0, 'average_cost' => 0, 'is_active' => true]));
 
         SystemLog::record('CREATE', 'Manufacturing Fabric Master', 'Menambahkan Fabric: ' . $request->fabric_code);
         return redirect()->back()->with('success', 'Data kain berhasil ditambahkan.');
@@ -51,15 +52,16 @@ class FabricController extends Controller
         $fabric = Fabric::findOrFail($id);
         $request->validate([
             'fabric_code' => 'required|string|max:50|unique:mfg_fabrics,fabric_code,' . $id,
-            'fabric_type' => 'required|string|max:50',
+            'fabric_type' => 'nullable|string|max:255',
+            'hs_code' => 'nullable|string|max:50', 'description' => 'required|string|max:255', 'material_name' => 'nullable|string|max:255', 'english_name' => 'nullable|string|max:255', 'category' => 'nullable|string|max:100', 'specification' => 'nullable|string', 'meters_per_roll' => 'nullable|numeric|min:0',
             'state'       => 'required|in:GREY,FINISHED',
             'unit'        => 'required|string|max:20',
         ]);
 
-        $fabric->update($request->only([
-            'fabric_code', 'fabric_type', 'subtype', 'state', 'gsm',
+        $fabric->update(array_merge($request->only([
+            'fabric_code', 'fabric_type', 'hs_code', 'description', 'material_name', 'english_name', 'category', 'specification', 'meters_per_roll', 'subtype', 'state', 'gsm',
             'composition', 'width', 'color', 'unit',
-        ]) + ['is_active' => $request->has('is_active')]);
+        ]), ['fabric_type' => $request->input('description'), 'is_active' => $request->has('is_active')]));
 
         return redirect()->back()->with('success', 'Data kain berhasil diperbarui.');
     }
@@ -104,8 +106,8 @@ class FabricController extends Controller
             ['TEMPLATE IMPORT MASTER FABRIC'],
             ['Pastikan format kolom tidak diubah. Kolom stok & HPP TIDAK diimport lewat sini (hanya via transaksi MRN).'],
             [''], [''], [''],
-            ['KODE FABRIC', 'JENIS', 'SUBTYPE', 'STATE (GREY/FINISHED)', 'GSM', 'KOMPOSISI', 'LEBAR', 'WARNA', 'SATUAN'],
-            ['FB-GREY-180', 'Single Jersey', '', 'GREY', '180', '100% Cotton', '150', '', 'KGS'],
+            ['HS CODE', 'KODE BAHAN', 'DESCRIPTION', 'NAMA BAHAN', 'NAMA MATERIAL INGGRIS', 'KATEGORI', 'WARNA', 'SPESIFIKASI/DESKRIPSI', 'SATUAN', 'METER PER GULUNG'],
+            ['5515110000', 'FB-GREY-180', 'Polyester Fabric', 'Kain Polyester 600D', 'Polyester Oxford Fabric', 'Bahan Utama', 'Hitam', 'Lebar 1,5 m; 600D/PU', 'METER', '100'],
         ];
 
         $callback = function () use ($rows) {

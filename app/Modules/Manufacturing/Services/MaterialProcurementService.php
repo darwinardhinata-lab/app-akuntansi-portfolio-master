@@ -9,6 +9,7 @@ use App\Modules\Manufacturing\Models\MaterialPurchaseRequestDetail;
 use App\Modules\Manufacturing\Models\Supplier;
 use App\Modules\Manufacturing\Models\Yarn;
 use App\Modules\Manufacturing\Models\Fabric;
+use App\Modules\Manufacturing\Models\AuxiliaryMaterial;
 use App\Support\DocumentSequence;
 use Illuminate\Support\Facades\DB;
 
@@ -20,7 +21,7 @@ class MaterialProcurementService
             $this->validateItems($items);
             $request = MaterialPurchaseRequest::create([
                 'request_number' => DocumentSequence::generateSecure('mfg_material_purchase_requests', 'request_number', 'MPR-'.now()->format('Ymd').'-'),
-                'request_date' => $header['request_date'], 'required_date' => $header['required_date'] ?? null,
+                'request_date' => $header['request_date'], 'required_date' => $header['required_date'] ?? null, 'source_work_order_id' => $header['source_work_order_id'] ?? null,
                 'remarks' => $header['remarks'] ?? null, 'created_by' => $header['created_by'] ?? null,
                 'approval_status' => MaterialPurchaseRequest::DRAFT,
             ]);
@@ -83,6 +84,7 @@ class MaterialProcurementService
                 if (! $requestDetail || $requestDetail->item_type !== $item['item_type']
                     || (int) ($requestDetail->yarn_id ?? 0) !== (int) ($item['yarn_id'] ?? 0)
                     || (int) ($requestDetail->fabric_id ?? 0) !== (int) ($item['fabric_id'] ?? 0)
+                    || (int) ($requestDetail->auxiliary_material_id ?? 0) !== (int) ($item['auxiliary_material_id'] ?? 0)
                     || (float) $item['qty'] > (float) $requestDetail->qty_requested - (float) $requestDetail->qty_ordered) {
                     throw new \RuntimeException('Detail Material PO harus berasal dari sisa detail PR yang disetujui.');
                 }
@@ -120,7 +122,7 @@ class MaterialProcurementService
     private function requestDetailAttributes(array $item): array
     {
         return ['item_type' => $item['item_type'], 'yarn_id' => $item['item_type'] === 'YARN' ? $item['yarn_id'] : null,
-            'fabric_id' => $item['item_type'] === 'FABRIC' ? $item['fabric_id'] : null,
+            'fabric_id' => $item['item_type'] === 'FABRIC' ? $item['fabric_id'] : null, 'auxiliary_material_id' => $item['item_type'] === 'AUXILIARY' ? $item['auxiliary_material_id'] : null,
             'item_name' => $item['item_name'], 'qty_requested' => $item['qty'], 'unit' => $item['unit'] ?? 'KGS',
             'remarks' => $item['remarks'] ?? null];
     }
@@ -128,7 +130,7 @@ class MaterialProcurementService
     private function orderDetailAttributes(array $item): array
     {
         return ['item_type' => $item['item_type'], 'yarn_id' => $item['item_type'] === 'YARN' ? $item['yarn_id'] : null,
-            'fabric_id' => $item['item_type'] === 'FABRIC' ? $item['fabric_id'] : null,
+            'fabric_id' => $item['item_type'] === 'FABRIC' ? $item['fabric_id'] : null, 'auxiliary_material_id' => $item['item_type'] === 'AUXILIARY' ? $item['auxiliary_material_id'] : null,
             'item_name' => $item['item_name'], 'qty' => $item['qty'], 'unit' => $item['unit'] ?? 'KGS',
             'rate' => $item['rate'] ?? 0];
     }
@@ -137,9 +139,10 @@ class MaterialProcurementService
     {
         if (! $items) { throw new \RuntimeException('Dokumen harus memiliki minimal satu detail bahan baku.'); }
         foreach ($items as $item) {
-            if (! in_array($item['item_type'] ?? null, ['YARN', 'FABRIC'], true) || (float) ($item['qty'] ?? 0) <= 0
+            if (! in_array($item['item_type'] ?? null, ['YARN', 'FABRIC', 'AUXILIARY'], true) || (float) ($item['qty'] ?? 0) <= 0
                 || empty($item['item_name']) || (($item['item_type'] ?? null) === 'YARN' && empty($item['yarn_id']))
-                || (($item['item_type'] ?? null) === 'FABRIC' && empty($item['fabric_id']))) {
+                || (($item['item_type'] ?? null) === 'FABRIC' && empty($item['fabric_id']))
+                || (($item['item_type'] ?? null) === 'AUXILIARY' && empty($item['auxiliary_material_id']))) {
                 throw new \RuntimeException('Detail bahan baku tidak valid.');
             }
             if ($item['item_type'] === 'YARN' && ! Yarn::whereKey($item['yarn_id'])->where('is_active', true)->exists()) {
@@ -147,6 +150,9 @@ class MaterialProcurementService
             }
             if ($item['item_type'] === 'FABRIC' && ! Fabric::whereKey($item['fabric_id'])->where('is_active', true)->exists()) {
                 throw new \RuntimeException('Fabric harus aktif.');
+            }
+            if ($item['item_type'] === 'AUXILIARY' && ! AuxiliaryMaterial::whereKey($item['auxiliary_material_id'])->where('is_active', true)->exists()) {
+                throw new \RuntimeException('Bahan penolong harus aktif.');
             }
         }
     }

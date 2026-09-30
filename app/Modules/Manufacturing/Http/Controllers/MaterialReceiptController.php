@@ -9,6 +9,7 @@ use App\Modules\Manufacturing\Models\MaterialReceipt;
 use App\Modules\Manufacturing\Models\MaterialPurchaseOrder;
 use App\Modules\Manufacturing\Models\Yarn;
 use App\Modules\Manufacturing\Models\Fabric;
+use App\Modules\Manufacturing\Models\AuxiliaryMaterial;
 use App\Modules\Manufacturing\Models\Supplier;
 use App\Modules\Manufacturing\Services\MaterialReceiptService;
 use App\Modules\Manufacturing\Exports\MaterialReceiptExport;
@@ -46,8 +47,9 @@ class MaterialReceiptController extends Controller
         $openPos = MaterialPurchaseOrder::with('details')->whereIn('status', ['APPROVED', 'PARTIAL'])->orderBy('po_date', 'desc')->get();
         $yarns = Yarn::where('is_active', true)->orderBy('yarn_code')->get();
         $fabrics = Fabric::where('is_active', true)->orderBy('fabric_code')->get();
+        $auxiliaryMaterials = AuxiliaryMaterial::where('is_active', true)->orderBy('material_code')->get();
 
-        return view('manufacturing.material_receipt.create', compact('suppliers', 'openPos', 'yarns', 'fabrics'));
+        return view('manufacturing.material_receipt.create', compact('suppliers', 'openPos', 'yarns', 'fabrics', 'auxiliaryMaterials'));
     }
 
     public function store(Request $request)
@@ -56,7 +58,7 @@ class MaterialReceiptController extends Controller
             'receipt_date'       => 'required|date',
             'supplier_id'        => 'required|exists:mfg_suppliers,id',
             'items'               => 'required|array|min:1',
-            'items.*.item_type'   => 'required|in:YARN,FABRIC',
+            'items.*.item_type'   => 'required|in:YARN,FABRIC,AUXILIARY',
             'items.*.qty'         => 'required|numeric|min:0.01',
             'items.*.rate'        => 'required|numeric|min:0',
             'items.*.item_name'   => 'required|string',
@@ -81,7 +83,7 @@ class MaterialReceiptController extends Controller
 
     public function show($id)
     {
-        $receipt = MaterialReceipt::with(['supplier', 'purchaseOrder', 'details.yarn', 'details.fabric', 'journal.details'])
+        $receipt = MaterialReceipt::with(['supplier', 'purchaseOrder', 'details.yarn', 'details.fabric', 'details.auxiliaryMaterial', 'journal.details'])
             ->findOrFail($id);
 
         return view('manufacturing.material_receipt.show', compact('receipt'));

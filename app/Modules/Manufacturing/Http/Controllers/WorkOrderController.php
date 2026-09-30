@@ -11,9 +11,13 @@ use App\Modules\Manufacturing\Models\Yarn;
 use App\Modules\Manufacturing\Models\Fabric;
 use App\Modules\Manufacturing\Models\Supplier;
 use App\Modules\Manufacturing\Models\ManufacturingProcess;
+use App\Modules\Manufacturing\Models\ProductionLine;
+use App\Modules\Manufacturing\Models\AuxiliaryMaterial;
 use App\Modules\Manufacturing\Services\WorkOrderService;
+use App\Modules\Manufacturing\Services\WorkOrderMaterialPlanningService;
 use App\Modules\Manufacturing\Exports\WorkOrderExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\Rule;
 
 class WorkOrderController extends Controller
 {
@@ -29,7 +33,7 @@ class WorkOrderController extends Controller
         $search = $request->get('search');
         $status = $request->get('status');
 
-        $query = WorkOrder::with('product')
+        $query = WorkOrder::with(['product', 'productionLine'])
             ->when($search, fn($q) => $q->where('spk_number', 'like', "%{$search}%")
                 ->orWhere('garment_name', 'like', "%{$search}%")
                 ->orWhere('style_sku', 'like', "%{$search}%"))
@@ -47,7 +51,8 @@ class WorkOrderController extends Controller
     public function create()
     {
         $products = Product::orderBy('name')->get();
-        return view('manufacturing.work_order.create', compact('products'));
+        $productionLines = ProductionLine::where('is_active', true)->orderBy('line_code')->get();
+        return view('manufacturing.work_order.create', compact('products', 'productionLines'));
     }
 
     public function store(Request $request)
@@ -57,13 +62,14 @@ class WorkOrderController extends Controller
             'garment_name' => 'required|string|max:255',
             'planned_qty'  => 'required|integer|min:1',
             'product_id'   => 'nullable|exists:products,id',
+            'line_id'      => ['nullable', Rule::exists('mfg_production_lines', 'id')->where('is_active', true)],
             'style_sku'    => 'nullable|string|max:100',
             'target_date'  => 'nullable|date',
         ]);
 
         try {
             $wo = $this->service->create($request->only([
-                'order_date', 'product_id', 'style_sku', 'garment_name',
+                'order_date', 'product_id', 'line_id', 'style_sku', 'garment_name',
                 'planned_qty', 'target_date', 'remarks',
             ]) + ['created_by' => auth()->id()]);
 
@@ -81,18 +87,22 @@ class WorkOrderController extends Controller
             'product',
             'knitOrders.supplier', 'knitOrders.fabric', 'knitOrders.yarnIssues.yarn', 'knitOrders.greyFabricReceipts',
             'processingOrders.supplier', 'processingOrders.fabricIssues.fabric', 'processingOrders.fabricReceipts.fabric',
-            'cuttingOrders.fabric', 'cuttingOrders.checks', 'cuttingOrders.stitchingOrders.supplier', 'cuttingOrders.stitchingOrders.finishingStages',
+            'cuttingOrders.fabric', 'cuttingOrders.productionLine', 'cuttingOrders.checks', 'cuttingOrders.stitchingOrders.supplier', 'cuttingOrders.stitchingOrders.finishingStages',
             'finishingStages',
             'barcodeLabels',
+            'auxiliaryMaterialIssues.material',
+            'materialRequirements',
         ])->findOrFail($id);
 
         // Data master untuk form-form inline di halaman show
         $yarns = Yarn::where('is_active', true)->orderBy('yarn_code')->get();
         $fabrics = Fabric::where('is_active', true)->orderBy('fabric_code')->get();
+        $auxiliaryMaterials = AuxiliaryMaterial::where('is_active', true)->orderBy('material_code')->get();
         $suppliers = Supplier::where('is_active', true)->orderBy('supplier_name')->get();
         $processes = ManufacturingProcess::where('is_active', true)->orderBy('process_name')->get();
 
-        return view('manufacturing.work_order.show', compact('workOrder', 'yarns', 'fabrics', 'suppliers', 'processes'));
+        $materialComparison = app(WorkOrderMaterialPlanningService::class)->comparison($workOrder);
+        return view('manufacturing.work_order.show', compact('workOrder', 'yarns', 'fabrics', 'auxiliaryMaterials', 'suppliers', 'processes', 'materialComparison'));
     }
 
     public function complete(Request $request, $id)
@@ -123,5 +133,24 @@ class WorkOrderController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal void penyelesaian SPK: ' . $e->getMessage());
         }
+    }
+
+    public function generateMaterialShortageRequest(int $id, WorkOrderMaterialPlanningService $service)
+    {
+        try {
+            $workOrder = WorkOrder::with('materialRequirements')->findOrFail($id);
+            $request = $service->generateShortageRequest($workOrder, auth()->id());
+            SystemLog::record('CREATE', 'Manufacturing Material Purchase Request', 'Membuat PR kekurangan BOM '.$request->request_number.' dari SPK '.$workOrder->spk_number);
+            return redirect()->route('mfg.material-requests.index')->with('success', 'Material PR '.$request->request_number.' dibuat dari kekurangan BOM SPK '.$workOrder->spk_number.'.');
+        } catch (\Throwable $exception) {
+            return back()->with('error', 'Gagal membuat Material PR dari BOM: '.$exception->getMessage());
+        }
+    }
+
+    public function previewMaterialShortageRequest(int $id, WorkOrderMaterialPlanningService $service)
+    {
+        $workOrder = WorkOrder::with(['product', 'materialRequirements'])->findOrFail($id);
+        $shortagePreview = $service->shortagePreview($workOrder);
+        return view('manufacturing.work_order.material_pr_preview', compact('workOrder', 'shortagePreview'));
     }
 }

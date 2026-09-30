@@ -16,7 +16,7 @@ class MaterialPurchaseRequest extends Model
 
     protected $table = 'mfg_material_purchase_requests';
 
-    protected $fillable = ['request_number', 'request_date', 'required_date', 'approval_status', 'submitted_by', 'submitted_at', 'approved_by', 'approved_at', 'rejected_by', 'rejected_at', 'rejection_reason', 'remarks', 'created_by'];
+    protected $fillable = ['request_number', 'request_date', 'required_date', 'source_work_order_id', 'approval_status', 'submitted_by', 'submitted_at', 'approved_by', 'approved_at', 'rejected_by', 'rejected_at', 'rejection_reason', 'remarks', 'created_by'];
 
     protected function casts(): array
     {

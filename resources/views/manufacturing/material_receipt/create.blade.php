@@ -50,6 +50,7 @@
                                 <select name="items[0][item_type]" class="form-select item-type" required>
                                     <option value="YARN">{{ __('erp.material_yarn_caps') }}</option>
                                     <option value="FABRIC">{{ __('erp.material_fabric_caps') }}</option>
+                                    <option value="AUXILIARY">Bahan Penolong</option>
                                 </select>
                             </td>
                             <td>
@@ -61,6 +62,7 @@
                                     <option value="">{{ __('erp.select_fabric_ph') }}</option>
                                     @foreach($fabrics as $f)<option value="{{ $f->id }}">{{ $f->fabric_code }}</option>@endforeach
                                 </select>
+                                <select name="items[0][auxiliary_material_id]" class="form-select auxiliary-select d-none"><option value="">Pilih Bahan Penolong</option>@foreach($auxiliaryMaterials as $a)<option value="{{ $a->id }}">{{ $a->material_code }} - {{ $a->material_name }}</option>@endforeach</select>
                             </td>
                             <td><input type="text" name="items[0][item_name]" class="form-control" required></td>
                             <td><input type="number" step="0.01" name="items[0][qty]" class="form-control" required></td>
@@ -93,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const type = row.querySelector('.item-type').value;
         row.querySelector('.yarn-select').classList.toggle('d-none', type !== 'YARN');
         row.querySelector('.fabric-select').classList.toggle('d-none', type !== 'FABRIC');
+        row.querySelector('.auxiliary-select').classList.toggle('d-none', type !== 'AUXILIARY');
     }
 
     document.getElementById('addRow').addEventListener('click', function () {

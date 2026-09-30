@@ -57,7 +57,7 @@
                 <table class="table table-bordered table-striped table-hover align-middle mb-0 text-nowrap" style="font-size: 13.5px;">
                     <thead class="bg-primary text-white text-center align-middle">
                         <tr>
-                            <th>{{ __('erp.work_order_no') }}</th><th>{{ __('erp.date') }}</th><th>{{ __('erp.garment_style') }}</th><th>{{ __('erp.planned_qty') }}</th>
+                            <th>{{ __('erp.work_order_no') }}</th><th>{{ __('erp.date') }}</th><th>{{ __('erp.garment_style') }}</th><th>Line Produksi</th><th>{{ __('erp.planned_qty') }}</th>
                             <th>{{ __('erp.material_cost') }}</th><th>{{ __('erp.process_cost') }}</th><th>{{ __('erp.total_wip') }}</th><th>{{ __('erp.status') }}</th><th>{{ __('erp.action') }}</th>
                         </tr>
                     </thead>
@@ -67,6 +67,7 @@
                                 <td class="fw-bold py-2">{{ $wo->spk_number }}</td>
                                 <td class="py-2">{{ \Carbon\Carbon::parse($wo->order_date)->format('d M Y') }}</td>
                                 <td class="py-2">{{ $wo->garment_name }} @if($wo->style_sku)<br><small class="text-muted">{{ $wo->style_sku }}</small>@endif</td>
+                                <td class="py-2">{{ $wo->productionLine ? $wo->productionLine->line_code.' - '.$wo->productionLine->line_name : '-' }}</td>
                                 <td class="text-end py-2">{{ number_format($wo->planned_qty) }}</td>
                                 <td class="text-end py-2">Rp {{ number_format($wo->total_material_cost, 2) }}</td>
                                 <td class="text-end py-2">Rp {{ number_format($wo->total_process_cost, 2) }}</td>
@@ -81,7 +82,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="9" class="text-center py-5 text-muted">{{ __('erp.no_work_orders_yet') }}</td></tr>
+                            <tr><td colspan="10" class="text-center py-5 text-muted">{{ __('erp.no_work_orders_yet') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>

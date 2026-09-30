@@ -52,19 +52,19 @@
                 <table class="table table-bordered table-striped table-hover align-middle mb-0 text-nowrap" style="font-size: 13.5px;">
                     <thead class="bg-primary text-white text-center align-middle">
                         <tr>
-                            <th>{{ __('erp.code_label') }}</th><th>{{ __('erp.kind_label') }}</th><th>{{ __('erp.count_label') }}</th><th>{{ __('erp.mfg_composition') }}</th><th>{{ __('erp.color_label') }}</th>
-                            <th>{{ __('erp.unit') }}</th><th>{{ __('erp.stock_label') }}</th><th>{{ __('erp.average_cogs') }}</th><th>{{ __('erp.status') }}</th><th>{{ __('erp.action') }}</th>
+                            <th>HS Code</th><th>{{ __('erp.code_label') }}</th><th>Description</th><th>Nama Bahan</th><th>Nama Inggris</th><th>Kategori</th><th>{{ __('erp.color_label') }}</th><th>Spesifikasi</th><th>{{ __('erp.unit') }}</th><th>Meter/Gulung</th>
+                            <th>{{ __('erp.stock_label') }}</th><th>{{ __('erp.average_cogs') }}</th><th>{{ __('erp.status') }}</th><th>{{ __('erp.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($yarns as $yarn)
                             <tr>
                                 <td class="fw-bold py-2">{{ $yarn->yarn_code }}</td>
-                                <td class="py-2">{{ $yarn->yarn_type }}</td>
-                                <td class="py-2">{{ $yarn->yarn_count ?? '-' }}</td>
-                                <td class="py-2">{{ $yarn->composition ?? '-' }}</td>
+                                <td>{{ $yarn->hs_code ?? '-' }}</td><td class="py-2">{{ $yarn->description ?? $yarn->yarn_type }}</td><td>{{ $yarn->material_name ?? '-' }}</td><td>{{ $yarn->english_name ?? '-' }}</td><td>{{ $yarn->category ?? '-' }}</td>
                                 <td class="py-2">{{ $yarn->color ?? '-' }}</td>
+                                <td>{{ $yarn->specification ?? '-' }}</td>
                                 <td class="text-center py-2">{{ $yarn->unit }}</td>
+                                <td class="text-end">{{ $yarn->meters_per_roll !== null ? number_format($yarn->meters_per_roll, 2) : '-' }}</td>
                                 <td class="text-end py-2">{{ number_format($yarn->stock_quantity, 2) }}</td>
                                 <td class="text-end py-2">Rp {{ number_format($yarn->average_cost, 2) }}</td>
                                 <td class="text-center py-2">
@@ -72,6 +72,7 @@
                                 </td>
                                 <td class="text-center py-2">
                                     <div class="btn-group">
+                                        <a href="{{ route('mfg.material-ledger.index', ['item_type' => 'YARN', 'item_id' => $yarn->id]) }}" class="btn btn-sm btn-outline-info" title="Kartu Stok"><i class="fa-solid fa-clipboard-list"></i></a>
                                         <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal"
                                             data-bs-target="#modalEdit{{ $yarn->id }}"><i class="fas fa-edit"></i></button>
                                         <form action="{{ route('mfg.yarns.destroy', $yarn->id) }}" method="POST" class="d-inline"
@@ -95,7 +96,14 @@
                                                 <div class="mb-2"><label class="form-label">{{ __('erp.yarn_code') }}</label>
                                                     <input type="text" name="yarn_code" class="form-control" value="{{ $yarn->yarn_code }}" required></div>
                                                 <div class="mb-2"><label class="form-label">{{ __('erp.kind_label') }}</label>
-                                                    <input type="text" name="yarn_type" class="form-control" value="{{ $yarn->yarn_type }}" required></div>
+                                                    <input type="text" name="description" class="form-control" value="{{ $yarn->description ?? $yarn->yarn_type }}" required></div>
+                                                <input type="hidden" name="yarn_type" value="{{ $yarn->description ?? $yarn->yarn_type }}">
+                                                <div class="mb-2"><label class="form-label">HS Code</label><input type="text" name="hs_code" class="form-control" value="{{ $yarn->hs_code }}"></div>
+                                                <div class="mb-2"><label class="form-label">Nama Bahan</label><input type="text" name="material_name" class="form-control" value="{{ $yarn->material_name }}"></div>
+                                                <div class="mb-2"><label class="form-label">Nama Material Inggris</label><input type="text" name="english_name" class="form-control" value="{{ $yarn->english_name }}"></div>
+                                                <div class="mb-2"><label class="form-label">Kategori</label><input type="text" name="category" class="form-control" value="{{ $yarn->category }}"></div>
+                                                <div class="mb-2"><label class="form-label">Spesifikasi/Deskripsi</label><textarea name="specification" class="form-control">{{ $yarn->specification }}</textarea></div>
+                                                <div class="mb-2"><label class="form-label">Meter per Gulung</label><input type="number" step="0.01" min="0" name="meters_per_roll" class="form-control" value="{{ $yarn->meters_per_roll }}"></div>
                                                 <div class="mb-2"><label class="form-label">{{ __('erp.count_label') }}</label>
                                                     <input type="text" name="yarn_count" class="form-control" value="{{ $yarn->yarn_count }}"></div>
                                                 <div class="mb-2"><label class="form-label">{{ __('erp.mfg_composition') }}</label>
@@ -117,7 +125,7 @@
                                 </div>
                             </div>
                         @empty
-                            <tr><td colspan="10" class="text-center py-5 text-muted">{{ __('erp.no_yarn_data') }}</td></tr>
+                            <tr><td colspan="14" class="text-center py-5 text-muted">{{ __('erp.no_yarn_data') }}</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -139,7 +147,14 @@
                     <div class="mb-2"><label class="form-label">{{ __('erp.yarn_code') }}</label>
                         <input type="text" name="yarn_code" class="form-control" required placeholder="Y-COTTON-30S"></div>
                     <div class="mb-2"><label class="form-label">{{ __('erp.kind_label') }}</label>
-                        <input type="text" name="yarn_type" class="form-control" required placeholder="Cotton Combed"></div>
+                        <input type="text" name="description" class="form-control" required placeholder="Cotton Yarn"></div>
+                    <input type="hidden" name="yarn_type" value="">
+                    <div class="mb-2"><label class="form-label">HS Code</label><input type="text" name="hs_code" class="form-control"></div>
+                    <div class="mb-2"><label class="form-label">Nama Bahan</label><input type="text" name="material_name" class="form-control"></div>
+                    <div class="mb-2"><label class="form-label">Nama Material Inggris</label><input type="text" name="english_name" class="form-control"></div>
+                    <div class="mb-2"><label class="form-label">Kategori</label><input type="text" name="category" class="form-control"></div>
+                    <div class="mb-2"><label class="form-label">Spesifikasi/Deskripsi</label><textarea name="specification" class="form-control"></textarea></div>
+                    <div class="mb-2"><label class="form-label">Meter per Gulung</label><input type="number" step="0.01" min="0" name="meters_per_roll" class="form-control"></div>
                     <div class="mb-2"><label class="form-label">{{ __('erp.count_label') }}</label>
                         <input type="text" name="yarn_count" class="form-control" placeholder="30s"></div>
                     <div class="mb-2"><label class="form-label">{{ __('erp.mfg_composition') }}</label>

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Modules\Manufacturing\Models\Supplier;
 use App\Modules\Manufacturing\Models\Yarn;
+use App\Modules\Manufacturing\Models\AuxiliaryMaterial;
 use App\Modules\Manufacturing\Services\MaterialProcurementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -91,6 +92,18 @@ class MaterialProcurementLifecycleTest extends TestCase
         $this->actingAs($user)->get(route('mfg.material-requests.index'))->assertOk()->assertSee('Material Purchase Request');
         $this->actingAs($user)->get(route('mfg.material-requests.create'))->assertOk()->assertSee('Buat Material Purchase Request');
         $this->actingAs($user)->get(route('mfg.material-orders.index'))->assertOk()->assertSee('Material Purchase Order');
+    }
+
+    public function test_approved_auxiliary_material_pr_can_create_po_with_same_master_reference(): void
+    {
+        $auxiliary = AuxiliaryMaterial::create(['material_code' => 'AUX-PR', 'material_name' => 'Polybag', 'unit' => 'PCS', 'is_active' => true]);
+        $item = ['item_type' => 'AUXILIARY', 'auxiliary_material_id' => $auxiliary->id, 'item_name' => 'Polybag', 'qty' => 10, 'unit' => 'PCS', 'rate' => 100];
+        $pr = $this->service->createRequest(['request_date' => '2026-09-30'], [$item]);
+        $this->service->submitRequest($pr->id, null);
+        $this->service->approveRequest($pr->id, null);
+        $detail = $pr->fresh('details')->details->sole();
+        $po = $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$item + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-30']);
+        $this->assertDatabaseHas('mfg_material_purchase_order_details', ['po_id' => $po->id, 'item_type' => 'AUXILIARY', 'auxiliary_material_id' => $auxiliary->id]);
     }
 
     private function item(float $qty): array

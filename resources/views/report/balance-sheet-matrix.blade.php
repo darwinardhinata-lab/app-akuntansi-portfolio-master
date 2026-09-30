@@ -13,16 +13,16 @@
             <p class="text-muted small mb-0">{{ __('erp.comparative_financial_position_monthly') }}</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('balance-sheet.index', ['year' => $year]) }}" class="btn btn-outline-secondary fw-bold px-3 shadow-sm">
+            <a href="{{ route('neraca.index', ['tab' => 'bulanan', 'year' => $year]) }}" class="btn btn-outline-secondary fw-bold px-3 shadow-sm">
                 <i class="fa-solid fa-list me-2"></i> Tampilan Standar
             </a>
-            <a href="{{ route('balance-sheet.matrix', ['year' => $year, 'export' => 'excel']) }}" class="btn btn-success fw-bold px-3 shadow-sm">
+            <a href="{{ route('neraca.index', ['tab' => 'bulanan', 'year' => $year, 'export' => 'excel']) }}" class="btn btn-success fw-bold px-3 shadow-sm">
                 <i class="fa-solid fa-file-excel me-2"></i> {{ __('erp.export_excel_btn') }}
             </a>
         </div>
     </div>
 
-    <form action="{{ route('balance-sheet.matrix') }}" method="GET" class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
+    <form action="{{ route('neraca.index', ['tab' => 'bulanan']) }}" method="GET" class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
         <div class="row g-2 align-items-end">
             <div class="col-md-3">
                 <label class="form-label small fw-bold text-muted">{{ __('erp.select_year') }}</label>

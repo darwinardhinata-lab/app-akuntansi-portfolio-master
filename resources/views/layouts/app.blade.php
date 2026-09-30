@@ -539,6 +539,14 @@
                     <span class="nav-icon"><i class="fa-solid fa-clipboard-list text-primary"></i></span>
                     <span class="nav-text">{{ __('erp.spk_work_order_label') }}</span>
                 </a>
+                <a href="{{ route('mfg.product-boms.index') }}" class="nav-link {{ request()->routeIs('mfg.product-boms.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-list-check text-success"></i></span>
+                    <span class="nav-text">BOM Produk</span>
+                </a>
+                <a href="{{ route('mfg.production-lines.index') }}" class="nav-link {{ request()->routeIs('mfg.production-lines.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-industry text-warning"></i></span>
+                    <span class="nav-text">Line Produksi</span>
+                </a>
                 <a href="{{ route('mfg.material-requests.index') }}" class="nav-link {{ request()->routeIs('mfg.material-requests.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-clipboard-check text-info"></i></span>
                     <span class="nav-text">Material PR</span>
@@ -551,22 +559,33 @@
                     <span class="nav-icon"><i class="fa-solid fa-truck-loading text-warning"></i></span>
                     <span class="nav-text">{{ __('erp.bc_material_receipt_mrn') }}</span>
                 </a>
+                <a href="{{ route('mfg.material-ledger.index') }}" class="nav-link {{ request()->routeIs('mfg.material-ledger.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-clipboard-list text-info"></i></span>
+                    <span class="nav-text">Kartu Stok Bahan</span>
+                </a>
                 <a href="{{ route('mfg.reports.hpp') }}" class="nav-link {{ request()->routeIs('mfg.reports.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-chart-line text-success"></i></span>
                     <span class="nav-text">{{ __('erp.mfg_report_hpp') }}</span>
                 </a>
+                <a href="{{ route('mfg.reports.bom-actual') }}" class="nav-link {{ request()->routeIs('mfg.reports.bom-actual') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-scale-balanced text-primary"></i></span>
+                    <span class="nav-text">Analisis BOM vs Aktual</span>
+                </a>
 
-                <a href="#menuMfgMaster" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('mfg.yarns.*') || request()->routeIs('mfg.fabrics.*') || request()->routeIs('mfg.suppliers.*') || request()->routeIs('mfg.processes.*') ? 'active' : '' }}">
+                <a href="#menuMfgMaster" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('mfg.yarns.*') || request()->routeIs('mfg.fabrics.*') || request()->routeIs('mfg.auxiliary-materials.*') || request()->routeIs('mfg.suppliers.*') || request()->routeIs('mfg.processes.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-database text-secondary"></i></span>
                     <span class="nav-text">{{ __('erp.mfg_master_data') }}</span>
                     <i class="fa-solid fa-chevron-down nav-chevron"></i>
                 </a>
-                <div class="collapse nav-submenu {{ request()->routeIs('mfg.yarns.*') || request()->routeIs('mfg.fabrics.*') || request()->routeIs('mfg.suppliers.*') || request()->routeIs('mfg.processes.*') ? 'show' : '' }}" id="menuMfgMaster">
+                <div class="collapse nav-submenu {{ request()->routeIs('mfg.yarns.*') || request()->routeIs('mfg.fabrics.*') || request()->routeIs('mfg.auxiliary-materials.*') || request()->routeIs('mfg.suppliers.*') || request()->routeIs('mfg.processes.*') ? 'show' : '' }}" id="menuMfgMaster">
                     <a href="{{ route('mfg.yarns.index') }}" class="nav-link {{ request()->routeIs('mfg.yarns.*') ? 'active' : '' }}">
                         <span class="nav-text">{{ __('erp.master_yarn_menu') }}</span>
                     </a>
                     <a href="{{ route('mfg.fabrics.index') }}" class="nav-link {{ request()->routeIs('mfg.fabrics.*') ? 'active' : '' }}">
                         <span class="nav-text">{{ __('erp.master_fabric_menu') }}</span>
+                    </a>
+                    <a href="{{ route('mfg.auxiliary-materials.index') }}" class="nav-link {{ request()->routeIs('mfg.auxiliary-materials.*') ? 'active' : '' }}">
+                        <span class="nav-text">Master Bahan Penolong</span>
                     </a>
                     <a href="{{ route('mfg.suppliers.index') }}" class="nav-link {{ request()->routeIs('mfg.suppliers.*') ? 'active' : '' }}">
                         <span class="nav-text">{{ __('erp.mfg_master_supplier') }}</span>

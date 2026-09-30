@@ -31,6 +31,7 @@ class CompanyCoaRegistry
             'sales_export' => ['normal_balance' => 'KREDIT', 'label' => 'Penjualan ekspor', 'mgi_account' => '411002'],
             'cogs' => ['normal_balance' => 'DEBET', 'label' => 'Beban pokok penjualan', 'mgi_account' => '510001'],
             'inventory_adjustment' => ['normal_balance' => 'DEBET', 'label' => 'Penyesuaian persediaan', 'mgi_account' => '510004'],
+            'auxiliary_material_expense' => ['normal_balance' => 'DEBET', 'label' => 'Beban bahan penolong produksi', 'mgi_account' => '510010'],
         ];
     }
 }

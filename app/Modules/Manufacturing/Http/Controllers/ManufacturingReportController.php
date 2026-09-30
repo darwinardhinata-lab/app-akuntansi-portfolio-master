@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Modules\Manufacturing\Models\WorkOrder;
 use App\Modules\Manufacturing\Models\CuttingCheck;
 use App\Modules\Manufacturing\Exports\ManufacturingHppExport;
+use App\Modules\Manufacturing\Services\WorkOrderMaterialPlanningService;
+use App\Models\Product;
 use Maatwebsite\Excel\Facades\Excel;
 
 /**
@@ -64,5 +66,45 @@ class ManufacturingReportController extends Controller
         }
 
         return view('manufacturing.report.hpp', compact('workOrders', 'summary', 'startDate', 'endDate'));
+    }
+
+    public function bomActual(Request $request, WorkOrderMaterialPlanningService $planningService)
+    {
+        $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate = $request->get('end_date', now()->format('Y-m-d'));
+        $productId = $request->integer('product_id');
+        $workOrderId = $request->integer('work_order_id');
+
+        $workOrders = WorkOrder::with(['product', 'materialRequirements'])
+            ->whereDate('order_date', '>=', $startDate)->whereDate('order_date', '<=', $endDate)
+            ->when($productId, fn ($query) => $query->where('product_id', $productId))
+            ->when($workOrderId, fn ($query) => $query->whereKey($workOrderId))
+            ->whereHas('materialRequirements')
+            ->orderBy('order_date')->get();
+
+        $rows = $workOrders->flatMap(function (WorkOrder $workOrder) use ($planningService) {
+            return $planningService->comparison($workOrder)->map(function ($comparison) use ($workOrder) {
+                $requirement = $comparison->requirement;
+                $baseQty = (float) $workOrder->planned_qty * (float) $requirement->qty_per_unit;
+                $plannedWasteQty = (float) $requirement->qty_required - $baseQty;
+                return (object) [
+                    'work_order' => $workOrder, 'product' => $workOrder->product, 'requirement' => $requirement,
+                    'base_qty' => $baseQty, 'planned_waste_qty' => $plannedWasteQty,
+                    'required_qty' => (float) $requirement->qty_required, 'actual_qty' => $comparison->actual_qty,
+                    'variance_qty' => $comparison->variance_qty, 'planned_cost' => (float) $requirement->estimated_total_cost,
+                    'actual_cost' => $comparison->actual_cost, 'variance_cost' => (float) $requirement->estimated_total_cost - $comparison->actual_cost,
+                ];
+            });
+        })->values();
+
+        $productSummary = $rows->groupBy(fn ($row) => $row->product?->id ?? 0)->map(function ($items) {
+            $first = $items->first();
+            return (object) ['product' => $first->product, 'spk_count' => $items->pluck('work_order.id')->unique()->count(), 'required_qty' => $items->sum('required_qty'), 'actual_qty' => $items->sum('actual_qty'), 'variance_qty' => $items->sum('variance_qty'), 'planned_cost' => $items->sum('planned_cost'), 'actual_cost' => $items->sum('actual_cost'), 'variance_cost' => $items->sum('variance_cost')];
+        })->values();
+
+        $summary = (object) ['spk_count' => $workOrders->count(), 'line_count' => $rows->count(), 'planned_waste_qty' => $rows->sum('planned_waste_qty'), 'planned_cost' => $rows->sum('planned_cost'), 'actual_cost' => $rows->sum('actual_cost'), 'variance_cost' => $rows->sum('variance_cost')];
+        $products = Product::orderBy('name')->get();
+
+        return view('manufacturing.report.bom_actual', compact('startDate', 'endDate', 'productId', 'workOrderId', 'products', 'workOrders', 'rows', 'productSummary', 'summary'));
     }
 }

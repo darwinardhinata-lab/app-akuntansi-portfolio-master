@@ -18,7 +18,14 @@ return new class extends Migration
         Schema::create('mfg_fabrics', function (Blueprint $table) {
             $table->id();
             $table->string('fabric_code', 50)->unique();
-            $table->string('fabric_type', 50);
+            $table->string('fabric_type', 255);
+            $table->string('hs_code', 50)->nullable();
+            $table->string('description', 255)->nullable();
+            $table->string('material_name', 255)->nullable();
+            $table->string('english_name', 255)->nullable();
+            $table->string('category', 100)->nullable();
+            $table->text('specification')->nullable();
+            $table->decimal('meters_per_roll', 20, 2)->nullable();
             $table->string('subtype', 100)->nullable();
             $table->enum('state', ['GREY','FINISHED'])->default('FINISHED');
             $table->integer('gsm')->nullable();

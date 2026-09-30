@@ -15,6 +15,7 @@ class Yarn extends Model
     protected $fillable = [
         'yarn_code',
         'yarn_type',
+        'hs_code', 'description', 'material_name', 'english_name', 'category', 'specification', 'meters_per_roll',
         'yarn_count',
         'composition',
         'color',
@@ -28,6 +29,7 @@ class Yarn extends Model
     protected $casts = [
         'stock_quantity' => 'decimal:2',
         'average_cost' => 'decimal:2',
+        'meters_per_roll' => 'decimal:2',
     ];
 
 

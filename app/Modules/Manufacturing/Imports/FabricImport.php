@@ -9,8 +9,8 @@ use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 
 /**
- * Import master Fabric. Kolom: KODE FABRIC, JENIS, SUBTYPE, STATE (GREY/FINISHED),
- * GSM, KOMPOSISI, LEBAR, WARNA, SATUAN.
+ * Import master Fabric. Format baru: HS CODE, KODE BAHAN, DESCRIPTION, NAMA BAHAN,
+ * NAMA MATERIAL INGGRIS, KATEGORI, WARNA, SPESIFIKASI/DESKRIPSI, SATUAN, METER PER GULUNG.
  * stock_quantity & average_cost TIDAK diimport lewat sini (sama seperti YarnImport).
  */
 class FabricImport implements ToCollection, WithStartRow, WithCustomCsvSettings
@@ -31,24 +31,35 @@ class FabricImport implements ToCollection, WithStartRow, WithCustomCsvSettings
             if (!isset($row[0]) || empty(trim((string) $row[0]))) {
                 continue;
             }
-            if (strtoupper(trim((string) $row[0])) === 'KODE FABRIC') {
+            if (in_array(strtoupper(trim((string) $row[0])), ['KODE FABRIC', 'KODE BAHAN', 'HS CODE'], true)) {
                 continue;
             }
 
-            $state = strtoupper(trim($row[3] ?? 'FINISHED'));
+            $isStandardFormat = count($row) >= 10;
+            $code = trim((string) ($isStandardFormat ? ($row[1] ?? '') : ($row[0] ?? '')));
+            if ($code === '') continue;
+            $description = trim((string) ($isStandardFormat ? ($row[2] ?? '-') : ($row[1] ?? '-')));
+            $state = strtoupper(trim((string) ($isStandardFormat ? 'FINISHED' : ($row[3] ?? 'FINISHED'))));
             if (!in_array($state, ['GREY', 'FINISHED'])) $state = 'FINISHED';
 
             Fabric::updateOrCreate(
-                ['fabric_code' => trim($row[0])],
+                ['fabric_code' => $code],
                 [
-                    'fabric_type'  => trim($row[1] ?? '-'),
-                    'subtype'      => trim($row[2] ?? '') ?: null,
+                    'fabric_type'  => $description,
+                    'description' => $description,
+                    'hs_code' => $isStandardFormat ? trim((string) ($row[0] ?? '')) ?: null : null,
+                    'material_name' => $isStandardFormat ? trim((string) ($row[3] ?? '')) ?: null : null,
+                    'english_name' => $isStandardFormat ? trim((string) ($row[4] ?? '')) ?: null : null,
+                    'category' => $isStandardFormat ? trim((string) ($row[5] ?? '')) ?: null : null,
+                    'specification' => $isStandardFormat ? trim((string) ($row[7] ?? '')) ?: null : null,
+                    'meters_per_roll' => $isStandardFormat && is_numeric($row[9] ?? null) ? (float) $row[9] : null,
+                    'subtype' => $isStandardFormat ? null : (trim((string) ($row[2] ?? '')) ?: null),
                     'state'        => $state,
-                    'gsm'          => is_numeric($row[4] ?? null) ? (int) $row[4] : null,
-                    'composition'  => trim($row[5] ?? '') ?: null,
-                    'width'        => is_numeric($row[6] ?? null) ? (float) $row[6] : null,
-                    'color'        => trim($row[7] ?? '') ?: null,
-                    'unit'         => trim($row[8] ?? 'KGS'),
+                    'gsm' => $isStandardFormat ? null : (is_numeric($row[4] ?? null) ? (int) $row[4] : null),
+                    'composition' => $isStandardFormat ? null : (trim((string) ($row[5] ?? '')) ?: null),
+                    'width' => $isStandardFormat ? null : (is_numeric($row[6] ?? null) ? (float) $row[6] : null),
+                    'color' => trim((string) ($isStandardFormat ? ($row[6] ?? '') : ($row[7] ?? ''))) ?: null,
+                    'unit' => trim((string) ($isStandardFormat ? ($row[8] ?? 'KGS') : ($row[8] ?? 'KGS'))),
                     'inventory_account_code' => config('coa.persediaan_bahan_baku_kain'),
                     'is_active'    => true,
                 ]

@@ -19,6 +19,13 @@ return new class extends Migration
             $table->id();
             $table->string('yarn_code', 50)->unique();
             $table->string('yarn_type', 100);
+            $table->string('hs_code', 50)->nullable();
+            $table->string('description', 255)->nullable();
+            $table->string('material_name', 255)->nullable();
+            $table->string('english_name', 255)->nullable();
+            $table->string('category', 100)->nullable();
+            $table->text('specification')->nullable();
+            $table->decimal('meters_per_roll', 20, 2)->nullable();
             $table->string('yarn_count', 50)->nullable();
             $table->string('composition', 255)->nullable();
             $table->string('color', 100)->nullable();

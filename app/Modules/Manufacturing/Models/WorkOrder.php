@@ -16,6 +16,7 @@ class WorkOrder extends Model
         'spk_number',
         'order_date',
         'product_id',
+        'line_id',
         'style_sku',
         'garment_name',
         'planned_qty',
@@ -41,6 +42,11 @@ class WorkOrder extends Model
     public function product()
     {
         return $this->belongsTo(\App\Models\Product::class, 'product_id');
+    }
+
+    public function productionLine()
+    {
+        return $this->belongsTo(ProductionLine::class, 'line_id');
     }
 
     public function journal()
@@ -76,6 +82,16 @@ class WorkOrder extends Model
     public function barcodeLabels()
     {
         return $this->hasMany(BarcodeLabel::class, 'work_order_id');
+    }
+
+    public function auxiliaryMaterialIssues()
+    {
+        return $this->hasMany(AuxiliaryMaterialIssue::class, 'work_order_id');
+    }
+
+    public function materialRequirements()
+    {
+        return $this->hasMany(WorkOrderMaterialRequirement::class, 'work_order_id');
     }
 
 }

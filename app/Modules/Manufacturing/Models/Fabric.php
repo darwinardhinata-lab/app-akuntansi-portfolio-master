@@ -15,6 +15,7 @@ class Fabric extends Model
     protected $fillable = [
         'fabric_code',
         'fabric_type',
+        'hs_code', 'description', 'material_name', 'english_name', 'category', 'specification', 'meters_per_roll',
         'subtype',
         'state',
         'gsm',
@@ -31,6 +32,7 @@ class Fabric extends Model
     protected $casts = [
         'stock_quantity' => 'decimal:2',
         'average_cost' => 'decimal:2',
+        'meters_per_roll' => 'decimal:2',
     ];
 
 

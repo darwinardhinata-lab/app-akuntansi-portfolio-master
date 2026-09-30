@@ -40,6 +40,15 @@
                         <label class="form-label">{{ __('erp.planned_qty_pcs') }}</label>
                         <input type="number" name="planned_qty" class="form-control" value="{{ old('planned_qty') }}" min="1" required>
                     </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Line Produksi</label>
+                        <select name="line_id" class="form-select">
+                            <option value="">Pilih kemudian / belum ditetapkan</option>
+                            @foreach($productionLines as $line)
+                                <option value="{{ $line->id }}" {{ old('line_id') == $line->id ? 'selected' : '' }}>{{ $line->line_code }} - {{ $line->line_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="col-md-3">
                         <label class="form-label">{{ __('erp.target_product_finished_sku') }}</label>
                         <select name="product_id" class="form-select">

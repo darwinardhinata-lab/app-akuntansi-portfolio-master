@@ -53,13 +53,15 @@ class CuttingOrderController extends Controller
             'pieces_rejected'   => 'nullable|integer|min:0',
             'fabric_used_kg'    => 'nullable|numeric|min:0',
             'fabric_wastage_kg' => 'nullable|numeric|min:0',
+            'scrap_kg'          => 'nullable|numeric|min:0',
+            'scrap_unit_value'  => 'nullable|numeric|min:0',
         ]);
 
         try {
             $cuttingOrder = CuttingOrder::findOrFail($id);
             $this->service->recordCheck((int) $id, $request->only([
                 'check_date', 'pieces_cut', 'pieces_ok', 'pieces_rejected',
-                'fabric_used_kg', 'fabric_wastage_kg', 'checked_by', 'remarks',
+                'fabric_used_kg', 'fabric_wastage_kg', 'scrap_kg', 'scrap_unit_value', 'checked_by', 'remarks',
             ]));
 
             SystemLog::record('POST', 'Manufacturing Cutting Check', "QC Cutting Order {$cuttingOrder->cutting_order_number}.");

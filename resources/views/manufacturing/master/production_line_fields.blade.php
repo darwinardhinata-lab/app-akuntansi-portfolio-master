@@ -1,0 +1,6 @@
+<div class="mb-2"><label class="form-label">Kode Line</label><input name="line_code" class="form-control" maxlength="50" required value="{{ old('line_code', $line?->line_code) }}" placeholder="LINE-SEW-01"></div>
+<div class="mb-2"><label class="form-label">Nama Line</label><input name="line_name" class="form-control" maxlength="150" required value="{{ old('line_name', $line?->line_name) }}" placeholder="Line Sewing 01"></div>
+<div class="mb-2"><label class="form-label">Area / Proses</label><input name="area" class="form-control" maxlength="100" value="{{ old('area', $line?->area) }}" placeholder="Cutting, Sewing, Finishing"></div>
+<div class="mb-2"><label class="form-label">Kapasitas per Hari</label><input name="daily_capacity" type="number" min="1" class="form-control" value="{{ old('daily_capacity', $line?->daily_capacity) }}"></div>
+<div class="mb-2"><label class="form-label">Catatan</label><textarea name="remarks" rows="2" class="form-control">{{ old('remarks', $line?->remarks) }}</textarea></div>
+<div class="form-check"><input name="is_active" value="1" class="form-check-input" type="checkbox" id="active{{ $line?->id ?? 'new' }}" {{ old('is_active', $line?->is_active ?? true) ? 'checked' : '' }}><label class="form-check-label" for="active{{ $line?->id ?? 'new' }}">Aktif</label></div>

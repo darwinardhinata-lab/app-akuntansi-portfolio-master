@@ -129,6 +129,7 @@
                             <div class="btn-group">
                                 <button type="button" onclick="showEntityLog('{{ $p->sku }}')" class="btn btn-sm btn-outline-info shadow-sm" title="{{ __('erp.activity_log') }}"><i class="fa-solid fa-clock-rotate-left"></i></button>
                                 <a href="{{ route('product.edit', $p->id) }}" class="btn btn-sm btn-outline-primary shadow-sm" title="{{ __('erp.edit_btn') }}"><i class="fa-solid fa-pen"></i></a>
+                                <a href="{{ route('mfg.product-boms.show', $p->id) }}" class="btn btn-sm btn-outline-success shadow-sm" title="Atur BOM Produk"><i class="fa-solid fa-list-check me-1"></i> BOM</a>
                                 <form action="{{ route('product.destroy', $p->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus barang ini secara permanen?')">
                                     @csrf
                                     @method('DELETE')

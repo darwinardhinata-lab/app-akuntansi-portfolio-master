@@ -10,15 +10,18 @@ use App\Modules\Manufacturing\Models\MaterialReceipt;
 use App\Modules\Manufacturing\Models\MaterialReceiptDetail;
 use App\Modules\Manufacturing\Models\Yarn;
 use App\Modules\Manufacturing\Models\Fabric;
+use App\Modules\Manufacturing\Models\AuxiliaryMaterial;
 use App\Modules\Manufacturing\Models\MaterialLedger;
 use App\Modules\Manufacturing\Support\MaterialCostHelper;
+use App\Modules\Platform\Support\CompanyCoaResolver;
+use App\Modules\Platform\Support\OperationalCompany;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
 /**
  * JURNAL #1 (lihat MANUFACTURING_INTEGRATION.md §3):
- *   Debit  Persediaan Bahan Baku Benang/Kain (config('coa.persediaan_bahan_baku_benang'/'_kain'))
- *   Kredit Hutang Usaha Maklun (config('coa.hutang_usaha_maklun'))
+ *   Debit  Persediaan Bahan Baku (mapping MGI: 114003)
+ *   Kredit Utang Usaha (mapping MGI: 211001)
  *
  * Sumber logic: mapping dari Anthrilo `gate_entries` + `mrns` + `mrn_items`
  * (disederhanakan jadi 1 dokumen MRN, lihat §2 MANUFACTURING_INTEGRATION.md).
@@ -40,6 +43,15 @@ class MaterialReceiptService
 
         return DB::transaction(function () use ($header, $items) {
             $now = now();
+            // Material procurement is a manufacturing flow. It must not fall
+            // back to legacy 11210/11220/22010 codes that are not part of the
+            // approved MGI COA mapping.
+            $company = app(OperationalCompany::class)->company();
+            $coa = app(CompanyCoaResolver::class);
+            $rawMaterialAccount = null;
+            $auxiliaryMaterialAccount = null;
+            $accountsPayableAccount = $coa->account($company, 'accounts_payable');
+            $inputVatAccount = $coa->account($company, 'input_vat');
             $receiptNumber = DocumentSequence::generateSecure(
                 'mfg_material_receipts', 'receipt_number', 'MRN-' . now()->format('Ymd') . '-'
             );
@@ -48,8 +60,10 @@ class MaterialReceiptService
             // agar tidak terjadi lost-update saat MRN paralel menyentuh yarn/fabric yang sama.
             $yarnIds   = collect($items)->where('item_type', 'YARN')->pluck('yarn_id')->filter()->unique()->all();
             $fabricIds = collect($items)->where('item_type', 'FABRIC')->pluck('fabric_id')->filter()->unique()->all();
+            $auxiliaryIds = collect($items)->where('item_type', 'AUXILIARY')->pluck('auxiliary_material_id')->filter()->unique()->all();
             $yarns     = $yarnIds ? Yarn::whereIn('id', $yarnIds)->lockForUpdate()->get()->keyBy('id') : collect();
             $fabrics   = $fabricIds ? Fabric::whereIn('id', $fabricIds)->lockForUpdate()->get()->keyBy('id') : collect();
+            $auxiliaries = $auxiliaryIds ? AuxiliaryMaterial::whereIn('id', $auxiliaryIds)->lockForUpdate()->get()->keyBy('id') : collect();
 
             $grossAmount = 0;
             $costByAccount = []; // [account_code => total] utk Debit jurnal (yarn vs kain dipisah akun)
@@ -77,19 +91,26 @@ class MaterialReceiptService
                 }
 
                 if ($row['item_type'] === 'YARN') {
+                    $rawMaterialAccount ??= $coa->account($company, 'raw_material_inventory');
                     $yarn = $yarns->get($row['yarn_id']) ?? throw new Exception("Yarn ID {$row['yarn_id']} tidak ditemukan.");
                     $result = MaterialCostHelper::receiveStock(
                         $yarn, 'YARN', $qty, $rate, $header['receipt_date'], $receiptNumber,
                         "Penerimaan MRN: {$receiptNumber} - {$row['item_name']}"
                     );
-                    $accountCode = $yarn->inventory_account_code ?: config('coa.persediaan_bahan_baku_benang');
-                } else {
+                    $accountCode = $rawMaterialAccount;
+                } elseif ($row['item_type'] === 'FABRIC') {
+                    $rawMaterialAccount ??= $coa->account($company, 'raw_material_inventory');
                     $fabric = $fabrics->get($row['fabric_id']) ?? throw new Exception("Fabric ID {$row['fabric_id']} tidak ditemukan.");
                     $result = MaterialCostHelper::receiveStock(
                         $fabric, 'FABRIC', $qty, $rate, $header['receipt_date'], $receiptNumber,
                         "Penerimaan MRN: {$receiptNumber} - {$row['item_name']}"
                     );
-                    $accountCode = $fabric->inventory_account_code ?: config('coa.persediaan_bahan_baku_kain');
+                    $accountCode = $rawMaterialAccount;
+                } else {
+                    $auxiliaryMaterialAccount ??= $coa->account($company, 'auxiliary_material_inventory');
+                    $auxiliary = $auxiliaries->get($row['auxiliary_material_id']) ?? throw new Exception("Bahan penolong ID {$row['auxiliary_material_id']} tidak ditemukan.");
+                    $result = MaterialCostHelper::receiveStock($auxiliary, 'AUXILIARY', $qty, $rate, $header['receipt_date'], $receiptNumber, "Penerimaan MRN: {$receiptNumber} - {$row['item_name']}");
+                    $accountCode = $auxiliaryMaterialAccount;
                 }
 
                 $costByAccount[$accountCode] = ($costByAccount[$accountCode] ?? 0) + $amount;
@@ -99,6 +120,7 @@ class MaterialReceiptService
                     'item_type'    => $row['item_type'],
                     'yarn_id'      => $row['yarn_id'] ?? null,
                     'fabric_id'    => $row['fabric_id'] ?? null,
+                    'auxiliary_material_id' => $row['auxiliary_material_id'] ?? null,
                     'item_name'    => $row['item_name'],
                     'qty'          => $qty,
                     'unit'         => $row['unit'] ?? 'KGS',
@@ -142,7 +164,7 @@ class MaterialReceiptService
             }
             $journalRows[] = [
                 'journal_id'   => $journal->getKey(),
-                'account_code' => config('coa.hutang_usaha_maklun'),
+                'account_code' => $accountsPayableAccount,
                 'helper_code'  => null, // TODO Stage 3: isi dgn helper_code supplier jika sudah terdaftar di helper_codes
                 'position'     => 'KREDIT',
                 'amount'       => $netAmount,
@@ -153,7 +175,7 @@ class MaterialReceiptService
                 // Pajak masukan dipisah sbg baris Debit tersendiri (bukan ikut nilai persediaan)
                 $journalRows[] = [
                     'journal_id'   => $journal->getKey(),
-                    'account_code' => config('coa.pajak_masukan'),
+                    'account_code' => $inputVatAccount,
                     'helper_code'  => null,
                     'position'     => 'DEBET',
                     'amount'       => $taxAmount,
@@ -183,8 +205,8 @@ class MaterialReceiptService
                 'created_by'        => $header['created_by'] ?? null,
             ]);
 
-            foreach ($detailRows as $row) {
-                $row['receipt_id'] = $receipt->id;
+            foreach ($detailRows as $index => $row) {
+                $detailRows[$index]['receipt_id'] = $receipt->id;
             }
             MaterialReceiptDetail::insert($detailRows);
 
@@ -217,14 +239,14 @@ class MaterialReceiptService
     public function void(int $receiptId): bool
     {
         return DB::transaction(function () use ($receiptId) {
-            $receipt = MaterialReceipt::with('details.yarn', 'details.fabric')->lockForUpdate()->findOrFail($receiptId);
+            $receipt = MaterialReceipt::with('details.yarn', 'details.fabric', 'details.auxiliaryMaterial')->lockForUpdate()->findOrFail($receiptId);
 
             if ($receipt->status === 'VOIDED') {
                 throw new Exception("MRN '{$receipt->receipt_number}' sudah berstatus VOIDED.");
             }
 
             foreach ($receipt->details as $detail) {
-                $item = $detail->item_type === 'YARN' ? $detail->yarn : $detail->fabric;
+                $item = $detail->item_type === 'YARN' ? $detail->yarn : ($detail->item_type === 'FABRIC' ? $detail->fabric : $detail->auxiliaryMaterial);
                 if (!$item) continue;
 
                 // Cek apakah qty yang diterima MRN ini sudah terpakai (stok saat ini < qty MRN
@@ -239,7 +261,7 @@ class MaterialReceiptService
 
             // Aman untuk dibalik: kurangi qty & value, ledger IN dihapus.
             foreach ($receipt->details as $detail) {
-                $item = $detail->item_type === 'YARN' ? $detail->yarn : $detail->fabric;
+                $item = $detail->item_type === 'YARN' ? $detail->yarn : ($detail->item_type === 'FABRIC' ? $detail->fabric : $detail->auxiliaryMaterial);
                 if (!$item) continue;
 
                 $currentValue = (float) $item->stock_quantity * (float) $item->average_cost;

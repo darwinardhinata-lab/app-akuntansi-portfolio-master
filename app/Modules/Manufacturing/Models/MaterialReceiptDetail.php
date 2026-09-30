@@ -18,6 +18,7 @@ class MaterialReceiptDetail extends Model
         'item_type',
         'yarn_id',
         'fabric_id',
+        'auxiliary_material_id',
         'item_name',
         'qty',
         'unit',
@@ -40,6 +41,11 @@ class MaterialReceiptDetail extends Model
     public function fabric()
     {
         return $this->belongsTo(Fabric::class, 'fabric_id');
+    }
+
+    public function auxiliaryMaterial()
+    {
+        return $this->belongsTo(AuxiliaryMaterial::class, 'auxiliary_material_id');
     }
 
 }

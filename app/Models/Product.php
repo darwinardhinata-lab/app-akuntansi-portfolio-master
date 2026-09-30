@@ -16,4 +16,9 @@ class Product extends Model
     {
         return $this->hasMany(InventoryLedger::class);
     }
+
+    public function manufacturingBoms()
+    {
+        return $this->hasMany(\App\Modules\Manufacturing\Models\ProductBom::class, 'product_id');
+    }
 }

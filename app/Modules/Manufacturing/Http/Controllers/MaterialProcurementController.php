@@ -9,6 +9,7 @@ use App\Modules\Manufacturing\Models\MaterialPurchaseOrder;
 use App\Modules\Manufacturing\Models\MaterialPurchaseRequest;
 use App\Modules\Manufacturing\Models\Supplier;
 use App\Modules\Manufacturing\Models\Yarn;
+use App\Modules\Manufacturing\Models\AuxiliaryMaterial;
 use App\Modules\Manufacturing\Services\MaterialProcurementService;
 use Illuminate\Http\Request;
 
@@ -94,12 +95,12 @@ class MaterialProcurementController extends Controller
 
     private function masters(): array
     {
-        return ['yarns' => Yarn::where('is_active', true)->orderBy('yarn_code')->get(), 'fabrics' => Fabric::where('is_active', true)->orderBy('fabric_code')->get(), 'suppliers' => Supplier::where('is_active', true)->where('supplier_type', 'RAW_MATERIAL')->orderBy('supplier_name')->get()];
+        return ['yarns' => Yarn::where('is_active', true)->orderBy('yarn_code')->get(), 'fabrics' => Fabric::where('is_active', true)->orderBy('fabric_code')->get(), 'auxiliaryMaterials' => AuxiliaryMaterial::where('is_active', true)->orderBy('material_code')->get(), 'suppliers' => Supplier::where('is_active', true)->where('supplier_type', 'RAW_MATERIAL')->orderBy('supplier_name')->get()];
     }
 
     private function validateItems(Request $request, bool $withPrice): array
     {
-        $rules = ['items' => 'required|array|min:1', 'items.*.item_type' => 'required|in:YARN,FABRIC', 'items.*.yarn_id' => 'nullable|exists:mfg_yarns,id', 'items.*.fabric_id' => 'nullable|exists:mfg_fabrics,id', 'items.*.item_name' => 'required|string|max:255', 'items.*.qty' => 'required|numeric|min:0.01', 'items.*.unit' => 'required|string|max:20'];
+        $rules = ['items' => 'required|array|min:1', 'items.*.item_type' => 'required|in:YARN,FABRIC,AUXILIARY', 'items.*.yarn_id' => 'nullable|exists:mfg_yarns,id', 'items.*.fabric_id' => 'nullable|exists:mfg_fabrics,id', 'items.*.auxiliary_material_id' => 'nullable|exists:mfg_auxiliary_materials,id', 'items.*.item_name' => 'required|string|max:255', 'items.*.qty' => 'required|numeric|min:0.01', 'items.*.unit' => 'required|string|max:20'];
         if ($withPrice) { $rules['items.*.rate'] = 'required|numeric|min:0'; $rules['items.*.source_request_detail_id'] = 'required|exists:mfg_material_purchase_request_details,id'; }
         return $request->validate($rules)['items'];
     }

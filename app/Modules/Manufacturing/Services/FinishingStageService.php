@@ -5,6 +5,7 @@ namespace App\Modules\Manufacturing\Services;
 use App\Modules\Manufacturing\Models\FinishingStage;
 use App\Modules\Manufacturing\Models\StitchingOrder;
 use App\Modules\Manufacturing\Models\WorkOrder;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -26,21 +27,47 @@ class FinishingStageService
     {
         return DB::transaction(function () use ($stitchingOrderId, $data) {
             $stitchingOrder = StitchingOrder::lockForUpdate()->findOrFail($stitchingOrderId);
+            if ($stitchingOrder->status !== 'ISSUED') {
+                throw new Exception("Finishing hanya dapat dicatat untuk Stitching Order ISSUED, bukan {$stitchingOrder->status}.");
+            }
 
-            $stage = FinishingStage::create([
+            $stage = $data['stage'];
+            $piecesIn = (int) $data['pieces_in'];
+            $piecesOk = (int) $data['pieces_ok'];
+            $piecesRejected = (int) ($data['pieces_rejected'] ?? 0);
+            if ($piecesOk + $piecesRejected > $piecesIn) {
+                throw new Exception('Pieces OK dan reject tidak boleh melebihi pieces masuk.');
+            }
+
+            $standardStages = ['WASHING', 'IRONING', 'QC', 'PACKING'];
+            $previousStages = ['IRONING' => 'WASHING', 'QC' => 'IRONING', 'PACKING' => 'QC'];
+            if (in_array($stage, $standardStages, true) && FinishingStage::where('stitching_order_id', $stitchingOrder->id)->where('stage', $stage)->exists()) {
+                throw new Exception("Tahap finishing {$stage} sudah dicatat untuk Stitching Order ini.");
+            }
+            $availablePieces = (int) $stitchingOrder->pieces_issued;
+            if (isset($previousStages[$stage])) {
+                $previous = FinishingStage::where('stitching_order_id', $stitchingOrder->id)->where('stage', $previousStages[$stage])->first();
+                if (! $previous) throw new Exception("Tahap {$previousStages[$stage]} wajib dicatat sebelum {$stage}.");
+                $availablePieces = (int) $previous->pieces_ok;
+            }
+            if ($piecesIn > $availablePieces) {
+                throw new Exception("Pieces masuk {$piecesIn} melebihi output tersedia ({$availablePieces} pcs).");
+            }
+
+            $stageRecord = FinishingStage::create([
                 'stitching_order_id' => $stitchingOrder->id,
                 'work_order_id'      => $stitchingOrder->work_order_id,
-                'stage'              => $data['stage'],
+                'stage'              => $stage,
                 'stage_date'         => $data['stage_date'],
-                'pieces_in'          => $data['pieces_in'],
-                'pieces_ok'          => $data['pieces_ok'],
-                'pieces_rejected'    => $data['pieces_rejected'] ?? 0,
+                'pieces_in'          => $piecesIn,
+                'pieces_ok'          => $piecesOk,
+                'pieces_rejected'    => $piecesRejected,
                 'size_breakdown'     => $data['size_breakdown'] ?? null,
                 'operator'           => $data['operator'] ?? null,
                 'remarks'            => $data['remarks'] ?? null,
             ]);
 
-            if ($data['stage'] === 'PACKING') {
+            if ($stage === 'PACKING') {
                 $stitchingOrder->status = 'COMPLETED';
                 $stitchingOrder->save();
 
@@ -51,7 +78,7 @@ class FinishingStageService
                 }
             }
 
-            return $stage;
+            return $stageRecord;
         });
     }
 

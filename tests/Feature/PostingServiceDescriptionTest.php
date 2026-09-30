@@ -47,6 +47,23 @@ class PostingServiceDescriptionTest extends TestCase
         $this->assertNull(JournalHeader::find($header->getKey())->notes);
     }
 
+    public function test_journal_search_uses_notes_column_not_description_accessor(): void
+    {
+        $header = PostingService::post(
+            ['transaction_date' => '2026-09-28', 'evidence_number' => 'EV-SEARCH-1', 'description' => 'Referensi PC-27092601', 'transaction_type' => 'Purchase Bill'],
+            $this->lines()
+        );
+
+        $journals = JournalHeader::query()
+            ->where(function ($query) {
+                $query->where('evidence_number', 'like', '%PC-27092601%')
+                    ->orWhere('notes', 'like', '%PC-27092601%');
+            })
+            ->get();
+
+        $this->assertTrue($journals->contains($header->getKey()));
+    }
+
     private function lines(): array
     {
         $now = now();

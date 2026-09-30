@@ -9,6 +9,10 @@ use App\Models\InventoryLedger;
 use App\Support\DocumentSequence;
 use App\Support\JournalBalanceValidator;
 use App\Modules\Manufacturing\Models\WorkOrder;
+use App\Modules\Manufacturing\Models\FinishingStage;
+use App\Modules\Manufacturing\Models\StitchingOrder;
+use App\Modules\Platform\Support\CompanyCoaResolver;
+use App\Modules\Platform\Support\OperationalCompany;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -28,10 +32,12 @@ class WorkOrderService
             'mfg_work_orders', 'spk_number', 'MFG-' . now()->format('Ymd') . '-'
         );
 
-        return WorkOrder::create([
+        return DB::transaction(function () use ($spkNumber, $data) {
+            $workOrder = WorkOrder::create([
             'spk_number'      => $spkNumber,
             'order_date'      => $data['order_date'],
             'product_id'      => $data['product_id'] ?? null,
+            'line_id'         => $data['line_id'] ?? null,
             'style_sku'       => $data['style_sku'] ?? null,
             'garment_name'    => $data['garment_name'] ?? null,
             'planned_qty'     => $data['planned_qty'] ?? 0,
@@ -41,7 +47,10 @@ class WorkOrderService
             'wip_account_code' => config('coa.wip_produksi'),
             'created_by'      => $data['created_by'] ?? null,
             'remarks'         => $data['remarks'] ?? null,
-        ]);
+            ]);
+            app(ProductBomService::class)->snapshotForWorkOrder($workOrder);
+            return $workOrder;
+        });
     }
 
     /**
@@ -90,6 +99,16 @@ class WorkOrderService
             if ($wo->status === 'COMPLETED') {
                 throw new Exception("SPK '{$wo->spk_number}' sudah COMPLETED, tidak bisa diselesaikan ulang.");
             }
+            if ($wo->status !== 'FINISHING') {
+                throw new Exception("SPK '{$wo->spk_number}' harus berstatus FINISHING sebelum diselesaikan.");
+            }
+            if (StitchingOrder::where('work_order_id', $wo->id)->where('status', '!=', 'COMPLETED')->exists()) {
+                throw new Exception("Semua Stitching Order SPK '{$wo->spk_number}' harus selesai PACKING sebelum penyelesaian SPK.");
+            }
+            $packingQty = (float) FinishingStage::where('work_order_id', $wo->id)->where('stage', 'PACKING')->sum('pieces_ok');
+            if ($packingQty <= 0 || round($qtyFinished, 2) !== round($packingQty, 2)) {
+                throw new Exception("Qty barang jadi harus sama dengan total hasil PACKING ({$packingQty} pcs).");
+            }
 
             $existing = JournalHeader::where('evidence_number', $wo->spk_number)
                 ->where('transaction_type', 'Work Order Completion (MFG)')
@@ -104,6 +123,10 @@ class WorkOrderService
             }
 
             $unitCost = $totalWipCost / $qtyFinished;
+            $company = app(OperationalCompany::class)->company();
+            $coa = app(CompanyCoaResolver::class);
+            $finishedGoodsAccount = $coa->account($company, 'finished_goods_inventory');
+            $wipAccount = $coa->account($company, 'wip_inventory');
 
             $product = Product::lockForUpdate()->findOrFail($productId);
             $oldStock = (float) $product->stock_quantity;
@@ -134,13 +157,13 @@ class WorkOrderService
             $journal = JournalHeader::create([
                 'transaction_date' => $completionDate,
                 'evidence_number'  => $wo->spk_number,
-                'description'      => "Penyelesaian SPK: {$wo->spk_number} - {$wo->garment_name} ({$qtyFinished} pcs)",
+                'notes'            => "Penyelesaian SPK: {$wo->spk_number} - {$wo->garment_name} ({$qtyFinished} pcs)",
                 'transaction_type' => 'Work Order Completion (MFG)',
             ]);
 
             $journalRows = [
-                ['journal_id' => $journal->getKey(), 'account_code' => $product->inventory_account_code ?: config('coa.persediaan_barang_jadi'), 'helper_code' => null, 'position' => 'DEBET',  'amount' => $totalWipCost, 'created_at' => $now, 'updated_at' => $now],
-                ['journal_id' => $journal->getKey(), 'account_code' => config('coa.wip_produksi'), 'helper_code' => null, 'position' => 'KREDIT', 'amount' => $totalWipCost, 'created_at' => $now, 'updated_at' => $now],
+                ['journal_id' => $journal->getKey(), 'account_code' => $finishedGoodsAccount, 'helper_code' => null, 'position' => 'DEBET',  'amount' => $totalWipCost, 'created_at' => $now, 'updated_at' => $now],
+                ['journal_id' => $journal->getKey(), 'account_code' => $wipAccount, 'helper_code' => null, 'position' => 'KREDIT', 'amount' => $totalWipCost, 'created_at' => $now, 'updated_at' => $now],
             ];
             if (!JournalBalanceValidator::isBalanced($journalRows)) {
                 throw new Exception('Jurnal Penyelesaian SPK tidak balance (Debet != Kredit). Ini adalah salah satu "detak jantung" akuntansi (RULES.md) — proses dibatalkan demi keamanan data.');
