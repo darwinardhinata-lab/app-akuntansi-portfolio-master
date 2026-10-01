@@ -35,7 +35,8 @@ class JournalImportTest extends TestCase
 
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('journal_headers', [
-            'evidence_number' => 'GJ-TEST-IMP'
+            'source_doc_no' => 'GJ-TEST-IMP',
+            'journal_type' => 'IMPORT',
         ]);
 
         $this->assertDatabaseHas('journal_details', [
@@ -48,6 +49,34 @@ class JournalImportTest extends TestCase
             'account_code' => '21100',
             'position'     => 'KREDIT',
             'amount'       => 100.00
+        ]);
+    }
+
+    public function test_csv_reimport_uses_source_transaction_number_as_its_idempotency_key(): void
+    {
+        DB::table('accounts')->insert([
+            ['account_code' => '11100', 'account_name' => 'Kas', 'coa_type' => 'ASSET', 'normal_balance' => 'DEBET', 'report_pos' => 'NERACA', 'created_at' => now(), 'updated_at' => now()],
+            ['account_code' => '21100', 'account_name' => 'Hutang', 'coa_type' => 'LIABILITY', 'normal_balance' => 'KREDIT', 'report_pos' => 'NERACA', 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        $content = implode("\n", [
+            'Tanggal,No Jurnal,No Bukti,Deskripsi,Col5,Col6,Nilai Debet,Nilai Kredit,Akun',
+            '2026-10-01,GJ-IMPORT-001,INV-FISIK-001,Import ulang,,,100.00,0.00,11100 - Kas',
+            '2026-10-01,GJ-IMPORT-001,INV-FISIK-001,Import ulang,,,0.00,100.00,21100 - Hutang',
+        ]);
+
+        foreach ([1, 2] as $attempt) {
+            $result = app(\App\Services\JournalCsvImportService::class)->import(
+                UploadedFile::fake()->createWithContent("jurnal_import_{$attempt}.csv", $content)
+            );
+            $this->assertSame('success', $result['status'], $result['message']);
+        }
+
+        $this->assertDatabaseCount('journal_headers', 1);
+        $this->assertDatabaseHas('journal_headers', [
+            'source_doc_no' => 'GJ-IMPORT-001',
+            'evidence_number' => 'IMP-20261001-0001',
+            'journal_type' => 'IMPORT',
         ]);
     }
 }

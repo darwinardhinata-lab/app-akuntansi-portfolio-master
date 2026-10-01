@@ -39,8 +39,8 @@
                     <input type="date" name="transaction_date" class="form-control input-header" value="{{ $journal->transaction_date }}" required>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">{{ __('erp.evidence_no') }}</label>
-                    <input type="text" name="evidence_number" class="form-control input-header" value="{{ $journal->evidence_number }}">
+                    <label class="form-label">No. Transaksi / Dokumen Asli</label>
+                    <input type="text" name="source_doc_no" class="form-control input-header" value="{{ $journal->source_doc_no }}" placeholder="Contoh: INV-SUPPLIER-2026-101">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">{{ __('erp.description_label') }}</label>
@@ -90,7 +90,7 @@
                             </select>
                         </td>
                         <td data-label="Nominal (Rp)">
-                            <input type="number" name="details[{{ $index }}][amount]" class="input-transparent amount-input text-end fw-bold" value="{{ $detail->amount }}" required>
+                            <input type="text" inputmode="decimal" name="details[{{ $index }}][amount]" class="input-transparent amount-input text-end fw-bold" value="{{ number_format($detail->amount, 2, ',', '.') }}" placeholder="0,00" required autocomplete="off">
                         </td>
                         <td class="text-center">
                             <button type="button" class="btn btn-sm text-danger btn-hapus" {{ $index < 2 ? 'disabled' : '' }}>✕</button>
@@ -134,12 +134,12 @@
         function hitungTotal() {
             let totalD = 0, totalK = 0;
             $('.amount-input').each(function() {
-                let amt = parseFloat($(this).val()) || 0;
+                let amt = amountToCents($(this).val());
                 let pos = $(this).closest('tr').find('.position-select').val();
                 if (pos === 'DEBET') totalD += amt; else totalK += amt;
             });
-            $('#textDebet').text(new Intl.NumberFormat('id-ID').format(totalD));
-            $('#textKredit').text(new Intl.NumberFormat('id-ID').format(totalK));
+            $('#textDebet').text(formatCents(totalD));
+            $('#textKredit').text(formatCents(totalK));
             
             if (totalD === totalK && totalD > 0) {
                 $('#statusIndicator').text('✓ BALANCE').addClass('bg-success text-white').removeClass('bg-danger');
@@ -154,13 +154,34 @@
             let newRow = $('#baris-jurnal tr:first').clone();
             newRow.find('select, input').each(function() {
                 let name = $(this).attr('name').replace(/\[\d+\]/, `[${rowCount}]`);
-                $(this).attr('name', name).val(name.includes('amount') ? 0 : '');
+                $(this).attr('name', name).val(name.includes('amount') ? '0,00' : '');
             });
             newRow.find('.btn-hapus').prop('disabled', false).click(function() { $(this).closest('tr').remove(); hitungTotal(); });
             newRow.find('.select2-container').remove();
             $('#baris-jurnal').append(newRow);
             rowCount++;
             initSelect2();
+            hitungTotal();
+        });
+
+        function amountToCents(value) {
+            let normalized = String(value || '').trim();
+            if (normalized.includes(',')) {
+                normalized = normalized.replace(/\./g, '').replace(',', '.');
+            } else if (!/^\d+\.\d{1,2}$/.test(normalized)) {
+                normalized = normalized.replace(/\./g, '');
+            }
+            if (!/^\d+(\.\d{0,2})?$/.test(normalized)) return 0;
+            const [whole, fraction = ''] = normalized.split('.');
+            return (parseInt(whole, 10) * 100) + parseInt((fraction + '00').slice(0, 2), 10);
+        }
+
+        function formatCents(cents) {
+            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(cents / 100);
+        }
+
+        $(document).on('blur', '.amount-input', function() {
+            $(this).val(formatCents(amountToCents($(this).val())));
             hitungTotal();
         });
 

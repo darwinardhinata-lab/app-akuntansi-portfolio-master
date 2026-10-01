@@ -272,8 +272,10 @@ class PaymentPlanService
                     'journal_id'       => $journalId,
                     'journal_no'     => $journalNo,
                     'transaction_date' => now()->toDateString(),
+                    'evidence_number'  => JournalHeader::generateEvidenceNumber('PP', now()),
                     'description'      => "Posting Payment Plan: {$no_transaksi} - {$pp->vendor_toko}",
                     'source_doc_no'    => $no_transaksi,
+                    'transaction_type' => 'Payment Plan',
                     'created_at'     => now(),
                     'updated_at'     => now(),
                 ]);

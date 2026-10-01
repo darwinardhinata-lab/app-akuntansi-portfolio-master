@@ -266,7 +266,7 @@ class SalesOrderService
                 $evidenceNumber = $invoice->invoice_number;
 
                 // Batch delete jurnal
-                $journalIds = JournalHeader::where('evidence_number', $evidenceNumber)->pluck('journal_id');
+                $journalIds = JournalHeader::where('source_doc_no', $evidenceNumber)->pluck('journal_id');
                 if ($journalIds->isNotEmpty()) {
                     DB::table('journal_details')->whereIn('journal_id', $journalIds)->delete();
                     DB::table('journal_headers')->whereIn('journal_id', $journalIds)->delete();

@@ -112,7 +112,7 @@
                 <thead class="table-light">
                     <tr>
                         <th width="11%" class="ps-4">{{ __('erp.date') }}</th>
-                        <th width="14%">{{ __('erp.evidence_no') }}</th>
+                        <th width="14%">No. Bukti / No. Transaksi</th>
                         <th width="33%">{{ __('erp.transaction_description') }}</th>
                         <th width="13%" class="text-end">{{ __('erp.debit_rp') }}</th>
                         <th width="13%" class="text-end">{{ __('erp.credit_rp') }}</th>
@@ -146,6 +146,7 @@
                             $kre = $tx->position == 'KREDIT' ? $tx->amount : 0;
                             $traceNumber = filled($tx->evidence_number) ? $tx->evidence_number : $tx->journal_id;
                             $displayNumber = filled($tx->evidence_number) ? $tx->evidence_number : $tx->journal_id;
+                            $sourceLink = $tx->header?->document_link ?? ['url' => route('jurnal.edit', $tx->journal_id), 'label' => 'Edit Jurnal', 'is_journal' => true];
                             
                             if ($isDebetNormal) {
                                 $runningBalance += ($deb - $kre);
@@ -158,11 +159,14 @@
                         <tr>
                             <td class="ps-4 fw-medium text-nowrap">{{ date('d M Y', strtotime($tx->transaction_date)) }}</td>
                             <td>
-                                <a href="{{ route('trace.document', $traceNumber) }}"
+                                <a href="{{ $sourceLink['url'] }}"
                                    class="text-primary text-decoration-none fw-bold"
-                                   title="{{ __('erp.trace_origin_doc') }}">
+                                   title="{{ $sourceLink['label'] }}">
                                     <i class="fa-solid fa-link fa-sm me-1"></i> {{ $displayNumber }}
                                 </a>
+                                @if(filled($tx->source_doc_no))
+                                    <small class="d-block text-muted font-monospace mt-1">Trx: {{ $tx->source_doc_no }}</small>
+                                @endif
                             </td>
                             <td class="fw-medium text-dark">{{ $tx->notes }}</td>
                             
@@ -217,6 +221,7 @@
         @php 
             $headerObj = $tx->header; 
             $modalId = $headerObj->journal_id ?? $headerObj->id;
+                            $sourceLink = $headerObj->document_link ?? ['url' => route('jurnal.edit', $modalId), 'label' => 'Edit Jurnal', 'is_journal' => true];
         @endphp
         <div class="modal fade" id="modalJournal-{{ $modalId }}" tabindex="-1" aria-labelledby="modalLabel-{{ $modalId }}" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -293,6 +298,10 @@
                     </div>
 
                     <div class="modal-footer bg-light py-2">
+                        <a href="{{ $sourceLink['url'] }}" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>{{ $sourceLink['label'] }}</a>
+                        @unless($sourceLink['is_journal'])
+                            <a href="{{ route('jurnal.edit', $modalId) }}" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-book me-1"></i>Edit Jurnal</a>
+                        @endunless
                         <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">{{ __('erp.close') }}</button>
                     </div>
 

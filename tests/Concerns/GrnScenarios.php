@@ -191,7 +191,7 @@ trait GrnScenarios
         $journal = \App\Models\JournalHeader::firstOrFail();
         $this->rejected(fn () => $journal->update(['evidence_number' => 'CHANGED']));
         $this->rejected(fn () => $journal->delete());
-        $this->rejected(fn () => \App\Models\JournalHeader::create(['transaction_date' => '2026-09-25', 'evidence_number' => 'BIL-GRN-1']));
+        $this->rejected(fn () => \App\Models\JournalHeader::create(['transaction_date' => '2026-09-25', 'source_doc_no' => 'BIL-GRN-1']));
         $this->assertSame(1, DB::table('journal_headers')->count());
         $this->assertSame(2, DB::table('journal_details')->count());
     }

@@ -163,7 +163,7 @@
                                 <input type="checkbox" class="form-check-input" onclick="document.querySelectorAll('.journal-checkbox').forEach(cb => cb.checked = this.checked)">
                             </th>
                             <th width="11%" class="ps-2">{{ __('erp.date') }}</th>
-                            <th width="14%">{{ __('erp.evidence_no') }}</th>
+                            <th width="14%">No. Bukti / No. Transaksi</th>
                             <th width="23%">{{ __('erp.description') }}</th>
                             <th width="24%">{{ __('erp.account_name_ref') }}</th>
                             <th width="11%" class="text-end">{{ __('erp.debit_rp') }}</th>
@@ -179,6 +179,7 @@
                                     $primaryId = $header->journal_id ?? $header->id;
                                     $traceNumber = filled($header->evidence_number) ? $header->evidence_number : $primaryId;
                                     $displayNumber = filled($header->evidence_number) ? $header->evidence_number : $primaryId;
+                                    $sourceLink = $header->document_link;
                                     
                                     // Hitung Total Balance
                                     $totDebet = $header->details->where('position', 'DEBET')->sum('amount');
@@ -192,11 +193,14 @@
                                         </td>
                                         <td class="ps-2 align-middle fw-medium">{{ date('d M Y', strtotime($header->transaction_date)) }}</td>
                                         <td class="align-middle">
-                                            <a href="{{ route('trace.document', $traceNumber) }}"
+                                            <a href="{{ $sourceLink['url'] }}"
                                                class="text-primary text-decoration-none fw-bold"
-                                               title="{{ __('erp.trace_origin_doc') }}">
+                                                title="{{ $sourceLink['label'] }}">
                                                 <i class="fa-solid fa-link fa-sm me-1"></i> {{ $displayNumber }}
                                             </a>
+                                            @if(filled($header->source_doc_no))
+                                                <small class="d-block text-muted font-monospace mt-1">Trx: {{ $header->source_doc_no }}</small>
+                                            @endif
                                         </td>
                                                 <td class="align-middle fw-medium">@linkify($header->description)</td>
                                                 <td colspan="3" class="text-center text-danger fw-bold align-middle">
@@ -223,6 +227,9 @@
                                                         class="text-primary text-decoration-none fw-bold"
                                                        title="{{ __('erp.trace_origin_doc') }}">
                                                         <i class="fa-solid fa-link fa-sm me-1"></i> {{ $displayNumber }}
+                                                    @if(filled($header->source_doc_no))
+                                                        <small class="d-block text-muted font-monospace mt-1">Trx: {{ $header->source_doc_no }}</small>
+                                                    @endif
                                                     </a>
                                                     @if($header->source_doc_no)
                                                         <br><small class="text-success fw-bold">
@@ -249,7 +256,10 @@
                                                 <td rowspan="{{ $detailsCount + 1 }}" class="text-center align-top pe-4 pt-3" style="background-color: #f8fafc;">
                                                     <div class="btn-group">
                                                         <button type="button" onclick="showEntityLog('{{ $header->evidence_number }}')" class="btn btn-sm btn-outline-info shadow-sm" title="{{ __('erp.activity_log') }}"><i class="fa-solid fa-clock-rotate-left"></i></button>
-                                                        <a href="{{ route('jurnal.edit', $primaryId) }}" class="btn btn-sm btn-outline-primary shadow-sm"><i class="fa-solid fa-pen-to-square"></i></a>
+                                                        <a href="{{ $sourceLink['url'] }}" class="btn btn-sm btn-outline-primary shadow-sm" title="{{ $sourceLink['label'] }}"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                                                        @unless($sourceLink['is_journal'])
+                                                            <a href="{{ route('jurnal.edit', $primaryId) }}" class="btn btn-sm btn-outline-secondary shadow-sm" title="Edit Jurnal"><i class="fa-solid fa-book"></i></a>
+                                                        @endunless
                                                         <button type="button" onclick="if(confirm('Hapus jurnal ini?')) document.getElementById('delete-form-{{ $primaryId }}').submit();" class="btn btn-sm btn-outline-danger shadow-sm"><i class="fa-solid fa-trash-can"></i></button>
                                                     </div>
                                                 </td>

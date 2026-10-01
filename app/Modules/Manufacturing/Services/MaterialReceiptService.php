@@ -136,7 +136,7 @@ class MaterialReceiptService
             $netAmount = $grossAmount + $taxAmount;
 
             // Anti-dobel posting: 1 nomor evidence hanya boleh 1 jurnal utk transaction_type ini.
-            $existing = JournalHeader::where('evidence_number', $receiptNumber)
+            $existing = JournalHeader::where('source_doc_no', $header['supplier_doc_no'] ?? $receiptNumber)
                 ->where('transaction_type', 'Material Receipt (MFG)')
                 ->exists();
             if ($existing) {
@@ -146,6 +146,7 @@ class MaterialReceiptService
             $journal = JournalHeader::create([
                 'transaction_date' => $header['receipt_date'],
                 'evidence_number'  => $receiptNumber,
+                'source_doc_no'    => $header['supplier_doc_no'] ?? $receiptNumber,
                 'description'      => "Penerimaan Bahan Baku (MRN) dari Supplier ID {$header['supplier_id']}",
                 'transaction_type' => 'Material Receipt (MFG)',
             ]);

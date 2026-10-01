@@ -8,8 +8,12 @@ use Illuminate\Support\Facades\Schema;
 /** Durable protection also applies when the new-document feature flag is switched off. */
 class GrnProtection
 {
-    public static function evidence(?string $number): void
+    public static function evidence(?string $evidenceNumber, ?string $sourceDocumentNumber = null): void
     {
+        // GRN protects against the physical Bill/transaction number. The internal
+        // evidence number is intentionally different (e.g. GRN-YYYYMMDD-0001).
+        $number = $sourceDocumentNumber ?: $evidenceNumber;
+
         if ($number && Schema::hasColumn('purchase_receipts', 'purchase_bill_id')
             && DB::table('purchase_receipts as r')->join('purchase_bills as b', 'b.id', '=', 'r.purchase_bill_id')
                 ->where('r.status', 'POSTED')->where('b.bill_number', $number)->exists()) {

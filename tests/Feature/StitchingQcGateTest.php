@@ -34,7 +34,7 @@ class StitchingQcGateTest extends TestCase
         app(CuttingOrderService::class)->recordCheck($cuttingOrder->id, ['check_date' => '2026-09-30', 'pieces_cut' => 10, 'pieces_ok' => 8, 'pieces_rejected' => 2]);
 
         $first = app(StitchingOrderService::class)->create($cuttingOrder->id, $workOrder->id, $this->stitchingData(5));
-        $journalId = JournalHeader::where('evidence_number', $first->stitching_order_number)->value('journal_id');
+        $journalId = JournalHeader::where('source_doc_no', $first->stitching_order_number)->value('journal_id');
         $this->assertDatabaseHas('journal_details', ['journal_id' => $journalId, 'account_code' => '114002', 'position' => 'DEBET', 'amount' => 50]);
         $this->assertDatabaseHas('journal_details', ['journal_id' => $journalId, 'account_code' => '212001', 'position' => 'KREDIT', 'amount' => 50]);
 

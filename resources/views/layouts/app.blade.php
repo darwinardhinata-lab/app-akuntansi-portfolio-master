@@ -14,6 +14,27 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+    /* Google Translate injects an external top banner/notification iframe.
+       Hide only that banner; the language buttons and translation cookie remain active. */
+    .goog-te-banner-frame,
+    .goog-te-banner-frame.skiptranslate,
+    iframe.goog-te-banner-frame,
+    iframe[src*="translate.google.com"],
+    .goog-te-balloon-frame,
+    .goog-te-balloon-frame.skiptranslate,
+    #goog-gt-tt,
+    .goog-te-spinner-pos {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        width: 0 !important;
+        border: 0 !important;
+    }
+    html,
+    body {
+        top: 0 !important;
+    }
+
     /* ================================================================
        RESET & BASE
     ================================================================ */
@@ -850,6 +871,46 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         var sourceLanguage = 'id';
+
+        // Google Translate injects its notification banner asynchronously and also
+        // sets body.style.top. Keep its translation engine, but permanently remove
+        // its injected UI so it never pushes the ERP page down.
+        function hideGoogleTranslateBanner() {
+            document.querySelectorAll('iframe').forEach(function (frame) {
+                var src = frame.getAttribute('src') || '';
+                var title = frame.getAttribute('title') || '';
+                var name = frame.getAttribute('name') || '';
+                var classes = frame.className || '';
+                var isGoogleTranslateUi = /goog-te|skiptranslate/i.test(classes)
+                    || /translate\.google\.com|translate_a\/element/i.test(src)
+                    || /google translate/i.test(title)
+                    || /google translate/i.test(name);
+
+                if (isGoogleTranslateUi) {
+                    // The translated page remains intact after only the banner frame is removed.
+                    frame.remove();
+                }
+            });
+
+            document.querySelectorAll('.goog-te-banner-frame, .goog-te-balloon-frame, #goog-gt-tt, .goog-te-spinner-pos').forEach(function (element) {
+                element.remove();
+            });
+
+            document.documentElement.style.setProperty('top', '0', 'important');
+            document.body.style.setProperty('top', '0', 'important');
+        }
+
+        hideGoogleTranslateBanner();
+        new MutationObserver(hideGoogleTranslateBanner).observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['style', 'class'],
+        });
+        // Google can recreate the toolbar after its asynchronous translation finishes.
+        // Recheck briefly, then stop so this does not keep a permanent timer running.
+        var translateBannerCleanup = window.setInterval(hideGoogleTranslateBanner, 250);
+        window.setTimeout(function () { window.clearInterval(translateBannerCleanup); }, 10000);
 
         function setGoogleTranslateCookie(value) {
             var expires = new Date(Date.now() + 31536000000).toUTCString();

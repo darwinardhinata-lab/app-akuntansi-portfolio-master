@@ -590,8 +590,9 @@ class PaymentPlanController extends Controller
                 JournalHeader::create([
                     'journal_id'       => $journalId,
                     'transaction_date' => $transactionDate,
-                    'evidence_number'  => 'JRN-' . $item->no_transaksi,
+                    'source_doc_no'    => $item->no_transaksi,
                     'description'      => 'Payment Plan: ' . $item->keterangan,
+                    'transaction_type' => 'Payment Plan',
                 ]);
 
                 // FIX: Jurnal WAJIB pakai nominal aktual efektif (COALESCE(nominal_aktual, nominal)),

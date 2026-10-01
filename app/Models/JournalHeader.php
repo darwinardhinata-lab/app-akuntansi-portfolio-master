@@ -44,7 +44,8 @@ class JournalHeader extends Model
         static::updating(fn (JournalHeader $header) => \App\Support\GrnProtection::journals([$header->getKey()]));
         static::deleting(fn (JournalHeader $header) => \App\Support\GrnProtection::journals([$header->getKey()]));
         static::creating(function (JournalHeader $header) {
-            \App\Support\GrnProtection::evidence($header->evidence_number);
+            $header->assignInternalEvidenceNumber();
+            \App\Support\GrnProtection::evidence($header->evidence_number, $header->source_doc_no);
             // Jika jurnal dibuat manual (ID kosong), pakai generator JRN- Anda
             if (empty($header->journal_id)) {
                 $header->journal_id = static::generateNextId();
@@ -54,6 +55,70 @@ class JournalHeader extends Model
                 $header->jj_id = time() + rand(100, 999);
             }
         });
+    }
+
+    /**
+     * No. Bukti is an internal, immutable accounting key: CODE-YYYYMMDD-0000.
+     * The physical/original transaction document number belongs in source_doc_no.
+     */
+    private function assignInternalEvidenceNumber(): void
+    {
+        $type = strtoupper((string) $this->journal_type);
+        $existingEvidence = trim((string) $this->evidence_number);
+
+        // Bulk imports explicitly set their own generated evidence number.
+        if ($type === 'IMPORT' && $existingEvidence !== '') {
+            return;
+        }
+
+        // Legacy callers supplied the physical document number in evidence_number.
+        // Preserve it as No. Transaksi before assigning the internal No. Bukti.
+        if (empty($this->source_doc_no) && $existingEvidence !== '') {
+            $this->source_doc_no = $existingEvidence;
+        }
+
+        $this->evidence_number = static::generateEvidenceNumber(
+            static::evidenceCodeFor($type, (string) $this->transaction_type),
+            $this->transaction_date
+        );
+    }
+
+    public static function generateEvidenceNumber(string $code, mixed $transactionDate): string
+    {
+        $date = \Illuminate\Support\Carbon::parse($transactionDate ?: now())->format('Ymd');
+        $prefix = strtoupper($code).'-'.$date.'-';
+
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($prefix) {
+            $last = static::where('evidence_number', 'like', $prefix.'%')
+                ->orderByDesc('evidence_number')
+                ->lockForUpdate()
+                ->value('evidence_number');
+
+            $sequence = $last ? ((int) substr($last, strlen($prefix)) + 1) : 1;
+
+            return $prefix.str_pad((string) $sequence, 4, '0', STR_PAD_LEFT);
+        });
+    }
+
+    private static function evidenceCodeFor(string $journalType, string $transactionType): string
+    {
+        if ($journalType === 'MANUAL') return 'GJ';
+        if ($journalType === 'IMPORT') return 'IMP';
+
+        $type = strtoupper($transactionType);
+
+        return match (true) {
+            str_contains($type, 'INVOICE'), str_contains($type, 'FAKTUR') => 'INV',
+            str_contains($type, 'PURCHASE BILL'), str_contains($type, 'TAGIHAN') => 'BIL',
+            str_contains($type, 'PURCHASE RETURN') => 'PR',
+            str_contains($type, 'SALES RETURN') => 'SR',
+            str_contains($type, 'MATERIAL RECEIPT') => 'MRN',
+            str_contains($type, 'WORK ORDER') => 'SPK',
+            str_contains($type, 'INBOUND') => 'GRN',
+            str_contains($type, 'OUTBOUND') => 'OUT',
+            str_contains($type, 'PAYMENT') => 'PP',
+            default => 'GJ',
+        };
     }
 
     /**

@@ -166,16 +166,31 @@ class JournalCsvImportService
 
             // --- PRE-FLIGHT VALIDATION ---
             $validAccounts = array_flip(\App\Models\Account::pluck('account_code')->toArray());
+            $validAccountsByName = array_change_key_case(\App\Models\Account::pluck('account_code', 'account_name')->toArray(), CASE_LOWER);
+
             $balances = [];
             $ghostAccounts = [];
 
-            foreach ($parsedRows as $pRow) {
-                $explodeAkun = explode(' - ', $pRow['raw_akun']);
+            foreach ($parsedRows as &$pRow) {
+                $rawAkunTrim = trim($pRow['raw_akun']);
+                $explodeAkun = explode(' - ', $rawAkunTrim);
                 $kodeAkun = str_replace('-', '', trim($explodeAkun[0]));
-                if (array_key_exists($kodeAkun, $this->accountMapping)) $kodeAkun = $this->accountMapping[$kodeAkun];
+
+                if (!isset($validAccounts[$kodeAkun])) {
+                    $lowerName = strtolower($rawAkunTrim);
+                    if (isset($validAccountsByName[$lowerName])) {
+                        $kodeAkun = $validAccountsByName[$lowerName];
+                        $pRow['raw_akun'] = $kodeAkun; // Update to standard code
+                    }
+                }
+
+                if (array_key_exists($kodeAkun, $this->accountMapping)) {
+                    $kodeAkun = $this->accountMapping[$kodeAkun];
+                    $pRow['raw_akun'] = $kodeAkun; // Update to standard code
+                }
 
                 if (!empty($kodeAkun) && !isset($validAccounts[$kodeAkun])) {
-                    $ghostAccounts[] = $kodeAkun;
+                    $ghostAccounts[] = $rawAkunTrim;
                 }
 
                 $debet  = NumberParser::parseDecimal($pRow['raw_debet']);
@@ -186,6 +201,7 @@ class JournalCsvImportService
                 $balances[$ev]['d'] += $debet;
                 $balances[$ev]['k'] += $kredit;
             }
+            unset($pRow);
 
             if (!empty($ghostAccounts)) {
                 $ghostAccounts = array_unique($ghostAccounts);
@@ -217,11 +233,13 @@ class JournalCsvImportService
 
             try {
                 // FIX #1390: Delete existing headers in chunks
-                $evidenceNumbersToImport = array_unique(array_column($parsedRows, 'evidence'));
-                $evidenceChunks = array_chunk($evidenceNumbersToImport, 200);
+                $sourceDocumentNumbersToImport = array_unique(array_column($parsedRows, 'evidence'));
+                $evidenceChunks = array_chunk($sourceDocumentNumbersToImport, 200);
                 $allHeadersToDelete = collect();
                 foreach ($evidenceChunks as $evChunk) {
-                    $chunkHeaders = JournalHeader::whereIn('evidence_number', $evChunk)->pluck('journal_id');
+                    $chunkHeaders = JournalHeader::where('journal_type', 'IMPORT')
+                        ->whereIn('source_doc_no', $evChunk)
+                        ->pluck('journal_id');
                     $allHeadersToDelete = $allHeadersToDelete->merge($chunkHeaders);
                 }
 
@@ -235,10 +253,13 @@ class JournalCsvImportService
                 }
 
                 // FIX #1390: Chunk evidence numbers to avoid "too many placeholders" error (MySQL limit: 65,535)
-                $evidenceNumbers = array_unique(array_column($parsedRows, 'evidence'));
+                $sourceDocumentNumbers = array_unique(array_column($parsedRows, 'evidence'));
                 $existingHeaders = [];
-                foreach (array_chunk($evidenceNumbers, 500) as $chunk) {
-                    $headersInChunk = JournalHeader::whereIn('evidence_number', $chunk)->pluck('journal_id', 'evidence_number')->toArray();
+                foreach (array_chunk($sourceDocumentNumbers, 500) as $chunk) {
+                    $headersInChunk = JournalHeader::where('journal_type', 'IMPORT')
+                        ->whereIn('source_doc_no', $chunk)
+                        ->pluck('journal_id', 'source_doc_no')
+                        ->toArray();
                     $existingHeaders = array_merge($existingHeaders, $headersInChunk);
                 }
                 $headerCache = $existingHeaders;
@@ -262,25 +283,29 @@ class JournalCsvImportService
 
                     if ($debet == 0 && $kredit == 0) continue;
 
-                    $evidenceNumber = $pRow['evidence'];
+                    // Nomor dari file adalah No. Transaksi/dokumen asal, bukan No. Bukti internal.
+                    $sourceDocumentNumber = $pRow['evidence'];
                     
-                    if (!isset($headerCache[$evidenceNumber])) {
+                    if (!isset($headerCache[$sourceDocumentNumber])) {
                         $seq++;
                         $newId = $datePrefix . str_pad($seq, 6, '0', STR_PAD_LEFT);
+                        $evidenceNumber = JournalHeader::generateEvidenceNumber('IMP', $pRow['tanggal']);
                         
                         $headersToInsert[] = [
                             'journal_id'       => $newId,
                             'evidence_number'  => $evidenceNumber,
+                            'source_doc_no'    => $sourceDocumentNumber,
                             'transaction_date' => $pRow['tanggal'],
                             'notes'            => substr($pRow['deskripsi'], 0, 255),
+                            'journal_type'     => 'IMPORT',
                             'jj_id'            => time() + $seq,
                             'created_at'       => $now,
                             'updated_at'       => $now,
                         ];
-                        $headerCache[$evidenceNumber] = $newId;
+                        $headerCache[$sourceDocumentNumber] = $newId;
                     }
 
-                    $currId = $headerCache[$evidenceNumber];
+                    $currId = $headerCache[$sourceDocumentNumber];
 
                     if ($debet != 0) {
                         $detailsToInsert[] = [

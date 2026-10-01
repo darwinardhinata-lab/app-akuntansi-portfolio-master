@@ -47,6 +47,9 @@ Thumbs.db
 
 # Local artifact archives & audit dumps (never track)
 /*.zip
+/backup_*.sql
+/audit_test_output*.txt
+/test_output.txt
 /hardcoded_report.json
 /routes_dump.txt
 /marvel-dard.txt

@@ -15,9 +15,13 @@ use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
  */
 class FabricImport implements ToCollection, WithStartRow, WithCustomCsvSettings
 {
+    public function __construct(private readonly string $inputEncoding = 'UTF-8')
+    {
+    }
+
     public function getCsvSettings(): array
     {
-        return ['delimiter' => ';'];
+        return ['delimiter' => ';', 'input_encoding' => $this->inputEncoding];
     }
 
     public function startRow(): int
@@ -66,4 +70,5 @@ class FabricImport implements ToCollection, WithStartRow, WithCustomCsvSettings
             );
         }
     }
+
 }

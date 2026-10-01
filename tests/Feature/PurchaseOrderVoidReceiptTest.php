@@ -30,7 +30,7 @@ class PurchaseOrderVoidReceiptTest extends TestCase
         app(PurchaseOrderService::class)->voidReceipt($po1);
 
         // Periksa collision prefix lebih dahulu: patch lama memilih PO-10 saat void PO-1.
-        $this->assertDatabaseHas('journal_headers', ['evidence_number' => 'BIL-VOID-10', 'transaction_type' => 'Purchase Bill']);
+        $this->assertDatabaseHas('journal_headers', ['source_doc_no' => 'BIL-VOID-10', 'transaction_type' => 'Purchase Bill']);
         $this->assertDatabaseHas('inventory_ledgers', ['evidence_number' => 'BIL-VOID-10']);
         $this->assertDatabaseHas('purchase_orders', ['id' => $po10, 'status' => 'RECEIVED']);
         $this->assertDatabaseHas('purchase_order_details', ['purchase_order_id' => $po10, 'qty_received' => 7]);
@@ -38,7 +38,7 @@ class PurchaseOrderVoidReceiptTest extends TestCase
         $this->assertNotNull(DB::table('purchase_bills')->where('bill_number', 'BIL-VOID-10')->value('journal_id'));
 
         // PO-1: semua efek receive terhapus dan tautan Bill dilepas.
-        $this->assertDatabaseMissing('journal_headers', ['evidence_number' => 'BIL-VOID-1']);
+        $this->assertDatabaseMissing('journal_headers', ['source_doc_no' => 'BIL-VOID-1']);
         $this->assertDatabaseMissing('inventory_ledgers', ['evidence_number' => 'BIL-VOID-1']);
         $this->assertDatabaseHas('purchase_orders', ['id' => $po1, 'status' => 'APPROVED']);
         $this->assertEquals(0, (float) Product::where('sku', 'SKU-V1')->value('stock_quantity'));
@@ -53,14 +53,14 @@ class PurchaseOrderVoidReceiptTest extends TestCase
         app(PurchaseOrderService::class)->voidReceipt($poUnderscore);
 
         // '_' adalah wildcard LIKE. POX7 tidak boleh ikut terpilih ketika void PO_7.
-        $this->assertDatabaseHas('journal_headers', ['evidence_number' => 'BIL-VOID-X', 'transaction_type' => 'Purchase Bill']);
+        $this->assertDatabaseHas('journal_headers', ['source_doc_no' => 'BIL-VOID-X', 'transaction_type' => 'Purchase Bill']);
         $this->assertDatabaseHas('inventory_ledgers', ['evidence_number' => 'BIL-VOID-X']);
         $this->assertDatabaseHas('purchase_orders', ['id' => $poWildcard, 'status' => 'RECEIVED']);
         $this->assertDatabaseHas('purchase_order_details', ['purchase_order_id' => $poWildcard, 'qty_received' => 7]);
         $this->assertEquals(7, (float) Product::where('sku', 'SKU-VX')->value('stock_quantity'));
         $this->assertNotNull(DB::table('purchase_bills')->where('bill_number', 'BIL-VOID-X')->value('journal_id'));
 
-        $this->assertDatabaseMissing('journal_headers', ['evidence_number' => 'BIL-VOID-U']);
+        $this->assertDatabaseMissing('journal_headers', ['source_doc_no' => 'BIL-VOID-U']);
         $this->assertDatabaseMissing('inventory_ledgers', ['evidence_number' => 'BIL-VOID-U']);
         $this->assertDatabaseHas('purchase_orders', ['id' => $poUnderscore, 'status' => 'APPROVED']);
         $this->assertEquals(0, (float) Product::where('sku', 'SKU-VU')->value('stock_quantity'));

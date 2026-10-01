@@ -75,7 +75,7 @@ class PurchaseOrderService
             // sebelum membuat JournalHeader baru. Ini mencegah double-posting saat:
             // 1. User terima barang via UI lalu bagian lain import:bil dengan nomor Bill yang sama
             // 2. Proses receive dijalankan 2x untuk bill yang sama
-            $existingJournal = JournalHeader::where('evidence_number', $evidenceNumber)
+            $existingJournal = JournalHeader::where('source_doc_no', $evidenceNumber)
                 ->where('transaction_type', 'Purchase Bill')
                 ->exists();
             if ($existingJournal) {
@@ -228,7 +228,7 @@ class PurchaseOrderService
 
             if (!empty($evidenceNumbers)) {
                 // 1. Batch delete jurnal akuntansi
-                $journalIds = JournalHeader::whereIn('evidence_number', $evidenceNumbers)->pluck('journal_id');
+                $journalIds = JournalHeader::whereIn('source_doc_no', $evidenceNumbers)->pluck('journal_id');
                 if ($journalIds->isNotEmpty()) {
                     // FIX: Lepas tautan purchase_bills.journal_id sebelum jurnal dihapus agar tidak
                     // menyisakan referensi menggantung ke jurnal yang sudah tidak ada.

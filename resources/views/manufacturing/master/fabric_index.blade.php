@@ -187,6 +187,14 @@
                         <label class="form-label">{{ __('erp.choose_file_xlsx') }}</label>
                         <input type="file" name="file_excel" class="form-control" required accept=".xlsx,.xls,.csv">
                     </div>
+                    <div class="mb-2">
+                        <label class="form-label">Encoding CSV</label>
+                        <select name="csv_encoding" class="form-select">
+                            <option value="UTF-8" selected>UTF-8 (CSV UTF-8 / default)</option>
+                            <option value="GB18030">GB18030 (CSV Excel/Windows berbahasa Mandarin)</option>
+                        </select>
+                        <div class="form-text">Untuk file .xlsx/.xls, pilihan ini tidak diperlukan. Jika teks Mandarin tampil sebagai ???, gunakan file sumber asli dan pilih GB18030, atau simpan ulang sebagai .xlsx / CSV UTF-8.</div>
+                    </div>
                     <div class="form-text">{{ __('erp.stock_cogs_not_imported_hint') }}</div>
                 </div>
                 <div class="modal-footer"><button type="submit" class="btn btn-primary fw-bold">{{ __('erp.start_import') }}</button></div>

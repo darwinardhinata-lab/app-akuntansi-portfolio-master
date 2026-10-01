@@ -12,9 +12,12 @@ use App\Models\JournalHeader;
 use App\Models\SystemLog;
 use App\Services\JournalCsvImportService;
 use App\Support\GrnProtection;
+use App\Support\JournalAmount;
 use App\Support\JournalBalanceValidator;
+use App\Support\JournalDocumentLinkResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 
 class JournalController extends Controller
@@ -65,6 +68,8 @@ class JournalController extends Controller
                 'end_date' => $endDate,
             ]);
 
+        JournalDocumentLinkResolver::attach($journals->getCollection());
+
         return view('journal.index', compact('journals', 'perPage', 'search', 'startDate', 'endDate'));
     }
 
@@ -78,14 +83,16 @@ class JournalController extends Controller
 
     public function store(Request $request)
     {
+        $this->normalizeJournalAmounts($request);
+
         $request->validate([
             'transaction_date' => 'required|date',
-            'evidence_number' => 'nullable|string|max:100',
+            'source_doc_no' => 'nullable|string|max:150',
             'description' => 'required|string|max:255',
             'details' => 'required|array|min:2',
             'details.*.account_code' => 'required|string',
             'details.*.position' => 'required|in:DEBET,KREDIT',
-            'details.*.amount' => 'required|numeric|min:0.01',
+            'details.*.amount' => 'required|numeric|decimal:0,2|min:0.01',
             'details.*.helper_code' => 'nullable|string',
         ]);
 
@@ -93,7 +100,7 @@ class JournalController extends Controller
         if (! JournalBalanceValidator::isBalanced($request->details)) {
             $selisih = JournalBalanceValidator::getDifference($request->details);
 
-            return redirect()->back()->withInput()->with('error', 'Gagal: Total Debet dan Kredit pada jurnal tidak seimbang (Unbalanced). Selisih: Rp '.number_format($selisih, 2, ',', '.'));
+            return redirect()->back()->withInput()->with('error', 'Gagal: Total Debet dan Kredit pada jurnal tidak seimbang (Unbalanced). Selisih: Rp '.JournalAmount::formatIndonesian($selisih));
         }
 
         try {
@@ -101,8 +108,9 @@ class JournalController extends Controller
 
             $journal = JournalHeader::create([
                 'transaction_date' => $request->transaction_date,
-                'evidence_number' => $request->evidence_number,
+                'source_doc_no' => $request->input('source_doc_no', $request->input('evidence_number')),
                 'notes' => $request->description,
+                'journal_type' => 'MANUAL',
             ]);
 
             // B9 FIX: Gunakan empty() eksplisit — operator ?? tidak menangkap string kosong ''
@@ -152,7 +160,7 @@ class JournalController extends Controller
             }
 
             DB::commit();
-            SystemLog::record('CREATE', 'Jurnal Umum', 'Menambahkan transaksi jurnal: '.($request->evidence_number ?? 'OTOMATIS'));
+            SystemLog::record('CREATE', 'Jurnal Umum', 'Menambahkan transaksi jurnal: '.$journal->evidence_number);
 
             return redirect()->route('jurnal.index')->with('success', 'Transaksi Jurnal berhasil disimpan!');
 
@@ -174,10 +182,23 @@ class JournalController extends Controller
 
     public function update(Request $request, $id)
     {
+        $this->normalizeJournalAmounts($request);
+
+        $request->validate([
+            'transaction_date' => 'required|date',
+            'source_doc_no' => 'nullable|string|max:150',
+            'description' => 'required|string|max:255',
+            'details' => 'required|array|min:2',
+            'details.*.account_code' => 'required|string',
+            'details.*.position' => 'required|in:DEBET,KREDIT',
+            'details.*.amount' => 'required|numeric|decimal:0,2|min:0.01',
+            'details.*.helper_code' => 'nullable|string',
+        ]);
+
         if (! JournalBalanceValidator::isBalanced($request->details)) {
             $selisih = JournalBalanceValidator::getDifference($request->details);
 
-            return redirect()->back()->with('error', 'Gagal: Total Debet dan Kredit pada perubahan jurnal tidak seimbang. Selisih: Rp '.number_format($selisih, 2, ',', '.'));
+            return redirect()->back()->withInput()->with('error', 'Gagal: Total Debet dan Kredit pada perubahan jurnal tidak seimbang. Selisih: Rp '.JournalAmount::formatIndonesian($selisih));
         }
 
         try {
@@ -186,7 +207,7 @@ class JournalController extends Controller
 
             $journal->update([
                 'transaction_date' => $request->transaction_date,
-                'evidence_number' => $request->evidence_number,
+                'source_doc_no' => $request->input('source_doc_no', $request->input('evidence_number')),
                 'notes' => $request->description,
             ]);
 
@@ -235,6 +256,29 @@ class JournalController extends Controller
 
             return redirect()->back()->with('error', 'Gagal update: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Normalize the Indonesian currency input before Laravel's numeric validation.
+     */
+    private function normalizeJournalAmounts(Request $request): void
+    {
+        $details = $request->input('details', []);
+        $errors = [];
+
+        foreach ($details as $index => $detail) {
+            try {
+                $details[$index]['amount'] = JournalAmount::normalize($detail['amount'] ?? null);
+            } catch (\InvalidArgumentException $exception) {
+                $errors["details.$index.amount"] = $exception->getMessage();
+            }
+        }
+
+        if ($errors !== []) {
+            throw ValidationException::withMessages($errors);
+        }
+
+        $request->merge(['details' => $details]);
     }
 
     public function destroy($id)
@@ -361,15 +405,15 @@ class JournalController extends Controller
 
     public function getJournalDetailsAjax(Request $request)
     {
-        $evidence = $request->get('evidence_number');
-        if (! $evidence) {
-            return response()->json(['status' => 'error', 'message' => 'Nomor Bukti tidak valid.']);
+        $journalId = $request->get('journal_id');
+        if (! $journalId) {
+            return response()->json(['status' => 'error', 'message' => 'ID jurnal tidak valid.']);
         }
 
         $journals = DB::table('journal_details')
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
             ->leftJoin('accounts', 'journal_details.account_code', '=', 'accounts.account_code')
-            ->where('journal_headers.evidence_number', $evidence)
+            ->where('journal_headers.journal_id', $journalId)
             ->select(
                 'journal_headers.transaction_date',
                 'journal_headers.notes as header_desc',
@@ -385,9 +429,9 @@ class JournalController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Detail Jurnal tidak ditemukan.']);
         }
 
-        // FIX #011: Escape evidence number to prevent XSS
-        $escapedEvidence = e($evidence);
-        $html = view('journal.partials.ajax_detail', compact('journals', 'escapedEvidence'))->render();
+        $header = JournalHeader::find($journalId);
+        JournalDocumentLinkResolver::attach(collect([$header]));
+        $html = view('journal.partials.ajax_detail', compact('journals', 'header'))->render();
 
         return response()->json([
             'status' => 'success',

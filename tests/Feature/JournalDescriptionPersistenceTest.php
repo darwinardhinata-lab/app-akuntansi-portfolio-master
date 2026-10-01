@@ -27,7 +27,7 @@ class JournalDescriptionPersistenceTest extends TestCase
 
         $response = $this->post(route('jurnal.store'), [
             'transaction_date' => '2026-09-29',
-            'evidence_number' => 'TEST-DESC-001',
+            'source_doc_no' => 'TEST-DESC-001',
             'description' => $description,
             'details' => [
                 ['account_code' => '11100', 'position' => 'DEBET', 'amount' => 100000],
@@ -36,9 +36,9 @@ class JournalDescriptionPersistenceTest extends TestCase
         ]);
 
         $response->assertRedirect(route('jurnal.index'));
-        $this->assertDatabaseHas('journal_headers', ['evidence_number' => 'TEST-DESC-001', 'notes' => $description]);
+        $this->assertDatabaseHas('journal_headers', ['evidence_number' => 'GJ-20260929-0001', 'source_doc_no' => 'TEST-DESC-001', 'notes' => $description]);
 
-        $journal = JournalHeader::where('evidence_number', 'TEST-DESC-001')->firstOrFail();
+        $journal = JournalHeader::where('source_doc_no', 'TEST-DESC-001')->firstOrFail();
         $this->assertSame($description, $journal->description);
         $this->get(route('jurnal.index'))->assertOk()->assertSee($description);
     }

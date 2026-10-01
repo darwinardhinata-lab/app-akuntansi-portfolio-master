@@ -25,30 +25,36 @@ return new class extends Migration
             });
         }
 
-        Schema::table('mfg_auxiliary_materials', function (Blueprint $table) {
-            foreach (['hs_code', 'description', 'english_name', 'color', 'meters_per_roll'] as $column) {
-                if (Schema::hasColumn('mfg_auxiliary_materials', $column)) continue;
-                match ($column) {
-                    'hs_code' => $table->string('hs_code', 50)->nullable(),
-                    'color' => $table->string('color', 100)->nullable(),
-                    'meters_per_roll' => $table->decimal('meters_per_roll', 20, 2)->nullable(),
-                    default => $table->string($column, 255)->nullable(),
-                };
-            }
-            $table->text('specification')->nullable()->change();
-        });
+        if (Schema::hasTable('mfg_auxiliary_materials')) {
+            Schema::table('mfg_auxiliary_materials', function (Blueprint $table) {
+                foreach (['hs_code', 'description', 'english_name', 'color', 'meters_per_roll'] as $column) {
+                    if (Schema::hasColumn('mfg_auxiliary_materials', $column)) continue;
+                    match ($column) {
+                        'hs_code' => $table->string('hs_code', 50)->nullable(),
+                        'color' => $table->string('color', 100)->nullable(),
+                        'meters_per_roll' => $table->decimal('meters_per_roll', 20, 2)->nullable(),
+                        default => $table->string($column, 255)->nullable(),
+                    };
+                }
+                $table->text('specification')->nullable()->change();
+            });
+        }
 
         DB::table('mfg_yarns')->whereNull('description')->update(['description' => DB::raw('yarn_type')]);
         DB::table('mfg_fabrics')->whereNull('description')->update(['description' => DB::raw('fabric_type')]);
-        DB::table('mfg_auxiliary_materials')->whereNull('description')->update(['description' => DB::raw('material_name')]);
+        if (Schema::hasTable('mfg_auxiliary_materials')) {
+            DB::table('mfg_auxiliary_materials')->whereNull('description')->update(['description' => DB::raw('material_name')]);
+        }
     }
 
     public function down(): void
     {
-        Schema::table('mfg_auxiliary_materials', function (Blueprint $table) {
-            $table->string('specification', 255)->nullable()->change();
-            $table->dropColumn(['hs_code', 'description', 'english_name', 'color', 'meters_per_roll']);
-        });
+        if (Schema::hasTable('mfg_auxiliary_materials')) {
+            Schema::table('mfg_auxiliary_materials', function (Blueprint $table) {
+                $table->string('specification', 255)->nullable()->change();
+                $table->dropColumn(['hs_code', 'description', 'english_name', 'color', 'meters_per_roll']);
+            });
+        }
         foreach (['mfg_yarns', 'mfg_fabrics'] as $tableName) {
             Schema::table($tableName, function (Blueprint $table) {
                 $table->dropColumn($this->columns);

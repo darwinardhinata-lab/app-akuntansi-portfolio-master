@@ -187,7 +187,9 @@ class PurchaseBillController extends Controller
             $inventoryService->reverseStockMovements($bill->bill_number, 'BIL');
 
             // 2. Hapus Jurnal
-            $journalIds = JournalHeader::where('evidence_number', $bill->bill_number)->pluck('journal_id');
+            $journalIds = $bill->journal_id
+                ? collect([$bill->journal_id])
+                : JournalHeader::where('source_doc_no', $bill->bill_number)->pluck('journal_id');
             if ($journalIds->isNotEmpty()) {
                 JournalDetail::whereIn('journal_id', $journalIds)->delete();
                 JournalHeader::whereIn('journal_id', $journalIds)->delete();

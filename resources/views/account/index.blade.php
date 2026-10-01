@@ -89,15 +89,9 @@
                 <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.coa_type') }}</label>
                 <select name="coa_type" class="form-select form-select-sm">
                     <option value="">{{ __('erp.all_types') }}</option>
-                    <option value="Cash & Bank" {{ request('coa_type') == 'Cash & Bank' ? 'selected' : '' }}>{{ __('erp.cash_and_bank') }}</option>
-                    <option value="Piutang Dagang" {{ request('coa_type') == 'Piutang Dagang' ? 'selected' : '' }}>{{ __('erp.trade_receivables') }}</option>
-                    <option value="Persediaan" {{ request('coa_type') == 'Persediaan' ? 'selected' : '' }}>{{ __('erp.inventory_label') }}</option>
-                    <option value="Aset Tetap" {{ request('coa_type') == 'Aset Tetap' ? 'selected' : '' }}>{{ __('erp.fixed_asset') }}</option>
-                    <option value="Hutang Dagang" {{ request('coa_type') == 'Hutang Dagang' ? 'selected' : '' }}>{{ __('erp.trade_payables') }}</option>
-                    <option value="Modal" {{ request('coa_type') == 'Modal' ? 'selected' : '' }}>{{ __('erp.equity_label') }}</option>
-                    <option value="Pendapatan" {{ request('coa_type') == 'Pendapatan' ? 'selected' : '' }}>{{ __('erp.revenue_label') }}</option>
-                    <option value="Harga Pokok Penjualan" {{ request('coa_type') == 'Harga Pokok Penjualan' ? 'selected' : '' }}>{{ __('erp.cogs_label') }}</option>
-                    <option value="Biaya" {{ request('coa_type') == 'Biaya' ? 'selected' : '' }}>{{ __('erp.expense_label') }}</option>
+                    @foreach($coaTypes as $type)
+                        <option value="{{ $type }}" {{ request('coa_type') == $type ? 'selected' : '' }}>{{ $type }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="col-12 col-md-4">

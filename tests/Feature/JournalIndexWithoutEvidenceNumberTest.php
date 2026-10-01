@@ -25,6 +25,6 @@ class JournalIndexWithoutEvidenceNumberTest extends TestCase
         $this->get(route('jurnal.index'))
             ->assertOk()
             ->assertSee($journal->journal_id)
-            ->assertSee(route('trace.document', $journal->journal_id));
+            ->assertSee(route('jurnal.edit', $journal->journal_id));
     }
 }

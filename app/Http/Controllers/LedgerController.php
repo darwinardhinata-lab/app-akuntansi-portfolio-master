@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Account;
 use App\Models\JournalDetail;
+use App\Support\JournalDocumentLinkResolver;
 use Illuminate\Support\Facades\DB;
 
 class LedgerController extends Controller
@@ -86,7 +87,7 @@ class LedgerController extends Controller
         // =====================================================================================
         $transactions = JournalDetail::with(['header.details.account']) 
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
-            ->select('journal_details.*', 'journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.notes')
+            ->select('journal_details.*', 'journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.source_doc_no', 'journal_headers.notes', 'journal_headers.journal_type')
             ->where('account_code', $accCode)
             ->whereBetween('transaction_date', [$startDate, $endDate])
             ->orderBy('transaction_date', 'asc')
@@ -98,6 +99,8 @@ class LedgerController extends Controller
                 'end_date'     => $endDate,
                 'per_page'     => $perPage,
             ]);
+
+        JournalDocumentLinkResolver::attach($transactions->getCollection()->pluck('header')->filter());
 
         return view('ledger.index', compact(
             'accounts', 'accCode', 'startDate', 'endDate', 

@@ -26,8 +26,8 @@ class LoginRedirectTest extends TestCase
         ]);
 
         $this->withSession(['url.intended' => 'http://localhost/'])
-            ->post(route('login'), ['email' => $user->email, 'password' => 'correct-password'])
-            ->assertRedirect(route('dashboard'));
+            ->post('/login', ['email' => $user->email, 'password' => 'correct-password'])
+            ->assertRedirect(route('dashboard.index'));
 
         $this->assertAuthenticatedAs($user);
     }
@@ -41,9 +41,18 @@ class LoginRedirectTest extends TestCase
         $intended = 'http://localhost/app-akuntansi-portfolio-master/public/akun';
 
         $this->withSession(['url.intended' => $intended])
-            ->post(route('login'), ['email' => $user->email, 'password' => 'correct-password'])
+            ->post('/login', ['email' => $user->email, 'password' => 'correct-password'])
             ->assertRedirect($intended);
 
         $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_an_authenticated_user_opening_the_login_page_is_sent_to_the_explicit_dashboard_endpoint(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/login')
+            ->assertRedirect(route('dashboard.index'));
     }
 }

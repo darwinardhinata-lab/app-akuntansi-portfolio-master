@@ -13,7 +13,7 @@ class LoginController extends Controller
     public function showLoginForm()
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            return redirect()->route('dashboard.index');
         }
 
         return view('auth.login');
@@ -22,7 +22,7 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email'    => ['required', 'email'],
+            'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
 
@@ -36,7 +36,10 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        $dashboard = route('dashboard');
+        // Gunakan endpoint eksplisit, bukan root aplikasi. Pada Apache/XAMPP,
+        // base directory /public dapat dinormalisasi menjadi /public/ dan
+        // berakhir pada route root yang tidak konsisten di cache runtime.
+        $dashboard = route('dashboard.index');
         $intended = $request->session()->pull('url.intended');
         $applicationUrl = rtrim((string) config('app.url'), '/');
 

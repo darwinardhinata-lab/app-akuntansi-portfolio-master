@@ -21,6 +21,7 @@ class AccountController extends Controller
         $report_pos = $request->get('report_pos');
 
         $query  = Account::query();
+        $coaTypes = Account::select('coa_type')->whereNotNull('coa_type')->distinct()->orderBy('coa_type')->pluck('coa_type');
 
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
@@ -42,7 +43,7 @@ class AccountController extends Controller
                           ->paginate(50)
                           ->appends(request()->query());
 
-        return view('account.index', compact('accounts', 'search'));
+        return view('account.index', compact('accounts', 'search', 'coaTypes'));
     }
 
     public function export(Request $request)
@@ -59,7 +60,8 @@ class AccountController extends Controller
     // =========================================================================================
     public function create()
     {
-        return view('account.create');
+        $coaTypes = Account::select('coa_type')->whereNotNull('coa_type')->distinct()->orderBy('coa_type')->pluck('coa_type');
+        return view('account.create', compact('coaTypes'));
     }
 
     public function store(Request $request)
@@ -88,7 +90,8 @@ class AccountController extends Controller
     public function edit($id)
     {
         $account = Account::where('account_code', $id)->first() ?? Account::findOrFail($id);
-        return view('account.edit', compact('account'));
+        $coaTypes = Account::select('coa_type')->whereNotNull('coa_type')->distinct()->orderBy('coa_type')->pluck('coa_type');
+        return view('account.edit', compact('account', 'coaTypes'));
     }
 
     public function update(Request $request, $id)

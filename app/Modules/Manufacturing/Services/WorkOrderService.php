@@ -110,7 +110,7 @@ class WorkOrderService
                 throw new Exception("Qty barang jadi harus sama dengan total hasil PACKING ({$packingQty} pcs).");
             }
 
-            $existing = JournalHeader::where('evidence_number', $wo->spk_number)
+            $existing = JournalHeader::where('source_doc_no', $wo->spk_number)
                 ->where('transaction_type', 'Work Order Completion (MFG)')
                 ->exists();
             if ($existing) {
@@ -157,6 +157,7 @@ class WorkOrderService
             $journal = JournalHeader::create([
                 'transaction_date' => $completionDate,
                 'evidence_number'  => $wo->spk_number,
+                'source_doc_no'    => $wo->spk_number,
                 'notes'            => "Penyelesaian SPK: {$wo->spk_number} - {$wo->garment_name} ({$qtyFinished} pcs)",
                 'transaction_type' => 'Work Order Completion (MFG)',
             ]);
@@ -218,10 +219,10 @@ class WorkOrderService
 
             JournalDetail::whereIn('journal_id', function ($q) use ($wo) {
                 $q->select('journal_id')->from('journal_headers')
-                    ->where('evidence_number', $wo->spk_number)
+                    ->where('source_doc_no', $wo->spk_number)
                     ->where('transaction_type', 'Work Order Completion (MFG)');
             })->delete();
-            JournalHeader::where('evidence_number', $wo->spk_number)
+            JournalHeader::where('source_doc_no', $wo->spk_number)
                 ->where('transaction_type', 'Work Order Completion (MFG)')
                 ->delete();
 

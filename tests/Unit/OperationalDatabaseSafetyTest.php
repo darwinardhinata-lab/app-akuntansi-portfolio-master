@@ -18,6 +18,11 @@ class OperationalDatabaseSafetyTest extends TestCase
         $this->assertFalse(OperationalDatabaseSafety::prohibitsDestructiveCommands('mgi_fresh_20260924', 'local', true));
     }
 
+    public function test_string_false_does_not_accidentally_enable_the_destructive_command_escape_hatch(): void
+    {
+        $this->assertTrue(OperationalDatabaseSafety::prohibitsDestructiveCommands('mgi_fresh_20260924', 'local', filter_var('false', FILTER_VALIDATE_BOOLEAN)));
+    }
+
     public function test_legacy_and_fixture_database_names_are_not_blocked_by_this_mgi_guard(): void
     {
         $this->assertFalse(OperationalDatabaseSafety::prohibitsDestructiveCommands('db_akuntansi', 'local', false));

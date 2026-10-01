@@ -8,7 +8,10 @@ class OperationalDatabaseSafety
     {
         $database ??= (string) config('database.connections.'.config('database.default').'.database');
         $environment ??= app()->environment();
-        $allowDestructiveCommands ??= (bool) config('platform.allow_destructive_database_commands', false);
+        $allowDestructiveCommands ??= filter_var(
+            config('platform.allow_destructive_database_commands', false),
+            FILTER_VALIDATE_BOOLEAN,
+        );
 
         return $environment !== 'testing'
             && str_starts_with(strtolower($database), 'mgi_fresh_')

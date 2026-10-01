@@ -80,13 +80,20 @@ class FabricController extends Controller
     public function import(Request $request)
     {
         try {
-            $request->validate(['file_excel' => 'required|file']);
+            $request->validate([
+                'file_excel' => 'required|file',
+                'csv_encoding' => 'nullable|in:UTF-8,GB18030',
+            ]);
             $extension = strtolower($request->file('file_excel')->getClientOriginalExtension());
             if (!in_array($extension, ['xlsx', 'xls', 'csv'])) {
                 return redirect()->back()->with('error', 'Gagal import: Format file harus .xlsx, .xls, atau .csv');
             }
 
-            Excel::import(new FabricImport, $request->file('file_excel'));
+            $inputEncoding = $extension === 'csv'
+                ? $request->input('csv_encoding', 'UTF-8')
+                : 'UTF-8';
+
+            Excel::import(new FabricImport($inputEncoding), $request->file('file_excel'));
             SystemLog::record('IMPORT', 'Manufacturing Fabric Master', 'Import master fabric dari file Excel berhasil.');
             return redirect()->back()->with('success', 'Data Master Fabric berhasil di-import!');
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
@@ -116,6 +123,6 @@ class FabricController extends Controller
             fclose($file);
         };
 
-        return response()->streamDownload($callback, 'Template_Import_Fabric.csv', ['Content-Type' => 'text/csv']);
+        return response()->streamDownload($callback, 'Template_Import_Fabric.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 }

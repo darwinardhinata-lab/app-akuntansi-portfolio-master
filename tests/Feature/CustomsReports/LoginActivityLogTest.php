@@ -30,7 +30,7 @@ class LoginActivityLogTest extends TestCase
         $this->post('/login', [
             'email' => $user->email,
             'password' => 'rahasia123',
-        ])->assertRedirect(route('dashboard'));
+        ])->assertRedirect(route('dashboard.index'));
 
         $this->assertDatabaseHas('system_logs', [
             'user_id' => $user->id,

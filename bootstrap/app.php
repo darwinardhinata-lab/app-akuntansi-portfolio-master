@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\SetLocaleMiddleware;
+use App\Modules\Platform\Http\Middleware\RequireOperationalCompany;
+use App\Providers\CollectionMacroServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,13 +16,17 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withEvents(discover: false)
     ->withMiddleware(function (Middleware $middleware) {
+        // Hindari root aplikasi (/public/) untuk pengguna yang sudah login.
+        // Endpoint eksplisit /dashboard stabil pada Apache/XAMPP.
+        $middleware->redirectUsersTo(fn () => route('dashboard.index'));
+
         $middleware->web(append: [
-            \App\Modules\Platform\Http\Middleware\RequireOperationalCompany::class,
-            \App\Http\Middleware\SetLocaleMiddleware::class, // 💉 Injeksi Middleware Bahasa
+            RequireOperationalCompany::class,
+            SetLocaleMiddleware::class, // 💉 Injeksi Middleware Bahasa
         ]);
     })
     ->withProviders([
-        \App\Providers\CollectionMacroServiceProvider::class,
+        CollectionMacroServiceProvider::class,
     ])
     ->withExceptions(function (Exceptions $exceptions): void {
         //

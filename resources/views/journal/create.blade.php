@@ -58,8 +58,8 @@
                     <input type="date" name="transaction_date" class="form-control input-header" value="{{ date('Y-m-d') }}" required>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">{{ __('erp.evidence_no') }}</label>
-                    <input type="text" name="evidence_number" class="form-control input-header" placeholder="{{ __('erp.eg_evidence_no') }}">
+                    <label class="form-label">No. Transaksi / Dokumen Asli</label>
+                    <input type="text" name="source_doc_no" class="form-control input-header" placeholder="Contoh: INV-SUPPLIER-2026-101">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">{{ __('erp.journal_description') }}</label>
@@ -105,7 +105,7 @@
                                 </select>
                             </td>
                             <td data-label="Nominal (Rp)">
-                                <input type="number" name="details[0][amount]" class="input-transparent amount-input text-end fw-bold" value="0" min="0" required>
+                                <input type="text" inputmode="decimal" name="details[0][amount]" class="input-transparent amount-input text-end fw-bold" value="0,00" placeholder="0,00" required autocomplete="off">
                             </td>
                             <td class="text-center align-middle">
                                 <button type="button" class="btn-hapus" disabled>×</button>
@@ -136,7 +136,7 @@
                                 </select>
                             </td>
                             <td>
-                                <input type="number" name="details[1][amount]" class="input-transparent amount-input text-end fw-bold" value="0" min="0" required>
+                                <input type="text" inputmode="decimal" name="details[1][amount]" class="input-transparent amount-input text-end fw-bold" value="0,00" placeholder="0,00" required autocomplete="off">
                             </td>
                             <td class="text-center align-middle">
                                 <button type="button" class="btn-hapus" disabled>×</button>
@@ -188,7 +188,7 @@
             let totalK = 0;
 
             $('.amount-input').each(function() {
-                let amt = parseFloat($(this).val()) || 0;
+                let amt = amountToCents($(this).val());
                 let pos = $(this).closest('tr').find('.position-select').val();
                 
                 if (pos === 'DEBET') {
@@ -199,8 +199,8 @@
             });
 
             // Format angka ke format Rupiah (Ribuan)
-            $('#textDebet').text(new Intl.NumberFormat('id-ID').format(totalD));
-            $('#textKredit').text(new Intl.NumberFormat('id-ID').format(totalK));
+            $('#textDebet').text(formatCents(totalD));
+            $('#textKredit').text(formatCents(totalK));
             
             // Validasi Seimbang (Balance)
             if (totalD === totalK && totalD > 0) {
@@ -230,9 +230,9 @@
                     let newName = name.replace(/\[\d+\]/, `[${rowCount}]`);
                     $(this).attr('name', newName);
                 }
-                // Reset nilai inputan number menjadi 0
-                if ($(this).attr('type') === 'number') {
-                    $(this).val(0);
+                // Reset nominal dengan format Rupiah dua digit desimal.
+                if ($(this).hasClass('amount-input')) {
+                    $(this).val('0,00');
                 } else {
                     $(this).val(''); // Reset select ke kosong
                 }
@@ -251,6 +251,27 @@
             initSelect2();
             
             rowCount++;
+            hitungTotal();
+        });
+
+        function amountToCents(value) {
+            let normalized = String(value || '').trim();
+            if (normalized.includes(',')) {
+                normalized = normalized.replace(/\./g, '').replace(',', '.');
+            } else if (!/^\d+\.\d{1,2}$/.test(normalized)) {
+                normalized = normalized.replace(/\./g, '');
+            }
+            if (!/^\d+(\.\d{0,2})?$/.test(normalized)) return 0;
+            const [whole, fraction = ''] = normalized.split('.');
+            return (parseInt(whole, 10) * 100) + parseInt((fraction + '00').slice(0, 2), 10);
+        }
+
+        function formatCents(cents) {
+            return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(cents / 100);
+        }
+
+        $(document).on('blur', '.amount-input', function() {
+            $(this).val(formatCents(amountToCents($(this).val())));
             hitungTotal();
         });
 

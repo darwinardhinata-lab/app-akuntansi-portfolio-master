@@ -208,14 +208,16 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
             // FIX #013: Add safety lock - only delete entries that match the EXACT evidence numbers being imported
             // This prevents accidental deletion of manually entered journals in the same date range
             // FIX #1390: Chunk evidence numbers to avoid "too many placeholders" error
-            $evidenceNumbersToImport = array_unique(array_column($parsedRows, 'evidence'));
+            $sourceDocumentNumbersToImport = array_unique(array_column($parsedRows, 'evidence'));
             
             // Only delete entries that match evidence numbers being re-imported
             // Chunk evidence numbers to avoid MySQL placeholder limit (max 65,535)
-            $evidenceChunks = array_chunk($evidenceNumbersToImport, 200);
+            $evidenceChunks = array_chunk($sourceDocumentNumbersToImport, 200);
             $allHeadersToDelete = collect();
             foreach ($evidenceChunks as $evChunk) {
-                $chunkHeaders = JournalHeader::whereIn('evidence_number', $evChunk)->pluck('journal_id');
+                $chunkHeaders = JournalHeader::where('journal_type', 'IMPORT')
+                    ->whereIn('source_doc_no', $evChunk)
+                    ->pluck('journal_id');
                 $allHeadersToDelete = $allHeadersToDelete->merge($chunkHeaders);
             }
 
@@ -240,10 +242,13 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
 
             // FIX #1390: Load header yang mungkin sudah tersimpan di database dari putaran sebelumnya
             // Chunk evidence numbers to avoid "too many placeholders" error (MySQL limit: 65,535)
-            $evidenceNumbers = array_unique(array_column($parsedRows, 'evidence'));
+            $sourceDocumentNumbers = array_unique(array_column($parsedRows, 'evidence'));
             $existingHeaders = [];
-            foreach (array_chunk($evidenceNumbers, 500) as $chunk) {
-                $headersInChunk = JournalHeader::whereIn('evidence_number', $chunk)->pluck('journal_id', 'evidence_number')->toArray();
+            foreach (array_chunk($sourceDocumentNumbers, 500) as $chunk) {
+                $headersInChunk = JournalHeader::where('journal_type', 'IMPORT')
+                    ->whereIn('source_doc_no', $chunk)
+                    ->pluck('journal_id', 'source_doc_no')
+                    ->toArray();
                 $existingHeaders = array_merge($existingHeaders, $headersInChunk);
             }
             $headerCache = $existingHeaders;
@@ -262,27 +267,30 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
 
                 if ($debet == 0 && $kredit == 0) continue;
 
-                $evidenceNumber = $pRow['evidence'];
+                // File import menyimpan No. Transaksi; No. Bukti dibuat internal dan unik.
+                $sourceDocumentNumber = $pRow['evidence'];
                 
                 // FIX: Pembuatan Header Otomatis Tanpa Model Create yang Lambat
-                if (!isset($headerCache[$evidenceNumber])) {
+                if (!isset($headerCache[$sourceDocumentNumber])) {
                     $seq++;
                     $newId = $datePrefix . str_pad($seq, 6, '0', STR_PAD_LEFT);
+                    $evidenceNumber = JournalHeader::generateEvidenceNumber('IMP', $pRow['tanggal']);
                     
                     $headersToInsert[] = [
                         'journal_id'       => $newId,
                         'evidence_number'  => $evidenceNumber,
-                        'source_doc_no'    => $pRow['no_bukti'] ?: null, // FIX: traceability untuk DocumentTrace
+                        'source_doc_no'    => $pRow['no_bukti'] ?: $sourceDocumentNumber,
                         'transaction_date' => $pRow['tanggal'],
                         'description'      => substr($evidenceNumber . ' - ' . $pRow['deskripsi'], 0, 255),
+                        'journal_type'     => 'IMPORT',
                         'jj_id'            => time() + $seq, // FIX 1364: Bypass constraint NOT NULL legacy
                         'created_at'       => now(),
                         'updated_at'       => now(),
                     ];
-                    $headerCache[$evidenceNumber] = $newId;
+                    $headerCache[$sourceDocumentNumber] = $newId;
                 }
 
-                $currId = $headerCache[$evidenceNumber];
+                $currId = $headerCache[$sourceDocumentNumber];
 
                  if ($debet != 0) {
                      $detailsToInsert[] = [

@@ -32,4 +32,19 @@ class FabricMasterImportTest extends TestCase
 
         $this->assertSame($fabricType, Fabric::where('fabric_code', 'H.005010')->value('fabric_type'));
     }
+
+    public function test_fabric_import_exposes_the_selected_csv_input_encoding(): void
+    {
+        $this->assertSame('GB18030', (new FabricImport('GB18030'))->getCsvSettings()['input_encoding']);
+        $this->assertSame('UTF-8', (new FabricImport)->getCsvSettings()['input_encoding']);
+    }
+
+    public function test_fabric_import_preserves_mandarin_material_names(): void
+    {
+        app(FabricImport::class)->collection(new Collection([[
+            '5515110000', 'A.001060', 'Polyester Fabric', '1680D 双丝 PU*2 防泼水', 'Polyester Oxford Fabric', '??/Bahan Utama', 'Hitam', 'Lebar 1,5 m', 'meter', '100',
+        ]]));
+
+        $this->assertSame('1680D 双丝 PU*2 防泼水', Fabric::where('fabric_code', 'A.001060')->value('material_name'));
+    }
 }

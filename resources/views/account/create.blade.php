@@ -26,24 +26,12 @@
                 
                 <div class="col-md-6">
                     <label class="form-label fw-bold small text-muted">{{ __('erp.account_type_required') }}</label>
-                    <select name="coa_type" class="form-select fw-bold text-primary" required>
-                        <option value="">{{ __('erp.select_account_category') }}</option>
-                        <option value="Cash & Bank">{{ __('erp.cash_and_bank') }}</option>
-                        <option value="Piutang Dagang">{{ __('erp.trade_receivables') }}</option>
-                        <option value="Persediaan">{{ __('erp.inventory_label') }}</option>
-                        <option value="Aset Lancar Lainnya">{{ __('erp.other_current_assets') }}</option>
-                        <option value="Aset Tetap">{{ __('erp.fixed_asset') }}</option>
-                        <option value="Investasi Jangka Panjang">{{ __('erp.long_term_investment') }}</option>
-                        <option value="Hutang Dagang">{{ __('erp.trade_payables') }}</option>
-                        <option value="Hutang Lainnya">{{ __('erp.other_payables') }}</option>
-                        <option value="Hutang Jangka Panjang">{{ __('erp.long_term_liabilities') }}</option>
-                        <option value="Modal">{{ __('erp.equity_label') }}</option>
-                        <option value="Pendapatan">{{ __('erp.revenue_label') }}</option>
-                        <option value="Pendapatan Lainnya">{{ __('erp.other_revenue') }}</option>
-                        <option value="Harga Pokok Penjualan">{{ __('erp.cogs_label') }}</option>
-                        <option value="Biaya">{{ __('erp.expense_label') }}</option>
-                        <option value="Biaya Lainnya">{{ __('erp.other_costs') }}</option>
-                    </select>
+                    <input type="text" name="coa_type" list="coaTypes" class="form-control fw-bold text-primary" placeholder="{{ __('erp.select_account_category') }}" required autocomplete="off">
+                    <datalist id="coaTypes">
+                        @foreach($coaTypes as $type)
+                            <option value="{{ $type }}"></option>
+                        @endforeach
+                    </datalist>
                 </div>
 
                 <div class="col-md-3">
