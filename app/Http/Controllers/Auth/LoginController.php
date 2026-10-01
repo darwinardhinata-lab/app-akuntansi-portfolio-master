@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
@@ -35,7 +36,18 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard'));
+        $dashboard = route('dashboard');
+        $intended = $request->session()->pull('url.intended');
+        $applicationUrl = rtrim((string) config('app.url'), '/');
+
+        // Session dari host/root XAMPP lama dapat menyimpan http://localhost/
+        // sebagai intended URL. URL tersebut berada di luar public base path ERP
+        // dan menyebabkan redirect ke aplikasi XAMPP lain setelah login.
+        if (is_string($intended) && ($intended === $applicationUrl || Str::startsWith($intended, $applicationUrl.'/'))) {
+            return redirect()->to($intended);
+        }
+
+        return redirect()->to($dashboard);
     }
 
     public function logout(Request $request)
