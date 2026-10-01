@@ -8,6 +8,12 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator; // <-- 1. WAJIB PANGGIL CLASS INI
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Database\Console\Migrations\FreshCommand;
+use Illuminate\Database\Console\Migrations\RefreshCommand;
+use Illuminate\Database\Console\Migrations\ResetCommand;
+use Illuminate\Database\Console\Migrations\RollbackCommand;
+use Illuminate\Database\Console\WipeCommand;
+use App\Support\OperationalDatabaseSafety;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +30,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Database MGI adalah data operasional. Perintah berikut dapat menghapus
+        // schema/data dan tidak boleh berjalan tanpa opt-in operator yang eksplisit.
+        // Test suite tetap diizinkan karena selalu menggunakan APP_ENV=testing.
+        if (OperationalDatabaseSafety::prohibitsDestructiveCommands()) {
+            FreshCommand::prohibit();
+            RefreshCommand::prohibit();
+            ResetCommand::prohibit();
+            RollbackCommand::prohibit();
+            WipeCommand::prohibit();
+        }
+
         Gate::policy(\App\Modules\Platform\Models\Party::class, \App\Modules\Platform\Policies\PartyPolicy::class);
 
         Event::listen(Login::class, LogUserLogin::class);

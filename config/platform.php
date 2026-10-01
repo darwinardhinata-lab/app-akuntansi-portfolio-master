@@ -1,6 +1,9 @@
 <?php
 
 return [
+    // Recovery-only opt-in. Default blocks destructive Artisan commands on
+    // operational mgi_fresh_* databases; see OperationalDatabaseSafety.
+    'allow_destructive_database_commands' => env('ALLOW_DESTRUCTIVE_MGI_DATABASE_COMMANDS', false),
     'grn_enabled' => env('PLATFORM_GRN_ENABLED', false),
     // MGI V1 mappings approved for GRN only; do not replace the legacy COA mappings.
     'grn_inventory_account' => '114001', // Barang jadi (DEBET)
