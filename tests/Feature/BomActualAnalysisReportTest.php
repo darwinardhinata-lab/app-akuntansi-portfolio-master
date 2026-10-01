@@ -25,7 +25,7 @@ class BomActualAnalysisReportTest extends TestCase
         $requirementCount = $workOrder->materialRequirements()->count();
 
         $this->get(route('mfg.reports.bom-actual', ['start_date' => '2026-09-01', 'end_date' => '2026-09-30']))
-            ->assertOk()->assertSee('Analisis BOM vs Aktual')->assertSee('MFG-20260930-')->assertSee('FAB-REPORT-01')->assertSee('21.000000');
+            ->assertOk()->assertSee('Analisis BOM vs Aktual')->assertSee($workOrder->spk_number)->assertSee('FAB-REPORT-01')->assertSee('21.000000');
 
         $this->assertSame($requirementCount, $workOrder->materialRequirements()->count());
         $this->assertSame(50.0, (float) $fabric->fresh()->stock_quantity);

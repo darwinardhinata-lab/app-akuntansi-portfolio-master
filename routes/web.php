@@ -118,6 +118,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/laba-rugi', [ProfitLossController::class, 'index'])->name('laba-rugi.index');
     Route::get('/neraca', [BalanceSheetController::class, 'index'])->name('neraca.index');
+    Route::get('/neraca/matriks', [BalanceSheetController::class, 'matrix'])->name('balance-sheet.matrix');
     Route::get('/laporan/arus-kas', [CashFlowController::class, 'index'])->name('arus-kas.index');
 
     // --- ADVANCED REPORTS ---

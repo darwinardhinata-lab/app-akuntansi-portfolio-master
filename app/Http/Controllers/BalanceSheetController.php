@@ -19,6 +19,7 @@ class BalanceSheetController extends Controller
 
         $tab      = $request->get('tab', 'bulanan');
         $isExport = $request->get('export') == 'excel';
+        $isMatrix = $request->routeIs('balance-sheet.matrix');
 
         // 2. Tarik Master Akun Neraca
         $masterAccounts = Account::whereIn(DB::raw('SUBSTR(TRIM(account_code), 1, 1)'), ['1', '2', '3'])
@@ -143,7 +144,7 @@ class BalanceSheetController extends Controller
 
         if ($tab == 'bulanan') {
             $report = $this->generateMatrix($accountsToProcess, $allData, $openingRows, $plData, $plRetained, $plCurrentYearOpening, $periods);
-            $view = view('report.balance-sheet', compact('tab', 'report', 'year', 'interval', 'month', 'periods', 'isExport'));
+            $view = view($isMatrix ? 'report.balance-sheet-matrix' : 'report.balance-sheet', compact('tab', 'report', 'year', 'interval', 'month', 'periods', 'isExport'));
         } else {
             $report = $this->generatePeriodeData($accountsToProcess, $allData, $date);
             $view = view('report.balance-sheet', compact('tab', 'report', 'date', 'isExport'));
@@ -155,6 +156,22 @@ class BalanceSheetController extends Controller
                 ->header('Content-Disposition', 'attachment; filename="' . $fname . '"');
         }
         return $view;
+    }
+
+    /**
+     * Tampilkan perbandingan Neraca per bulan dalam format matriks.
+     *
+     * Perhitungan tetap didelegasikan ke index() agar angka matriks dan
+     * tampilan Neraca standar selalu memakai sumber serta aturan yang sama.
+     */
+    public function matrix(Request $request)
+    {
+        $request->merge([
+            'tab' => 'bulanan',
+            'interval' => 'bulanan',
+        ]);
+
+        return $this->index($request);
     }
 
     private function generateMatrix($accounts, $allData, $openingRows, $plData, $plRetained, $plCurrentYearOpening, array $periods)

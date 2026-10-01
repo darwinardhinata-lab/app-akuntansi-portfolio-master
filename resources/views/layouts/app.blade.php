@@ -600,7 +600,7 @@
         {{-- ================================================================
              SECTION: CUSTOMS (CEISA H2H Integration)
         ================================================================ --}}
-        @if(config('customs.enabled', false))
+        @if(config('customs.enabled', false) && \Illuminate\Support\Facades\Route::has('customs.index'))
         <div class="nav-section">
             <a href="#sectionCustoms" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'true' : 'false' }}">
                 <span class="section-icon"><i class="fa-solid fa-file-signature text-info"></i></span>

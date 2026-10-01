@@ -126,6 +126,9 @@
                 </div>
 
                 <div class="btn-group shadow-sm">
+                    @if($tab == 'bulanan')
+                        <a href="{{ route('balance-sheet.matrix', ['year' => $year]) }}" class="btn btn-sm btn-outline-primary fw-bold px-3" title="Tampilan Matriks"><i class="fa-solid fa-table-columns"></i></a>
+                    @endif
                     <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-secondary fw-bold px-3" title="{{ __('erp.print') }}"><i class="fa-solid fa-print"></i></button>
                     <button type="button" onclick="exportPDF()" class="btn btn-sm btn-outline-danger fw-bold px-3" title="{{ __('erp.export_pdf') }}"><i class="fa-solid fa-file-pdf"></i></button>
                     <button type="submit" name="export" value="excel" class="btn btn-sm btn-outline-success fw-bold px-3" title="{{ __('erp.export_excel') }}"><i class="fa-solid fa-file-excel"></i></button>
