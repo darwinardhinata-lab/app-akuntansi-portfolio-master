@@ -3,9 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Modules\Manufacturing\Models\AuxiliaryMaterial;
+use App\Modules\Manufacturing\Models\MaterialPurchaseRequest;
 use App\Modules\Manufacturing\Models\Supplier;
 use App\Modules\Manufacturing\Models\Yarn;
-use App\Modules\Manufacturing\Models\AuxiliaryMaterial;
 use App\Modules\Manufacturing\Services\MaterialProcurementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,9 @@ class MaterialProcurementLifecycleTest extends TestCase
     use RefreshDatabase;
 
     private MaterialProcurementService $service;
+
     private int $yarnId;
+
     private int $supplierId;
 
     protected function setUp(): void
@@ -89,9 +92,96 @@ class MaterialProcurementLifecycleTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)->get(route('mfg.material-requests.index'))->assertOk()->assertSee('Material Purchase Request');
+        $this->actingAs($user)->get(route('mfg.material-requests.index'))->assertOk()->assertSee('Purchase Request');
         $this->actingAs($user)->get(route('mfg.material-requests.create'))->assertOk()->assertSee('Buat Material Purchase Request');
         $this->actingAs($user)->get(route('mfg.material-orders.index'))->assertOk()->assertSee('Material Purchase Order');
+    }
+
+    public function test_purchase_request_index_exposes_marvel_tabs_and_overview(): void
+    {
+        $user = User::factory()->create();
+        $this->service->createRequest([
+            'request_date' => '2026-10-02',
+            'created_by' => $user->id,
+            'remarks' => 'Kebutuhan produksi Oktober',
+        ], [$this->item(12)]);
+
+        $this->actingAs($user)->get(route('mfg.material-requests.index'))
+            ->assertOk()
+            ->assertSeeText('Overview')
+            ->assertSeeText('PR List')
+            ->assertSeeText('My PR')
+            ->assertSeeText('Total PR')
+            ->assertSeeText('Kebutuhan produksi Oktober');
+    }
+
+    public function test_my_pr_scope_cannot_be_bypassed_by_search_matching_another_request(): void
+    {
+        $requester = User::factory()->create(['name' => 'Requester Sendiri']);
+        $other = User::factory()->create(['name' => 'Requester Lain']);
+        $mine = $this->service->createRequest([
+            'request_date' => '2026-10-02', 'created_by' => $requester->id, 'remarks' => 'Kebutuhan sendiri unik',
+        ], [$this->item(4)]);
+        $theirs = $this->service->createRequest([
+            'request_date' => '2026-10-02', 'created_by' => $other->id, 'remarks' => 'Kata pencarian rahasia',
+        ], [$this->item(5)]);
+
+        $this->actingAs($requester)
+            ->get(route('mfg.material-requests.index', ['tab' => 'mine']))
+            ->assertOk()->assertSeeText($mine->request_number)->assertDontSeeText($theirs->request_number);
+
+        $this->actingAs($requester)
+            ->get(route('mfg.material-requests.index', ['tab' => 'mine', 'search' => 'Kata pencarian rahasia']))
+            ->assertOk()->assertDontSeeText($theirs->request_number)->assertSeeText('Tidak ada Purchase Request yang sesuai.');
+    }
+
+    public function test_purchase_request_list_can_search_requester_and_filter_status(): void
+    {
+        $viewer = User::factory()->create();
+        $requester = User::factory()->create(['name' => 'Pemohon Filter Khusus']);
+        $draft = $this->service->createRequest([
+            'request_date' => '2026-10-02', 'created_by' => $requester->id, 'remarks' => 'Purpose draft khusus',
+        ], [$this->item(6)]);
+        $submitted = $this->service->createRequest([
+            'request_date' => '2026-10-02', 'created_by' => $requester->id, 'remarks' => 'Purpose submitted khusus',
+        ], [$this->item(7)]);
+        $this->service->submitRequest($submitted->id, $requester->id);
+
+        $this->actingAs($viewer)
+            ->get(route('mfg.material-requests.index', ['tab' => 'list', 'search' => 'Pemohon Filter', 'status' => MaterialPurchaseRequest::SUBMITTED]))
+            ->assertOk()->assertSeeText($submitted->request_number)->assertDontSeeText($draft->request_number);
+
+        $this->actingAs($viewer)
+            ->get(route('mfg.material-requests.index', ['tab' => 'list', 'requester_id' => $requester->id, 'status' => MaterialPurchaseRequest::DRAFT]))
+            ->assertOk()->assertSeeText($draft->request_number)->assertDontSeeText($submitted->request_number);
+    }
+
+    public function test_purchase_request_detail_shows_material_and_available_status_history(): void
+    {
+        $requester = User::factory()->create(['name' => 'Pembuat PR Detail']);
+        $approver = User::factory()->create(['name' => 'Penyetuju PR Detail']);
+        $pr = $this->service->createRequest([
+            'request_date' => '2026-10-02', 'created_by' => $requester->id, 'remarks' => 'Purpose detail audit',
+        ], [$this->item(8)]);
+        $this->service->submitRequest($pr->id, $requester->id);
+        $this->service->approveRequest($pr->id, $approver->id);
+
+        $this->actingAs($requester)->get(route('mfg.material-requests.show', $pr->id))
+            ->assertOk()
+            ->assertSeeText($pr->request_number)
+            ->assertSeeText('Cotton Yarn')
+            ->assertSeeText('Pembuat PR Detail')
+            ->assertSeeText('Penyetuju PR Detail')
+            ->assertSeeText('Purpose detail audit')
+            ->assertSeeText('belum merupakan approval history append-only');
+    }
+
+    public function test_purchase_request_index_rejects_unknown_tab_and_status(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get(route('mfg.material-requests.index', ['tab' => 'unknown']))->assertSessionHasErrors('tab');
+        $this->actingAs($user)->get(route('mfg.material-requests.index', ['status' => 'PAID']))->assertSessionHasErrors('status');
     }
 
     public function test_approved_auxiliary_material_pr_can_create_po_with_same_master_reference(): void

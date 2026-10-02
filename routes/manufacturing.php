@@ -60,6 +60,7 @@ Route::prefix('manufaktur/material-request')->name('mfg.material-requests.')->co
     Route::get('/', 'requestIndex')->name('index');
     Route::get('/create', 'requestCreate')->name('create');
     Route::post('/', 'requestStore')->name('store');
+    Route::get('/{id}', 'requestShow')->name('show');
     Route::post('/{id}/submit', 'requestSubmit')->name('submit');
     Route::post('/{id}/approve', 'requestApprove')->name('approve');
     Route::post('/{id}/reject', 'requestReject')->name('reject');

@@ -10,8 +10,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class MaterialPurchaseRequest extends Model
 {
     public const DRAFT = 'DRAFT';
+
     public const SUBMITTED = 'SUBMITTED';
+
     public const APPROVED = 'APPROVED';
+
     public const REJECTED = 'REJECTED';
 
     protected $table = 'mfg_material_purchase_requests';
@@ -31,5 +34,20 @@ class MaterialPurchaseRequest extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function submitter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'submitted_by');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function rejector(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
     }
 }

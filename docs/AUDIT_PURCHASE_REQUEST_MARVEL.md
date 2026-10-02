@@ -1,0 +1,300 @@
+# Audit Purchase Request Marvel terhadap Material PR Existing
+
+Tanggal audit: 2 Oktober 2026  
+Branch acuan: `feat/marvel-mgi-accounting-safeguards`  
+Commit acuan: `488836524cb9cb12d39fd744104cde022838659b`
+
+## 1. Tujuan dan batas audit
+
+Audit ini membandingkan inventaris visual pada
+`d:\Project ERP\Daftar_Menu_Marvel_AI.xlsx` dengan implementasi Material
+Purchase Request yang sudah ada. Audit ini tidak menganggap screenshot sebagai
+spesifikasi workflow lengkap dan tidak menjalankan migration operasional.
+
+Acuan workbook sendiri menyatakan bahwa fungsi aplikasi dan isi submenu yang
+tidak terlihat belum diuji. Karena itu, field, status, level approval, dan aturan
+otorisasi yang tidak tampak tidak boleh dibuat berdasarkan asumsi.
+
+## 2. Kebutuhan yang benar-benar terverifikasi dari workbook
+
+### Navigasi
+
+- `Purchase > Purchase Request`
+- `Purchase > Purchase Request Appr...`; nama lengkap diperkirakan
+  `Purchase Request Approval`, tetapi belum terkonfirmasi.
+- `Report > PR Outstanding`
+
+### Halaman Purchase Request
+
+- Tab `Overview`.
+- Tab `PR List`.
+- Tab `My PR`.
+- Search `PR No`, `Purpose`, dan `Requester`.
+- Filter `Factory`, `Purchase Type`, `Approval Status`, dan `Requester`.
+- Aksi `Refresh`, `Create Purchase Request`, `Reset`, `Export`, dan `Print`.
+- Aksi per baris berupa ikon view, edit, dan print. Arti ikon merupakan
+  kesimpulan dari gambar, bukan hasil uji aplikasi Marvel.
+
+Workbook tidak membuktikan struktur item, daftar purchase type, definisi
+factory, tingkatan approval, batas nominal, delegation, attachment, budget
+check, ataupun aturan revision.
+
+## 3. Implementasi existing
+
+Komponen utama:
+
+- `app\Modules\Manufacturing\Models\MaterialPurchaseRequest.php`
+- `app\Modules\Manufacturing\Models\MaterialPurchaseRequestDetail.php`
+- `app\Modules\Manufacturing\Http\Controllers\MaterialProcurementController.php`
+- `app\Modules\Manufacturing\Services\MaterialProcurementService.php`
+- `app\Modules\Manufacturing\Services\WorkOrderMaterialPlanningService.php`
+- `resources\views\manufacturing\material_procurement\request_index.blade.php`
+- `resources\views\manufacturing\material_procurement\request_create.blade.php`
+
+### Kontrak yang sudah tersedia
+
+- Nomor unik `MPR-YYYYMMDD-*` melalui `DocumentSequence`.
+- Header tanggal permintaan, tanggal dibutuhkan, catatan, pembuat, dan sumber
+  Work Order opsional.
+- Detail khusus `YARN`, `FABRIC`, dan `AUXILIARY` dengan referensi master,
+  quantity, UOM, nama snapshot, dan catatan.
+- Lifecycle `DRAFT -> SUBMITTED -> APPROVED` atau `REJECTED`.
+- Row lock dan transaksi pada submit, approve, reject, dan pembuatan PO.
+- Material PR dapat dibuat otomatis dari kekurangan BOM Work Order.
+- PO hanya dapat dibuat dari PR `APPROVED`.
+- Quantity PO tidak dapat melampaui sisa quantity PR; `qty_ordered` dilacak.
+- PR/PO tidak membuat stok atau jurnal.
+
+### Halaman dan endpoint existing
+
+- Daftar global dengan pagination 30 baris.
+- Create manual, tetapi form hanya menyediakan satu baris item.
+- Submit, approve, dan reject langsung dari halaman daftar.
+- Create Material PO dari PR approved.
+- Seluruh route berada di grup `auth`; tidak ada middleware permission khusus
+  untuk operasi PR.
+
+## 4. Matriks gap
+
+| Kapabilitas | Existing | Target terverifikasi | Gap |
+|---|---|---|---|
+| Overview | Tidak ada | Ada | Perlu query agregat dan UI |
+| PR List | Daftar global sederhana | Ada | Perlu diselaraskan |
+| My PR | Tidak ada | Ada | Filter owner server-side diperlukan |
+| Search | Tidak ada | No/purpose/requester | Perlu query terkelompok aman |
+| Factory filter | Tidak ada field/master factory | Ada | Keputusan model master diperlukan |
+| Purchase Type | Tidak ada | Ada | Nilai domain belum diketahui |
+| Approval Status | Data ada | Filter tidak ada | Dapat direuse |
+| Requester | `created_by` ada | Search/filter requester | Relasi dan UI diperlukan |
+| Purpose | Tidak ada | Search purpose | Field dan definisi diperlukan |
+| Create | Ada, khusus material dan satu baris | Ada | Form dinamis dan scope perlu diputuskan |
+| View | Tidak ada | Terlihat | Perlu detail read-only |
+| Edit | Tidak ada | Terlihat | Perlu aturan status dan locking |
+| Print | Tidak ada | Terlihat | Perlu view cetak |
+| Export | Tidak ada | Terlihat | Dapat mengikuti pola Maatwebsite Excel existing |
+| Revision | Tidak ada | Roadmap internal | Workflow belum dispesifikasikan |
+| Approval history | Hanya kolom status terakhir | Roadmap internal | Perlu tabel append-only |
+| PR approval page | Tidak ada | Menu terindikasi | Nama dan perilaku belum terkonfirmasi |
+| PR outstanding | `qty_requested/qty_ordered` ada | Menu ada | Material PR dapat menjadi sumber awal |
+| Company/factory scope | Tidak ada pada PR | Factory filter ada | Isolasi data belum tersedia |
+| Authorization | Semua user login dapat mutasi | Belum dijelaskan workbook | Risiko P0 sebelum rollout |
+
+## 5. Temuan risiko
+
+### P0 — approve/reject tidak memiliki otorisasi bisnis
+
+Setiap user terautentikasi dapat membuka daftar dan memanggil endpoint submit,
+approve, atau reject. Tombol dan server tidak membedakan requester dengan
+approver. Ini tidak layak dibawa ke rollout Purchase Request Marvel.
+
+Tabel platform `permissions`, `role_permission`, dan `user_role` sudah ada,
+tetapi katalog seeder saat ini hanya berisi permission Party dan helper
+`Role::hasPermission()` belum dipakai oleh PR. Implementasi PR harus memakai
+policy/gate server-side; menyembunyikan tombol saja tidak cukup.
+
+### P0 — tidak ada ownership/company/factory scope
+
+Material PR tidak memiliki `company_id`, `factory_id`, atau `org_unit_id`.
+`created_by` hanya mencatat pembuat dan daftar existing menampilkan seluruh PR.
+Tab `My PR` harus selalu difilter server-side. Definisi `Factory` belum tersedia
+dalam schema yang diperiksa dan tidak boleh diganti diam-diam dengan Department
+tanpa keputusan bisnis.
+
+### P1 — reject memakai alasan tersembunyi tetap
+
+UI daftar mengirim alasan `Ditolak melalui daftar Material PR` tanpa meminta
+alasan aktual. Service menerima alasan, tetapi histori hanya berupa snapshot
+kolom terakhir.
+
+### P1 — tidak ada edit/revision yang aman
+
+Belum ada aturan apakah draft boleh diubah, siapa yang boleh mengubah, apa yang
+terjadi setelah reject, dan apakah perubahan material membatalkan approval.
+Implementasi edit sebelum aturan ini disepakati dapat merusak audit trail.
+
+### P1 — form create tidak memadai
+
+UI hanya mengirim satu detail meskipun backend menerima array. Nama item diketik
+manual berdampingan dengan referensi master sehingga snapshot dapat tidak cocok
+dengan master. Validasi service memastikan master aktif, tetapi belum memastikan
+nama dan UOM berasal dari snapshot master yang konsisten.
+
+### P1 — race pada generator shortage Work Order
+
+Generator mengecek keberadaan PR aktif sebelum create, tetapi tidak ada unique
+constraint yang menjamin satu PR aktif per Work Order. Dua request bersamaan
+masih dapat melewati pengecekan. Ini perlu idempotency/constraint yang sesuai
+sebelum generator dipakai luas.
+
+### P2 — lifecycle terlalu ringkas untuk histori
+
+Kolom `submitted_*`, `approved_*`, dan `rejected_*` hanya menyimpan state akhir.
+Ia tidak dapat merepresentasikan revision berulang, resubmit, approval bertingkat,
+komentar berurutan, atau delegation.
+
+## 6. Keputusan reuse versus pemisahan
+
+### Rekomendasi: hybrid, bukan overwrite
+
+Pertahankan Material PR existing sebagai domain procurement manufaktur dan
+integrasi BOM. Jangan mengubah tabel detail tersebut menjadi wadah generik untuk
+seluruh Purchase Request Marvel karena:
+
+1. setiap detail terikat salah satu master yarn/fabric/auxiliary;
+2. Material PO dan receipt downstream bergantung pada referensi detail itu;
+3. quantity ordered sudah menjadi kontrak pemenuhan material;
+4. PR umum dapat mencakup jasa, aset, biaya, atau item lain yang belum memiliki
+   kontrak master dan downstream yang sama;
+5. memaksakan kolom nullable/polymorphic akan melemahkan integritas referensial.
+
+Bangun agregat Purchase Request Marvel umum dengan kontrak header, workflow,
+authorization, history, list, dan reporting yang konsisten. Material request
+dapat diintegrasikan sebagai subtype/source yang eksplisit, bukan digabung lewat
+kolom detail ambigu.
+
+Pilihan implementasi yang disarankan setelah domain dikonfirmasi:
+
+- tabel header umum `purchase_requests`;
+- tabel detail umum `purchase_request_details` dengan tipe referensi yang
+  dibatasi dan tervalidasi, bukan generic free-form polymorphism tanpa registry;
+- tabel append-only `purchase_request_status_histories`;
+- linkage eksplisit dari kebutuhan material/Work Order ke PR umum, atau adapter
+  satu arah ke kontrak Material PO;
+- pertahankan tabel `mfg_material_purchase_*` selama transisi dan jangan
+  memigrasikan histori sebelum rekonsiliasi.
+
+Jika bisnis memastikan bahwa Purchase Request Marvel **hanya** untuk yarn,
+fabric, dan auxiliary material, generalisasi additive terhadap tabel existing
+masih mungkin. Keputusan itu harus tertulis sebelum migration dibuat.
+
+## 7. Rancangan fase implementasi
+
+### Fase 0 — keputusan domain dan security contract
+
+Wajib dikonfirmasi sebelum coding workflow:
+
+1. Apakah PR mencakup material saja atau juga jasa, aset, dan biaya umum?
+2. Apa master `Factory`; apakah berbeda dari Company/Department/Section?
+3. Daftar resmi `Purchase Type` dan dampaknya ke field/detail/approval.
+4. Siapa requester, editor, submitter, approver, dan viewer lintas unit?
+5. Apakah self-approval dilarang?
+6. Apakah approval bertingkat berdasarkan nominal, factory, purchase type,
+   department, atau budget?
+7. Arti revision: kembali ke draft, versi baru, atau amendment append-only?
+8. Aturan cancel/delete dan kondisi ketika PR sudah mempunyai PO.
+9. Definisi `PR Outstanding`: belum ordered, sisa quantity, belum received,
+   atau kombinasi status lain?
+10. Format print/export dan field wajib, termasuk purpose dan attachment.
+
+### Fase 1 — read model dan UX terverifikasi
+
+- Overview.
+- PR List dan My PR dengan pagination serta query parameter yang dipertahankan.
+- Search No/Purpose/Requester.
+- Filter Factory/Purchase Type/Approval Status/Requester setelah master domain
+  tersedia.
+- View dan print read-only.
+- Export berdasarkan filter yang sama dengan daftar.
+- Test isolation My PR, escaping search, pagination, dan authorization view.
+
+Fase ini tidak boleh membuka approve/reject tanpa policy.
+
+### Fase 2 — create/edit/submit/revision
+
+- Form multi-detail dinamis.
+- Snapshot nama/UOM dari server, bukan percaya input browser.
+- Edit hanya pada state yang disahkan.
+- Optimistic concurrency atau row lock untuk mencegah lost update.
+- Submit dan revision dengan status history append-only.
+- Attachment hanya jika kebutuhan dan kebijakan penyimpanan disetujui.
+
+### Fase 3 — approval
+
+- Halaman approval terpisah jika label workbook dikonfirmasi.
+- Permission minimal: `purchase_request.view`, `purchase_request.create`,
+  `purchase_request.update`, `purchase_request.submit`,
+  `purchase_request.approve`, `purchase_request.reject`,
+  `purchase_request.export`, dan `purchase_request.print`.
+- Policy memperhitungkan company/factory/unit dan larangan self-approval.
+- Alasan reject wajib dan disimpan sebagai event history.
+- Perubahan material setelah approval wajib memicu re-approval atau versi baru.
+
+Seeder hanya membuat katalog permission; grant role produksi tidak boleh
+diberikan otomatis tanpa keputusan operator.
+
+### Fase 4 — PO dan outstanding
+
+- Konversi detail approved ke PO dengan lock dan pengecekan remaining quantity.
+- Pertahankan invariant existing bahwa PR/PO tidak membuat stok atau jurnal.
+- Definisikan split supplier dan multiple PO.
+- Tambahkan PR Outstanding setelah semantik outstanding disahkan.
+
+## 8. Strategi migration
+
+- Semua perubahan additive; jangan rename/drop tabel existing pada fase awal.
+- Tambahkan foreign key dan index untuk filter utama setelah master dipilih.
+- Jangan backfill `factory_id`, `purpose`, atau `purchase_type` dengan nilai
+  tebakan.
+- Histori Material PR lama tetap dapat dibaca sebagai legacy/material subtype.
+- Migration diuji pada SQLite dan isolated MySQL sebelum operasional.
+- Aktivasi UI baru sebaiknya memakai feature flag default `false` sampai schema,
+  permission catalog, grant, dan readiness check selesai.
+
+## 9. Test minimum sebelum rollout
+
+- Requester hanya melihat data yang diperbolehkan dan `My PR` tidak bocor.
+- User tanpa permission mendapat 403 pada seluruh endpoint mutasi meskipun
+  memanggil URL langsung.
+- Requester tidak dapat self-approve jika aturan melarang.
+- Submit/approve/reject/revision tahan double-submit dan request bersamaan.
+- Approved/rejected tidak dapat diedit lewat mass assignment atau endpoint lama.
+- PO tidak melebihi sisa PR pada dua koneksi MySQL bersamaan.
+- Filter layar, export, dan print menghasilkan scope data identik.
+- History tidak dapat diubah/dihapus melalui jalur aplikasi biasa.
+- Lifecycle BOM -> Material PR -> Material PO existing tetap lulus.
+- Tidak ada stok atau jurnal pada create/submit/approve PR dan PO.
+
+## 10. Verifikasi audit
+
+Pada baseline commit di atas:
+
+```text
+php artisan test tests/Feature/MaterialProcurementLifecycleTest.php
+7 tests, 20 assertions: PASS
+```
+
+Route terdaftar untuk list/create/store/submit/approve/reject Material PR dan
+list/create/store/submit/approve Material PO. Working tree bersih sebelum dokumen
+audit ditambahkan.
+
+## 11. Kesimpulan
+
+Material PR existing layak direuse untuk nomor dokumen, transaksi/locking,
+validasi master material, linkage BOM, tracking quantity ordered, dan kontrak
+PR-approved-to-PO. Ia belum layak diperlakukan sebagai Purchase Request Marvel
+secara keseluruhan.
+
+Langkah aman berikutnya bukan langsung membuat seluruh workflow, melainkan
+mengesahkan sepuluh keputusan pada Fase 0. Setelah itu Fase 1 dapat dibangun
+dengan read model dan UX terverifikasi, sambil menutup celah authorization P0
+sebelum endpoint approval dipaparkan sebagai fitur Marvel.
