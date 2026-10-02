@@ -88,7 +88,7 @@ class KnitOrderController extends Controller
             $knitOrder = KnitOrder::findOrFail($id);
             $this->service->receiveGreyFabric((int) $id, $request->only([
                 'receipt_date', 'qty_received', 'qty_rejected', 'lot_number',
-                'gsm_actual', 'knitting_cost_amount', 'remarks',
+                'gsm_actual', 'knitting_cost_amount', 'remarks', 'full_completion', 'liability_account_code',
             ]) + ['created_by' => auth()->id()]);
 
             SystemLog::record('POST', 'Manufacturing Knit Order', "Menerima kain grey dari {$knitOrder->knit_order_number}, jurnal WIP diposting.");
@@ -99,12 +99,13 @@ class KnitOrderController extends Controller
         }
     }
 
-    public function voidYarnIssue($id)
+    public function voidYarnIssue(Request $request, $id)
     {
+        $reason = \App\Support\MaklunReversalAuthorization::validate((string) $request->input('reason', ''));
         try {
             $issue = YarnIssue::findOrFail($id);
             $knitOrder = KnitOrder::findOrFail($issue->knit_order_id);
-            $this->service->voidYarnIssue((int) $id);
+            $this->service->voidYarnIssue((int) $id, $reason);
             SystemLog::record('VOID', 'Manufacturing Knit Order', "Void Yarn Issue: {$issue->issue_number}");
             return redirect()->route('mfg.work-orders.show', $knitOrder->work_order_id)
                 ->with('success', "Yarn Issue {$issue->issue_number} berhasil di-void.");
@@ -113,12 +114,13 @@ class KnitOrderController extends Controller
         }
     }
 
-    public function voidGreyFabricReceipt($id)
+    public function voidGreyFabricReceipt(Request $request, $id)
     {
+        $reason = \App\Support\MaklunReversalAuthorization::validate((string) $request->input('reason', ''));
         try {
             $receipt = GreyFabricReceipt::findOrFail($id);
             $knitOrder = KnitOrder::findOrFail($receipt->knit_order_id);
-            $this->service->voidGreyFabricReceipt((int) $id);
+            $this->service->voidGreyFabricReceipt((int) $id, $reason);
             SystemLog::record('VOID', 'Manufacturing Knit Order', "Void Grey Fabric Receipt: {$receipt->receipt_number}");
             return redirect()->route('mfg.work-orders.show', $knitOrder->work_order_id)
                 ->with('success', "Penerimaan Kain Grey {$receipt->receipt_number} berhasil di-void.");

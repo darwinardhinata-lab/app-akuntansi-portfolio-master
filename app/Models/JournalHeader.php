@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class JournalHeader extends Model
 {
+    public function newEloquentBuilder($query)
+    {
+        return new \App\Support\JournalHeaderBuilder($query);
+    }
     protected $table = 'journal_headers';
 
     protected $primaryKey = 'journal_id';
@@ -41,6 +45,8 @@ class JournalHeader extends Model
 
     protected static function booted(): void
     {
+        static::updating(fn (JournalHeader $header) => \App\Support\MaklunJournalProtection::check([$header->getKey()]));
+        static::deleting(fn (JournalHeader $header) => \App\Support\MaklunJournalProtection::check([$header->getKey()]));
         static::updating(fn (JournalHeader $header) => \App\Support\GrnProtection::journals([$header->getKey()]));
         static::deleting(fn (JournalHeader $header) => \App\Support\GrnProtection::journals([$header->getKey()]));
         static::creating(function (JournalHeader $header) {

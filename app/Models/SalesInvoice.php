@@ -12,7 +12,7 @@ class SalesInvoice extends Model
     protected $fillable = [
         'invoice_number', 'sales_order_id', 'transaction_date', 
         'contact_name', 'sub_total', 'disc_amount', 'tax_amount', 
-        'shipping_cost', 'grand_total', 'payment_status', 'journal_id'
+        'shipping_cost', 'grand_total', 'payment_status', 'journal_id', 'sales_semantic', 'revenue_account_code'
     ];
 
     public function details(): HasMany

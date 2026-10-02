@@ -86,7 +86,7 @@ class ProcessingOrderController extends Controller
             $this->service->receiveFabric((int) $id, $request->only([
                 'finished_fabric_id', 'receipt_date', 'qty_received', 'qty_rejected',
                 'lot_number', 'color', 'shade_code', 'shrinkage_percent',
-                'process_cost_amount', 'remarks',
+                'process_cost_amount', 'remarks', 'full_completion', 'liability_account_code',
             ]) + ['created_by' => auth()->id()]);
 
             SystemLog::record('POST', 'Manufacturing Processing Order', "Menerima kain finished dari {$order->order_number}, jurnal WIP diposting.");
@@ -97,12 +97,13 @@ class ProcessingOrderController extends Controller
         }
     }
 
-    public function voidFabricIssue($id)
+    public function voidFabricIssue(Request $request, $id)
     {
+        $reason = \App\Support\MaklunReversalAuthorization::validate((string) $request->input('reason', ''));
         try {
             $issue = FabricIssue::findOrFail($id);
             $order = ProcessingOrder::findOrFail($issue->processing_order_id);
-            $this->service->voidFabricIssue((int) $id);
+            $this->service->voidFabricIssue((int) $id, $reason);
             SystemLog::record('VOID', 'Manufacturing Processing Order', "Void Fabric Issue: {$issue->issue_number}");
             return redirect()->route('mfg.work-orders.show', $order->work_order_id)
                 ->with('success', "Fabric Issue {$issue->issue_number} berhasil di-void.");
@@ -111,12 +112,13 @@ class ProcessingOrderController extends Controller
         }
     }
 
-    public function voidFabricReceipt($id)
+    public function voidFabricReceipt(Request $request, $id)
     {
+        $reason = \App\Support\MaklunReversalAuthorization::validate((string) $request->input('reason', ''));
         try {
             $receipt = FabricReceipt::findOrFail($id);
             $order = ProcessingOrder::findOrFail($receipt->processing_order_id);
-            $this->service->voidFabricReceipt((int) $id);
+            $this->service->voidFabricReceipt((int) $id, $reason);
             SystemLog::record('VOID', 'Manufacturing Processing Order', "Void Fabric Receipt: {$receipt->receipt_number}");
             return redirect()->route('mfg.work-orders.show', $order->work_order_id)
                 ->with('success', "Penerimaan Kain Finished {$receipt->receipt_number} berhasil di-void.");

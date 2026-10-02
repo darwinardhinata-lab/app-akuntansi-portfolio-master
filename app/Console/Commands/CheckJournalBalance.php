@@ -17,7 +17,7 @@ class CheckJournalBalance extends Command
         $end   = $this->argument('end_date');
 
         // 1. CEK JURNAL YANG DEBET != KREDIT PER EVIDENCE NUMBER
-        $unbalanced = DB::table('journal_details')
+        $unbalanced = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
             ->whereBetween('journal_headers.transaction_date', [$start . ' 00:00:00', $end . ' 23:59:59'])
             ->select(
@@ -62,7 +62,7 @@ class CheckJournalBalance extends Command
         // -> baris ini SILENT DROP dari Neraca & Laba Rugi karena query controller
         //    hanya menjaring prefix '1'..'9'. Jika lawan pasangannya valid, ini JUGA
         //    menyebabkan imbalance laporan walau journal_details-nya sendiri balance.
-        $ghost = DB::table('journal_details')
+        $ghost = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
             ->whereBetween('journal_headers.transaction_date', [$start . ' 00:00:00', $end . ' 23:59:59'])
             ->where(function ($q) {

@@ -60,7 +60,7 @@ class DashboardController extends Controller
 
         $monthExpr = $this->getMonthExpression();
 
-        $cashRows = DB::table('journal_details')
+        $cashRows = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
             ->selectRaw("{$monthExpr} as month")
             ->selectRaw("SUM(CASE WHEN journal_details.position = 'DEBET' THEN journal_details.amount ELSE 0 END) as cash_in")
@@ -72,7 +72,7 @@ class DashboardController extends Controller
             ->get()->keyBy('month');
 
         // 2. Ambil Kueri Laba Rugi Matriks
-        $plRows = DB::table('journal_details')
+        $plRows = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
             ->selectRaw("{$monthExpr} as month")
             ->selectRaw("SUM(CASE WHEN SUBSTR(TRIM(journal_details.account_code), 1, 1) IN ('4','7') AND journal_details.position = 'KREDIT' THEN journal_details.amount WHEN SUBSTR(TRIM(journal_details.account_code), 1, 1) IN ('4','7') AND journal_details.position = 'DEBET' THEN -journal_details.amount ELSE 0 END) as revenue")
@@ -184,7 +184,7 @@ class DashboardController extends Controller
 
         $monthExpr = $this->getMonthExpression();
 
-        $cashRows = DB::table('journal_details')
+        $cashRows = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
             ->selectRaw("{$monthExpr} as month")
             ->selectRaw("SUM(CASE WHEN journal_details.position = 'DEBET' THEN journal_details.amount ELSE 0 END) as cash_in")
@@ -197,7 +197,7 @@ class DashboardController extends Controller
             ->keyBy('month');
 
         // 2. HITUNG LABA RUGI MATRIKS AKTUAL (REVENUE VS EXPENSE)
-        $plRows = DB::table('journal_details')
+        $plRows = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
             ->selectRaw("{$monthExpr} as month")
             ->selectRaw("SUM(CASE WHEN SUBSTR(TRIM(journal_details.account_code), 1, 1) IN ('4','7') AND journal_details.position = 'KREDIT' THEN journal_details.amount WHEN SUBSTR(TRIM(journal_details.account_code), 1, 1) IN ('4','7') AND journal_details.position = 'DEBET' THEN -journal_details.amount ELSE 0 END) as revenue")

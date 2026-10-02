@@ -235,8 +235,8 @@ class PurchaseOrderService
                     DB::table('purchase_bills')
                         ->whereIn('journal_id', $journalIds)
                         ->update(['journal_id' => null, 'updated_at' => now()]);
-                    DB::table('journal_details')->whereIn('journal_id', $journalIds)->delete();
-                    DB::table('journal_headers')->whereIn('journal_id', $journalIds)->delete();
+                    \App\Support\ProtectedJournalQuery::table('journal_details')->whereIn('journal_id', $journalIds)->delete();
+                    \App\Support\ProtectedJournalQuery::table('journal_headers')->whereIn('journal_id', $journalIds)->delete();
                 }
 
                 // 2. Kalkulasi balik stok dari InventoryLedger (Kembalikan ke posisi awal)

@@ -474,7 +474,7 @@ class AccountController extends Controller
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
             
             fputcsv($file, ['KODE AKUN', 'NAMA AKUN', 'DEBET', 'KREDIT'], ';');
-            fputcsv($file, [config('coa.piutang_usaha'), 'Kas Besar', '50000000', '0'], ';');
+            fputcsv($file, [config('coa.piutang_usaha'), 'Piutang Usaha', '50000000', '0'], ';');
             fputcsv($file, [config('coa.hutang_usaha'), 'Hutang Dagang', '0', '50000000'], ';');
             
             fclose($file);

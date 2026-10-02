@@ -12,13 +12,19 @@ class FabricMasterImportTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        \App\Models\Account::create(['account_code' => '114003', 'account_name' => 'Bahan baku', 'normal_balance' => 'DEBET', 'report_pos' => 'NERACA', 'coa_type' => 'Persediaan']);
+    }
+
     public function test_fabric_import_preserves_a_type_longer_than_the_legacy_fifty_character_limit(): void
     {
         $fabricType = 'Computer heat transfer label (ink with glue coating, printed on lining)';
 
         $this->assertGreaterThan(50, mb_strlen($fabricType));
 
-        app(FabricImport::class)->collection(new Collection([[
+        (new FabricImport('UTF-8', '114003'))->collection(new Collection([[
             'H.005010',
             $fabricType,
             'heat transfer label',
@@ -41,7 +47,7 @@ class FabricMasterImportTest extends TestCase
 
     public function test_fabric_import_preserves_mandarin_material_names(): void
     {
-        app(FabricImport::class)->collection(new Collection([[
+        (new FabricImport('UTF-8', '114003'))->collection(new Collection([[
             '5515110000', 'A.001060', 'Polyester Fabric', '1680D 双丝 PU*2 防泼水', 'Polyester Oxford Fabric', '??/Bahan Utama', 'Hitam', 'Lebar 1,5 m', 'meter', '100',
         ]]));
 

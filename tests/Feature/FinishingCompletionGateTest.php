@@ -81,7 +81,7 @@ class FinishingCompletionGateTest extends TestCase
         config(['platform.order_company_scope_enabled' => true, 'platform.legacy_sync_enabled' => false, 'customs.enabled' => false]);
         $company = Company::create(['code' => 'MGI', 'name' => 'MGI', 'active' => true]);
         foreach ([['114001', 'Barang jadi', 'DEBET'], ['114002', 'WIP', 'DEBET'], ['114003', 'Bahan baku', 'DEBET'], ['114005', 'Scrap', 'DEBET'], ['510004', 'Penyesuaian', 'DEBET'], ['212001', 'Akrual CMT', 'KREDIT']] as [$code, $name, $balance]) {
-            Account::create(['account_code' => $code, 'account_name' => $name, 'coa_type' => 'Test', 'normal_balance' => $balance, 'report_pos' => 'NERACA']);
+            Account::create(['account_code' => $code, 'account_name' => $name, 'coa_type' => 'Test', 'normal_balance' => $balance, 'report_pos' => $code === '510004' ? 'LABA RUGI' : 'NERACA']);
         }
         foreach (['finished_goods_inventory' => '114001', 'wip_inventory' => '114002', 'raw_material_inventory' => '114003', 'scrap_inventory' => '114005', 'inventory_adjustment' => '510004', 'subcontract_accrual' => '212001'] as $key => $account) {
             CompanyCoaMapping::create(['company_id' => $company->id, 'semantic_key' => $key, 'account_code' => $account, 'active' => true]);

@@ -81,7 +81,7 @@ class ProcessPendingTempJob implements ShouldQueue
                                 }
 
                                 // 3. Suntik Header
-                                DB::table('journal_headers')->updateOrInsert(
+                                \App\Support\ProtectedJournalQuery::table('journal_headers')->updateOrInsert(
                                     ['jj_id' => $header->journal_id],
                                     [
                                         'journal_id' => $newJournalId,
@@ -103,7 +103,7 @@ class ProcessPendingTempJob implements ShouldQueue
                                     ]
                                 );
                                 // 4. Bersihkan Detail Lama
-                                DB::table('journal_details')->where('journal_id', $newJournalId)->delete();
+                                \App\Support\ProtectedJournalQuery::table('journal_details')->where('journal_id', $newJournalId)->delete();
 
                                 // 5. Jahit Detail (N5 FIX: gunakan $details dari map, bukan query ulang)
                                 $detailInserts = [];
@@ -134,7 +134,7 @@ class ProcessPendingTempJob implements ShouldQueue
 
                                 // 6. Suntik Massal Detail
                                 if (!empty($detailInserts)) {
-                                    DB::table('journal_details')->insert($detailInserts);
+                                    \App\Support\ProtectedJournalQuery::table('journal_details')->insert($detailInserts);
                                 }
 
                                 // 7. Tandai Berhasil

@@ -219,25 +219,23 @@
                                 <td class="py-2 text-center">
                                     <form action="{{ route('payment.set_rekening', $item->id_payment) }}" method="POST" class="m-0">
                                         @csrf
-                                        <select name="jenis_transaksi" style="font-size: 12.5px; min-width: 140px;" class="form-select form-select-sm {{ $item->jenis_transaksi != 'PENDING' ? 'border-info text-primary fw-bold' : 'border-danger animate-pulse' }}" onchange="this.form.submit()" required>
+                                        <select name="jenis_transaksi" style="font-size: 12.5px; min-width: 140px;" class="form-select form-select-sm {{ $item->jenis_transaksi != 'PENDING' ? 'border-info text-primary fw-bold' : 'border-danger animate-pulse' }}" onchange="this.form.submit()" required @disabled(in_array($item->status_payment, ['PAID', 'POSTED']))>
                                             <option value="PENDING" {{ $item->jenis_transaksi == 'PENDING' ? 'selected' : '' }}>{{ __('erp.finance_not_set') }}</option>
-                                            <option value="BCA BBW OPS" {{ $item->jenis_transaksi == 'BCA BBW OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_bbw_ops') }}</option>
-                                            <option value="BCA BBB OPS" {{ $item->jenis_transaksi == 'BCA BBB OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_bbb_ops') }}</option>
-                                            <option value="BCA KOI OPS" {{ $item->jenis_transaksi == 'BCA KOI OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_koi_ops') }}</option>
-                                            <option value="BCA GBB OPS" {{ $item->jenis_transaksi == 'BCA GBB OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_gbb_ops') }}</option>
-                                            <option value="MANDIRI BBW" {{ $item->jenis_transaksi == 'MANDIRI BBW' ? 'selected' : '' }}>{{ __('erp.bank_mandiri_bbw') }}</option>
+                                            @include('payment_plan.funding_options', ['selectedFunding' => $item->jenis_transaksi])
                                         </select>
                                     </form>
                                 </td>
                                 <td class="py-2 text-center">
                                     <form action="{{ route('payment.update_status', $item->id_payment) }}" method="POST" class="m-0">
                                         @csrf
-                                        <select name="status_payment" style="font-size: 12.5px;" class="form-select form-select-sm fw-bold text-center {{ $item->status_payment == 'POSTED' ? 'bg-info text-white' : ($item->status_payment == 'PAID' ? 'bg-success text-white' : ($item->status_payment == 'APPROVED' ? 'bg-primary text-white' : ($item->status_payment == 'REJECTED' ? 'bg-danger text-white' : 'bg-warning text-dark'))) }}" onchange="this.form.submit()">
+                                        <select name="status_payment" title="{{ __('erp.payment_workflow_notice') }}" style="font-size: 12.5px;" class="form-select form-select-sm fw-bold text-center {{ $item->status_payment == 'POSTED' ? 'bg-info text-white' : ($item->status_payment == 'PAID' ? 'bg-success text-white' : ($item->status_payment == 'APPROVED' ? 'bg-primary text-white' : ($item->status_payment == 'REJECTED' ? 'bg-danger text-white' : 'bg-warning text-dark'))) }}" onchange="this.form.submit()" @disabled(in_array($item->status_payment, ['PAID', 'POSTED', 'REJECTED']))>
                                             <option value="PENGAJUAN" {{ $item->status_payment == 'PENGAJUAN' ? 'selected' : '' }}>{{ __('erp.status_submitted') }}</option>
                                             <option value="APPROVED" {{ $item->status_payment == 'APPROVED' ? 'selected' : '' }}>{{ __('erp.status_approved') }}</option>
                                             <option value="REJECTED" {{ $item->status_payment == 'REJECTED' ? 'selected' : '' }}>{{ __('erp.status_rejected') }}</option>
                                             <option value="PAID" {{ $item->status_payment == 'PAID' ? 'selected' : '' }}>{{ __('erp.status_paid') }}</option>
-                                            <option value="POSTED" {{ $item->status_payment == 'POSTED' ? 'selected' : '' }}>{{ __('erp.status_posted') }}</option>
+                                            @if($item->status_payment == 'POSTED')
+                                            <option value="POSTED" selected>{{ __('erp.status_posted') }}</option>
+                                            @endif
                                         </select>
                                     </form>
                                 </td>
@@ -262,7 +260,7 @@
                                                     }
                                                 }
                                             @endphp
-                                            <input type="text" class="form-control form-control-sm coa-search-input {{ $item->id_akun ? 'border-success text-success fw-bold' : 'border-danger' }}" style="font-size: 12.5px;" placeholder="{{ __('erp.search_coa') }}" value="{{ $displayValue }}" {{ $item->status_payment == 'POSTED' ? 'disabled' : '' }} autocomplete="off">
+                                            <input type="text" class="form-control form-control-sm coa-search-input {{ $item->id_akun ? 'border-success text-success fw-bold' : 'border-danger' }}" style="font-size: 12.5px;" placeholder="{{ __('erp.search_coa') }}" value="{{ $displayValue }}" @disabled(in_array($item->status_payment, ['PAID', 'POSTED'])) autocomplete="off">
                                             <div class="coa-dropdown-menu position-absolute w-100 bg-white border rounded shadow-sm text-start" style="top: 100%; left: 0; z-index: 1050; max-height: 220px; overflow-y: auto; display: none; margin-top: 2px;">
                                                 <div class="coa-options-container"></div>
                                             </div>
@@ -294,6 +292,7 @@
                                         <a href="{{ route('payment.edit', $item->id_payment) }}" class="btn btn-sm btn-outline-warning" title="{{ __('erp.edit_data') }}">
                                             <i class="fas fa-edit"></i>
                                         </a>
+                                        @if(!in_array($item->status_payment, ['PAID', 'POSTED']))
                                         <form action="{{ route('payment.destroy', $item->id_payment) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus pengajuan Payment Plan ini?')">
                                             @csrf
                                             @method('DELETE')
@@ -301,6 +300,7 @@
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

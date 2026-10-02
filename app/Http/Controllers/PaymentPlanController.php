@@ -127,6 +127,9 @@ class PaymentPlanController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->filled('jenis_transaksi') && $request->jenis_transaksi !== 'PENDING') {
+            \App\Support\PaymentFundingAccount::resolve($request->jenis_transaksi);
+        }
         $request->validate([
             'id_divisi' => 'required|exists:master_divisi,id_divisi',
             'tgl_pengajuan' => 'required|date',
@@ -290,6 +293,9 @@ class PaymentPlanController extends Controller
 
     public function update(Request $request, $id)
     {
+        if ($request->filled('jenis_transaksi') && $request->jenis_transaksi !== 'PENDING') {
+            \App\Support\PaymentFundingAccount::resolve($request->jenis_transaksi);
+        }
         $request->validate([
             'id_divisi' => 'required',
             'tgl_pengajuan' => 'required|date',
@@ -319,33 +325,11 @@ class PaymentPlanController extends Controller
             return redirect()->route('payment.index')->with('error', 'Data tidak ditemukan!');
         }
 
-        // Hitung dulu total nominal & nominal_aktual BARU dari payload items,
-        // supaya bisa dibandingkan dengan yang lama sebelum benar-benar menyimpan
-        // (untuk aturan "terkunci setelah PAID/POSTED").
-        $totalNominalBaru = 0;
-        $adaAktualDiisiBaru = false;
-        foreach ($request->items as $item) {
-            $qty = $item['qty'] ?? 1;
-            $hargaSatuan = $item['harga_satuan'] ?? null;
-            $nominalItem = ($hargaSatuan !== null && $hargaSatuan !== '')
-                ? (float) $hargaSatuan * (float) $qty
-                : (float) ($item['nominal'] ?? 0);
-            $totalNominalBaru += $nominalItem;
-
-            if (!empty($item['nominal_aktual']) || $item['nominal_aktual'] === '0') {
-                $adaAktualDiisiBaru = true;
-            }
-        }
-
-        $statusTerkunci = ($current->status_payment === 'PAID' || $current->status_payment === 'POSTED');
-        $nominalBerubah = round($totalNominalBaru, 2) != round((float) $current->nominal, 2);
-
-        if ($statusTerkunci && $nominalBerubah) {
-            return redirect()->back()->with('error', 'Tidak dapat mengubah Nominal Pengajuan/Aktual untuk payment plan yang sudah diposting ke Jurnal. Gunakan Jurnal Penyesuaian manual jika ada selisih yang perlu dikoreksi setelah posting.');
-        }
-
         DB::beginTransaction();
         try {
+            $current = PaymentPlan::where('id_payment', $id)->lockForUpdate()->firstOrFail();
+            \App\Support\PaymentPlanProtection::editable($current);
+            \App\Support\PaymentPlanProtection::unreceivedOrders($current);
             $oldKategori = $current->kategori_payment;
 
             $current->update([
@@ -361,6 +345,10 @@ class PaymentPlanController extends Controller
                 'keterangan' => $request->keterangan ?? $current->keterangan,
                 'nama_toko_link' => $request->nama_toko_link,
             ]);
+
+            if ($current->status_payment === 'APPROVED') {
+                $current->update(['status_payment' => 'PENGAJUAN']);
+            }
 
             // Hapus detail yang dibuang user di UI
             if ($request->filled('deleted_detail_ids')) {
@@ -436,13 +424,9 @@ class PaymentPlanController extends Controller
 
         DB::beginTransaction();
         try {
-            if ($current->status_payment === 'PAID' || $current->status_payment === 'POSTED') {
-                $journalIds = JournalHeader::where('evidence_number', 'JRN-' . $current->no_transaksi)->pluck('journal_id');
-                if ($journalIds->isNotEmpty()) {
-                    JournalDetail::whereIn('journal_id', $journalIds)->delete();
-                    JournalHeader::whereIn('journal_id', $journalIds)->delete();
-                }
-            }
+            $current = PaymentPlan::with('details')->where('id_payment', $id)->lockForUpdate()->firstOrFail();
+            \App\Support\PaymentPlanProtection::editable($current);
+            \App\Support\PaymentPlanProtection::unreceivedOrders($current);
 
             $poNumber = 'PO-' . $current->no_transaksi;
             $poIds = PurchaseOrder::where('po_number', $poNumber)->pluck('id');
@@ -466,7 +450,7 @@ class PaymentPlanController extends Controller
             return redirect()->back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
 
-        return redirect()->back()->with('success', 'Data Payment Plan beserta seluruh turunannya (Jurnal & PO) berhasil dihapus bersih dari sistem!');
+        return redirect()->back()->with('success', __('erp.payment_unpaid_deleted'));
     }
 
     public function setCoa(Request $request, $id)
@@ -476,10 +460,15 @@ class PaymentPlanController extends Controller
         if (!$current) {
             return redirect()->back()->with('error', 'Data tidak ditemukan!');
         }
-        $current->update([
-            'id_akun' => $request->id_akun,
-            'updated_at' => now()
-        ]);
+        DB::transaction(function () use ($request, $id) {
+            $current = PaymentPlan::where('id_payment', $id)->lockForUpdate()->firstOrFail();
+            \App\Support\PaymentPlanProtection::editable($current);
+            $current->update([
+                'id_akun' => $request->id_akun,
+                'status_payment' => $current->status_payment === 'APPROVED' ? 'PENGAJUAN' : $current->status_payment,
+                'updated_at' => now(),
+            ]);
+        });
         SystemLog::record('UPDATE', 'Payment Plan', 'Menetapkan COA untuk pengajuan: ' . $current->no_transaksi);
         return redirect()->back()->with('success', 'COA (Akun Biaya) berhasil ditetapkan!');
     }
@@ -492,10 +481,20 @@ class PaymentPlanController extends Controller
 
         $current = PaymentPlan::where('id_payment', $id)->firstOrFail();
 
-        $current->update([
-            'status_payment' => $request->status_payment,
-            'updated_at' => now()
-        ]);
+        DB::transaction(function () use ($request, $id) {
+            $current = PaymentPlan::where('id_payment', $id)->lockForUpdate()->firstOrFail();
+            \App\Support\PaymentPlanProtection::editable($current);
+            if ($request->status_payment === 'POSTED') {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'status_payment' => __('erp.payment_posted_action_guard'),
+                ]);
+            }
+            \App\Support\PaymentPlanWorkflow::transition($current, $request->status_payment);
+            $previousStatus = $current->status_payment;
+            $current->update(['status_payment' => $request->status_payment, 'updated_at' => now()]);
+            SystemLog::record('UPDATE', 'Payment Plan', 'Transisi '.$current->no_transaksi.': '.$previousStatus.' -> '.$current->status_payment
+                .'; aktual: '.($current->nominal_aktual ?? '-').'; tanggal realisasi: '.($current->tgl_transaksi ?? '-'));
+        });
 
         SystemLog::record('UPDATE', 'Payment Plan', 'Mengubah status menjadi ' . $request->status_payment . ' untuk pengajuan: ' . $current->no_transaksi);
         return redirect()->back()->with('success', 'Status Payment Plan berhasil diubah menjadi ' . $request->status_payment . '!');
@@ -509,33 +508,23 @@ class PaymentPlanController extends Controller
             return redirect()->back()->with('error', 'Pilih minimal satu data untuk diposting!');
         }
 
-        $cashAccounts = Account::where(function($q) {
-                $q->where('coa_type', 'like', '%Cash%')
-                  ->orWhere('coa_type', 'like', '%Bank%')
-                  ->orWhere('account_name', 'like', '%Kas%')
-                  ->orWhere('account_name', 'like', '%Bank%');
-            })
-            ->where(DB::raw('LEFT(TRIM(account_code), 1)'), '1')
-            ->orderBy('account_code', 'asc')
-            ->get()
-            ->keyBy('account_code');
-
-        $cachedBankAccount = null;
-        $cachedKasAccount = null;
-        foreach ($cashAccounts as $acc) {
-            if ($cachedBankAccount === null && (str_starts_with(trim($acc->account_code), '112') || str_contains(strtolower($acc->account_name), 'bank'))) {
-                $cachedBankAccount = $acc->account_code;
-            }
-            if ($cachedKasAccount === null && (str_starts_with(trim($acc->account_code), '111') || str_contains(strtolower($acc->account_name), 'kas'))) {
-                $cachedKasAccount = $acc->account_code;
-            }
-            if ($cachedBankAccount !== null && $cachedKasAccount !== null) break;
-        }
-        $defaultCashAccount = $cashAccounts->first()?->account_code ?? '11000';
-
         $payments = PaymentPlan::whereIn('no_transaksi', $no_transaksis)->get();
         $count    = 0;
         $skipped  = [];
+
+        // Reject unconfirmed payments before entering the legacy account-selection path.
+        $payments = $payments->filter(function ($item) use (&$skipped) {
+            try {
+                if ($item->status_payment !== 'PAID') {
+                    throw new \RuntimeException(__('erp.payment_paid_posting_guard'));
+                }
+                \App\Support\PaymentPlanWorkflow::realized($item);
+                return true;
+            } catch (\Exception $e) {
+                $skipped[] = $item->no_transaksi.' ('.$e->getMessage().')';
+                return false;
+            }
+        });
 
         $candidateIds = $payments->pluck('no_transaksi')
             ->mapWithKeys(fn($no) => [$no => JournalHeader::idForPaymentPlan($no)]);
@@ -550,8 +539,7 @@ class PaymentPlanController extends Controller
                 continue;
             }
 
-            $jenis = strtoupper($item->jenis_transaksi ?? '');
-            $selectedKasAccount = str_contains($jenis, 'KAS') ? ($cachedKasAccount ?? $defaultCashAccount) : ($cachedBankAccount ?? $defaultCashAccount);
+            $selectedKasAccount = \App\Support\PaymentFundingAccount::resolve($item->jenis_transaksi);
 
             // FIX PEMBAYARAN HUTANG:aksa debit ke akun Hutang Usaha, bukan ke akun yang dipilih staff
             $debitAccount = $item->id_akun;
@@ -585,6 +573,21 @@ class PaymentPlanController extends Controller
 
             DB::beginTransaction();
             try {
+                $item = PaymentPlan::where('id_payment', $item->id_payment)->lockForUpdate()->firstOrFail();
+                if ($item->status_payment !== 'PAID') {
+                    throw new \RuntimeException(__('erp.payment_paid_posting_guard'));
+                }
+                \App\Support\PaymentPlanWorkflow::realized($item);
+                $selectedKasAccount = \App\Support\PaymentFundingAccount::resolve($item->jenis_transaksi);
+                if (JournalHeader::where('journal_id', $journalId)->exists()) {
+                    throw new \RuntimeException(__('erp.payment_posted_action_guard'));
+                }
+                $debitAccount = str_contains(strtoupper($item->kategori_payment ?? ''), 'PEMBAYARAN HUTANG')
+                    ? config('coa.hutang_usaha') : $item->id_akun;
+                if (! Account::where('account_code', $debitAccount)->exists()
+                    || ! Account::where('account_code', $selectedKasAccount)->exists()) {
+                    throw new \RuntimeException(__('erp.payment_realization_guard'));
+                }
                 $transactionDate = $item->tgl_transaksi;
 
                 JournalHeader::create([
@@ -616,6 +619,7 @@ class PaymentPlanController extends Controller
 
                 $updateData = [
                     'status_payment' => 'POSTED',
+                    'journal_id' => $journalId,
                     'updated_at'     => now(),
                 ];
 
@@ -627,7 +631,7 @@ class PaymentPlanController extends Controller
                     }
                 }
 
-                $item->update($updateData);
+                $item->forceFill($updateData)->save();
 
                 DB::commit();
                 $count++;
@@ -639,7 +643,7 @@ class PaymentPlanController extends Controller
         }
 
         if ($count == 0) {
-            return redirect()->back()->with('error', 'Gagal posting! Pastikan data yang dicentang sudah memiliki Alokasi Akun (COA).');
+            return redirect()->back()->with('error', __('erp.payment_paid_posting_guard').' '.implode(' | ', $skipped));
         }
 
         SystemLog::record('POST', 'Payment Plan', 'Posting ' . $count . ' data payment plan ke Jurnal Umum.');
@@ -673,9 +677,9 @@ class PaymentPlanController extends Controller
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns, ';');
             $contoh = [
-                '[auto]', '16/05/2026', 'PEMBELIAN & OPERASIONAL', 'BCA BBW OPS', 'APPROVED',
+                '[auto]', date('d/m/Y'), 'PEMBELIAN & OPERASIONAL', 'PENDING', 'PENGAJUAN',
                 'Nama Staff', 'FINANCE', 'Toko ABC', 'Shopee', 'Pembelian ATK',
-                'BCA 123456', '51001', '1', 'Pcs', '150000', '150000', '0', '150000'
+                '', '', '1', 'Pcs', '150000', '', '0', '150000'
             ];
             fputcsv($file, $contoh, ';');
             fclose($file);
@@ -758,6 +762,11 @@ class PaymentPlanController extends Controller
 
                     if ($status == 'APPROVE') $status = 'APPROVED';
                     if ($status == 'REJECT') $status = 'REJECTED';
+                    if ($status === 'POSTED') {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'status_payment' => __('erp.payment_posted_action_guard'),
+                        ]);
+                    }
                     if (!in_array($status, ['PENGAJUAN', 'APPROVED', 'REJECTED', 'PAID', 'POSTED'])) {
                         $status = 'PENGAJUAN';
                     }
@@ -972,16 +981,22 @@ class PaymentPlanController extends Controller
     public function setRekening(Request $request, $id)
     {
         $request->validate(['jenis_transaksi' => 'required|string']);
+        \App\Support\PaymentFundingAccount::resolve($request->jenis_transaksi);
 
         $current = PaymentPlan::where('id_payment', $id)->first();
         if (!$current) {
             return redirect()->back()->with('error', 'Data tidak ditemukan!');
         }
 
-        $current->update([
-            'jenis_transaksi' => strtoupper($request->jenis_transaksi),
-            'updated_at' => now()
-        ]);
+        DB::transaction(function () use ($request, $id) {
+            $current = PaymentPlan::where('id_payment', $id)->lockForUpdate()->firstOrFail();
+            \App\Support\PaymentPlanProtection::editable($current);
+            $current->update([
+                'jenis_transaksi' => strtoupper($request->jenis_transaksi),
+                'status_payment' => $current->status_payment === 'APPROVED' ? 'PENGAJUAN' : $current->status_payment,
+                'updated_at' => now(),
+            ]);
+        });
 
         SystemLog::record('UPDATE', 'Payment Plan', 'Menetapkan Rekening Sumber Dana: ' . $current->no_transaksi);
 

@@ -30,6 +30,7 @@ class FabricController extends Controller
 
     public function store(Request $request)
     {
+        $account = \App\Support\FabricInventoryAccount::resolve($request->inventory_account_code);
         $request->validate([
             'fabric_code' => 'required|string|max:50|unique:mfg_fabrics,fabric_code',
             'fabric_type' => 'nullable|string|max:255',
@@ -41,7 +42,7 @@ class FabricController extends Controller
         Fabric::create(array_merge($request->only([
             'fabric_code', 'fabric_type', 'hs_code', 'description', 'material_name', 'english_name', 'category', 'specification', 'meters_per_roll', 'subtype', 'state', 'gsm',
             'composition', 'width', 'color', 'unit',
-        ]), ['fabric_type' => $request->input('description'), 'stock_quantity' => 0, 'average_cost' => 0, 'is_active' => true]));
+        ]), ['inventory_account_code' => $account, 'fabric_type' => $request->input('description'), 'stock_quantity' => 0, 'average_cost' => 0, 'is_active' => true]));
 
         SystemLog::record('CREATE', 'Manufacturing Fabric Master', 'Menambahkan Fabric: ' . $request->fabric_code);
         return redirect()->back()->with('success', 'Data kain berhasil ditambahkan.');
@@ -50,6 +51,10 @@ class FabricController extends Controller
     public function update(Request $request, $id)
     {
         $fabric = Fabric::findOrFail($id);
+        $account = \App\Support\FabricInventoryAccount::resolve($request->inventory_account_code);
+        if ((float) $fabric->stock_quantity != 0 && $fabric->inventory_account_code !== $account) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['inventory_account_code' => __('erp.fabric_coa_stock_guard')]);
+        }
         $request->validate([
             'fabric_code' => 'required|string|max:50|unique:mfg_fabrics,fabric_code,' . $id,
             'fabric_type' => 'nullable|string|max:255',
@@ -61,7 +66,7 @@ class FabricController extends Controller
         $fabric->update(array_merge($request->only([
             'fabric_code', 'fabric_type', 'hs_code', 'description', 'material_name', 'english_name', 'category', 'specification', 'meters_per_roll', 'subtype', 'state', 'gsm',
             'composition', 'width', 'color', 'unit',
-        ]), ['fabric_type' => $request->input('description'), 'is_active' => $request->has('is_active')]));
+        ]), ['inventory_account_code' => $account, 'fabric_type' => $request->input('description'), 'is_active' => $request->has('is_active')]));
 
         return redirect()->back()->with('success', 'Data kain berhasil diperbarui.');
     }
@@ -93,7 +98,8 @@ class FabricController extends Controller
                 ? $request->input('csv_encoding', 'UTF-8')
                 : 'UTF-8';
 
-            Excel::import(new FabricImport($inputEncoding), $request->file('file_excel'));
+            $account = \App\Support\FabricInventoryAccount::resolve($request->inventory_account_code);
+            Excel::import(new FabricImport($inputEncoding, $account), $request->file('file_excel'));
             SystemLog::record('IMPORT', 'Manufacturing Fabric Master', 'Import master fabric dari file Excel berhasil.');
             return redirect()->back()->with('success', 'Data Master Fabric berhasil di-import!');
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {

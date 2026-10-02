@@ -1,0 +1,1 @@
+<input type="text" name="reason" class="form-control form-control-sm" required minlength="10" maxlength="1000" placeholder="{{ __('erp.payment_correction_reason') }}" aria-label="{{ __('erp.payment_correction_reason') }}">

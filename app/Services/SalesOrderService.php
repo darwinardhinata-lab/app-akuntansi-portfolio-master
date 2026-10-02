@@ -26,6 +26,7 @@ class SalesOrderService
 
             // B13 FIX: Lock baris SO agar tidak ada race condition status saat request paralel
             $so = SalesOrder::lockForUpdate()->findOrFail($soId);
+            $revenueAccount = \App\Support\SalesRevenueAccount::resolve($financials['sales_semantic'] ?? null);
 
             if ($so->status === 'SHIPPED') {
                 throw new Exception("Sales Order ini sudah selesai dan fakturnya sudah tercetak.");
@@ -85,6 +86,8 @@ class SalesOrderService
 
             $invoice = SalesInvoice::create([
                 'invoice_number'   => $invoiceNumber,
+                'sales_semantic' => $financials['sales_semantic'],
+                'revenue_account_code' => $revenueAccount,
                 'sales_order_id'   => $so->id,
                 'transaction_date' => $shipDate,
                 'contact_name'     => $so->contact_name,
@@ -194,7 +197,7 @@ class SalesOrderService
                     }
 
                     // Penjualan
-                    $journalLines[] = ['account_code' => config('coa.penjualan'), 'position' => 'KREDIT', 'amount' => $invoice->sub_total,   'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
+                    $journalLines[] = ['account_code' => $revenueAccount, 'position' => 'KREDIT', 'amount' => $invoice->sub_total,   'helper_code' => null, 'created_at' => $now, 'updated_at' => $now];
                     
                     // Ongkos Kirim
                     if ($invoice->shipping_cost > 0) {
@@ -268,8 +271,8 @@ class SalesOrderService
                 // Batch delete jurnal
                 $journalIds = JournalHeader::where('source_doc_no', $evidenceNumber)->pluck('journal_id');
                 if ($journalIds->isNotEmpty()) {
-                    DB::table('journal_details')->whereIn('journal_id', $journalIds)->delete();
-                    DB::table('journal_headers')->whereIn('journal_id', $journalIds)->delete();
+                    \App\Support\ProtectedJournalQuery::table('journal_details')->whereIn('journal_id', $journalIds)->delete();
+                    \App\Support\ProtectedJournalQuery::table('journal_headers')->whereIn('journal_id', $journalIds)->delete();
                 }
 
                 // OPTIMASI N+1: Agregasi delta stok dalam 1 query, bukan loop delete + save

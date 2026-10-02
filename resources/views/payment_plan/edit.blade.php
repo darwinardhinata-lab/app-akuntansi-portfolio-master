@@ -17,15 +17,20 @@
             <h5 class="m-0 fw-bold"><i class="fas fa-edit me-2"></i> Edit Data Payment Plan #{{ $data->no_transaksi }}</h5>
         </div>
         <div class="card-body">
+            <div class="alert alert-info">{{ __('erp.payment_workflow_notice') }}</div>
+            @if($data->status_payment === 'PAID' && \App\Support\PaymentPlanCorrectionAccess::allowed(auth()->user()) && !\App\Support\PaymentPlanProtection::hasJournal($data))
+                <a class="btn btn-outline-warning mb-3" href="{{ route('payment.correction.edit', $data->id_payment) }}">{{ __('erp.payment_correction_title') }}</a>
+            @endif
             @if($statusTerkunci)
                 <div class="alert alert-danger fw-bold">
-                    <i class="fa-solid fa-lock me-1"></i> {{ __('erp.status_already') }} <strong>{{ $data->status_payment }}</strong>. Nominal item tidak dapat diubah/ditambah/dihapus lagi (sudah diposting ke Jurnal). Anda tetap bisa mengubah data non-nominal (vendor, keterangan header, dsb).
+                    <i class="fa-solid fa-lock me-1"></i> {{ __('erp.payment_locked_guard') }}
                 </div>
             @endif
 
             <form action="{{ route('payment.update', $data->id_payment) }}" method="POST" enctype="multipart/form-data" id="form-payment-edit">
                 @csrf
                 @method('PUT')
+                <fieldset @disabled($statusTerkunci)>
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
@@ -42,19 +47,8 @@
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold text-dark">{{ __('erp.ops_account_required') }}</label>
                         <select name="jenis_transaksi" class="form-select" required>
-                            <option value="BCA BBW OPS" {{ $data->jenis_transaksi == 'BCA BBW OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_bbw_ops') }}</option>
-                            <option value="BCA BBB OPS" {{ $data->jenis_transaksi == 'BCA BBB OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_bbb_ops') }}</option>
-                            <option value="BCA KOI OPS" {{ $data->jenis_transaksi == 'BCA KOI OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_koi_ops') }}</option>
-                            <option value="BCA GBB OPS" {{ $data->jenis_transaksi == 'BCA GBB OPS' ? 'selected' : '' }}>{{ __('erp.bank_bca_gbb_ops') }}</option>
-                            <option value="BCA BBW" {{ $data->jenis_transaksi == 'BCA BBW' ? 'selected' : '' }}>{{ __('erp.bank_bca_bbw') }}</option>
-                            <option value="BCA BBB" {{ $data->jenis_transaksi == 'BCA BBB' ? 'selected' : '' }}>{{ __('erp.bank_bca_bbb') }}</option>
-                            <option value="BCA KOI" {{ $data->jenis_transaksi == 'BCA KOI' ? 'selected' : '' }}>{{ __('erp.bank_bca_koi') }}</option>
-                            <option value="BCA GBB" {{ $data->jenis_transaksi == 'BCA GBB' ? 'selected' : '' }}>{{ __('erp.bank_bca_gbb') }}</option>
-                            <option value="MANDIRI BBW" {{ $data->jenis_transaksi == 'MANDIRI BBW' ? 'selected' : '' }}>{{ __('erp.bank_mandiri_bbw') }}</option>
-                            <option value="MANDIRI KOI" {{ $data->jenis_transaksi == 'MANDIRI KOI' ? 'selected' : '' }}>{{ __('erp.bank_mandiri_koi') }}</option>
-                            <option value="MANDIRI BBB" {{ $data->jenis_transaksi == 'MANDIRI BBB' ? 'selected' : '' }}>{{ __('erp.bank_mandiri_bbb') }}</option>
-                            <option value="XENDIT" {{ $data->jenis_transaksi == 'XENDIT' ? 'selected' : '' }}>{{ __('erp.bank_xendit') }}</option>
-                            <option value="BRI BBW" {{ $data->jenis_transaksi == 'BRI BBW' ? 'selected' : '' }}>{{ __('erp.bank_bri_bbw') }}</option>
+                            <option value="">{{ __('erp.select_account_bank_ph') }}</option>
+                            @include('payment_plan.funding_options', ['selectedFunding' => old('jenis_transaksi', $data->jenis_transaksi)])
                         </select>
                     </div>
 
@@ -202,6 +196,7 @@
                     <i class="fas fa-save me-2"></i> Update Perubahan Data
                 </button>
                 <a href="{{ route('payment.index') }}" class="btn btn-secondary px-4 py-2 fw-bold ms-2">{{ __('erp.cancel') }}</a>
+                </fieldset>
             </form>
         </div>
     </div>

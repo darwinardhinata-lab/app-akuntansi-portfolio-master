@@ -6,6 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class JournalDetail extends Model
 {
+    protected static function booted(): void
+    {
+        static::creating(function (JournalDetail $detail) {
+            \App\Support\MaklunJournalProtection::check([$detail->journal_id]);
+            if (empty($detail->account_code)) {
+                throw new \RuntimeException('Mapping COA belum ditetapkan; posting dibatalkan.');
+            }
+        });
+        static::updating(function (JournalDetail $detail) {
+            \App\Support\MaklunJournalProtection::check([$detail->getOriginal('journal_id'), $detail->journal_id]);
+        });
+        static::deleting(fn (JournalDetail $detail) => \App\Support\MaklunJournalProtection::check([$detail->journal_id]));
+    }
+
+    public function newEloquentBuilder($query)
+    {
+        return new \App\Support\JournalDetailBuilder($query);
+    }
+
     protected $table = 'journal_details';
     
     // Primary Key dari Detail Jurnal

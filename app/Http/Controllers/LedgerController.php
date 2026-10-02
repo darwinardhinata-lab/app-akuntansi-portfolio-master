@@ -60,7 +60,7 @@ class LedgerController extends Controller
             $skippedCount = ($page - 1) * $perPage;
             
             // Hanya menarik posisi dan nominal dari baris sebelumnya (beban memori nyaris 0 KB)
-            $skippedData = DB::table('journal_details')
+            $skippedData = \App\Support\ProtectedJournalQuery::table('journal_details')
                 ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
                 ->select('position', 'amount')
                 ->where('account_code', $accCode)

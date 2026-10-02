@@ -32,8 +32,7 @@
 
     @if($assetsNeedingInput->isEmpty())
         <div class="alert alert-info shadow-sm fw-bold">
-            <i class="fa-solid fa-circle-info me-2"></i> Semua aset sudah memiliki umur penyusutan. 
-            Jika ingin menambah aset, buat jurnal pembelian dengan kode akun 12000 (Aset Tetap) di menu Jurnal Umum.
+            <i class="fa-solid fa-circle-info me-2"></i> {{ __('erp.asset_mapping_notice') }}
         </div>
     @else
         <div class="card shadow-sm border-0 rounded-3">
@@ -73,9 +72,10 @@
                                         @csrf
                                         <input type="hidden" name="asset_id" value="{{ $asset->id }}">
                                         <td class="text-center" width="120">
+                                            @include('asset.mapping_fields')
                                             <input type="number" name="useful_life_months" class="form-control form-control-sm text-center" 
                                                    value="{{ $asset->useful_life_months > 0 ? $asset->useful_life_months : '' }}" 
-                                                   min="1" placeholder="{{ __('erp.eg_useful_life') }}" required>
+                                                   min="0" placeholder="{{ __('erp.eg_useful_life') }}" required>
                                         </td>
                                         <td class="text-end text-danger" style="font-weight: 500;">
                                             Rp {{ number_format($asset->depreciation_per_month ?? 0, 2, ',', '.') }}

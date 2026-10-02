@@ -14,7 +14,7 @@ class CheckDuplicateJournals extends Command
     {
         $this->info('🔍 Memeriksa duplikasi jurnal berdasarkan (evidence_number, transaction_type)...');
 
-        $duplicates = DB::table('journal_headers')
+        $duplicates = \App\Support\ProtectedJournalQuery::table('journal_headers')
             ->select('evidence_number', 'transaction_type', DB::raw('COUNT(*) as jumlah_jurnal'))
             ->whereNotNull('evidence_number')
             ->where('evidence_number', '!=', '')
@@ -36,7 +36,7 @@ class CheckDuplicateJournals extends Command
             $this->line("  📋 Evidence: <fg=yellow>{$dup->evidence_number}</> | Type: <fg=cyan>{$dup->transaction_type}</> | Jumlah: <fg=red>{$dup->jumlah_jurnal}</>");
             
             // Show the journal_ids involved
-            $journalIds = DB::table('journal_headers')
+            $journalIds = \App\Support\ProtectedJournalQuery::table('journal_headers')
                 ->where('evidence_number', $dup->evidence_number)
                 ->where('transaction_type', $dup->transaction_type)
                 ->orderBy('journal_id')

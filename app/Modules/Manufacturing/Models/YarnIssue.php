@@ -13,6 +13,7 @@ class YarnIssue extends Model
     protected $table = 'mfg_yarn_issues';
 
     protected $fillable = [
+        'source_account_code',
         'issue_number',
         'issue_date',
         'knit_order_id',

@@ -126,8 +126,8 @@ class FastSyncJurnal extends Command
             if ($deletedCount > 0) {
                 $headersToDelete->chunk(5000)->each(function ($chunk) {
                     \App\Support\GrnProtection::journals($chunk);
-                    DB::table('journal_details')->whereIn('journal_id', $chunk)->delete();
-                    DB::table('journal_headers')->whereIn('journal_id', $chunk)->delete();
+                    \App\Support\ProtectedJournalQuery::table('journal_details')->whereIn('journal_id', $chunk)->delete();
+                    \App\Support\ProtectedJournalQuery::table('journal_headers')->whereIn('journal_id', $chunk)->delete();
                 });
                 $this->info("🗑️ Berhasil menghapus {$deletedCount} Nomor Bukti lama.");
             } else {
@@ -153,7 +153,7 @@ class FastSyncJurnal extends Command
 
         // Pre-calculate ID Jurnal untuk mode Batch Insert
         $datePrefix = 'JRN-' . date('Ymd') . '-';
-        $lastIdStr = DB::table('journal_headers')
+        $lastIdStr = \App\Support\ProtectedJournalQuery::table('journal_headers')
                         ->where('journal_id', 'like', $datePrefix . '%')
                         ->orderByDesc('journal_id')
                         ->value('journal_id');
@@ -253,12 +253,12 @@ class FastSyncJurnal extends Command
                     // Chunk headers to avoid "too many placeholders" error (MySQL limit: 65,535)
                     if (!empty($headersToInsert)) {
                         foreach (array_chunk($headersToInsert, 500) as $chunk) {
-                            DB::table('journal_headers')->insert($chunk);
+                            \App\Support\ProtectedJournalQuery::table('journal_headers')->insert($chunk);
                         }
                         $headersToInsert = [];
                     }
 
-                    DB::table('journal_details')->insert($detailsToInsert);
+                    \App\Support\ProtectedJournalQuery::table('journal_details')->insert($detailsToInsert);
                     $detailsToInsert = []; 
                     
                     // Notifikasi hanya muncul per kelipatan 10.000 agar terminal tidak macet (lag)
@@ -271,11 +271,11 @@ class FastSyncJurnal extends Command
             // FIX #1390: Bersihkan sisa data yang belum mencapai 1000 baris - Chunk untuk menghindari error "too many placeholders"
             if (!empty($headersToInsert)) {
                 foreach (array_chunk($headersToInsert, 500) as $chunk) {
-                    DB::table('journal_headers')->insert($chunk);
+                    \App\Support\ProtectedJournalQuery::table('journal_headers')->insert($chunk);
                 }
             }
             if (!empty($detailsToInsert)) {
-                DB::table('journal_details')->insert($detailsToInsert);
+                \App\Support\ProtectedJournalQuery::table('journal_details')->insert($detailsToInsert);
             }
 
             // FIX: Hapus DB::commit() ganda yang bisa menyebabkan error pada PDO

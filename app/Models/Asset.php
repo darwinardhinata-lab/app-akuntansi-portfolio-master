@@ -11,6 +11,7 @@ class Asset extends Model
         'asset_code',
         'asset_name',
         'category',
+        'depreciation_expense_code',
         'quantity',
         'purchase_date',
         'purchase_price',

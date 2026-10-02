@@ -99,6 +99,7 @@
                                                 <div class="mb-2"><label class="form-label">{{ __('erp.subtype_label') }}</label>
                                                     <input type="text" name="subtype" class="form-control" value="{{ $fabric->subtype }}"></div>
                                                 <div class="mb-2"><label class="form-label">{{ __('erp.state_label') }}</label>
+                                                    @include('manufacturing.master.fabric_coa_field', ['selectedFabricAccount' => $fabric->inventory_account_code])
                                                     <select name="state" class="form-select" required>
                                                         <option value="GREY" {{ $fabric->state === 'GREY' ? 'selected' : '' }}>{{ __('erp.fabric_state_grey') }}</option>
                                                         <option value="FINISHED" {{ $fabric->state === 'FINISHED' ? 'selected' : '' }}>{{ __('erp.fabric_state_finished') }}</option>
@@ -150,6 +151,7 @@
                     <div class="mb-2"><label class="form-label">{{ __('erp.subtype_label') }}</label>
                         <input type="text" name="subtype" class="form-control"></div>
                     <div class="mb-2"><label class="form-label">{{ __('erp.state_label') }}</label>
+                        @include('manufacturing.master.fabric_coa_field', ['selectedFabricAccount' => null])
                         <select name="state" class="form-select" required>
                             <option value="GREY">{{ __('erp.fabric_state_grey') }}</option>
                             <option value="FINISHED">{{ __('erp.fabric_state_finished') }}</option>
@@ -185,6 +187,7 @@
                     </div>
                     <div class="mb-2">
                         <label class="form-label">{{ __('erp.choose_file_xlsx') }}</label>
+                        @include('manufacturing.master.fabric_coa_field', ['selectedFabricAccount' => null])
                         <input type="file" name="file_excel" class="form-control" required accept=".xlsx,.xls,.csv">
                     </div>
                     <div class="mb-2">

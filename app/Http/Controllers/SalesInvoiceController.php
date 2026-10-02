@@ -102,6 +102,7 @@ class SalesInvoiceController extends Controller
         // FIX: Tambahkan proteksi agar qty dan price tidak boleh bernilai negatif atau nol
         $request->validate([
             'invoice_number'   => 'required|unique:sales_invoices,invoice_number',
+            'sales_semantic' => 'required|in:LOCAL,EXPORT',
             'transaction_date' => 'required|date',
             'contact_name'     => 'required|string',
             'details'          => 'required|array|min:1',
@@ -109,6 +110,7 @@ class SalesInvoiceController extends Controller
             'details.*.price'  => 'required|numeric|min:0',
         ]);
 
+        $revenueAccount = \App\Support\SalesRevenueAccount::resolve($request->sales_semantic);
         DB::beginTransaction();
         try {
             $subTotal = 0;
@@ -132,6 +134,8 @@ class SalesInvoiceController extends Controller
 
             $invoice = SalesInvoice::create([
                 'invoice_number'   => $request->invoice_number,
+                'sales_semantic' => $request->sales_semantic,
+                'revenue_account_code' => $revenueAccount,
                 'sales_order_id'   => null, // Null karena ini direct invoice
                 'transaction_date' => $request->transaction_date,
                 'contact_name'     => $request->contact_name,
@@ -231,7 +235,7 @@ class SalesInvoiceController extends Controller
                         $jDetails[] = ['journal_id' => $primaryId, 'account_code' => config('coa.diskon_lain'), 'position' => 'DEBET', 'amount' => $otherDisc, 'created_at' => $now, 'updated_at' => $now];
                     }
                     
-                    $jDetails[] = ['journal_id' => $primaryId, 'account_code' => config('coa.penjualan'), 'position' => 'KREDIT', 'amount' => $subTotal, 'created_at' => $now, 'updated_at' => $now];
+                    $jDetails[] = ['journal_id' => $primaryId, 'account_code' => $revenueAccount, 'position' => 'KREDIT', 'amount' => $subTotal, 'created_at' => $now, 'updated_at' => $now];
                     
                     if ($shippingCost > 0) {
                         $jDetails[] = ['journal_id' => $primaryId, 'account_code' => config('coa.ongkos_kirim'), 'position' => 'KREDIT', 'amount' => $shippingCost, 'created_at' => $now, 'updated_at' => $now];
@@ -249,7 +253,11 @@ class SalesInvoiceController extends Controller
                     $jDetails[] = ['journal_id' => $primaryId, 'account_code' => config('coa.persediaan'), 'position' => 'KREDIT', 'amount' => $totalCogsValue, 'created_at' => $now, 'updated_at' => $now];
                 }
 
+                if (!\App\Support\JournalBalanceValidator::isBalanced($jDetails)) {
+                    throw new \RuntimeException('Jurnal invoice tidak balance; transaksi dibatalkan.');
+                }
                 if (!empty($jDetails)) JournalDetail::insert($jDetails);
+                $invoice->update(['journal_id' => $primaryId]);
             }
 
             DB::commit();

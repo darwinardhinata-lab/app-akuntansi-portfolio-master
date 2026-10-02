@@ -410,7 +410,7 @@ class JournalController extends Controller
             return response()->json(['status' => 'error', 'message' => 'ID jurnal tidak valid.']);
         }
 
-        $journals = DB::table('journal_details')
+        $journals = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
             ->leftJoin('accounts', 'journal_details.account_code', '=', 'accounts.account_code')
             ->where('journal_headers.journal_id', $journalId)

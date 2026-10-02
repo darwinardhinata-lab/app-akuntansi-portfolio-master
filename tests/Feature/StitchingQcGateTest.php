@@ -102,7 +102,7 @@ class StitchingQcGateTest extends TestCase
         config(['platform.order_company_scope_enabled' => true, 'platform.legacy_sync_enabled' => false, 'customs.enabled' => false]);
         $company = Company::create(['code' => 'MGI', 'name' => 'PT. Magicase Group Indonesia', 'active' => true]);
         foreach ([['114002', 'Barang dalam proses', 'ASSET', 'DEBET'], ['114003', 'Bahan baku', 'ASSET', 'DEBET'], ['114005', 'Scrap-Afal', 'ASSET', 'DEBET'], ['510004', 'Penyesuaian Persediaan', 'COGS', 'DEBET'], ['212001', 'Akrual subcontractor', 'LIABILITY', 'KREDIT']] as [$code, $name, $type, $balance]) {
-            Account::create(['account_code' => $code, 'account_name' => $name, 'coa_type' => $type, 'normal_balance' => $balance, 'report_pos' => $balance === 'DEBET' ? 'NERACA' : 'NERACA']);
+            Account::create(['account_code' => $code, 'account_name' => $name, 'coa_type' => $type, 'normal_balance' => $balance, 'report_pos' => $code === '510004' ? 'LABA RUGI' : 'NERACA']);
         }
         foreach (['wip_inventory' => '114002', 'raw_material_inventory' => '114003', 'scrap_inventory' => '114005', 'inventory_adjustment' => '510004', 'subcontract_accrual' => '212001'] as $key => $account) {
             CompanyCoaMapping::create(['company_id' => $company->id, 'semantic_key' => $key, 'account_code' => $account, 'active' => true]);

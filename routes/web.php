@@ -150,6 +150,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/payment-plan/import', [PaymentPlanController::class, 'importCsv'])->middleware('throttle:5,1')->name('payment.import');
     Route::post('/payment-plan/post-journal', [PaymentPlanController::class, 'postJournal'])->name('payment.post_journal');
     Route::get('/payment-plan/{id}/edit', [PaymentPlanController::class, 'edit'])->name('payment.edit');
+    Route::get('/payment-plan/{id}/correction', [\App\Http\Controllers\PaymentPlanCorrectionController::class, 'edit'])->whereNumber('id')->name('payment.correction.edit');
+    Route::post('/payment-plan/{id}/correction', [\App\Http\Controllers\PaymentPlanCorrectionController::class, 'store'])->whereNumber('id')->middleware('throttle:10,1')->name('payment.correction.store');
     Route::put('/payment-plan/{id}/update', [PaymentPlanController::class, 'update'])->name('payment.update');
     Route::delete('/payment-plan/{id}/delete', [PaymentPlanController::class, 'destroy'])->name('payment.destroy');
     Route::post('/payment-plan/{id}/set-coa', [PaymentPlanController::class, 'setCoa'])->name('payment.set_coa');

@@ -72,7 +72,7 @@ class AuxiliaryMaterialFlowTest extends TestCase
         config(['platform.order_company_scope_enabled' => true, 'platform.legacy_sync_enabled' => false, 'customs.enabled' => false]);
         $company = Company::create(['code' => 'MGI', 'name' => 'MGI', 'active' => true]);
         foreach ([['114002', 'WIP', 'DEBET'], ['114004', 'Bahan Penolong', 'DEBET'], ['117008', 'PPN Masukan', 'DEBET'], ['211001', 'Utang Usaha', 'KREDIT'], ['510010', 'Beban Bahan Penolong', 'DEBET']] as [$code, $name, $balance]) {
-            Account::create(['account_code' => $code, 'account_name' => $name, 'coa_type' => 'Test', 'normal_balance' => $balance, 'report_pos' => 'NERACA']);
+            Account::create(['account_code' => $code, 'account_name' => $name, 'coa_type' => 'Test', 'normal_balance' => $balance, 'report_pos' => $code === '510010' ? 'LABA RUGI' : 'NERACA']);
         }
         foreach (['wip_inventory' => '114002', 'auxiliary_material_inventory' => '114004', 'input_vat' => '117008', 'accounts_payable' => '211001', 'auxiliary_material_expense' => '510010'] as $key => $account) {
             CompanyCoaMapping::create(['company_id' => $company->id, 'semantic_key' => $key, 'account_code' => $account, 'active' => true]);

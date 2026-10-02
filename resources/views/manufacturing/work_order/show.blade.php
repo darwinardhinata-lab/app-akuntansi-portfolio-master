@@ -81,20 +81,26 @@
                                     @elseif($ko->status === 'ISSUED')
                                         <button class="btn btn-xs btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalReceiveGrey{{ $ko->id }}">{{ __('erp.receive_grey_fabric') }}</button>
                                         @foreach($ko->yarnIssues as $yi)
+                                            @if(\App\Support\MaklunReversalAuthorization::allowed(auth()->user()))
                                             <form action="{{ route('mfg.knit-orders.void-yarn-issue', $yi->id) }}" method="POST" class="d-inline"
                                                   onsubmit="return confirm('Void Yarn Issue {{ $yi->issue_number }}? Stok yarn akan dikembalikan.')">
                                                 @csrf
+                                                @include('manufacturing.work_order.reversal_reason')
                                                 <button type="submit" class="btn btn-xs btn-outline-danger" title="Void {{ $yi->issue_number }}"><i class="fa-solid fa-rotate-left"></i></button>
                                             </form>
+                                            @endif
                                         @endforeach
                                     @else
                                         <span class="text-muted small d-block">Yarn terpakai: {{ $ko->yarnIssues->sum('total_cost') ? 'Rp '.number_format($ko->yarnIssues->sum('total_cost'),2) : '-' }}</span>
                                         @foreach($ko->greyFabricReceipts as $gfr)
+                                            @if(\App\Support\MaklunReversalAuthorization::allowed(auth()->user()))
                                             <form action="{{ route('mfg.knit-orders.void-grey-fabric-receipt', $gfr->id) }}" method="POST" class="d-inline"
                                                   onsubmit="return confirm('Void penerimaan kain grey {{ $gfr->receipt_number }}? Jurnal & stok akan dibalik.')">
                                                 @csrf
+                                                @include('manufacturing.work_order.reversal_reason')
                                                 <button type="submit" class="btn btn-xs btn-outline-danger mt-1" title="Void {{ $gfr->receipt_number }}"><i class="fa-solid fa-rotate-left"></i> {{ __('erp.void_gfr') }}</button>
                                             </form>
+                                            @endif
                                         @endforeach
                                     @endif
                                 </td>
@@ -127,6 +133,7 @@
                                             <div class="mb-2"><label class="form-label">{{ __('erp.receive_date') }}</label><input type="date" name="receipt_date" class="form-control" value="{{ date('Y-m-d') }}" required></div>
                                             <div class="mb-2"><label class="form-label">{{ __('erp.qty_received_kg') }}</label><input type="number" step="0.01" name="qty_received" class="form-control" required></div>
                                             <div class="mb-2"><label class="form-label">{{ __('erp.qty_reject_kg') }}</label><input type="number" step="0.01" name="qty_rejected" class="form-control" value="0"></div>
+                                            @include('manufacturing.work_order.maklun_receipt_fields')
                                             <div class="mb-2"><label class="form-label">{{ __('erp.knitting_service_cost_rp') }}</label><input type="number" step="0.01" name="knitting_cost_amount" class="form-control" value="0" required></div>
                                             <div class="mb-2"><label class="form-label">{{ __('erp.lot_number') }}</label><input type="text" name="lot_number" class="form-control"></div>
                                         </div>
@@ -166,19 +173,25 @@
                                     @elseif($po->status === 'ISSUED')
                                         <button class="btn btn-xs btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalReceiveFabric{{ $po->id }}">{{ __('erp.receive_finished_fabric') }}</button>
                                         @foreach($po->fabricIssues as $fi)
+                                            @if(\App\Support\MaklunReversalAuthorization::allowed(auth()->user()))
                                             <form action="{{ route('mfg.processing-orders.void-fabric-issue', $fi->id) }}" method="POST" class="d-inline"
                                                   onsubmit="return confirm('Void Fabric Issue {{ $fi->issue_number }}? Stok kain grey akan dikembalikan.')">
                                                 @csrf
+                                                @include('manufacturing.work_order.reversal_reason')
                                                 <button type="submit" class="btn btn-xs btn-outline-danger" title="Void {{ $fi->issue_number }}"><i class="fa-solid fa-rotate-left"></i></button>
                                             </form>
+                                            @endif
                                         @endforeach
                                     @elseif($po->status === 'COMPLETED')
                                         @foreach($po->fabricReceipts as $fr)
+                                            @if(\App\Support\MaklunReversalAuthorization::allowed(auth()->user()))
                                             <form action="{{ route('mfg.processing-orders.void-fabric-receipt', $fr->id) }}" method="POST" class="d-inline"
                                                   onsubmit="return confirm('Void penerimaan kain finished {{ $fr->receipt_number }}? Jurnal & stok akan dibalik.')">
                                                 @csrf
+                                                @include('manufacturing.work_order.reversal_reason')
                                                 <button type="submit" class="btn btn-xs btn-outline-danger" title="Void {{ $fr->receipt_number }}"><i class="fa-solid fa-rotate-left"></i> {{ __('erp.void_fr') }}</button>
                                             </form>
+                                            @endif
                                         @endforeach
                                     @endif
                                 </td>
@@ -213,6 +226,7 @@
                                             <div class="mb-2"><label class="form-label">{{ __('erp.qty_received_kg') }}</label><input type="number" step="0.01" name="qty_received" class="form-control" required></div>
                                             <div class="mb-2"><label class="form-label">{{ __('erp.qty_reject_kg') }}</label><input type="number" step="0.01" name="qty_rejected" class="form-control" value="0"></div>
                                             <div class="mb-2"><label class="form-label">{{ __('erp.shrinkage_percent') }}</label><input type="number" step="0.01" name="shrinkage_percent" class="form-control" value="0"></div>
+                                            @include('manufacturing.work_order.maklun_receipt_fields')
                                             <div class="mb-2"><label class="form-label">{{ __('erp.process_service_cost_rp') }}</label><input type="number" step="0.01" name="process_cost_amount" class="form-control" value="0" required></div>
                                             <div class="mb-2"><label class="form-label">{{ __('erp.color_shade_code') }}</label><input type="text" name="color" class="form-control"></div>
                                         </div>

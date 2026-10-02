@@ -392,9 +392,9 @@ class SalesOrderController extends Controller
         }
         // 👆 ----------------------------------------------------- 👆
 
-        $request->validate(['file_csv' => 'required|file']);
         $request->validate([
             'ship_date'   => 'required|date',
+            'sales_semantic' => 'required|in:LOCAL,EXPORT',
             'items'       => 'required|array',
             'sub_total'   => 'required|numeric',
             'grand_total' => 'required|numeric',
@@ -413,6 +413,7 @@ class SalesOrderController extends Controller
             // Tangkap kalkulasi dari layar
             $financials = [
                 'sub_total'         => $request->sub_total,
+                'sales_semantic' => $request->sales_semantic,
                 'disc_amount'       => $request->disc_amount ?? 0,
                 'tax_amount'        => $request->tax_amount ?? 0,
                 'shipping_cost'     => $request->shipping_cost ?? 0,

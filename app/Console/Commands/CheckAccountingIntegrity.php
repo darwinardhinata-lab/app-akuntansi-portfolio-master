@@ -16,8 +16,8 @@ class CheckAccountingIntegrity extends Command
     public function handle(): int
     {
         try {
-            $headers = DB::table('journal_headers')->count();
-            $details = DB::table('journal_details')->count();
+            $headers = \App\Support\ProtectedJournalQuery::table('journal_headers')->count();
+            $details = \App\Support\ProtectedJournalQuery::table('journal_details')->count();
             $headersWithoutDetails = DB::table('journal_headers as h')
                 ->whereNotExists(fn ($query) => $query->selectRaw('1')->from('journal_details as d')->whereColumn('d.journal_id', 'h.journal_id'))
                 ->count();

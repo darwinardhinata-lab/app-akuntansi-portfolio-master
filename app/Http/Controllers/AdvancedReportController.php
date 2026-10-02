@@ -40,7 +40,7 @@ class AdvancedReportController extends Controller
         $transactions = collect();
 
         if ($tag) {
-            $transactions = DB::table('journal_details')
+            $transactions = \App\Support\ProtectedJournalQuery::table('journal_details')
                 ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
                 ->leftJoin('accounts', 'journal_details.account_code', '=', 'accounts.account_code')
                 ->select(
@@ -73,10 +73,10 @@ class AdvancedReportController extends Controller
         $kodeAkunPiutang = [config('coa.piutang_usaha')]; 
         
         // Menggunakan akun: Uang Muka Penjualan / Deposit Pelanggan
-        $kodeAkunUangMukaJual = [config('coa.hutang_usaha')];
+        $kodeAkunUangMukaJual = [config('coa.uang_muka_jual')];
 
         // Piutang Bersaldo Normal DEBIT (Debit - Kredit)
-        $piutang = DB::table('journal_details')
+        $piutang = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->join('accounts', 'journal_details.account_code', '=', 'accounts.account_code')
             ->select(
                 'accounts.account_code', 
@@ -88,7 +88,7 @@ class AdvancedReportController extends Controller
             ->get();
 
         // Uang Muka Penjualan Bersaldo Normal KREDIT (Kredit - Debit)
-        $uangMuka = DB::table('journal_details')
+        $uangMuka = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->join('accounts', 'journal_details.account_code', '=', 'accounts.account_code')
             ->select(
                 'accounts.account_code', 
@@ -114,7 +114,7 @@ class AdvancedReportController extends Controller
         $kodeAkunUangMukaBeli = [config('coa.uang_muka_beli')];
 
         // Hutang Bersaldo Normal KREDIT (Kredit - Debit)
-        $hutang = DB::table('journal_details')
+        $hutang = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->join('accounts', 'journal_details.account_code', '=', 'accounts.account_code')
             ->select(
                 'accounts.account_code', 
@@ -126,7 +126,7 @@ class AdvancedReportController extends Controller
             ->get();
 
         // Uang Muka Pembelian Bersaldo Normal DEBIT (Debit - Kredit)
-        $uangMuka = DB::table('journal_details')
+        $uangMuka = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->join('accounts', 'journal_details.account_code', '=', 'accounts.account_code')
             ->select(
                 'accounts.account_code', 
@@ -158,7 +158,7 @@ class AdvancedReportController extends Controller
 
         if ($tab === 'tagihan') {
             // 1. Tagihan Belum Lunas (Subquery Optimization)
-            $subquery = DB::table('journal_details')
+            $subquery = \App\Support\ProtectedJournalQuery::table('journal_details')
                 ->select('journal_id',
                     DB::raw('SUM(CASE WHEN position = "DEBET" THEN amount ELSE -amount END) as remaining_balance'),
                     DB::raw('SUM(CASE WHEN position = "DEBET" THEN amount ELSE 0 END) as total_invoice')
@@ -167,14 +167,14 @@ class AdvancedReportController extends Controller
                 ->groupBy('journal_id')
                 ->having('remaining_balance', '>', 0);
 
-            $unpaidInvoices = DB::table('journal_headers')
+            $unpaidInvoices = \App\Support\ProtectedJournalQuery::table('journal_headers')
                 ->joinSub($subquery, 'details', 'journal_headers.journal_id', '=', 'details.journal_id')
                 ->select('journal_headers.evidence_number', 'journal_headers.transaction_date', 'journal_headers.notes', 'details.remaining_balance', 'details.total_invoice')
                 ->orderBy('journal_headers.transaction_date', 'asc')
                 ->simplePaginate(50);
         } elseif ($tab === 'pembayaran') {
             // 2. Riwayat Pembayaran (SimplePaginate Optimization)
-            $payments = DB::table('journal_details')
+            $payments = \App\Support\ProtectedJournalQuery::table('journal_details')
                 ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
                 ->whereIn('journal_details.account_code', $kodeAkunPiutang)
                 ->where('journal_details.position', 'KREDIT')
@@ -184,7 +184,7 @@ class AdvancedReportController extends Controller
                 ->simplePaginate(50);
         } elseif ($tab === 'retur') {
             // 3. Riwayat Retur Penjualan (SimplePaginate Optimization)
-            $returns = DB::table('journal_details')
+            $returns = \App\Support\ProtectedJournalQuery::table('journal_details')
                 ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
                 ->whereIn('journal_details.account_code', $kodeAkunReturJual)
                 ->select('journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.notes', 'journal_details.amount')
@@ -211,7 +211,7 @@ class AdvancedReportController extends Controller
 
         if ($tab === 'tagihan') {
             // 1. Tagihan Hutang Belum Lunas (Subquery Optimization)
-            $subquery = DB::table('journal_details')
+            $subquery = \App\Support\ProtectedJournalQuery::table('journal_details')
                 ->select('journal_id',
                     DB::raw('SUM(CASE WHEN position = "KREDIT" THEN amount ELSE -amount END) as remaining_balance'),
                     DB::raw('SUM(CASE WHEN position = "KREDIT" THEN amount ELSE 0 END) as total_invoice')
@@ -220,14 +220,14 @@ class AdvancedReportController extends Controller
                 ->groupBy('journal_id')
                 ->having('remaining_balance', '>', 0);
 
-            $unpaidBills = DB::table('journal_headers')
+            $unpaidBills = \App\Support\ProtectedJournalQuery::table('journal_headers')
                 ->joinSub($subquery, 'details', 'journal_headers.journal_id', '=', 'details.journal_id')
                 ->select('journal_headers.evidence_number', 'journal_headers.transaction_date', 'journal_headers.notes', 'details.remaining_balance', 'details.total_invoice')
                 ->orderBy('journal_headers.transaction_date', 'asc')
                 ->simplePaginate(50);
         } elseif ($tab === 'pembayaran') {
             // 2. Riwayat Pembayaran Hutang (SimplePaginate Optimization)
-            $payments = DB::table('journal_details')
+            $payments = \App\Support\ProtectedJournalQuery::table('journal_details')
                 ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
                 ->whereIn('journal_details.account_code', $kodeAkunHutang)
                 ->where('journal_details.position', 'DEBET')
@@ -237,7 +237,7 @@ class AdvancedReportController extends Controller
                 ->simplePaginate(50);
         } elseif ($tab === 'retur') {
             // 3. Riwayat Retur Pembelian (SimplePaginate Optimization)
-            $returns = DB::table('journal_details')
+            $returns = \App\Support\ProtectedJournalQuery::table('journal_details')
                 ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
                 ->whereIn('journal_details.account_code', $kodeAkunHutang)
                 ->where('journal_details.position', 'DEBET')

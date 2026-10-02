@@ -1,6 +1,16 @@
 <?php
 
 return [
+    'maklun_reversal_user_ids' => array_values(array_filter(array_map(
+        'trim', explode(',', (string) env('MAKLUN_REVERSAL_USER_IDS', ''))
+    ), fn ($id) => ctype_digit($id) && (int) $id > 0)),
+    'maklun_receipt_enabled' => env('PLATFORM_MAKLUN_RECEIPT_ENABLED', false),
+    // Keep off until receipt/reversal lifecycle and historical issues are reviewed.
+    'maklun_issue_enabled' => env('PLATFORM_MAKLUN_ISSUE_ENABLED', false),
+    // Explicit FINANCE user IDs only; empty by default, no ADMIN bypass.
+    'payment_correction_user_ids' => array_values(array_filter(array_map(
+        'trim', explode(',', (string) env('PAYMENT_CORRECTION_USER_IDS', ''))
+    ), fn ($id) => ctype_digit($id) && (int) $id > 0)),
     // Recovery-only opt-in. Default blocks destructive Artisan commands on
     // operational mgi_fresh_* databases; see OperationalDatabaseSafety.
     'allow_destructive_database_commands' => env('ALLOW_DESTRUCTIVE_MGI_DATABASE_COMMANDS', false),

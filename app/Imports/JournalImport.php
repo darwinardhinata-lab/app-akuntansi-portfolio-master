@@ -225,8 +225,8 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
                 $chunks = array_chunk($allHeadersToDelete->toArray(), 200);
                 foreach ($chunks as $chunk) {
                     \App\Support\GrnProtection::journals($chunk);
-                    DB::table('journal_details')->whereIn('journal_id', $chunk)->delete();
-                    DB::table('journal_headers')->whereIn('journal_id', $chunk)->delete();
+                    \App\Support\ProtectedJournalQuery::table('journal_details')->whereIn('journal_id', $chunk)->delete();
+                    \App\Support\ProtectedJournalQuery::table('journal_headers')->whereIn('journal_id', $chunk)->delete();
                 }
             }
 
@@ -237,7 +237,7 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
 
             // Membaca ID terakhir untuk Auto-Generate JRN-
             $datePrefix = 'JRN-' . date('Ymd') . '-';
-            $lastIdStr = DB::table('journal_headers')->where('journal_id', 'like', $datePrefix . '%')->orderByDesc('journal_id')->value('journal_id');
+            $lastIdStr = \App\Support\ProtectedJournalQuery::table('journal_headers')->where('journal_id', 'like', $datePrefix . '%')->orderByDesc('journal_id')->value('journal_id');
             $seq = $lastIdStr ? (int) substr($lastIdStr, -6) : 0;
 
             // FIX #1390: Load header yang mungkin sudah tersimpan di database dari putaran sebelumnya
@@ -353,17 +353,17 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
 
             if (!empty($headersToInsert)) {
                 foreach (array_chunk($headersToInsert, 200) as $chunk) {
-                    DB::table('journal_headers')->insert($chunk);
+                    \App\Support\ProtectedJournalQuery::table('journal_headers')->insert($chunk);
                 }
             }
             if (!empty($detailsToInsert)) {
                 foreach (array_chunk($detailsToInsert, 200) as $chunk) {
-                    DB::table('journal_details')->insert($chunk);
+                    \App\Support\ProtectedJournalQuery::table('journal_details')->insert($chunk);
                 }
             }
             if (!empty($roundingEntries)) {
                 foreach (array_chunk($roundingEntries, 200) as $chunk) {
-                    DB::table('journal_details')->insert($chunk);
+                    \App\Support\ProtectedJournalQuery::table('journal_details')->insert($chunk);
                 }
             }
 
@@ -425,7 +425,7 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
         $journalIds = array_values($headerCache);
 
         // Only detect account code from config (Aset Tetap)
-        $details = DB::table('journal_details')
+        $details = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->whereIn('journal_details.journal_id', $journalIds)
             ->where('journal_details.position', 'DEBET')
             ->where('journal_details.account_code', config('coa.aset_tetap'))

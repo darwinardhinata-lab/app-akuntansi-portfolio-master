@@ -104,7 +104,9 @@ class AssetController extends Controller
         }
 
         // Tampilkan semua aset yang belum ada umur penyusutan (termasuk aset import manual)
-        $assetsNeedingInput = Asset::where('useful_life_months', 0)
+        $assetsNeedingInput = Asset::where(function ($query) {
+                $query->where('useful_life_months', 0)->orWhereNull('depreciation_expense_code');
+            })
             ->with('journalDetail.header')
             ->orderBy('purchase_date', 'desc')
             ->limit(200)
@@ -133,13 +135,19 @@ class AssetController extends Controller
     {
         $request->validate([
             'asset_id'           => 'required|exists:assets,id',
-            'useful_life_months' => 'required|integer|min:1',
+            'useful_life_months' => 'required|integer|min:0',
+            'category' => 'required|string',
+            'depreciation_expense_code' => 'nullable|string',
         ]);
 
         try {
             $asset = Asset::findOrFail($request->asset_id);
+            \App\Support\AssetCoaSelection::editable($asset);
 
+            \App\Support\AssetCoaSelection::validate($asset, $request->category, (int) $request->useful_life_months, $request->depreciation_expense_code);
             $asset->update([
+                'category' => $request->category,
+                'depreciation_expense_code' => $request->depreciation_expense_code,
                 'useful_life_months' => $request->useful_life_months,
             ]);
 
@@ -158,12 +166,16 @@ class AssetController extends Controller
     public function update(Request $request, $id)
     {
         $asset = Asset::findOrFail($id);
+        \App\Support\AssetCoaSelection::editable($asset);
 
         $request->validate([
-            'useful_life_months' => 'required|numeric|min:0'
+            'useful_life_months' => 'required|integer|min:0',
+            'category' => 'required|string',
+            'depreciation_expense_code' => 'nullable|string',
         ]);
 
-        $asset->update(['useful_life_months' => $request->useful_life_months]);
+        \App\Support\AssetCoaSelection::validate($asset, $request->category, (int) $request->useful_life_months, $request->depreciation_expense_code);
+        $asset->update($request->only(['category', 'depreciation_expense_code', 'useful_life_months']));
 
         SystemLog::record('UPDATE', 'Aset Management', 'Mengubah umur penyusutan aset: ' . $asset->asset_name);
 
@@ -226,80 +238,13 @@ class AssetController extends Controller
     public function generateDepreciation()
     {
         try {
-            DB::beginTransaction();
-            $now = Carbon::now();
-
-            $period = $now->format('Ym');
-            $monthName = $now->translatedFormat('F Y');
-            $evidenceNumber = 'DEP-' . $period;
-
-            $exists = JournalHeader::where('evidence_number', $evidenceNumber)->exists();
-            if ($exists) {
-                return redirect()->back()->with('error', "GAGAL: Jurnal penyusutan untuk bulan {$monthName} sudah pernah diproses sebelumnya! Anda tidak boleh menjurnal dua kali di bulan yang sama.");
-            }
-
-            $assets = Asset::where('useful_life_months', '>', 0)->get();
-            $totalDepreciation = 0;
-            $detailsToInsert = [];
-
-            $journalId = JournalHeader::generateNextId();
-            JournalHeader::create([
-                'journal_id'       => $journalId,
-                'transaction_date' => $now->endOfMonth()->format('Y-m-d'),
-                'evidence_number'  => $evidenceNumber,
-                'description'      => "Penyusutan Aset Tetap - Bulan {$monthName}",
-                'transaction_type' => 'Penyusutan Aset',
-            ]);
-
-            foreach ($assets as $asset) {
-                $start = Carbon::parse($asset->purchase_date);
-                if ($start->format('Ym') > $period) continue;
-
-                $age = $start->diffInMonths($now);
-                if ($age >= $asset->useful_life_months) continue;
-
-                $depreciableAmount = $asset->purchase_price - $asset->residual_value;
-                $depPerMonth = $depreciableAmount / $asset->useful_life_months;
-                $totalDepreciation += $depPerMonth;
-
-                $detailsToInsert[] = [
-                    'journal_id'   => $journalId,
-                    'account_code' => config('coa.akum_penyusutan'),
-                    'helper_code'  => null,
-                    'position'     => 'KREDIT',
-                    'amount'       => $depPerMonth,
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
-                ];
-            }
-
-            if ($totalDepreciation == 0) {
-                DB::rollBack();
-                return redirect()->back()->with('error', 'Tidak ada aset valid yang perlu disusutkan pada bulan ini.');
-            }
-
-            $detailsToInsert[] = [
-                'journal_id'   => $journalId,
-                'account_code' => config('coa.beban_penyusutan'),
-                'helper_code'  => null,
-                'position'     => 'DEBET',
-                'amount'       => $totalDepreciation,
-                'created_at'   => now(),
-                'updated_at'   => now(),
-            ];
-
-            JournalDetail::insert($detailsToInsert);
-
-            DB::commit();
-            SystemLog::record('CREATE', 'Aset Management', 'Jurnal penyusutan aset bulan ' . $monthName . ' sebesar Rp ' . number_format($totalDepreciation, 2, ',', '.') . ' berhasil dibuat.');
-            return redirect()->back()->with('success', "SEMPURNA! Jurnal Penyusutan Aset sebesar Rp " . number_format($totalDepreciation, 2, ',', '.') . " untuk bulan {$monthName} berhasil diposting ke Buku Besar.");
-
+            $journal = app(\App\Services\AssetDepreciationService::class)->post(Carbon::now());
+            SystemLog::record('CREATE', 'Aset Management', 'Depresiasi kategori MGI: '.$journal->source_doc_no);
+            return redirect()->back()->with('success', 'Depresiasi kategori MGI berhasil diposting.');
         } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
-
     // ====================================================================================
     // IMPORT, EXPORT, AND TEMPLATE FEATURES
     // ====================================================================================

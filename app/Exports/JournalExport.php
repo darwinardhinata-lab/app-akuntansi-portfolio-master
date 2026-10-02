@@ -77,7 +77,7 @@ class JournalExport implements FromArray, WithHeadings, WithStyles, WithBatchIns
             $journalIds = $journals->pluck('journal_id')->toArray();
 
             // Batch load all details with their accounts for these journals
-            $details = DB::table('journal_details')
+            $details = \App\Support\ProtectedJournalQuery::table('journal_details')
                 ->leftJoin('accounts', 'journal_details.account_code', '=', 'accounts.account_code')
                 ->whereIn('journal_details.journal_id', $journalIds)
                 ->select(

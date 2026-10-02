@@ -17,12 +17,18 @@ class StandardMaterialStructureTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        \App\Models\Account::create(['account_code' => '114003', 'account_name' => 'Bahan baku', 'normal_balance' => 'DEBET', 'report_pos' => 'NERACA', 'coa_type' => 'Persediaan']);
+    }
+
     public function test_standard_material_columns_are_imported_for_yarn_fabric_and_auxiliary_material(): void
     {
         $row = ['5515110000', 'MAT-001', 'Polyester Fabric', 'Kain Polyester', 'Polyester Oxford Fabric', 'Bahan Utama', 'Hitam', 'Lebar 1,5 m; tahan air', 'METER', '100'];
 
         app(YarnImport::class)->collection(new Collection([$row]));
-        app(FabricImport::class)->collection(new Collection([$row]));
+        (new FabricImport('UTF-8', '114003'))->collection(new Collection([$row]));
         app(AuxiliaryMaterialImport::class)->collection(new Collection([$row]));
 
         foreach ([Yarn::class => 'yarn_code', Fabric::class => 'fabric_code', AuxiliaryMaterial::class => 'material_code'] as $model => $codeColumn) {

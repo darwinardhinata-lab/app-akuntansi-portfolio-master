@@ -33,11 +33,7 @@
                         <label class="form-label fw-bold text-dark">{{ __('erp.ops_account_required') }}</label>
                         <select name="jenis_transaksi" class="form-select" required>
                             <option value="">{{ __('erp.select_account_bank_ph') }}</option>
-                            <option value="BCA BBW OPS">{{ __('erp.bank_bca_bbw_ops') }}</option>
-                            <option value="BCA BBB OPS">{{ __('erp.bank_bca_bbb_ops') }}</option>
-                            <option value="BCA KOI OPS">{{ __('erp.bank_bca_koi_ops') }}</option>
-                            <option value="BCA GBB OPS">{{ __('erp.bank_bca_gbb_ops') }}</option>
-                            <option value="MANDIRI BBW">{{ __('erp.bank_mandiri_bbw') }}</option>
+                            @include('payment_plan.funding_options', ['selectedFunding' => old('jenis_transaksi')])
                         </select>
                     </div>
 

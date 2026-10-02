@@ -188,6 +188,7 @@
                                 <form action="{{ route('aset.update', $asset->id) }}" method="POST" class="d-flex justify-content-center gap-1">
                                     @csrf
                                     <input type="number" name="useful_life_months" class="form-control form-control-sm text-center" value="{{ $asset->useful_life_months }}" min="0" style="max-width: 70px;" required>
+                                    @include('asset.mapping_fields')
                                     <button type="submit" class="btn btn-sm btn-primary py-0 px-2" style="border-radius: 6px;">✔</button>
                                 </form>
                             </td>

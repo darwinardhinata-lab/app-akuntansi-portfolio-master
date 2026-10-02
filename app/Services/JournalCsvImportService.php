@@ -247,8 +247,8 @@ class JournalCsvImportService
                     $chunks = array_chunk($allHeadersToDelete->toArray(), 200);
                     foreach ($chunks as $chunk) {
                         \App\Support\GrnProtection::journals($chunk);
-                        DB::table('journal_details')->whereIn('journal_id', $chunk)->delete();
-                        DB::table('journal_headers')->whereIn('journal_id', $chunk)->delete();
+                        \App\Support\ProtectedJournalQuery::table('journal_details')->whereIn('journal_id', $chunk)->delete();
+                        \App\Support\ProtectedJournalQuery::table('journal_headers')->whereIn('journal_id', $chunk)->delete();
                     }
                 }
 
@@ -268,7 +268,7 @@ class JournalCsvImportService
                 $detailsToInsert = [];
 
                 $datePrefix = 'JRN-' . date('Ymd') . '-';
-                $lastIdStr = DB::table('journal_headers')->where('journal_id', 'like', $datePrefix . '%')->orderByDesc('journal_id')->value('journal_id');
+                $lastIdStr = \App\Support\ProtectedJournalQuery::table('journal_headers')->where('journal_id', 'like', $datePrefix . '%')->orderByDesc('journal_id')->value('journal_id');
                 $seq = $lastIdStr ? (int) substr($lastIdStr, -6) : 0;
 
                 $now = now();
@@ -384,13 +384,13 @@ class JournalCsvImportService
                 }
 
                 if (!empty($headersToInsert)) {
-                    foreach (array_chunk($headersToInsert, 200) as $chunk) DB::table('journal_headers')->insert($chunk);
+                    foreach (array_chunk($headersToInsert, 200) as $chunk) \App\Support\ProtectedJournalQuery::table('journal_headers')->insert($chunk);
                 }
                 if (!empty($detailsToInsert)) {
-                    foreach (array_chunk($detailsToInsert, 200) as $chunk) DB::table('journal_details')->insert($chunk);
+                    foreach (array_chunk($detailsToInsert, 200) as $chunk) \App\Support\ProtectedJournalQuery::table('journal_details')->insert($chunk);
                 }
                 if (!empty($roundingEntries)) {
-                    foreach (array_chunk($roundingEntries, 200) as $chunk) DB::table('journal_details')->insert($chunk);
+                    foreach (array_chunk($roundingEntries, 200) as $chunk) \App\Support\ProtectedJournalQuery::table('journal_details')->insert($chunk);
                 }
 
                 DB::commit();
@@ -445,7 +445,7 @@ class JournalCsvImportService
 
         $journalIds = array_values($headerCache);
 
-        $details = DB::table('journal_details')
+        $details = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->join('accounts', 'journal_details.account_code', '=', 'accounts.account_code')
             ->whereIn('journal_details.journal_id', $journalIds)
             ->where('journal_details.position', 'DEBET')

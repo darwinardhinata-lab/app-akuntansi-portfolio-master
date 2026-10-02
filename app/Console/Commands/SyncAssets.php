@@ -15,7 +15,7 @@ class SyncAssets extends Command
         $items = JournalDetail::with('header')
             ->has('header')
             ->where('position', 'DEBET')
-            ->where('account_code', 'LIKE', '12%')
+            ->whereIn('account_code', array_keys(config('asset_coa.categories')))
             ->get();
 
         // FIX N+1: Kumpulkan data, gunakan upsert (1 query) bukan updateOrCreate per item
@@ -29,6 +29,7 @@ class SyncAssets extends Command
                 'journal_detail_id'  => $item->getKey(),
                 'asset_code'         => 'AST-' . $item->getKey() . '-' . date('Ymd', strtotime($tglBeli)),
                 'asset_name'         => $item->header->description ?: 'Aset Tetap Tanpa Nama',
+                'category' => null, // Finance must confirm category/expense explicitly.
                 'purchase_date'      => $tglBeli,
                 'purchase_price'     => $item->amount,
                 'useful_life_months' => 0,

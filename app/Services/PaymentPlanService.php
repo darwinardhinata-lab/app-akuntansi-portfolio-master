@@ -207,7 +207,7 @@ class PaymentPlanService
         DB::beginTransaction();
         try {
             // FIX C4: Gunakan kolom description bukan keterangan
-            $journals = DB::table('journal_headers')
+            $journals = \App\Support\ProtectedJournalQuery::table('journal_headers')
                 ->whereExists(function ($query) use ($no_transaksi) {
                     $query->select(DB::raw(1))
                         ->from('journal_details')
@@ -216,8 +216,8 @@ class PaymentPlanService
                 })->pluck('journal_id');
 
             if ($journals->isNotEmpty()) {
-                DB::table('journal_details')->whereIn('journal_id', $journals)->delete();
-                DB::table('journal_headers')->whereIn('journal_id', $journals)->delete();
+                \App\Support\ProtectedJournalQuery::table('journal_details')->whereIn('journal_id', $journals)->delete();
+                \App\Support\ProtectedJournalQuery::table('journal_headers')->whereIn('journal_id', $journals)->delete();
             }
 
             $pos = DB::table('purchase_orders')->where('no_transaksi_pp', $no_transaksi)->pluck('id');
@@ -268,7 +268,7 @@ class PaymentPlanService
                 $journalNo = "JRN-PP-" . date('Ymd') . "-" . substr(preg_replace('/[^0-9]/', '', $no_transaksi), -4);
 
                 // FIX C4: Gunakan kolom yang benar sesuai skema database
-                DB::table('journal_headers')->insert([
+                \App\Support\ProtectedJournalQuery::table('journal_headers')->insert([
                     'journal_id'       => $journalId,
                     'journal_no'     => $journalNo,
                     'transaction_date' => now()->toDateString(),
@@ -287,7 +287,7 @@ class PaymentPlanService
                     throw new \Exception("Akun {$accountCode} tidak ditemukan di master accounts.");
                 }
 
-                DB::table('journal_details')->insert([
+                \App\Support\ProtectedJournalQuery::table('journal_details')->insert([
                     'journal_id'   => $journalId,
                     'journal_no'   => $journalNo,
                     'account_code' => $accountCode,
@@ -306,7 +306,7 @@ class PaymentPlanService
                     throw new \Exception("Kode akun kas {$cashAccount} tidak ditemukan di master accounts.");
                 }
 
-                DB::table('journal_details')->insert([
+                \App\Support\ProtectedJournalQuery::table('journal_details')->insert([
                     'journal_id'   => $journalId,
                     'journal_no'   => $journalNo,
                     'account_code' => $cashAccount,

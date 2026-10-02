@@ -42,13 +42,13 @@ class CheckGrnReadiness extends Command
             foreach (DB::table('purchase_receipts')->orderBy('id')->cursor() as $r) {
                 $po = DB::table('purchase_orders')->where('id', $r->purchase_order_id)->first();
                 $bill = DB::table('purchase_bills')->where('id', $r->purchase_bill_id)->first();
-                $journal = DB::table('journal_headers')->where('journal_id', $r->journal_id)->first();
+                $journal = \App\Support\ProtectedJournalQuery::table('journal_headers')->where('journal_id', $r->journal_id)->first();
                 if ((int) $r->company_id !== (int) $company->id || $r->status !== 'POSTED' || ! $r->idempotency_key || ! $r->payload_hash
                     || ! $po || $po->receipt_mode !== 'GRN_V1' || ! $bill || ! $journal
                     || $bill->journal_id !== $r->journal_id || $journal->evidence_number !== $bill->bill_number) {
                     throw new \RuntimeException('Linkage GRN tidak valid: ID '.$r->id);
                 }
-                $lines = DB::table('journal_details')->where('journal_id', $r->journal_id)
+                $lines = \App\Support\ProtectedJournalQuery::table('journal_details')->where('journal_id', $r->journal_id)
                     ->orderBy('position')->get(['account_code', 'position', 'amount']);
                 $billDetailAccount = DB::table('purchase_bill_details')
                     ->where('purchase_bill_id', $r->purchase_bill_id)->value('account_code');

@@ -17,6 +17,7 @@
 
     <form action="{{ route('invoice.store') }}" method="POST" id="form-invoice">
         @csrf
+        @include('sales_invoice.semantic_field')
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-file-invoice-dollar text-primary me-2"></i>{{ __('erp.create_sales_invoice_direct') }}</h4>
             <div>

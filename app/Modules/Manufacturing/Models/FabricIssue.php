@@ -13,6 +13,7 @@ class FabricIssue extends Model
     protected $table = 'mfg_fabric_issues';
 
     protected $fillable = [
+        'source_account_code',
         'issue_number',
         'issue_date',
         'processing_order_id',

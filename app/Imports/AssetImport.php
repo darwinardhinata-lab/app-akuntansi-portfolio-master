@@ -66,7 +66,8 @@ class AssetImport implements ToCollection, WithStartRow, WithCustomCsvSettings
                 $quantity = (int) $this->getCellValue($r, 4, '1');
                 $purchaseDate = $this->getCellValue($r, 5);
                 $purchasePrice = NumberParser::parseDecimal($this->getCellValue($r, 6));
-                $accumulation = (int) $this->getCellValue($r, 7);
+                // Column 7 is a monetary opening accumulation, NOT useful-life months.
+                $accumulation = NumberParser::parseDecimal($this->getCellValue($r, 7));
                 $residualValue = NumberParser::parseDecimal($this->getCellValue($r, 9));
                 $status = $this->getCellValue($r, 10);
 
@@ -94,23 +95,29 @@ class AssetImport implements ToCollection, WithStartRow, WithCustomCsvSettings
                 $isActive = strtolower($status) === 'aktif' ? 1 : 0;
 
                 // Use updateOrCreate to handle duplicates gracefully
+                if ($accumulation != 0) {
+                    $this->errors[] = "Aset $assetCode memiliki akumulasi historis; gunakan jalur saldo awal yang disahkan, bukan import ini.";
+                    $this->skippedCount++;
+                    continue;
+                }
                 $assetData = [
                     'asset_code'         => $assetCode,
                     'asset_name'         => $assetName,
-                    'category'           => $category ?: null,
+                    'category'           => null, // Explicit MGI selection is required after import.
                     'quantity'           => max(1, $quantity),
                     'purchase_date'      => $formattedDate,
                     'purchase_price'     => $purchasePrice,
                     'residual_value'     => $residualValue,
-                    'useful_life_months' => $accumulation,
+                    'useful_life_months' => 0,
                     'is_active'          => $isActive,
                 ];
 
                 // Check if asset_code already exists
                 $existingAsset = Asset::where('asset_code', $assetCode)->first();
                 if ($existingAsset) {
-                    // Update existing
-                    $existingAsset->update($assetData);
+                    $this->errors[] = "Aset $assetCode sudah ada; import tidak boleh menimpa histori/configurasi.";
+                    $this->skippedCount++;
+                    continue;
                 } else {
                     // Create new
                     Asset::create($assetData);

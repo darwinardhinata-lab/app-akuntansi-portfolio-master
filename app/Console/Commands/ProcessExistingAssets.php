@@ -17,7 +17,7 @@ class ProcessExistingAssets extends Command
     {
         $this->info('Memproses journal entries dengan akun 12000...');
 
-        $details = DB::table('journal_details')
+        $details = \App\Support\ProtectedJournalQuery::table('journal_details')
             ->where('account_code', '12000')
             ->where('position', 'DEBET')
             ->select(

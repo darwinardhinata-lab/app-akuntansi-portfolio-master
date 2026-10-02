@@ -502,47 +502,30 @@
         </div>
 
         {{-- ================================================================
-             SECTION: OUTFLOW (PURCHASE)
+             SECTION: PURCHASE (existing routes only)
         ================================================================ --}}
         <div class="nav-section">
-            <a href="#sectionOutflow" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('po.*') || request()->routeIs('payment.*') || request()->routeIs('purchase-bills.*') || request()->routeIs('purchase-returns.*') || request()->routeIs('reports.ap_dp') || request()->routeIs('reports.ap_subledger') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('po.*') || request()->routeIs('payment.*') || request()->routeIs('purchase-bills.*') || request()->routeIs('purchase-returns.*') || request()->routeIs('reports.ap_dp') || request()->routeIs('reports.ap_subledger') ? 'true' : 'false' }}">
+            <a href="#sectionOutflow" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('po.*', 'grn.*', 'purchase-returns.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('po.*', 'grn.*', 'purchase-returns.*') ? 'true' : 'false' }}">
                 <span class="section-icon"><i class="fa-solid fa-arrow-trend-down text-danger"></i></span>
-                <span class="section-text">{{ __('erp.expense_outflow') }}</span>
+                <span class="section-text">{{ __('erp.purchase_navigation') }}</span>
                 <i class="fa-solid fa-chevron-down section-chevron"></i>
             </a>
-            <div class="collapse section-collapse {{ request()->routeIs('po.*') || request()->routeIs('payment.*') || request()->routeIs('purchase-bills.*') || request()->routeIs('purchase-returns.*') || request()->routeIs('reports.ap_dp') || request()->routeIs('reports.ap_subledger') ? 'show' : '' }}" id="sectionOutflow">
+            <div class="collapse section-collapse {{ request()->routeIs('po.*', 'grn.*', 'purchase-returns.*') ? 'show' : '' }}" id="sectionOutflow">
                 <a href="{{ route('po.index') }}" class="nav-link {{ request()->routeIs('po.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-cart-shopping text-warning"></i></span>
                     <span class="nav-text">{{ __('erp.purchase_order') }}</span>
                 </a>
-                <a href="{{ route('payment.index') }}" class="nav-link {{ request()->routeIs('payment.*') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-money-check-dollar text-danger"></i></span>
-                    <span class="nav-text">{{ __('erp.payment_plan') }}</span>
+                @if(config('platform.order_company_scope_enabled'))
+                <a href="{{ route('grn.index') }}" class="nav-link {{ request()->routeIs('grn.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-truck-ramp-box text-warning"></i></span>
+                    <span class="nav-text">{{ __('erp.purchase_receipt_navigation') }}</span>
                 </a>
-                <a href="{{ route('purchase-bills.index') }}" class="nav-link {{ request()->routeIs('purchase-bills.*') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-file-invoice text-warning"></i></span>
-                    <span class="nav-text">{{ __('erp.purchase_bill') }}</span>
-                </a>
+                @endif
                 <a href="{{ route('purchase-returns.index') }}" class="nav-link {{ request()->routeIs('purchase-returns.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-arrow-rotate-right text-warning"></i></span>
                     <span class="nav-text">{{ __('erp.purchase_return') }}</span>
                 </a>
 
-                <a href="#menuApHutang" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('reports.ap_dp') || request()->routeIs('reports.ap_subledger') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-file-invoice text-danger"></i></span>
-                    <span class="nav-text">{{ __('erp.ap_dp') }}</span>
-                    <i class="fa-solid fa-chevron-down nav-chevron"></i>
-                </a>
-                <div class="collapse nav-submenu {{ request()->routeIs('reports.ap_dp') || request()->routeIs('reports.ap_subledger') ? 'show' : '' }}" id="menuApHutang">
-                    <a href="{{ route('reports.ap_dp') }}" class="nav-link {{ request()->routeIs('reports.ap_dp') ? 'active' : '' }}">
-                        <span class="nav-icon"><i class="fa-solid fa-file-invoice text-danger"></i></span>
-                        <span class="nav-text">{{ __('erp.ap_dp') }}</span>
-                    </a>
-                    <a href="{{ route('reports.ap_subledger') }}" class="nav-link {{ request()->routeIs('reports.ap_subledger') ? 'active' : '' }}">
-                        <span class="nav-icon"><i class="fa-solid fa-receipt text-danger"></i></span>
-                        <span class="nav-text">{{ __('erp.ap_subledger') }}</span>
-                    </a>
-                </div>
             </div>
         </div>
 
@@ -686,13 +669,21 @@
         {{-- ================================================================
              SECTION: AKUNTANSI
         ================================================================ --}}
+        @php
+            $financeNavigationActive = request()->routeIs(
+                'account.*', 'helper.*', 'tax.*', 'jurnal.*', 'aset.*',
+                'buku-besar.*', 'laba-rugi.*', 'neraca.*', 'arus-kas.*',
+                'reports.cogs', 'reports.tags', 'purchase-bills.*', 'payment.*',
+                'reports.ap_dp', 'reports.ap_subledger'
+            );
+        @endphp
         <div class="nav-section">
-            <a href="#sectionAkuntansi" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('account.*') || request()->routeIs('helper.*') || request()->routeIs('tax.*') || request()->routeIs('jurnal.*') || request()->routeIs('aset.*') || request()->routeIs('buku-besar.*') || request()->routeIs('laba-rugi.*') || request()->routeIs('neraca.*') || request()->routeIs('arus-kas.*') || request()->routeIs('reports.cogs') || request()->routeIs('reports.tags') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('account.*') || request()->routeIs('helper.*') || request()->routeIs('tax.*') || request()->routeIs('jurnal.*') || request()->routeIs('aset.*') || request()->routeIs('buku-besar.*') || request()->routeIs('laba-rugi.*') || request()->routeIs('neraca.*') || request()->routeIs('arus-kas.*') || request()->routeIs('reports.cogs') || request()->routeIs('reports.tags') ? 'true' : 'false' }}">
+            <a href="#sectionAkuntansi" data-bs-toggle="collapse" class="section-toggle {{ $financeNavigationActive ? 'active' : '' }}" aria-expanded="{{ $financeNavigationActive ? 'true' : 'false' }}">
                 <span class="section-icon"><i class="fa-solid fa-calculator text-primary"></i></span>
-                <span class="section-text">{{ __('erp.accounting') }}</span>
+                <span class="section-text">{{ __('erp.finance_navigation') }}</span>
                 <i class="fa-solid fa-chevron-down section-chevron"></i>
             </a>
-            <div class="collapse section-collapse {{ request()->routeIs('account.*') || request()->routeIs('helper.*') || request()->routeIs('tax.*') || request()->routeIs('jurnal.*') || request()->routeIs('aset.*') || request()->routeIs('buku-besar.*') || request()->routeIs('laba-rugi.*') || request()->routeIs('neraca.*') || request()->routeIs('arus-kas.*') || request()->routeIs('reports.cogs') || request()->routeIs('reports.tags') ? 'show' : '' }}" id="sectionAkuntansi">
+            <div class="collapse section-collapse {{ $financeNavigationActive ? 'show' : '' }}" id="sectionAkuntansi">
                 <div class="nav-sub-label">{{ __('erp.master_data') }}</div>
                 <a href="{{ route('account.index') }}" class="nav-link {{ request()->routeIs('account.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-list-check"></i></span>
@@ -709,12 +700,23 @@
 
                 <hr class="nav-divider-inner">
 
-                <div class="nav-sub-label">{{ __('erp.transaction') }}</div>
+                <div class="nav-sub-label">{{ __('erp.journal_navigation') }}</div>
                 <a href="{{ route('jurnal.index') }}" class="nav-link {{ request()->routeIs('jurnal.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-book"></i></span>
                     <span class="nav-text">{{ __('erp.general_journal') }}</span>
                 </a>
 
+                <div class="nav-sub-label">{{ __('erp.ap_navigation') }}</div>
+                <a href="{{ route('purchase-bills.index') }}" class="nav-link {{ request()->routeIs('purchase-bills.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-file-invoice text-warning"></i></span>
+                    <span class="nav-text">{{ __('erp.purchase_bill') }}</span>
+                </a>
+                <a href="{{ route('payment.index') }}" class="nav-link {{ request()->routeIs('payment.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-money-check-dollar text-danger"></i></span>
+                    <span class="nav-text">{{ __('erp.payment_plan') }}</span>
+                </a>
+
+                <div class="nav-sub-label">{{ __('erp.fixed_asset') }}</div>
                 <a href="#menuAset" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('aset.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span>
                     <span class="nav-text">{{ __('erp.fixed_asset') }}</span>
@@ -734,6 +736,19 @@
                 <hr class="nav-divider-inner">
 
                 <div class="nav-sub-label">{{ __('erp.reports') }}</div>
+                <a href="#menuApHutang" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('reports.ap_dp', 'reports.ap_subledger') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('reports.ap_dp', 'reports.ap_subledger') ? 'true' : 'false' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-file-invoice text-danger"></i></span>
+                    <span class="nav-text">{{ __('erp.ap_dp') }}</span>
+                    <i class="fa-solid fa-chevron-down nav-chevron"></i>
+                </a>
+                <div class="collapse nav-submenu {{ request()->routeIs('reports.ap_dp', 'reports.ap_subledger') ? 'show' : '' }}" id="menuApHutang">
+                    <a href="{{ route('reports.ap_dp') }}" class="nav-link {{ request()->routeIs('reports.ap_dp') ? 'active' : '' }}">
+                        <span class="nav-text">{{ __('erp.ap_dp') }}</span>
+                    </a>
+                    <a href="{{ route('reports.ap_subledger') }}" class="nav-link {{ request()->routeIs('reports.ap_subledger') ? 'active' : '' }}">
+                        <span class="nav-text">{{ __('erp.ap_subledger') }}</span>
+                    </a>
+                </div>
                 <a href="{{ route('buku-besar.index') }}" class="nav-link {{ request()->routeIs('buku-besar.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
                     <span class="nav-text">{{ __('erp.general_ledger') }}</span>
@@ -776,7 +791,7 @@
                     <a href="{{ route('arus-kas.index', ['tab' => 'direct']) }}" class="nav-link {{ request('tab', 'direct') == 'direct' && request()->routeIs('arus-kas.*') ? 'active' : '' }}">
                         <span class="nav-icon"><i class="fa-solid fa-money-bill-transfer"></i></span><span class="nav-text">{{ __('erp.direct_method') }}</span>
                     </a>
-                    <a href="{{ route('arus-kas.index', ['tab' => 'indirect']) }}" class="nav-link {{ request('tab') == 'indirect' ? 'active' : '' }}">
+                    <a href="{{ route('arus-kas.index', ['tab' => 'indirect']) }}" class="nav-link {{ request()->routeIs('arus-kas.*') && request('tab') == 'indirect' ? 'active' : '' }}">
                         <span class="nav-icon"><i class="fa-solid fa-calculator"></i></span><span class="nav-text">{{ __('erp.indirect_method') }}</span>
                     </a>
                 </div>

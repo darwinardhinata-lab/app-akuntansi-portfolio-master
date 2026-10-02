@@ -26,7 +26,11 @@ class CompanyCoaResolver
         }
 
         $account = Account::query()->find($mapping->account_code);
-        if (! $account || $account->normal_balance !== $definition['normal_balance']) {
+        $expectedReport = in_array($semanticKey, ['sales_local', 'sales_export', 'cogs', 'inventory_adjustment', 'auxiliary_material_expense'], true)
+            ? 'LABA RUGI' : 'NERACA';
+        if (! $account || $account->normal_balance !== $definition['normal_balance']
+            || $account->report_pos !== $expectedReport
+            || $account->account_code !== $definition['mgi_account']) {
             throw new RuntimeException('Mapping COA tidak valid untuk '.$semanticKey.'.');
         }
 

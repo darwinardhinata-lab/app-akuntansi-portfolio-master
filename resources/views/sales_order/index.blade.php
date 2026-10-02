@@ -229,6 +229,7 @@
                                 <div class="modal-dialog modal-xl modal-dialog-centered">
                                     <form action="{{ route('so.ship', $o->id) }}" method="POST" class="modal-content border-0 shadow-lg">
                                         @csrf
+                                        @include('sales_invoice.semantic_field')
                                         <div class="modal-header bg-success text-white py-3">
                                             <h5 class="modal-title fw-bold"><i class="fa-solid fa-boxes-packing me-2"></i> {{ __('erp.issue_sales_invoice_actual_ship') }}</h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>

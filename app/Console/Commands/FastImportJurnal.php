@@ -46,7 +46,7 @@ class FastImportJurnal extends Command
         $this->info("⏳ Memuat seluruh Nomor Bukti ke dalam Memori...");
         
         // OPTIMASI 1: Tarik SEMUA nomor bukti yang sudah ada sekaligus (Bebas Query berulang)
-        $headers = DB::table('journal_headers')->select('evidence_number', 'journal_id')->get();
+        $headers = \App\Support\ProtectedJournalQuery::table('journal_headers')->select('evidence_number', 'journal_id')->get();
         $headerCache = [];
         foreach($headers as $h) {
             $headerCache[$h->evidence_number] = $h->journal_id;
@@ -104,11 +104,11 @@ class FastImportJurnal extends Command
         $evList = array_keys($evidenceNumbersInFile);
         $deletedCount = 0;
         foreach (array_chunk($evList, 500) as $chunk) {
-            $idsToDelete = DB::table('journal_headers')->whereIn('evidence_number', $chunk)->pluck('journal_id');
+            $idsToDelete = \App\Support\ProtectedJournalQuery::table('journal_headers')->whereIn('evidence_number', $chunk)->pluck('journal_id');
             if ($idsToDelete->isNotEmpty()) {
                 \App\Support\GrnProtection::journals($idsToDelete);
-                DB::table('journal_details')->whereIn('journal_id', $idsToDelete)->delete();
-                DB::table('journal_headers')->whereIn('journal_id', $idsToDelete)->delete();
+                \App\Support\ProtectedJournalQuery::table('journal_details')->whereIn('journal_id', $idsToDelete)->delete();
+                \App\Support\ProtectedJournalQuery::table('journal_headers')->whereIn('journal_id', $idsToDelete)->delete();
                 $deletedCount += $idsToDelete->count();
                 // Refresh headerCache: hapus evidence_number yang sudah di-delete agar dianggap "baru"
                 foreach ($chunk as $ev) {
@@ -124,7 +124,7 @@ class FastImportJurnal extends Command
 
         // FIX: PRE-CALCULATE ID JURNAL TERAKHIR AGAR TIDAK QUERY BERULANG DI DALAM LOOP
         $datePrefix = 'JRN-' . date('Ymd') . '-';
-        $lastIdStr = DB::table('journal_headers')
+        $lastIdStr = \App\Support\ProtectedJournalQuery::table('journal_headers')
                         ->where('journal_id', 'like', $datePrefix . '%')
                         ->orderByDesc('journal_id')
                         ->value('journal_id');
@@ -236,12 +236,12 @@ class FastImportJurnal extends Command
                     // Chunk headers to avoid "too many placeholders" error (MySQL limit: 65,535)
                     if (count($headersToInsert) > 0) {
                         foreach (array_chunk($headersToInsert, 500) as $chunk) {
-                            DB::table('journal_headers')->insert($chunk);
+                            \App\Support\ProtectedJournalQuery::table('journal_headers')->insert($chunk);
                         }
                         $headersToInsert = [];
                     }
 
-                    DB::table('journal_details')->insert($detailsToInsert);
+                    \App\Support\ProtectedJournalQuery::table('journal_details')->insert($detailsToInsert);
                     $detailsToInsert = []; 
                     $this->info("🔄 {$count} baris ditampung ke memori sementara...");
                 }
@@ -250,11 +250,11 @@ class FastImportJurnal extends Command
             // FIX #1390: INSERT SISA DATA DI LUAR LOOP - Chunk untuk menghindari error "too many placeholders"
             if (count($headersToInsert) > 0) {
                 foreach (array_chunk($headersToInsert, 500) as $chunk) {
-                    DB::table('journal_headers')->insert($chunk);
+                    \App\Support\ProtectedJournalQuery::table('journal_headers')->insert($chunk);
                 }
             }
             if (count($detailsToInsert) > 0) {
-                DB::table('journal_details')->insert($detailsToInsert);
+                \App\Support\ProtectedJournalQuery::table('journal_details')->insert($detailsToInsert);
             }
 
             // OPTIMASI 3: Tumpahkan semua data dari RAM ke Harddisk di detik terakhir!

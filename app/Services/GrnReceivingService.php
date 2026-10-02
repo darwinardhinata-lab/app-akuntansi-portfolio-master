@@ -65,7 +65,7 @@ class GrnReceivingService
                 throw new \RuntimeException('GRN V1 hanya pembelian hutang tanpa uang muka, pajak, atau diskon; alokasi lanjut belum didukung.');
             }
             if (DB::table('purchase_bills')->where('bill_number', $bill)->exists()
-                || DB::table('journal_headers')->where('evidence_number', $bill)->exists()
+                || \App\Support\ProtectedJournalQuery::table('journal_headers')->where('evidence_number', $bill)->exists()
                 || DB::table('inventory_ledgers')->where('evidence_number', $bill)->exists()) {
                 throw new \RuntimeException('Nomor Bill sudah digunakan. Gunakan nomor berbeda untuk penerimaan berbeda.');
             }
