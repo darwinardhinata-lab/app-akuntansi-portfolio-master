@@ -36,6 +36,8 @@ class MaterialProcurementLifecycleTest extends TestCase
         config([
             'platform.pr_create_user_ids' => [(string) $this->prCreator->id],
             'platform.pr_approve_user_ids' => [(string) $this->prApprover->id],
+            'platform.po_create_user_ids' => [(string) $this->prCreator->id],
+            'platform.po_approve_user_ids' => [(string) $this->prApprover->id],
         ]);
         $this->yarnId = Yarn::create(['yarn_code' => 'YARN-M2', 'yarn_type' => 'Cotton', 'unit' => 'KGS'])->id;
         $this->supplierId = Supplier::create(['supplier_code' => 'SUP-M2', 'supplier_name' => 'Supplier Raw Material', 'supplier_type' => 'RAW_MATERIAL'])->id;
@@ -49,10 +51,10 @@ class MaterialProcurementLifecycleTest extends TestCase
         $this->service->approveRequest($pr->id, $this->prApprover->id);
 
         $detail = $pr->fresh('details')->details->sole();
-        $po = $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$this->item(40) + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-28']);
+        $po = $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$this->item(40) + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-28', 'created_by' => $this->prCreator->id]);
         $this->assertSame('DRAFT', $po->approval_status);
-        $this->service->submitOrder($po->id, null);
-        $this->service->approveOrder($po->id, null);
+        $this->service->submitOrder($po->id, $this->prCreator->id);
+        $this->service->approveOrder($po->id, $this->prApprover->id);
 
         $this->assertDatabaseHas('mfg_material_purchase_orders', ['id' => $po->id, 'approval_status' => 'APPROVED', 'fulfillment_status' => 'OPEN', 'status' => 'APPROVED']);
         $this->assertDatabaseHas('mfg_material_purchase_order_details', ['po_id' => $po->id, 'source_request_detail_id' => $detail->id, 'qty' => 40]);
@@ -68,7 +70,7 @@ class MaterialProcurementLifecycleTest extends TestCase
         $pr = $this->service->createRequest(['request_date' => '2026-09-28', 'created_by' => $this->prCreator->id], [$this->item(10)]);
         $detail = $pr->fresh('details')->details->sole();
         $this->expectExceptionMessage('Material PO harus berasal dari PR APPROVED');
-        $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$this->item(10) + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-28']);
+        $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$this->item(10) + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-28', 'created_by' => $this->prCreator->id]);
     }
 
     public function test_po_cannot_exceed_remaining_approved_pr_quantity(): void
@@ -79,7 +81,7 @@ class MaterialProcurementLifecycleTest extends TestCase
         $detail = $pr->fresh('details')->details->sole();
 
         $this->expectExceptionMessage('Detail Material PO harus berasal dari sisa detail PR');
-        $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$this->item(11) + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-28']);
+        $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$this->item(11) + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-28', 'created_by' => $this->prCreator->id]);
     }
 
     public function test_inactive_material_master_or_non_raw_material_supplier_is_rejected(): void
@@ -96,7 +98,7 @@ class MaterialProcurementLifecycleTest extends TestCase
         $this->service->rejectRequest($pr->id, 'Tidak diperlukan', $this->prApprover->id);
 
         $this->expectExceptionMessage('Material PO harus berasal dari PR APPROVED');
-        $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$this->item(5) + ['source_request_detail_id' => $pr->fresh('details')->details->sole()->id]], ['po_date' => '2026-09-28']);
+        $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$this->item(5) + ['source_request_detail_id' => $pr->fresh('details')->details->sole()->id]], ['po_date' => '2026-09-28', 'created_by' => $this->prCreator->id]);
     }
 
     public function test_authenticated_user_can_open_material_procurement_pages(): void
@@ -222,7 +224,7 @@ class MaterialProcurementLifecycleTest extends TestCase
         $this->service->submitRequest($pr->id, $this->prCreator->id);
         $this->service->approveRequest($pr->id, $this->prApprover->id);
         $detail = $pr->fresh('details')->details->sole();
-        $po = $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$item + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-30']);
+        $po = $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$item + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-30', 'created_by' => $this->prCreator->id]);
         $this->assertDatabaseHas('mfg_material_purchase_order_details', ['po_id' => $po->id, 'item_type' => 'AUXILIARY', 'auxiliary_material_id' => $auxiliary->id]);
     }
 

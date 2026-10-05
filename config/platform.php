@@ -1,6 +1,16 @@
 <?php
 
 return [
+    // FIX: akses PO memerlukan ID eksplisit; semua allowlist default kosong.
+    'po_view_user_ids' => array_values(array_filter(array_map(
+        'trim', explode(',', (string) env('PO_VIEW_USER_IDS', ''))
+    ), fn ($id) => ctype_digit($id) && (int) $id > 0)),
+    'po_create_user_ids' => array_values(array_filter(array_map(
+        'trim', explode(',', (string) env('PO_CREATE_USER_IDS', ''))
+    ), fn ($id) => ctype_digit($id) && (int) $id > 0)),
+    'po_approve_user_ids' => array_values(array_filter(array_map(
+        'trim', explode(',', (string) env('PO_APPROVE_USER_IDS', ''))
+    ), fn ($id) => ctype_digit($id) && (int) $id > 0)),
     // FIX: akses PR hanya melalui ID eksplisit; seluruh allowlist default kosong.
     'pr_view_user_ids' => array_values(array_filter(array_map(
         'trim', explode(',', (string) env('PR_VIEW_USER_IDS', ''))
