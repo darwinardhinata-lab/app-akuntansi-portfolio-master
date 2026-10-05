@@ -73,8 +73,13 @@ Route::prefix('manufaktur/material-order')->name('mfg.material-orders.')->contro
     Route::get('/', 'orderIndex')->name('index');
     Route::get('/create', 'orderCreate')->name('create');
     Route::post('/', 'orderStore')->name('store');
+    Route::get('/{id}/edit', 'orderEdit')->name('edit');
+    Route::put('/{id}', 'orderUpdate')->name('update');
+    Route::get('/{id}', 'orderShow')->name('show');
     Route::post('/{id}/submit', 'orderSubmit')->name('submit');
     Route::post('/{id}/approve', 'orderApprove')->name('approve');
+    Route::post('/{id}/reject', 'orderReject')->name('reject');
+    Route::post('/{id}/revise', 'orderRevise')->name('revise');
 });
 
 Route::prefix('manufaktur/knit-order')->name('mfg.knit-orders.')->controller(KnitOrderController::class)->group(function () {

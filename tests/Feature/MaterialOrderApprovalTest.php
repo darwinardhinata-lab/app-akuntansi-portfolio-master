@@ -151,6 +151,61 @@ class MaterialOrderApprovalTest extends TestCase
         }
     }
 
+    public function test_http_read_edit_and_revision_deny_users_without_permission(): void
+    {
+        $po = $this->order();
+        foreach ([$this->outsider, User::factory()->create(['role' => 'ADMIN'])] as $user) {
+            $this->actingAs($user)->get(route('mfg.material-orders.index'))->assertForbidden();
+            $this->get(route('mfg.material-orders.show', $po->id))->assertForbidden();
+            $this->get(route('mfg.material-orders.edit', $po->id))->assertForbidden();
+            $this->put(route('mfg.material-orders.update', $po->id), [])->assertForbidden();
+            $this->post(route('mfg.material-orders.revise', $po->id), [])->assertForbidden();
+        }
+        $this->assertSame('DRAFT', $po->fresh()->approval_status);
+        $this->assertSame(1, $po->histories()->count());
+    }
+
+    public function test_http_transitions_use_authenticated_actor_and_enforce_sod(): void
+    {
+        $po = $this->order();
+        $this->actingAs($this->creator)->put(route('mfg.material-orders.update', $po->id), [
+            'po_date' => '2026-10-06', 'items' => [$this->orderItem(12)], 'remarks' => 'HTTP edit PO',
+            'created_by' => $this->outsider->id, 'actor_id' => $this->outsider->id, 'approval_status' => 'APPROVED', 'revision_no' => 99,
+        ])->assertRedirect()->assertSessionHas('success');
+        $this->assertSame($this->creator->id, $po->fresh()->created_by);
+        $this->assertSame('DRAFT', $po->fresh()->approval_status);
+        $this->assertSame(0, $po->fresh()->revision_no);
+        $this->assertHistory($po, 'EDITED', 'DRAFT', 'DRAFT', $this->creator->id);
+        $this->post(route('mfg.material-orders.submit', $po->id), ['actor_id' => $this->outsider->id])->assertSessionHas('success');
+        $this->assertEquals($this->creator->id, $po->fresh()->submitted_by);
+        config(['platform.po_approve_user_ids' => [(string) $this->creator->id, (string) $this->approver->id]]);
+        $this->post(route('mfg.material-orders.approve', $po->id))->assertForbidden();
+        $this->post(route('mfg.material-orders.reject', $po->id), ['rejection_reason' => 'Alasan valid'])->assertForbidden();
+        $this->actingAs($this->approver)->post(route('mfg.material-orders.reject', $po->id), ['rejection_reason' => '   '])->assertSessionHasErrors('rejection_reason');
+        $this->post(route('mfg.material-orders.reject', $po->id), ['rejection_reason' => 'Periksa harga', 'actor_id' => $this->creator->id])->assertSessionHas('success');
+        $this->assertEquals($this->approver->id, $po->fresh()->rejected_by);
+        $this->actingAs($this->creator)->post(route('mfg.material-orders.revise', $po->id), ['reason' => 'Pendek'])->assertSessionHasErrors('reason');
+        $this->post(route('mfg.material-orders.revise', $po->id), ['reason' => 'Harga telah diperiksa kembali', 'actor_id' => $this->outsider->id])->assertSessionHas('success');
+        $this->assertHistory($po, 'REVISED', 'REJECTED', 'DRAFT', $this->creator->id, 'Harga telah diperiksa kembali', 1);
+        $this->post(route('mfg.material-orders.submit', $po->id))->assertSessionHas('success');
+        $this->actingAs($this->approver)->post(route('mfg.material-orders.approve', $po->id), ['actor_id' => $this->creator->id])->assertSessionHas('success');
+        $this->assertHistory($po, 'APPROVED', 'SUBMITTED', 'APPROVED', $this->approver->id, null, 1);
+    }
+
+    public function test_http_denies_non_owner_and_received_order_changes(): void
+    {
+        $po = $this->order();
+        config(['platform.po_create_user_ids' => [(string) $this->creator->id, (string) $this->outsider->id]]);
+        $this->actingAs($this->outsider)->post(route('mfg.material-orders.submit', $po->id))->assertForbidden();
+        $this->get(route('mfg.material-orders.edit', $po->id))->assertForbidden();
+        $this->put(route('mfg.material-orders.update', $po->id), [])->assertForbidden();
+        $po->details()->sole()->update(['qty_received' => 1]);
+        $this->actingAs($this->creator)->get(route('mfg.material-orders.edit', $po->id))->assertForbidden();
+        $this->put(route('mfg.material-orders.update', $po->id), [])->assertForbidden();
+        $po->update(['approval_status' => 'REJECTED']);
+        $this->post(route('mfg.material-orders.revise', $po->id), ['reason' => 'Alasan revisi yang valid'])->assertForbidden();
+    }
+
     public function test_sod_denies_po_creator_and_submitter_but_allows_source_pr_creator(): void
     {
         $po = $this->submitted();

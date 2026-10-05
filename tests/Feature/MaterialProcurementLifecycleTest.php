@@ -107,6 +107,8 @@ class MaterialProcurementLifecycleTest extends TestCase
         // FIX: izin create eksplisit agar halaman create tetap terbuka setelah otorisasi Tahap 2.
         config(['platform.pr_create_user_ids' => [(string) $user->id]]);
 
+        // FIX: halaman PO juga membutuhkan akses eksplisit, terpisah dari izin PR.
+        config(['platform.po_view_user_ids' => [(string) $user->id]]);
         $this->actingAs($user)->get(route('mfg.material-requests.index'))->assertOk()->assertSee('Purchase Request');
         $this->actingAs($user)->get(route('mfg.material-requests.create'))->assertOk()->assertSee('Buat Material Purchase Request');
         $this->actingAs($user)->get(route('mfg.material-orders.index'))->assertOk()->assertSee('Material Purchase Order');

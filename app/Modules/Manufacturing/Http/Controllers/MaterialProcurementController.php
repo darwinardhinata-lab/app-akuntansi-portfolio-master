@@ -12,6 +12,7 @@ use App\Modules\Manufacturing\Models\MaterialPurchaseRequest;
 use App\Modules\Manufacturing\Models\Supplier;
 use App\Modules\Manufacturing\Models\Yarn;
 use App\Modules\Manufacturing\Services\MaterialProcurementService;
+use App\Support\MaterialOrderAuthorization;
 use App\Support\MaterialRequestAuthorization;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
@@ -173,6 +174,7 @@ class MaterialProcurementController extends Controller
 
     public function orderIndex(Request $request)
     {
+        abort_unless(MaterialOrderAuthorization::canView($request->user()), 403);
         $orders = MaterialPurchaseOrder::with(['supplier', 'details'])->orderByDesc('id')->paginate(30);
 
         return view('manufacturing.material_procurement.order_index', compact('orders'));
@@ -180,6 +182,7 @@ class MaterialProcurementController extends Controller
 
     public function orderCreate(Request $request)
     {
+        abort_unless(MaterialOrderAuthorization::canCreate($request->user()), 403);
         $request->validate(['request_id' => 'required|exists:mfg_material_purchase_requests,id']);
         $materialRequest = MaterialPurchaseRequest::with('details')->findOrFail($request->integer('request_id'));
         abort_unless($materialRequest->approval_status === MaterialPurchaseRequest::APPROVED, 409, 'Material PO hanya dari PR APPROVED.');
@@ -189,6 +192,7 @@ class MaterialProcurementController extends Controller
 
     public function orderStore(Request $request)
     {
+        abort_unless(MaterialOrderAuthorization::canCreate($request->user()), 403);
         $request->validate(['request_id' => 'required|exists:mfg_material_purchase_requests,id', 'supplier_id' => 'required|exists:mfg_suppliers,id', 'po_date' => 'required|date']);
         $data = $this->validateItems($request, true);
         try {
@@ -196,6 +200,8 @@ class MaterialProcurementController extends Controller
             SystemLog::record('CREATE', 'Manufacturing Material Purchase Order', 'Membuat Material PO: '.$po->po_number);
 
             return redirect()->route('mfg.material-orders.index')->with('success', 'Material PO '.$po->po_number.' dibuat sebagai DRAFT.');
+        } catch (AuthorizationException $e) {
+            throw $e;
         } catch (\Throwable $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }
@@ -203,12 +209,73 @@ class MaterialProcurementController extends Controller
 
     public function orderSubmit(int $id)
     {
+        abort_unless(MaterialOrderAuthorization::canSubmit(auth()->user(), MaterialPurchaseOrder::findOrFail($id)), 403);
+
         return $this->transition(fn () => $this->service->submitOrder($id, auth()->id()), 'SUBMIT', 'Material PO disubmit.');
     }
 
     public function orderApprove(int $id)
     {
+        abort_unless(MaterialOrderAuthorization::canApprove(auth()->user(), MaterialPurchaseOrder::findOrFail($id)), 403);
+
         return $this->transition(fn () => $this->service->approveOrder($id, auth()->id()), 'APPROVE', 'Material PO disetujui.');
+    }
+
+    public function orderShow(int $id)
+    {
+        abort_unless(MaterialOrderAuthorization::canView(auth()->user()), 403);
+        $materialOrder = MaterialPurchaseOrder::with(['supplier', 'details', 'histories.actor'])->findOrFail($id);
+
+        return view('manufacturing.material_procurement.order_show', compact('materialOrder'));
+    }
+
+    public function orderEdit(int $id)
+    {
+        $materialOrder = MaterialPurchaseOrder::with('details')->findOrFail($id);
+        abort_unless(MaterialOrderAuthorization::canEdit(auth()->user(), $materialOrder), 403);
+        $this->authorizeUnreceivedOrder($materialOrder);
+
+        return view('manufacturing.material_procurement.order_edit', $this->masters() + compact('materialOrder'));
+    }
+
+    public function orderUpdate(Request $request, int $id)
+    {
+        $materialOrder = MaterialPurchaseOrder::findOrFail($id);
+        abort_unless(MaterialOrderAuthorization::canEdit($request->user(), $materialOrder), 403);
+        $this->authorizeUnreceivedOrder($materialOrder);
+        $header = $request->validate(['po_date' => 'required|date', 'remarks' => 'nullable|string']);
+        $items = $this->validateItems($request, true);
+
+        // FIX: hanya field bisnis diteruskan; actor berasal dari autentikasi, bukan payload.
+        return $this->transition(fn () => $this->service->updateOrder($id, $header, $items, auth()->id()), 'UPDATE', 'Material PO diperbarui.');
+    }
+
+    public function orderReject(Request $request, int $id)
+    {
+        abort_unless(MaterialOrderAuthorization::canApprove($request->user(), MaterialPurchaseOrder::findOrFail($id)), 403);
+        $reason = $request->input('rejection_reason');
+        $reason = is_string($reason) ? trim($reason) : $reason;
+        Validator::make(['rejection_reason' => $reason], ['rejection_reason' => 'required|string|max:2000'])->validate();
+
+        return $this->transition(fn () => $this->service->rejectOrder($id, $reason, auth()->id()), 'REJECT', 'Material PO ditolak.');
+    }
+
+    public function orderRevise(Request $request, int $id)
+    {
+        $materialOrder = MaterialPurchaseOrder::findOrFail($id);
+        abort_unless(MaterialOrderAuthorization::canRevise($request->user(), $materialOrder), 403);
+        $this->authorizeUnreceivedOrder($materialOrder);
+        $reason = $request->input('reason');
+        $reason = is_string($reason) ? trim($reason) : $reason;
+        Validator::make(['reason' => $reason], ['reason' => 'required|string|min:10|max:1000'])->validate();
+
+        return $this->transition(fn () => $this->service->reviseOrder($id, $reason, auth()->id()), 'REVISE', 'Material PO kembali DRAFT untuk revisi.');
+    }
+
+    private function authorizeUnreceivedOrder(MaterialPurchaseOrder $order): void
+    {
+        abort_if($order->fulfillment_status !== 'OPEN' || in_array($order->status, ['PARTIAL', 'RECEIVED', 'CANCELED'], true)
+            || $order->details()->where('qty_received', '>', 0)->exists(), 403);
     }
 
     private function masters(): array
@@ -236,6 +303,9 @@ class MaterialProcurementController extends Controller
             SystemLog::record($event, 'Manufacturing Material Procurement', $message.' '.$document->getKey());
 
             return back()->with('success', $message);
+        } catch (AuthorizationException $e) {
+            // FIX: penolakan service saat state berubah tetap menjadi HTTP 403, bukan redirect sukses semu.
+            throw $e;
         } catch (\Throwable $e) {
             return back()->with('error', $e->getMessage());
         }
