@@ -30,7 +30,11 @@ Flag deployment tidak diubah oleh penyelarasan navigasi.
 | Aset dan depresiasi legacy | `aset.index`, `aset.list` | Finance; tidak dipecah menjadi modul aset Marvel |
 | HPP dan tag legacy | `reports.cogs`, `reports.tags` | Finance / Reports |
 
-Menu Sales/AR, manufaktur, inventory, customs, dan platform tidak dipindahkan.
+Menu Sales, manufaktur, inventory, customs, dan platform tidak dipindahkan.
+Koreksi navigasi AR: grup `menuArPiutang` kini berada di Finance / Piutang (AR),
+bersama navigasi AP. Link `reports.ar_dp` tetap memakai label Piutang & Uang Muka
+Jual; `reports.ar_subledger` memakai label sidebar List Piutang (AR). Kedua route
+otomatis membuka Finance dan submenu AR, bukan Sales. URL dan backend tidak berubah.
 PR/approval, recurring journal, fiscal lock, closing, dan menu target lain tidak
 ditambahkan sebagai placeholder. Fitur tersebut memerlukan discovery tersendiri;
 ketiadaan link baru tidak menyatakan backend pasti belum tersedia.

@@ -41,7 +41,7 @@
     *, *::before, *::after { box-sizing: border-box; }
 
     :root {
-        --sidebar-w:      260px;
+        --sidebar-w:      292px;
         --topbar-h:        60px;
         --bottomnav-h:     64px;
         --accent:       #2563eb;
@@ -146,32 +146,32 @@
     }
 
     /* LEVEL 2: Sub-menu Links */
-    .nav-link {
+    .sidebar .nav-link {
         display: flex; align-items: center; padding: 8px 12px 8px 24px;
         color: #475569; font-size: 0.82rem; font-weight: 600;
         border-radius: 8px; margin-bottom: 2px; position: relative;
         transition: all 0.2s ease; text-decoration: none;
     }
-    .nav-link::before {
+    .sidebar .nav-link::before {
         content: ''; position: absolute; left: 0; top: 50%;
         width: 14px; height: 2px; background-color: #f1f5f9; border-radius: 2px;
         transition: all 0.2s ease;
     }
-    .nav-link:hover { background: #f8fafc; color: #0f172a; }
-    .nav-link:hover::before { background-color: #cbd5e1; width: 18px; }
-    .nav-link.active { background: #eff6ff; color: #1d4ed8; font-weight: 700; }
-    .nav-link.active::before { background-color: #3b82f6; width: 18px; }
+    .sidebar .nav-link:hover { background: #f8fafc; color: #0f172a; }
+    .sidebar .nav-link:hover::before { background-color: #cbd5e1; width: 18px; }
+    .sidebar .nav-link.active { background: #eff6ff; color: #1d4ed8; font-weight: 700; }
+    .sidebar .nav-link.active::before { background-color: #3b82f6; width: 18px; }
     
-    .nav-link .nav-icon {
+    .sidebar .nav-link .nav-icon {
         width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
         border-radius: 6px; font-size: 0.85rem; margin-right: 10px; flex-shrink: 0;
         color: #94a3b8; transition: all 0.2s ease;
     }
-    .nav-link:hover .nav-icon { color: #3b82f6; transform: scale(1.1); }
-    .nav-link.active .nav-icon { color: #2563eb; }
-    .nav-link .nav-text { flex: 1; }
-    .nav-link .nav-chevron { font-size: 0.65rem; color: #94a3b8; transition: transform 0.3s ease; margin-left: auto; }
-    .nav-link[aria-expanded="true"] .nav-chevron { transform: rotate(180deg); color: #3b82f6; }
+    .sidebar .nav-link:hover .nav-icon { color: #3b82f6; transform: scale(1.1); }
+    .sidebar .nav-link.active .nav-icon { color: #2563eb; }
+    .sidebar .nav-link .nav-text { flex: 1; }
+    .sidebar .nav-link .nav-chevron { font-size: 0.65rem; color: #94a3b8; transition: transform 0.3s ease; margin-left: auto; }
+    .sidebar .nav-link[aria-expanded="true"] .nav-chevron { transform: rotate(180deg); color: #3b82f6; }
 
     /* LEVEL 3: Sub-submenu Container */
     .nav-submenu {
@@ -184,22 +184,57 @@
     }
 
     /* LEVEL 3: Links */
-    .nav-submenu .nav-link {
+    .sidebar .nav-submenu .nav-link {
         padding: 7px 10px 7px 22px;
         font-size: 0.78rem; font-weight: 500; color: #64748b;
         background: transparent; margin-bottom: 2px;
     }
-    .nav-submenu .nav-link::before {
+    .sidebar .nav-submenu .nav-link::before {
         left: 0; width: 14px; background-color: transparent; border-top: 2px dotted #e2e8f0; border-radius: 0; height: 0;
     }
-    .nav-submenu .nav-link:hover { color: #1e293b; background: rgba(241, 245, 249, 0.5); }
-    .nav-submenu .nav-link:hover::before { border-top-color: #94a3b8; width: 16px; }
-    .nav-submenu .nav-link.active { color: #2563eb; font-weight: 700; background: transparent; }
-    .nav-submenu .nav-link.active::before { border-top: 2px solid #3b82f6; width: 16px; }
+    .sidebar .nav-submenu .nav-link:hover { color: #1e293b; background: rgba(241, 245, 249, 0.5); }
+    .sidebar .nav-submenu .nav-link:hover::before { border-top-color: #94a3b8; width: 16px; }
+    .sidebar .nav-submenu .nav-link.active { color: #2563eb; font-weight: 700; background: transparent; }
+    .sidebar .nav-submenu .nav-link.active::before { border-top: 2px solid #3b82f6; width: 16px; }
     
-    .nav-submenu .nav-link .nav-icon { display: none; }
+    .sidebar .nav-submenu .nav-link .nav-icon { display: none; }
     .nav-divider-inner { border: none; border-top: 1px dashed #cbd5e1; margin: 8px 14px 8px 26px; }
     .nav-divider { border: none; border-top: 1px solid var(--border); margin: 4px 10px; }
+
+    /* Compact, theme-aware navigation. Never style page tabs as sidebar links. */
+    .sidebar .nav-section { padding: 4px 12px; }
+    .sidebar .nav-section-label {
+        color: var(--muted); font-size: 0.65rem; letter-spacing: 0.09em;
+        padding: 16px 12px 6px; margin: 0;
+    }
+    .sidebar .section-toggle { color: var(--text); font-size: 0.83rem; padding: 10px; gap: 8px; }
+    .sidebar .section-toggle .section-icon { margin-right: 0; background: var(--bg); }
+    .sidebar .section-toggle.active .section-icon { background: var(--accent); }
+    .sidebar .section-toggle.active .section-icon i { color: #fff !important; }
+    .sidebar .section-text, .sidebar .nav-text { min-width: 0; line-height: 1.45; overflow-wrap: anywhere; }
+    .sidebar .section-collapse { padding-left: 12px; margin: 2px 0 6px; }
+    .sidebar .section-collapse::before { left: 12px; width: 1px; background: var(--border); }
+    .sidebar .nav-link { padding: 9px 10px 9px 14px; color: var(--muted); font-size: 0.8rem; font-weight: 500; min-height: 38px; }
+    .sidebar .nav-link::before { display: none; }
+    .sidebar .nav-link .nav-icon { width: 20px; height: 20px; margin-right: 9px; font-size: 0.82rem; }
+    .sidebar .nav-link .nav-icon i { color: var(--muted) !important; }
+    .sidebar .nav-link:hover, .sidebar .section-toggle:hover { background: var(--bg); color: var(--text); border-color: var(--border); }
+    .sidebar .nav-link.active, .sidebar .section-toggle.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+    .sidebar .nav-link.active .nav-icon i { color: var(--accent) !important; }
+    .sidebar .nav-submenu { padding-left: 14px; margin: 2px 0 6px; }
+    .sidebar .nav-submenu::before { left: 14px; border-left: 1px solid var(--border); }
+    .sidebar .nav-submenu .nav-link { padding-left: 14px; font-size: 0.77rem; }
+    .sidebar .nav-sub-label { color: var(--muted); padding: 12px 10px 5px 14px; font-size: 0.62rem; letter-spacing: 0.06em; }
+    .sidebar .nav-divider-inner { border-top: 1px solid var(--border); margin: 10px 10px 6px 14px; }
+    .sidebar .nav-link:focus-visible, .sidebar .section-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .sidebar-brand { flex-shrink: 0; }
+    .sidebar-brand-text { min-width: 0; }
+    .sidebar-brand-text .name { overflow-wrap: anywhere; }
+    .sidebar-brand-text .sub { color: var(--muted); }
+    .sidebar-inner { padding-top: 8px; scrollbar-gutter: stable; }
+    @media (prefers-reduced-motion: reduce) {
+        .sidebar, .sidebar .nav-link, .sidebar .section-toggle, .sidebar .collapsing { transition: none; }
+    }
 
     /* ================================================================
        OVERLAY (Tablet & HP)
@@ -312,17 +347,17 @@
     [data-bs-theme="dark"] .section-toggle.active .section-icon { background: #3b82f6; color: #ffffff; }
 
     [data-bs-theme="dark"] .section-collapse::before { background-color: #334155; }
-    [data-bs-theme="dark"] .nav-link { color: #94a3b8; }
-    [data-bs-theme="dark"] .nav-link::before { background-color: #334155; }
-    [data-bs-theme="dark"] .nav-link:hover { background: rgba(255,255,255,0.03); color: #f8fafc; }
-    [data-bs-theme="dark"] .nav-link:hover::before { background-color: #64748b; }
-    [data-bs-theme="dark"] .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
-    [data-bs-theme="dark"] .nav-link.active::before { background-color: #3b82f6; }
+    [data-bs-theme="dark"] .sidebar .nav-link { color: #94a3b8; }
+    [data-bs-theme="dark"] .sidebar .nav-link::before { background-color: #334155; }
+    [data-bs-theme="dark"] .sidebar .nav-link:hover { background: rgba(255,255,255,0.03); color: #f8fafc; }
+    [data-bs-theme="dark"] .sidebar .nav-link:hover::before { background-color: #64748b; }
+    [data-bs-theme="dark"] .sidebar .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+    [data-bs-theme="dark"] .sidebar .nav-link.active::before { background-color: #3b82f6; }
 
     [data-bs-theme="dark"] .nav-submenu::before { border-left-color: #334155; }
-    [data-bs-theme="dark"] .nav-submenu .nav-link::before { border-top-color: #334155; }
-    [data-bs-theme="dark"] .nav-submenu .nav-link:hover::before { border-top-color: #64748b; }
-    [data-bs-theme="dark"] .nav-submenu .nav-link.active::before { border-top-color: #60a5fa; }
+    [data-bs-theme="dark"] .sidebar .nav-submenu .nav-link::before { border-top-color: #334155; }
+    [data-bs-theme="dark"] .sidebar .nav-submenu .nav-link:hover::before { border-top-color: #64748b; }
+    [data-bs-theme="dark"] .sidebar .nav-submenu .nav-link.active::before { border-top-color: #60a5fa; }
     [data-bs-theme="dark"] .nav-divider-inner { border-top-color: #334155; }
 
     /* Elemen Umum Dark Mode */
@@ -377,12 +412,7 @@
     </a>
 
     <div class="sidebar-inner custom-scrollbar">
-        @auth
-        <a href="{{ route('platform.company.edit') }}" class="nav-link {{ request()->routeIs('platform.*') ? 'active' : '' }}">
-            <span class="nav-icon"><i class="fa-solid fa-building"></i></span>
-            <span class="nav-text">Perusahaan &amp; Master Party</span>
-        </a>
-        @endauth
+
         {{-- MENU UTAMA (always visible) --}}
         <div class="nav-section">
             <div class="nav-section-label">{{ __('erp.main_menu') }}</div>
@@ -390,86 +420,20 @@
                 <span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>
                 <span class="nav-text">{{ __('erp.dashboard') }}</span>
             </a>
-            @if(auth()->check() && auth()->user()->role === 'ADMIN')
-            <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                <span class="nav-icon"><i class="fa-solid fa-users-gear text-danger"></i></span>
-                <span class="nav-text text-danger fw-bold">{{ __('erp.user_management') }}</span>
-            </a>
-            <a href="{{ route('logs.index') }}" class="nav-link {{ request()->routeIs('logs.*') ? 'active' : '' }}">
-                <span class="nav-icon"><i class="fa-solid fa-clock-rotate-left text-warning"></i></span>
-                <span class="nav-text text-warning fw-bold">{{ __('erp.system_activity_logs') }}</span>
-            </a>
-            @endif
+
         </div>
 
-        {{-- ================================================================
-             SECTION: MASTER DATA
-        ================================================================ --}}
-        <div class="nav-section">
-            <a href="#sectionMaster" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('product.*') || Request::is('divisi*') || request()->routeIs('budgeting.*') || request()->routeIs('company.*') || request()->routeIs('payment-category.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('product.*') || Request::is('divisi*') || request()->routeIs('budgeting.*') || request()->routeIs('company.*') || request()->routeIs('payment-category.*') ? 'true' : 'false' }}">
-                <span class="section-icon"><i class="fa-solid fa-database text-info"></i></span>
-                <span class="section-text">{{ __('erp.master_planning') }}</span>
-                <i class="fa-solid fa-chevron-down section-chevron"></i>
-            </a>
-            <div class="collapse section-collapse {{ request()->routeIs('product.*') || Request::is('divisi*') || request()->routeIs('budgeting.*') || request()->routeIs('company.*') || request()->routeIs('payment-category.*') ? 'show' : '' }}" id="sectionMaster">
-                <a href="{{ route('company.edit') }}" class="nav-link {{ request()->routeIs('company.*') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-building text-info"></i></span>
-                    <span class="nav-text">{{ __('erp.bc_company_profile') }}</span>
-                </a>
-                <a href="{{ route('product.index') }}" class="nav-link {{ request()->routeIs('product.*') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-box-open text-info"></i></span>
-                    <span class="nav-text">{{ __('erp.master_product') }}</span>
-                </a>
-                <a href="{{ route('divisi.index') }}" class="nav-link {{ Request::is('divisi*') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-sitemap text-secondary"></i></span>
-                    <span class="nav-text">{{ __('erp.master_division') }}</span>
-                </a>
-                <a href="{{ route('budgeting.index') }}" class="nav-link {{ request()->routeIs('budgeting.*') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-chart-pie text-primary"></i></span>
-                    <span class="nav-text">{{ __('erp.budgeting') }}</span>
-                </a>
-                <a href="{{ route('payment-category.index') }}" class="nav-link {{ request()->routeIs('payment-category.*') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-tags text-success"></i></span>
-                    <span class="nav-text">{{ __('erp.payment_category') }}</span>
-                </a>
-            </div>
-        </div>
-
-        {{-- ================================================================
-             SECTION: WAREHOUSE
-        ================================================================ --}}
-        <div class="nav-section">
-            <a href="#sectionWarehouse" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('warehouse.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('warehouse.*') ? 'true' : 'false' }}">
-                <span class="section-icon"><i class="fa-solid fa-warehouse text-secondary"></i></span>
-                <span class="section-text">{{ __('erp.warehouse_gudang') }}</span>
-                <i class="fa-solid fa-chevron-down section-chevron"></i>
-            </a>
-            <div class="collapse section-collapse {{ request()->routeIs('warehouse.*') ? 'show' : '' }}" id="sectionWarehouse">
-                <a href="{{ route('warehouse.process-orders') }}" class="nav-link {{ request()->routeIs('warehouse.process-orders') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-boxes-packing text-primary"></i></span>
-                    <span class="nav-text">{{ __('erp.bc_process_orders') }}</span>
-                </a>
-                <a href="{{ route('warehouse.inbound') }}" class="nav-link {{ request()->routeIs('warehouse.inbound') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-arrow-right-to-bracket text-success"></i></span>
-                    <span class="nav-text">{{ __('erp.bc_goods_in') }}</span>
-                </a>
-                <a href="{{ route('warehouse.outbound') }}" class="nav-link {{ request()->routeIs('warehouse.outbound') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-arrow-right-from-bracket text-danger"></i></span>
-                    <span class="nav-text">{{ __('erp.bc_goods_out') }}</span>
-                </a>
-            </div>
-        </div>
-
+        <div class="nav-section-label">{{ __('erp.operations_navigation') }}</div>
         {{-- ================================================================
              SECTION: INFLOW (SALES)
         ================================================================ --}}
         <div class="nav-section">
-            <a href="#sectionInflow" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('so.*') || request()->routeIs('invoice.*') || request()->routeIs('sales-returns.*') || request()->routeIs('reports.ar_dp') || request()->routeIs('reports.ar_subledger') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('so.*') || request()->routeIs('invoice.*') || request()->routeIs('sales-returns.*') || request()->routeIs('reports.ar_dp') || request()->routeIs('reports.ar_subledger') ? 'true' : 'false' }}">
+            <a href="#sectionInflow" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('so.*', 'invoice.*', 'sales-returns.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('so.*', 'invoice.*', 'sales-returns.*') ? 'true' : 'false' }}">
                 <span class="section-icon"><i class="fa-solid fa-arrow-trend-up text-success"></i></span>
-                <span class="section-text">{{ __('erp.sales_inflow') }}</span>
+                <span class="section-text">{{ __('erp.sales_navigation') }}</span>
                 <i class="fa-solid fa-chevron-down section-chevron"></i>
             </a>
-            <div class="collapse section-collapse {{ request()->routeIs('so.*') || request()->routeIs('invoice.*') || request()->routeIs('sales-returns.*') || request()->routeIs('reports.ar_dp') || request()->routeIs('reports.ar_subledger') ? 'show' : '' }}" id="sectionInflow">
+            <div class="collapse section-collapse {{ request()->routeIs('so.*', 'invoice.*', 'sales-returns.*') ? 'show' : '' }}" id="sectionInflow">
                 <a href="{{ route('so.index') }}" class="nav-link {{ request()->routeIs('so.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar text-success"></i></span>
                     <span class="nav-text">{{ __('erp.sales_order') }}</span>
@@ -483,21 +447,6 @@
                     <span class="nav-text">{{ __('erp.sales_return') }}</span>
                 </a>
 
-                <a href="#menuArPiutang" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('reports.ar_dp') || request()->routeIs('reports.ar_subledger') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar text-warning"></i></span>
-                    <span class="nav-text">{{ __('erp.ar_dp') }}</span>
-                    <i class="fa-solid fa-chevron-down nav-chevron"></i>
-                </a>
-                <div class="collapse nav-submenu {{ request()->routeIs('reports.ar_dp') || request()->routeIs('reports.ar_subledger') ? 'show' : '' }}" id="menuArPiutang">
-                    <a href="{{ route('reports.ar_dp') }}" class="nav-link {{ request()->routeIs('reports.ar_dp') ? 'active' : '' }}">
-                        <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar text-warning"></i></span>
-                        <span class="nav-text">{{ __('erp.ar_dp') }}</span>
-                    </a>
-                    <a href="{{ route('reports.ar_subledger') }}" class="nav-link {{ request()->routeIs('reports.ar_subledger') ? 'active' : '' }}">
-                        <span class="nav-icon"><i class="fa-solid fa-receipt text-warning"></i></span>
-                        <span class="nav-text">{{ __('erp.ar_subledger') }}</span>
-                    </a>
-                </div>
             </div>
         </div>
 
@@ -530,6 +479,31 @@
         </div>
 
         {{-- ================================================================
+             SECTION: WAREHOUSE
+        ================================================================ --}}
+        <div class="nav-section">
+            <a href="#sectionWarehouse" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('warehouse.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('warehouse.*') ? 'true' : 'false' }}">
+                <span class="section-icon"><i class="fa-solid fa-warehouse text-secondary"></i></span>
+                <span class="section-text">{{ __('erp.inventory_navigation') }}</span>
+                <i class="fa-solid fa-chevron-down section-chevron"></i>
+            </a>
+            <div class="collapse section-collapse {{ request()->routeIs('warehouse.*') ? 'show' : '' }}" id="sectionWarehouse">
+                <a href="{{ route('warehouse.process-orders') }}" class="nav-link {{ request()->routeIs('warehouse.process-orders') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-boxes-packing text-primary"></i></span>
+                    <span class="nav-text">{{ __('erp.bc_process_orders') }}</span>
+                </a>
+                <a href="{{ route('warehouse.inbound') }}" class="nav-link {{ request()->routeIs('warehouse.inbound') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-arrow-right-to-bracket text-success"></i></span>
+                    <span class="nav-text">{{ __('erp.bc_goods_in') }}</span>
+                </a>
+                <a href="{{ route('warehouse.outbound') }}" class="nav-link {{ request()->routeIs('warehouse.outbound') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-arrow-right-from-bracket text-danger"></i></span>
+                    <span class="nav-text">{{ __('erp.bc_goods_out') }}</span>
+                </a>
+            </div>
+        </div>
+
+        {{-- ================================================================
              SECTION: MANUFAKTUR (Anthrilo Integration)
         ================================================================ --}}
         <div class="nav-section">
@@ -539,6 +513,7 @@
                 <i class="fa-solid fa-chevron-down section-chevron"></i>
             </a>
             <div class="collapse section-collapse {{ request()->routeIs('mfg.*') ? 'show' : '' }}" id="sectionManufaktur">
+                <div class="nav-sub-label">{{ __('erp.production_navigation') }}</div>
                 <a href="{{ route('mfg.work-orders.index') }}" class="nav-link {{ request()->routeIs('mfg.work-orders.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-clipboard-list text-primary"></i></span>
                     <span class="nav-text">{{ __('erp.spk_work_order_label') }}</span>
@@ -551,6 +526,7 @@
                     <span class="nav-icon"><i class="fa-solid fa-industry text-warning"></i></span>
                     <span class="nav-text">Line Produksi</span>
                 </a>
+                <div class="nav-sub-label">{{ __('erp.materials_navigation') }}</div>
                 <a href="{{ route('mfg.material-requests.index') }}" class="nav-link {{ request()->routeIs('mfg.material-requests.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-clipboard-check text-info"></i></span>
                     <span class="nav-text">Material PR</span>
@@ -567,7 +543,8 @@
                     <span class="nav-icon"><i class="fa-solid fa-clipboard-list text-info"></i></span>
                     <span class="nav-text">Kartu Stok Bahan</span>
                 </a>
-                <a href="{{ route('mfg.reports.hpp') }}" class="nav-link {{ request()->routeIs('mfg.reports.*') ? 'active' : '' }}">
+                <div class="nav-sub-label">{{ __('erp.reports') }}</div>
+                <a href="{{ route('mfg.reports.hpp') }}" class="nav-link {{ request()->routeIs('mfg.reports.hpp') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-chart-line text-success"></i></span>
                     <span class="nav-text">{{ __('erp.mfg_report_hpp') }}</span>
                 </a>
@@ -576,6 +553,7 @@
                     <span class="nav-text">Analisis BOM vs Aktual</span>
                 </a>
 
+                <div class="nav-sub-label">{{ __('erp.master_data') }}</div>
                 <a href="#menuMfgMaster" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('mfg.yarns.*') || request()->routeIs('mfg.fabrics.*') || request()->routeIs('mfg.auxiliary-materials.*') || request()->routeIs('mfg.suppliers.*') || request()->routeIs('mfg.processes.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-database text-secondary"></i></span>
                     <span class="nav-text">{{ __('erp.mfg_master_data') }}</span>
@@ -601,71 +579,7 @@
             </div>
         </div>
 
-        {{-- ================================================================
-             SECTION: CUSTOMS (CEISA H2H Integration)
-        ================================================================ --}}
-        @if(config('customs.enabled', false) && \Illuminate\Support\Facades\Route::has('customs.index'))
-        <div class="nav-section">
-            <a href="#sectionCustoms" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'true' : 'false' }}">
-                <span class="section-icon"><i class="fa-solid fa-file-signature text-info"></i></span>
-                <span class="section-text">{{ __('erp.customs_module') }}</span>
-                <i class="fa-solid fa-chevron-down section-chevron"></i>
-            </a>
-            <div class="collapse section-collapse {{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'show' : '' }}" id="sectionCustoms">
-                <a href="{{ route('customs.index') }}" class="nav-link {{ request()->routeIs('customs.index') || request()->routeIs('customs.documents.*') || request()->routeIs('customs.show') || request()->routeIs('customs-reports.*') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-file-invoice text-info"></i></span>
-                    <span class="nav-text">{{ __('erp.customs_documents') }}</span>
-                </a>
-
-                {{-- SUBSECTION: LAPORAN CEISA --}}
-                <a href="#menuLaporanCeisa" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('customs-reports.*') ? 'active' : '' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-chart-line text-success"></i></span>
-                    <span class="nav-text">Laporan CEISA</span>
-                    <i class="fa-solid fa-chevron-down nav-chevron"></i>
-                </a>
-                <div class="collapse nav-submenu {{ request()->routeIs('customs-reports.*') ? 'show' : '' }}" id="menuLaporanCeisa">
-                    <a href="{{ route('customs-reports.create', ['report_type' => 'PEMASUKAN']) }}" class="nav-link {{ request()->routeIs('customs-reports.*') && request()->input('report_type') == 'PEMASUKAN' ? 'active' : '' }}"><span class="nav-text">1. Pemasukan Barang</span></a>
-                    <a href="{{ route('customs-reports.create', ['report_type' => 'PENGELUARAN']) }}" class="nav-link {{ request()->routeIs('customs-reports.*') && request()->input('report_type') == 'PENGELUARAN' ? 'active' : '' }}"><span class="nav-text">2. Pengeluaran Barang</span></a>
-                    <a href="{{ route('customs-reports.create', ['report_type' => 'MUTASI_BAHAN_BAKU']) }}" class="nav-link"><span class="nav-text">3. Mutasi Bahan Baku &amp; Penolong</span></a>
-                    <a href="{{ route('customs-reports.create', ['report_type' => 'WIP']) }}" class="nav-link"><span class="nav-text">4. WIP</span></a>
-                    <a href="{{ route('customs-reports.create', ['report_type' => 'MUTASI_BARANG_JADI']) }}" class="nav-link"><span class="nav-text">5. Mutasi Barang Jadi</span></a>
-                    <a href="{{ route('customs-reports.create', ['report_type' => 'MUTASI_BARANG_MODAL']) }}" class="nav-link"><span class="nav-text">6. Mutasi Barang Modal &amp; Lain</span></a>
-                    <a href="{{ route('customs-reports.create', ['report_type' => 'MUTASI_REJECT']) }}" class="nav-link"><span class="nav-text">7. Mutasi Barang Reject &amp; Sisa</span></a>
-                    <a href="{{ route('customs-reports.index') }}" class="nav-link"><span class="nav-text">Lihat Semua Periode</span></a>
-                </div>
-
-                {{-- SUBSECTION: TRACKING INSW (Hyperlink Eksternal Portal INSW) --}}
-                <a href="#menuInswTracking" data-bs-toggle="collapse" class="nav-link">
-                    <span class="nav-icon"><i class="fa-solid fa-globe text-primary"></i></span>
-                    <span class="nav-text">{{ __('customs.insw.title') }}</span>
-                    <i class="fa-solid fa-chevron-down nav-chevron"></i>
-                </a>
-                <div class="collapse nav-submenu" id="menuInswTracking">
-                    <a href="https://insw.go.id/pib-peb" target="_blank" rel="noopener noreferrer" class="nav-link">
-                        <span class="nav-text">{{ __('customs.insw.pib_peb') }}</span>
-                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
-                    </a>
-                    <a href="https://insw.go.id/perijinan" target="_blank" rel="noopener noreferrer" class="nav-link">
-                        <span class="nav-text">{{ __('customs.insw.perijinan') }}</span>
-                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
-                    </a>
-                    <a href="https://insw.go.id/e-coo" target="_blank" rel="noopener noreferrer" class="nav-link">
-                        <span class="nav-text">{{ __('customs.insw.e_coo') }}</span>
-                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
-                    </a>
-                    <a href="https://insw.go.id/intr" target="_blank" rel="noopener noreferrer" class="nav-link">
-                        <span class="nav-text">{{ __('customs.insw.intr') }}</span>
-                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
-                    </a>
-                    <a href="https://insw.go.id/nib" target="_blank" rel="noopener noreferrer" class="nav-link">
-                        <span class="nav-text">{{ __('customs.insw.nib') }}</span>
-                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-        @endif
-
+        <div class="nav-section-label">{{ __('erp.finance_group_navigation') }}</div>
         {{-- ================================================================
              SECTION: AKUNTANSI
         ================================================================ --}}
@@ -674,7 +588,8 @@
                 'account.*', 'helper.*', 'tax.*', 'jurnal.*', 'aset.*',
                 'buku-besar.*', 'laba-rugi.*', 'neraca.*', 'arus-kas.*',
                 'reports.cogs', 'reports.tags', 'purchase-bills.*', 'payment.*',
-                'reports.ap_dp', 'reports.ap_subledger'
+                'reports.ap_dp', 'reports.ap_subledger', 'reports.ar_dp', 'reports.ar_subledger',
+                'budgeting.*', 'payment-category.*'
             );
         @endphp
         <div class="nav-section">
@@ -698,6 +613,17 @@
                     <span class="nav-text">{{ __('erp.tax_master') }}</span>
                 </a>
 
+                <a href="{{ route('payment-category.index') }}" class="nav-link {{ request()->routeIs('payment-category.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-tags text-success"></i></span>
+                    <span class="nav-text">{{ __('erp.payment_category') }}</span>
+                </a>
+
+                <div class="nav-sub-label">{{ __('erp.planning_navigation') }}</div>
+                <a href="{{ route('budgeting.index') }}" class="nav-link {{ request()->routeIs('budgeting.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-chart-pie text-primary"></i></span>
+                    <span class="nav-text">{{ __('erp.budgeting') }}</span>
+                </a>
+
                 <hr class="nav-divider-inner">
 
                 <div class="nav-sub-label">{{ __('erp.journal_navigation') }}</div>
@@ -715,6 +641,37 @@
                     <span class="nav-icon"><i class="fa-solid fa-money-check-dollar text-danger"></i></span>
                     <span class="nav-text">{{ __('erp.payment_plan') }}</span>
                 </a>
+
+                <a href="#menuApHutang" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('reports.ap_dp', 'reports.ap_subledger') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('reports.ap_dp', 'reports.ap_subledger') ? 'true' : 'false' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-file-invoice text-danger"></i></span>
+                    <span class="nav-text">{{ __('erp.ap_dp') }}</span>
+                    <i class="fa-solid fa-chevron-down nav-chevron"></i>
+                </a>
+                <div class="collapse nav-submenu {{ request()->routeIs('reports.ap_dp', 'reports.ap_subledger') ? 'show' : '' }}" id="menuApHutang">
+                    <a href="{{ route('reports.ap_dp') }}" class="nav-link {{ request()->routeIs('reports.ap_dp') ? 'active' : '' }}">
+                        <span class="nav-text">{{ __('erp.ap_dp') }}</span>
+                    </a>
+                    <a href="{{ route('reports.ap_subledger') }}" class="nav-link {{ request()->routeIs('reports.ap_subledger') ? 'active' : '' }}">
+                        <span class="nav-text">{{ __('erp.ap_subledger') }}</span>
+                    </a>
+                </div>
+
+                <div class="nav-sub-label">{{ __('erp.ar_navigation') }}</div>
+                <a href="#menuArPiutang" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('reports.ar_dp', 'reports.ar_subledger') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('reports.ar_dp', 'reports.ar_subledger') ? 'true' : 'false' }}" aria-controls="menuArPiutang">
+                    <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar text-success"></i></span>
+                    <span class="nav-text">{{ __('erp.ar_dp') }}</span>
+                    <i class="fa-solid fa-chevron-down nav-chevron"></i>
+                </a>
+                <div class="collapse nav-submenu {{ request()->routeIs('reports.ar_dp', 'reports.ar_subledger') ? 'show' : '' }}" id="menuArPiutang">
+                    <a href="{{ route('reports.ar_dp') }}" class="nav-link {{ request()->routeIs('reports.ar_dp') ? 'active' : '' }}">
+                        <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar text-success"></i></span>
+                        <span class="nav-text">{{ __('erp.ar_dp') }}</span>
+                    </a>
+                    <a href="{{ route('reports.ar_subledger') }}" class="nav-link {{ request()->routeIs('reports.ar_subledger') ? 'active' : '' }}">
+                        <span class="nav-icon"><i class="fa-solid fa-receipt text-success"></i></span>
+                        <span class="nav-text">{{ __('erp.ar_list_navigation') }}</span>
+                    </a>
+                </div>
 
                 <div class="nav-sub-label">{{ __('erp.fixed_asset') }}</div>
                 <a href="#menuAset" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('aset.*') ? 'active' : '' }}">
@@ -736,19 +693,6 @@
                 <hr class="nav-divider-inner">
 
                 <div class="nav-sub-label">{{ __('erp.reports') }}</div>
-                <a href="#menuApHutang" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('reports.ap_dp', 'reports.ap_subledger') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('reports.ap_dp', 'reports.ap_subledger') ? 'true' : 'false' }}">
-                    <span class="nav-icon"><i class="fa-solid fa-file-invoice text-danger"></i></span>
-                    <span class="nav-text">{{ __('erp.ap_dp') }}</span>
-                    <i class="fa-solid fa-chevron-down nav-chevron"></i>
-                </a>
-                <div class="collapse nav-submenu {{ request()->routeIs('reports.ap_dp', 'reports.ap_subledger') ? 'show' : '' }}" id="menuApHutang">
-                    <a href="{{ route('reports.ap_dp') }}" class="nav-link {{ request()->routeIs('reports.ap_dp') ? 'active' : '' }}">
-                        <span class="nav-text">{{ __('erp.ap_dp') }}</span>
-                    </a>
-                    <a href="{{ route('reports.ap_subledger') }}" class="nav-link {{ request()->routeIs('reports.ap_subledger') ? 'active' : '' }}">
-                        <span class="nav-text">{{ __('erp.ap_subledger') }}</span>
-                    </a>
-                </div>
                 <a href="{{ route('buku-besar.index') }}" class="nav-link {{ request()->routeIs('buku-besar.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
                     <span class="nav-text">{{ __('erp.general_ledger') }}</span>
@@ -804,6 +748,126 @@
                 </a>
             </div>
         </div>
+        {{-- ================================================================
+             SECTION: CUSTOMS (CEISA H2H Integration)
+        ================================================================ --}}
+        @if(config('customs.enabled', false) && \Illuminate\Support\Facades\Route::has('customs.index'))
+        <div class="nav-section-label">{{ __('erp.compliance_navigation') }}</div>
+        <div class="nav-section">
+            <a href="#sectionCustoms" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'true' : 'false' }}">
+                <span class="section-icon"><i class="fa-solid fa-file-signature text-info"></i></span>
+                <span class="section-text">{{ __('erp.customs_module') }}</span>
+                <i class="fa-solid fa-chevron-down section-chevron"></i>
+            </a>
+            <div class="collapse section-collapse {{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'show' : '' }}" id="sectionCustoms">
+                <a href="{{ route('customs.index') }}" class="nav-link {{ request()->routeIs('customs.index') || request()->routeIs('customs.documents.*') || request()->routeIs('customs.show') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-file-invoice text-info"></i></span>
+                    <span class="nav-text">{{ __('erp.customs_documents') }}</span>
+                </a>
+
+                {{-- SUBSECTION: LAPORAN CEISA --}}
+                <a href="#menuLaporanCeisa" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('customs-reports.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-chart-line text-success"></i></span>
+                    <span class="nav-text">Laporan CEISA</span>
+                    <i class="fa-solid fa-chevron-down nav-chevron"></i>
+                </a>
+                <div class="collapse nav-submenu {{ request()->routeIs('customs-reports.*') ? 'show' : '' }}" id="menuLaporanCeisa">
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'PEMASUKAN']) }}" class="nav-link {{ request()->routeIs('customs-reports.*') && request()->input('report_type') == 'PEMASUKAN' ? 'active' : '' }}"><span class="nav-text">1. Pemasukan Barang</span></a>
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'PENGELUARAN']) }}" class="nav-link {{ request()->routeIs('customs-reports.*') && request()->input('report_type') == 'PENGELUARAN' ? 'active' : '' }}"><span class="nav-text">2. Pengeluaran Barang</span></a>
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'MUTASI_BAHAN_BAKU']) }}" class="nav-link {{ request()->routeIs('customs-reports.create') && request('report_type') === 'MUTASI_BAHAN_BAKU' ? 'active' : '' }}"><span class="nav-text">3. Mutasi Bahan Baku &amp; Penolong</span></a>
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'WIP']) }}" class="nav-link {{ request()->routeIs('customs-reports.create') && request('report_type') === 'WIP' ? 'active' : '' }}"><span class="nav-text">4. WIP</span></a>
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'MUTASI_BARANG_JADI']) }}" class="nav-link {{ request()->routeIs('customs-reports.create') && request('report_type') === 'MUTASI_BARANG_JADI' ? 'active' : '' }}"><span class="nav-text">5. Mutasi Barang Jadi</span></a>
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'MUTASI_BARANG_MODAL']) }}" class="nav-link {{ request()->routeIs('customs-reports.create') && request('report_type') === 'MUTASI_BARANG_MODAL' ? 'active' : '' }}"><span class="nav-text">6. Mutasi Barang Modal &amp; Lain</span></a>
+                    <a href="{{ route('customs-reports.create', ['report_type' => 'MUTASI_REJECT']) }}" class="nav-link {{ request()->routeIs('customs-reports.create') && request('report_type') === 'MUTASI_REJECT' ? 'active' : '' }}"><span class="nav-text">7. Mutasi Barang Reject &amp; Sisa</span></a>
+                    <a href="{{ route('customs-reports.index') }}" class="nav-link {{ request()->routeIs('customs-reports.index') ? 'active' : '' }}"><span class="nav-text">Lihat Semua Periode</span></a>
+                </div>
+
+                {{-- SUBSECTION: TRACKING INSW (Hyperlink Eksternal Portal INSW) --}}
+                <a href="#menuInswTracking" data-bs-toggle="collapse" class="nav-link">
+                    <span class="nav-icon"><i class="fa-solid fa-globe text-primary"></i></span>
+                    <span class="nav-text">{{ __('customs.insw.title') }}</span>
+                    <i class="fa-solid fa-chevron-down nav-chevron"></i>
+                </a>
+                <div class="collapse nav-submenu" id="menuInswTracking">
+                    <a href="https://insw.go.id/pib-peb" target="_blank" rel="noopener noreferrer" class="nav-link">
+                        <span class="nav-text">{{ __('customs.insw.pib_peb') }}</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
+                    </a>
+                    <a href="https://insw.go.id/perijinan" target="_blank" rel="noopener noreferrer" class="nav-link">
+                        <span class="nav-text">{{ __('customs.insw.perijinan') }}</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
+                    </a>
+                    <a href="https://insw.go.id/e-coo" target="_blank" rel="noopener noreferrer" class="nav-link">
+                        <span class="nav-text">{{ __('customs.insw.e_coo') }}</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
+                    </a>
+                    <a href="https://insw.go.id/intr" target="_blank" rel="noopener noreferrer" class="nav-link">
+                        <span class="nav-text">{{ __('customs.insw.intr') }}</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
+                    </a>
+                    <a href="https://insw.go.id/nib" target="_blank" rel="noopener noreferrer" class="nav-link">
+                        <span class="nav-text">{{ __('customs.insw.nib') }}</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto text-muted" style="font-size: 0.65rem;"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <div class="nav-section-label">{{ __('erp.settings_navigation') }}</div>
+        {{-- ================================================================
+             SECTION: MASTER DATA
+        ================================================================ --}}
+        <div class="nav-section">
+            <a href="#sectionMaster" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('product.*', 'divisi.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('product.*', 'divisi.*') ? 'true' : 'false' }}">
+                <span class="section-icon"><i class="fa-solid fa-database text-info"></i></span>
+                <span class="section-text">{{ __('erp.master_data') }}</span>
+                <i class="fa-solid fa-chevron-down section-chevron"></i>
+            </a>
+            <div class="collapse section-collapse {{ request()->routeIs('product.*', 'divisi.*') ? 'show' : '' }}" id="sectionMaster">
+
+                <a href="{{ route('product.index') }}" class="nav-link {{ request()->routeIs('product.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-box-open text-info"></i></span>
+                    <span class="nav-text">{{ __('erp.master_product') }}</span>
+                </a>
+                <a href="{{ route('divisi.index') }}" class="nav-link {{ request()->routeIs('divisi.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-sitemap text-secondary"></i></span>
+                    <span class="nav-text">{{ __('erp.master_division') }}</span>
+                </a>
+
+
+            </div>
+        </div>
+
+        @auth
+        <div class="nav-section">
+            <a href="#sectionAdministration" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('platform.*', 'company.*', 'users.*', 'logs.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('platform.*', 'company.*', 'users.*', 'logs.*') ? 'true' : 'false' }}">
+                <span class="section-icon"><i class="fa-solid fa-sliders"></i></span>
+                <span class="section-text">{{ __('erp.administration_navigation') }}</span>
+                <i class="fa-solid fa-chevron-down section-chevron"></i>
+            </a>
+            <div class="collapse section-collapse {{ request()->routeIs('platform.*', 'company.*', 'users.*', 'logs.*') ? 'show' : '' }}" id="sectionAdministration">
+                <a href="{{ route('platform.company.edit') }}" class="nav-link {{ request()->routeIs('platform.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-building"></i></span>
+                    <span class="nav-text">{{ __('erp.company_party_navigation') }}</span>
+                </a>
+                <a href="{{ route('company.edit') }}" class="nav-link {{ request()->routeIs('company.*') ? 'active' : '' }}">
+                    <span class="nav-icon"><i class="fa-solid fa-building text-info"></i></span>
+                    <span class="nav-text">{{ __('erp.bc_company_profile') }}</span>
+                </a>
+            @if(auth()->check() && auth()->user()->role === 'ADMIN')
+            <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                <span class="nav-icon"><i class="fa-solid fa-users-gear text-danger"></i></span>
+                <span class="nav-text">{{ __('erp.user_management') }}</span>
+            </a>
+            <a href="{{ route('logs.index') }}" class="nav-link {{ request()->routeIs('logs.*') ? 'active' : '' }}">
+                <span class="nav-icon"><i class="fa-solid fa-clock-rotate-left text-warning"></i></span>
+                <span class="nav-text">{{ __('erp.system_activity_logs') }}</span>
+            </a>
+            @endif
+            </div>
+        </div>
+        @endauth
     </div>
 </aside>
 
@@ -1038,7 +1102,7 @@ function showEntityLog(keyword) {
     function saveSectionState(id, expanded) {
         var states = getSectionStates();
         states[id] = expanded;
-        localStorage.setItem(SECTION_STORAGE_KEY, JSON.stringify(states));
+        try { localStorage.setItem(SECTION_STORAGE_KEY, JSON.stringify(states)); } catch (e) { /* Navigation works without storage. */ }
     }
 
     // Restore section states from localStorage
@@ -1050,8 +1114,9 @@ function showEntityLog(keyword) {
             var id = targetId.replace('#', '');
             var target = document.querySelector(targetId);
             if (!target) return;
-            // If saved state exists, apply it (overrides server-side show)
-            if (states[id] !== undefined) {
+            el.setAttribute('aria-controls', id);
+            // The current page's section must remain visible even after a saved collapse.
+            if (states[id] !== undefined && !el.classList.contains('active')) {
                 if (states[id]) {
                     target.classList.add('show');
                     el.setAttribute('aria-expanded', 'true');
@@ -1069,11 +1134,13 @@ function showEntityLog(keyword) {
         var target = targetId ? document.querySelector(targetId) : null;
         if (!target) return;
         var id = targetId.replace('#', '');
-        target.addEventListener('show.bs.collapse', function () {
+        target.addEventListener('show.bs.collapse', function (event) {
+            if (event.target !== target) return;
             el.setAttribute('aria-expanded', 'true');
             saveSectionState(id, true);
         });
-        target.addEventListener('hide.bs.collapse', function () {
+        target.addEventListener('hide.bs.collapse', function (event) {
+            if (event.target !== target) return;
             el.setAttribute('aria-expanded', 'false');
             saveSectionState(id, false);
         });
@@ -1084,8 +1151,10 @@ function showEntityLog(keyword) {
         var targetId = el.getAttribute('href');
         var target = targetId ? document.querySelector(targetId) : null;
         if (!target) return;
-        target.addEventListener('show.bs.collapse', function () { el.setAttribute('aria-expanded', 'true'); });
-        target.addEventListener('hide.bs.collapse', function () { el.setAttribute('aria-expanded', 'false'); });
+        el.setAttribute('aria-controls', target.id);
+        el.setAttribute('aria-expanded', target.classList.contains('show') ? 'true' : 'false');
+        target.addEventListener('show.bs.collapse', function (event) { if (event.target === target) el.setAttribute('aria-expanded', 'true'); });
+        target.addEventListener('hide.bs.collapse', function (event) { if (event.target === target) el.setAttribute('aria-expanded', 'false'); });
     });
 })();
 

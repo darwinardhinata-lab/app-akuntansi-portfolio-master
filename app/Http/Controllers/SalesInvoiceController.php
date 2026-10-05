@@ -12,6 +12,7 @@ use App\Models\JournalHeader;
 use App\Models\JournalDetail;
 use App\Models\SystemLog;
 use App\Services\InventorySyncService;
+use App\Support\ReportInterval;
 
 class SalesInvoiceController extends Controller
 {
@@ -61,12 +62,12 @@ class SalesInvoiceController extends Controller
             ->join('sales_invoice_details as sid', 'si.id', '=', 'sid.sales_invoice_id')
             ->leftJoin('sales_orders as so', 'si.sales_order_id', '=', 'so.id')
             ->select([
-                DB::raw("STRFTIME('%Y-%m', si.transaction_date) as bulan"),
+                DB::raw(ReportInterval::periodKeyExpr('bulanan', 'si.transaction_date') . ' as bulan'),
                 DB::raw("IFNULL(so.location_name, 'Pusat') as lokasi"),
                 'si.contact_name as pelanggan',
                 'sid.item_code as sku',
                 DB::raw("SUM(sid.qty_actual) as total_qty"),
-                DB::raw("CAST(SUM(sid.amount) AS INTEGER) as total_omset")
+                DB::raw("SUM(sid.amount) as total_omset")
             ]);
 
         // Berikan filter tanggal yang sama pada menu analitik pivotnya
