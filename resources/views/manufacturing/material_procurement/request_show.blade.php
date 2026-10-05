@@ -9,6 +9,16 @@
         <div class="d-flex gap-2"><button type="button" class="btn btn-outline-secondary" onclick="window.print()"><i class="fa-solid fa-print me-1"></i> Print</button><a href="{{ route('mfg.material-requests.index', ['tab' => 'list']) }}" class="btn btn-outline-primary">Kembali</a></div>
     </div>
 
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        @if(\App\Support\MaterialRequestAuthorization::canSubmit(auth()->user(), $materialRequest))
+        <form method="POST" action="{{ route('mfg.material-requests.submit', $materialRequest->id) }}">@csrf<button class="btn btn-outline-primary">Submit</button></form>
+        @endif
+        @if(\App\Support\MaterialRequestAuthorization::canApprove(auth()->user(), $materialRequest))
+        <form method="POST" action="{{ route('mfg.material-requests.approve', $materialRequest->id) }}">@csrf<button class="btn btn-success">Approve</button></form>
+        <form method="POST" action="{{ route('mfg.material-requests.reject', $materialRequest->id) }}" class="d-flex gap-2">@csrf<label for="rejection_reason" class="visually-hidden">Alasan penolakan</label><input id="rejection_reason" name="rejection_reason" class="form-control" required maxlength="2000" placeholder="Alasan penolakan"><button class="btn btn-danger">Reject</button></form>
+        @endif
+    </div>
+
     <div class="card mb-3"><div class="card-header fw-semibold">Informasi PR</div><div class="card-body"><div class="row g-3">
         <div class="col-md-3"><div class="text-muted small">Tanggal Permintaan</div><div>{{ $materialRequest->request_date?->format('d-m-Y') }}</div></div>
         <div class="col-md-3"><div class="text-muted small">Tanggal Dibutuhkan</div><div>{{ $materialRequest->required_date?->format('d-m-Y') ?? '-' }}</div></div>

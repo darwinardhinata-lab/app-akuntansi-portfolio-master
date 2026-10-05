@@ -298,3 +298,90 @@ Langkah aman berikutnya bukan langsung membuat seluruh workflow, melainkan
 mengesahkan sepuluh keputusan pada Fase 0. Setelah itu Fase 1 dapat dibangun
 dengan read model dan UX terverifikasi, sambil menutup celah authorization P0
 sebelum endpoint approval dipaparkan sebagai fitur Marvel.
+
+## 12. Otorisasi Tahap 2
+
+Status: rancangan disetujui memakai **Pola B — allowlist env, default kosong
+(deny)**. Bagian ini ditulis sebelum ada perubahan kode.
+
+### 12.1 Keputusan pola
+
+Pola B dipilih karena Material PR tidak memiliki `company_id`, route `mfg.*`
+tidak memiliki company context, dan preceden codebase untuk aksi sensitif
+adalah `MaklunReversalAuthorization` serta `PaymentPlanCorrectionAccess`
+(config `platform.*_user_ids` ← env koma-dipisah, default kosong). String role
+`ADMIN` **tidak** menjadi bypass; hanya ID yang tercatat eksplisit yang lolos.
+Pola A (permission Platform per company) ditunda sampai PR punya company scope.
+
+### 12.2 Konfigurasi (default kosong, tanpa nilai produksi)
+
+| Env | Config key | Makna |
+|---|---|---|
+| `PR_VIEW_USER_IDS=""` | `platform.pr_view_user_ids` | ID yang boleh melihat PR |
+| `PR_CREATE_USER_IDS=""` | `platform.pr_create_user_ids` | ID yang boleh create/store PR |
+| `PR_APPROVE_USER_IDS=""` | `platform.pr_approve_user_ids` | ID yang boleh approve/reject PR |
+
+Parsing mengikuti pola existing: env koma-dipisah → array; kosong/tidak diset
+→ `[]` (deny semua). Sesuai konfirmasi lanjutan, akses read-only memerlukan
+keanggotaan pada salah satu allowlist view/create/approve. Login saja tidak
+cukup. My PR tetap dibatasi `created_by`.
+
+### 12.3 Matriks kebijakan (default deny)
+
+| Aksi | Izin | Status | Syarat tambahan |
+|---|---|---|---|
+| index/overview/list/my-pr/show | allowlist view/create/approve | - | My PR selalu difilter `created_by` server-side |
+| create/store | ID di allowlist create | - | - |
+| submit | pembuat (`created_by`) dengan akses PR | `DRAFT` | user lain ditolak meski PR DRAFT |
+| approve | ID di allowlist approve | `SUBMITTED` | approver ≠ `created_by` dan ≠ pengirim submit (segregation of duties); `approved_by` terisi |
+| reject | ID di allowlist approve | `SUBMITTED` | alasan wajib (validasi existing dipertahankan); SoD sama seperti approve |
+
+### 12.4 Dua lapis pemeriksaan
+
+1. **Controller (HTTP 403):** `abort_unless` untuk create/store, submit
+   (ownership), dan approve/reject (allowlist + SoD) sebelum memanggil service —
+   mengikuti pola `MaklunReversalAuthorization::validate`.
+2. **Service (exception):** `MaterialRequestAuthorization` melempar
+   `AuthorizationException` dengan aturan yang sama, sehingga pemanggilan
+   internal yang melewati controller tetap ditolak.
+
+### 12.5 UI bukan pengaman
+
+Blade hanya merender tombol Submit/Approve/Reject bila user berwenang
+(Submit: pembuat + DRAFT; Approve/Reject: allowlist approve + bukan pembuat +
+status SUBMITTED). Server tetap menolak pemanggilan URL langsung.
+
+### 12.6 Test wajib (Langkah 3)
+
+1. User tanpa izin: approve/reject/submit/create → 403, data tidak berubah.
+2. Pembuat tidak bisa approve PR miliknya sendiri (SoD).
+3. User lain (bukan pembuat) tidak bisa submit PR orang lain.
+4. Approver berizin non-pembuat bisa approve; status berubah, `approved_by` terisi.
+5. Reject tanpa alasan ditolak.
+6. Service menolak pemanggil tak berwenang meski controller dilewati.
+7. `role = 'ADMIN'` tanpa allowlist eksplisit tetap ditolak.
+8. Dua belas test Tahap 1 diperbarui hanya dengan memberi izin eksplisit pada
+   user di dalam test (bukan melonggarkan aturan).
+
+### 12.7 Risiko rollout
+
+Saat config masih kosong, user existing kehilangan akses view/create/submit/approve/reject
+sampai ID mereka dimasukkan operator ke environment (mandat manual, tanpa
+grant otomatis).
+
+### 12.8 Verifikasi implementasi Tahap 2
+
+- Target PR + BOM: 21 passed, 106 assertions.
+- Suite penuh `php artisan test --stop-on-failure`: 292 passed, 10102 assertions;
+  dijalankan sekali pada Langkah 5.
+- Syntax seluruh PHP yang diubah lulus; Pint `--test` lulus untuk 7 class/test;
+  routes tidak dijalankan melalui Pint dan tidak diubah pada Tahap 2.
+- `git diff --check` bersih; `view:cache` berhasil; 7 route PR terdaftar.
+- Fixture BOM/MySQL diberi aktor berizin eksplisit; verifier MySQL terisolasi
+  tidak dijalankan dan tidak termasuk suite default Unit/Feature.
+- Actor-ID pada API service merupakan identitas dari pemanggil internal
+  tepercaya; controller mengambil ID dari autentikasi, bukan payload pengguna.
+- Allowlist bersifat global, bukan isolasi company/factory. Tidak ada grant
+  produksi otomatis, perubahan `.env` produksi, migration operasional, push,
+  merge, atau deploy. Edit/revision, history append-only, Factory, Purchase Type,
+  dan approval bertingkat tetap di luar scope.

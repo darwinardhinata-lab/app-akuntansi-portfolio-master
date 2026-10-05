@@ -2,21 +2,23 @@
 
 namespace App\Modules\Manufacturing\Services;
 
+use App\Models\User;
+use App\Modules\Manufacturing\Models\AuxiliaryMaterial;
+use App\Modules\Manufacturing\Models\Fabric;
 use App\Modules\Manufacturing\Models\MaterialPurchaseOrder;
-use App\Modules\Manufacturing\Models\MaterialPurchaseOrderDetail;
 use App\Modules\Manufacturing\Models\MaterialPurchaseRequest;
-use App\Modules\Manufacturing\Models\MaterialPurchaseRequestDetail;
 use App\Modules\Manufacturing\Models\Supplier;
 use App\Modules\Manufacturing\Models\Yarn;
-use App\Modules\Manufacturing\Models\Fabric;
-use App\Modules\Manufacturing\Models\AuxiliaryMaterial;
 use App\Support\DocumentSequence;
+use App\Support\MaterialRequestAuthorization;
 use Illuminate\Support\Facades\DB;
 
 class MaterialProcurementService
 {
     public function createRequest(array $header, array $items): MaterialPurchaseRequest
     {
+        MaterialRequestAuthorization::ensure(MaterialRequestAuthorization::canCreate(User::find($header['created_by'] ?? 0)));
+
         return DB::transaction(function () use ($header, $items) {
             $this->validateItems($items);
             $request = MaterialPurchaseRequest::create([
@@ -28,6 +30,7 @@ class MaterialProcurementService
             foreach ($items as $item) {
                 $request->details()->create($this->requestDetailAttributes($item));
             }
+
             return $request;
         });
     }
@@ -36,9 +39,13 @@ class MaterialProcurementService
     {
         return DB::transaction(function () use ($id, $actorId) {
             $request = MaterialPurchaseRequest::with('details')->lockForUpdate()->findOrFail($id);
+            MaterialRequestAuthorization::ensure(MaterialRequestAuthorization::canSubmit(User::find($actorId), $request));
             $this->requireStatus($request->approval_status, MaterialPurchaseRequest::DRAFT, 'PR hanya dapat disubmit dari DRAFT.');
-            if ($request->details->isEmpty()) { throw new \RuntimeException('PR harus memiliki minimal satu detail.'); }
+            if ($request->details->isEmpty()) {
+                throw new \RuntimeException('PR harus memiliki minimal satu detail.');
+            }
             $request->update(['approval_status' => MaterialPurchaseRequest::SUBMITTED, 'submitted_by' => $actorId, 'submitted_at' => now()]);
+
             return $request;
         });
     }
@@ -47,8 +54,10 @@ class MaterialProcurementService
     {
         return DB::transaction(function () use ($id, $actorId) {
             $request = MaterialPurchaseRequest::lockForUpdate()->findOrFail($id);
+            MaterialRequestAuthorization::ensure(MaterialRequestAuthorization::canApprove(User::find($actorId), $request));
             $this->requireStatus($request->approval_status, MaterialPurchaseRequest::SUBMITTED, 'PR hanya dapat disetujui dari SUBMITTED.');
             $request->update(['approval_status' => MaterialPurchaseRequest::APPROVED, 'approved_by' => $actorId, 'approved_at' => now()]);
+
             return $request;
         });
     }
@@ -57,8 +66,13 @@ class MaterialProcurementService
     {
         return DB::transaction(function () use ($id, $reason, $actorId) {
             $request = MaterialPurchaseRequest::lockForUpdate()->findOrFail($id);
+            MaterialRequestAuthorization::ensure(MaterialRequestAuthorization::canApprove(User::find($actorId), $request));
+            if (trim($reason) === '') {
+                throw new \RuntimeException('Alasan penolakan PR wajib diisi.');
+            }
             $this->requireStatus($request->approval_status, MaterialPurchaseRequest::SUBMITTED, 'PR hanya dapat ditolak dari SUBMITTED.');
             $request->update(['approval_status' => MaterialPurchaseRequest::REJECTED, 'rejected_by' => $actorId, 'rejected_at' => now(), 'rejection_reason' => $reason]);
+
             return $request;
         });
     }
@@ -94,6 +108,7 @@ class MaterialProcurementService
                 $requestDetail->increment('qty_ordered', $item['qty']);
             }
             $order->update(['sub_total' => $total, 'tax_amount' => 0, 'grand_total' => $total]);
+
             return $order;
         });
     }
@@ -103,8 +118,11 @@ class MaterialProcurementService
         return DB::transaction(function () use ($id, $actorId) {
             $order = MaterialPurchaseOrder::with('details')->lockForUpdate()->findOrFail($id);
             $this->requireStatus($order->approval_status, 'DRAFT', 'Material PO hanya dapat disubmit dari DRAFT.');
-            if ($order->details->isEmpty()) { throw new \RuntimeException('Material PO harus memiliki minimal satu detail.'); }
+            if ($order->details->isEmpty()) {
+                throw new \RuntimeException('Material PO harus memiliki minimal satu detail.');
+            }
             $order->update(['approval_status' => 'SUBMITTED', 'submitted_by' => $actorId, 'submitted_at' => now()]);
+
             return $order;
         });
     }
@@ -115,6 +133,7 @@ class MaterialProcurementService
             $order = MaterialPurchaseOrder::lockForUpdate()->findOrFail($id);
             $this->requireStatus($order->approval_status, 'SUBMITTED', 'Material PO hanya dapat disetujui dari SUBMITTED.');
             $order->update(['approval_status' => 'APPROVED', 'approved_by' => $actorId, 'approved_at' => now(), 'status' => 'APPROVED']);
+
             return $order;
         });
     }
@@ -137,7 +156,9 @@ class MaterialProcurementService
 
     private function validateItems(array $items): void
     {
-        if (! $items) { throw new \RuntimeException('Dokumen harus memiliki minimal satu detail bahan baku.'); }
+        if (! $items) {
+            throw new \RuntimeException('Dokumen harus memiliki minimal satu detail bahan baku.');
+        }
         foreach ($items as $item) {
             if (! in_array($item['item_type'] ?? null, ['YARN', 'FABRIC', 'AUXILIARY'], true) || (float) ($item['qty'] ?? 0) <= 0
                 || empty($item['item_name']) || (($item['item_type'] ?? null) === 'YARN' && empty($item['yarn_id']))
@@ -159,6 +180,8 @@ class MaterialProcurementService
 
     private function requireStatus(string $actual, string $expected, string $message): void
     {
-        if ($actual !== $expected) { throw new \RuntimeException($message); }
+        if ($actual !== $expected) {
+            throw new \RuntimeException($message);
+        }
     }
 }

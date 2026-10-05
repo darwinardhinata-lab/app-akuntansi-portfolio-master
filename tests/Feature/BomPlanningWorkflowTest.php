@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Product;
+use App\Models\User;
 use App\Modules\Manufacturing\Imports\ProductBomImport;
 use App\Modules\Manufacturing\Models\AuxiliaryMaterial;
 use App\Modules\Manufacturing\Models\ProductBom;
@@ -41,11 +42,14 @@ class BomPlanningWorkflowTest extends TestCase
         $this->assertSame(7.0, $preview->shortage_qty);
         $this->assertSame(700.0, $preview->shortage_estimated_cost);
 
-        $request = $service->generateShortageRequest($workOrder, null);
+        // FIX: generator PR memakai pembuat dengan izin eksplisit, bukan actor kosong.
+        $creator = User::factory()->create();
+        config(['platform.pr_create_user_ids' => [(string) $creator->id]]);
+        $request = $service->generateShortageRequest($workOrder, $creator->id);
         $this->assertSame($workOrder->id, $request->source_work_order_id);
         $this->assertSame(7.0, (float) $request->details()->sole()->qty_requested);
         $this->assertSame(3.0, (float) $material->fresh()->stock_quantity);
         $this->expectException(\RuntimeException::class);
-        $service->generateShortageRequest($workOrder, null);
+        $service->generateShortageRequest($workOrder, $creator->id);
     }
 }

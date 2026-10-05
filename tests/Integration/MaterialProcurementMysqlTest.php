@@ -2,6 +2,7 @@
 
 namespace Tests\Integration;
 
+use App\Models\User;
 use App\Modules\Manufacturing\Models\Supplier;
 use App\Modules\Manufacturing\Models\Yarn;
 use App\Modules\Manufacturing\Services\MaterialProcurementService;
@@ -12,12 +13,15 @@ use Tests\TestCase;
 class MaterialProcurementMysqlTest extends TestCase
 {
     private ?string $fixture = null;
+
     private bool $created = false;
 
     protected function setUp(): void
     {
         parent::setUp();
-        if (getenv('MGI_M2_MYSQL_TESTS') !== '1') { $this->markTestSkipped('Run the isolated M2 MySQL verifier.'); }
+        if (getenv('MGI_M2_MYSQL_TESTS') !== '1') {
+            $this->markTestSkipped('Run the isolated M2 MySQL verifier.');
+        }
         $config = ['driver' => 'mysql', 'host' => getenv('MGI_TEST_HOST') ?: '127.0.0.1', 'port' => getenv('MGI_TEST_PORT') ?: '3306', 'username' => getenv('MGI_TEST_USER') ?: 'root', 'password' => getenv('MGI_TEST_PASSWORD') ?: '', 'database' => 'information_schema', 'charset' => 'utf8mb4', 'collation' => 'utf8mb4_unicode_ci', 'prefix' => '', 'strict' => true];
         config(['database.connections.m2_admin' => $config]);
         $this->fixture = 'mgi_fresh_m2test_'.bin2hex(random_bytes(8));
@@ -28,12 +32,19 @@ class MaterialProcurementMysqlTest extends TestCase
         DB::setDefaultConnection('m2_fixture');
         try {
             $this->assertSame(0, Artisan::call('migrate', ['--database' => 'm2_fixture', '--force' => true]), Artisan::output());
-        } catch (\Throwable $e) { $this->cleanupFixture(); throw $e; }
+        } catch (\Throwable $e) {
+            $this->cleanupFixture();
+            throw $e;
+        }
     }
 
     protected function tearDown(): void
     {
-        try { $this->cleanupFixture(); } finally { parent::tearDown(); }
+        try {
+            $this->cleanupFixture();
+        } finally {
+            parent::tearDown();
+        }
     }
 
     public function test_full_mysql_migration_chain_supports_pr_to_approved_po_without_posting(): void
@@ -42,9 +53,16 @@ class MaterialProcurementMysqlTest extends TestCase
         $supplier = Supplier::create(['supplier_code' => 'SUP-M2-MYSQL', 'supplier_name' => 'Supplier Raw Material', 'supplier_type' => 'RAW_MATERIAL']);
         $item = ['item_type' => 'YARN', 'yarn_id' => $yarn->id, 'item_name' => 'Cotton Yarn', 'qty' => 20, 'unit' => 'KGS', 'rate' => 12500];
         $service = app(MaterialProcurementService::class);
-        $pr = $service->createRequest(['request_date' => '2026-09-28'], [$item]);
-        $service->submitRequest($pr->id, null);
-        $service->approveRequest($pr->id, null);
+        // FIX: izin fixture eksplisit dengan pembuat dan approver terpisah.
+        $creator = User::factory()->create();
+        $approver = User::factory()->create();
+        config([
+            'platform.pr_create_user_ids' => [(string) $creator->id],
+            'platform.pr_approve_user_ids' => [(string) $approver->id],
+        ]);
+        $pr = $service->createRequest(['request_date' => '2026-09-28', 'created_by' => $creator->id], [$item]);
+        $service->submitRequest($pr->id, $creator->id);
+        $service->approveRequest($pr->id, $approver->id);
         $detail = $pr->fresh('details')->details->sole();
         $po = $service->createOrderFromRequest($pr->id, $supplier->id, [$item + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-28']);
         $service->submitOrder($po->id, null);

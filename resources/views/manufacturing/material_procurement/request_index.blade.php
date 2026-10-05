@@ -9,7 +9,9 @@
             <h3 class="fw-bold mb-1">Purchase Request</h3>
             <p class="text-muted mb-0">Permintaan material produksi. Tidak membuat stok atau jurnal.</p>
         </div>
+        @if(\App\Support\MaterialRequestAuthorization::canCreate(auth()->user()))
         <a href="{{ route('mfg.material-requests.create') }}" class="btn btn-primary"><i class="fa-solid fa-plus me-1"></i> Create Purchase Request</a>
+        @endif
     </div>
 
     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
@@ -60,8 +62,8 @@
             <td><span class="badge text-bg-{{ match($materialRequest->approval_status) { 'APPROVED' => 'success', 'REJECTED' => 'danger', 'SUBMITTED' => 'warning', default => 'secondary' } }}">{{ $materialRequest->approval_status }}</span></td>
             <td>{{ $materialRequest->details_count }}</td><td><div class="d-flex flex-wrap gap-1">
                 <a class="btn btn-sm btn-outline-secondary" href="{{ route('mfg.material-requests.show', $materialRequest->id) }}" title="View"><i class="fa-solid fa-eye"></i></a>
-                @if($materialRequest->approval_status === 'DRAFT')<form method="POST" action="{{ route('mfg.material-requests.submit', $materialRequest->id) }}">@csrf<button class="btn btn-sm btn-outline-primary">Submit</button></form>
-                @elseif($materialRequest->approval_status === 'SUBMITTED')<form method="POST" action="{{ route('mfg.material-requests.approve', $materialRequest->id) }}">@csrf<button class="btn btn-sm btn-success">Approve</button></form>
+                @if(\App\Support\MaterialRequestAuthorization::canSubmit(auth()->user(), $materialRequest))<form method="POST" action="{{ route('mfg.material-requests.submit', $materialRequest->id) }}">@csrf<button class="btn btn-sm btn-outline-primary">Submit</button></form>
+                @elseif(\App\Support\MaterialRequestAuthorization::canApprove(auth()->user(), $materialRequest))<form method="POST" action="{{ route('mfg.material-requests.approve', $materialRequest->id) }}">@csrf<button class="btn btn-sm btn-success">Approve</button></form>
                 @elseif($materialRequest->approval_status === 'APPROVED')<a class="btn btn-sm btn-primary" href="{{ route('mfg.material-orders.create', ['request_id' => $materialRequest->id]) }}">Buat PO</a>@endif
             </div></td>
         </tr>@empty<tr><td colspan="8" class="text-center text-muted py-4">Tidak ada Purchase Request yang sesuai.</td></tr>@endforelse</tbody>

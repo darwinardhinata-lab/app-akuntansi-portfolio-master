@@ -12,6 +12,7 @@ use App\Modules\Manufacturing\Models\MaterialPurchaseRequest;
 use App\Modules\Manufacturing\Models\Supplier;
 use App\Modules\Manufacturing\Models\Yarn;
 use App\Modules\Manufacturing\Services\MaterialProcurementService;
+use App\Support\MaterialRequestAuthorization;
 use Illuminate\Http\Request;
 
 class MaterialProcurementController extends Controller
@@ -20,6 +21,7 @@ class MaterialProcurementController extends Controller
 
     public function requestIndex(Request $request)
     {
+        abort_unless(MaterialRequestAuthorization::canView($request->user()), 403);
         $filters = $request->validate([
             'tab' => 'nullable|in:overview,list,mine',
             'search' => 'nullable|string|max:100',
@@ -65,6 +67,7 @@ class MaterialProcurementController extends Controller
 
     public function requestShow(int $id)
     {
+        abort_unless(MaterialRequestAuthorization::canView(auth()->user()), 403);
         $materialRequest = MaterialPurchaseRequest::with([
             'details', 'creator', 'submitter', 'approver', 'rejector',
         ])->findOrFail($id);
@@ -74,11 +77,14 @@ class MaterialProcurementController extends Controller
 
     public function requestCreate()
     {
+        abort_unless(MaterialRequestAuthorization::canCreate(auth()->user()), 403);
+
         return view('manufacturing.material_procurement.request_create', $this->masters());
     }
 
     public function requestStore(Request $request)
     {
+        abort_unless(MaterialRequestAuthorization::canCreate($request->user()), 403);
         $data = $this->validateItems($request, false);
         try {
             $pr = $this->service->createRequest($request->only(['request_date', 'required_date', 'remarks']) + ['created_by' => auth()->id()], $data);
@@ -92,16 +98,21 @@ class MaterialProcurementController extends Controller
 
     public function requestSubmit(int $id)
     {
+        abort_unless(MaterialRequestAuthorization::canSubmit(auth()->user(), MaterialPurchaseRequest::findOrFail($id)), 403);
+
         return $this->transition(fn () => $this->service->submitRequest($id, auth()->id()), 'SUBMIT', 'Material PR disubmit.');
     }
 
     public function requestApprove(int $id)
     {
+        abort_unless(MaterialRequestAuthorization::canApprove(auth()->user(), MaterialPurchaseRequest::findOrFail($id)), 403);
+
         return $this->transition(fn () => $this->service->approveRequest($id, auth()->id()), 'APPROVE', 'Material PR disetujui.');
     }
 
     public function requestReject(Request $request, int $id)
     {
+        abort_unless(MaterialRequestAuthorization::canApprove($request->user(), MaterialPurchaseRequest::findOrFail($id)), 403);
         $request->validate(['rejection_reason' => 'required|string|max:2000']);
 
         return $this->transition(fn () => $this->service->rejectRequest($id, $request->string('rejection_reason')->toString(), auth()->id()), 'REJECT', 'Material PR ditolak.');

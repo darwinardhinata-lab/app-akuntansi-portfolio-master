@@ -22,20 +22,31 @@ class MaterialProcurementLifecycleTest extends TestCase
 
     private int $supplierId;
 
+    private User $prCreator;
+
+    private User $prApprover;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->service = app(MaterialProcurementService::class);
+        $this->prCreator = User::factory()->create(['name' => 'Pembuat PR Lifecycle']);
+        $this->prApprover = User::factory()->create(['name' => 'Penyetuju PR Lifecycle']);
+        // FIX: izin eksplisit per user via allowlist config (default deny), tanpa grant role permanen.
+        config([
+            'platform.pr_create_user_ids' => [(string) $this->prCreator->id],
+            'platform.pr_approve_user_ids' => [(string) $this->prApprover->id],
+        ]);
         $this->yarnId = Yarn::create(['yarn_code' => 'YARN-M2', 'yarn_type' => 'Cotton', 'unit' => 'KGS'])->id;
         $this->supplierId = Supplier::create(['supplier_code' => 'SUP-M2', 'supplier_name' => 'Supplier Raw Material', 'supplier_type' => 'RAW_MATERIAL'])->id;
     }
 
     public function test_material_pr_to_approved_po_keeps_stock_and_journal_empty(): void
     {
-        $pr = $this->service->createRequest(['request_date' => '2026-09-28'], [$this->item(100)]);
+        $pr = $this->service->createRequest(['request_date' => '2026-09-28', 'created_by' => $this->prCreator->id], [$this->item(100)]);
         $this->assertSame('DRAFT', $pr->approval_status);
-        $this->service->submitRequest($pr->id, null);
-        $this->service->approveRequest($pr->id, null);
+        $this->service->submitRequest($pr->id, $this->prCreator->id);
+        $this->service->approveRequest($pr->id, $this->prApprover->id);
 
         $detail = $pr->fresh('details')->details->sole();
         $po = $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$this->item(40) + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-28']);
@@ -54,7 +65,7 @@ class MaterialProcurementLifecycleTest extends TestCase
 
     public function test_po_cannot_be_created_from_unapproved_pr(): void
     {
-        $pr = $this->service->createRequest(['request_date' => '2026-09-28'], [$this->item(10)]);
+        $pr = $this->service->createRequest(['request_date' => '2026-09-28', 'created_by' => $this->prCreator->id], [$this->item(10)]);
         $detail = $pr->fresh('details')->details->sole();
         $this->expectExceptionMessage('Material PO harus berasal dari PR APPROVED');
         $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$this->item(10) + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-28']);
@@ -62,9 +73,9 @@ class MaterialProcurementLifecycleTest extends TestCase
 
     public function test_po_cannot_exceed_remaining_approved_pr_quantity(): void
     {
-        $pr = $this->service->createRequest(['request_date' => '2026-09-28'], [$this->item(10)]);
-        $this->service->submitRequest($pr->id, null);
-        $this->service->approveRequest($pr->id, null);
+        $pr = $this->service->createRequest(['request_date' => '2026-09-28', 'created_by' => $this->prCreator->id], [$this->item(10)]);
+        $this->service->submitRequest($pr->id, $this->prCreator->id);
+        $this->service->approveRequest($pr->id, $this->prApprover->id);
         $detail = $pr->fresh('details')->details->sole();
 
         $this->expectExceptionMessage('Detail Material PO harus berasal dari sisa detail PR');
@@ -75,14 +86,14 @@ class MaterialProcurementLifecycleTest extends TestCase
     {
         Yarn::whereKey($this->yarnId)->update(['is_active' => false]);
         $this->expectExceptionMessage('Yarn harus aktif');
-        $this->service->createRequest(['request_date' => '2026-09-28'], [$this->item(1)]);
+        $this->service->createRequest(['request_date' => '2026-09-28', 'created_by' => $this->prCreator->id], [$this->item(1)]);
     }
 
     public function test_rejected_pr_cannot_be_approved_or_used_for_po(): void
     {
-        $pr = $this->service->createRequest(['request_date' => '2026-09-28'], [$this->item(5)]);
-        $this->service->submitRequest($pr->id, null);
-        $this->service->rejectRequest($pr->id, 'Tidak diperlukan', null);
+        $pr = $this->service->createRequest(['request_date' => '2026-09-28', 'created_by' => $this->prCreator->id], [$this->item(5)]);
+        $this->service->submitRequest($pr->id, $this->prCreator->id);
+        $this->service->rejectRequest($pr->id, 'Tidak diperlukan', $this->prApprover->id);
 
         $this->expectExceptionMessage('Material PO harus berasal dari PR APPROVED');
         $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$this->item(5) + ['source_request_detail_id' => $pr->fresh('details')->details->sole()->id]], ['po_date' => '2026-09-28']);
@@ -91,6 +102,8 @@ class MaterialProcurementLifecycleTest extends TestCase
     public function test_authenticated_user_can_open_material_procurement_pages(): void
     {
         $user = User::factory()->create();
+        // FIX: izin create eksplisit agar halaman create tetap terbuka setelah otorisasi Tahap 2.
+        config(['platform.pr_create_user_ids' => [(string) $user->id]]);
 
         $this->actingAs($user)->get(route('mfg.material-requests.index'))->assertOk()->assertSee('Purchase Request');
         $this->actingAs($user)->get(route('mfg.material-requests.create'))->assertOk()->assertSee('Buat Material Purchase Request');
@@ -100,6 +113,8 @@ class MaterialProcurementLifecycleTest extends TestCase
     public function test_purchase_request_index_exposes_marvel_tabs_and_overview(): void
     {
         $user = User::factory()->create();
+        // FIX: izin create eksplisit untuk pembuat tab overview ini.
+        config(['platform.pr_create_user_ids' => [(string) $user->id]]);
         $this->service->createRequest([
             'request_date' => '2026-10-02',
             'created_by' => $user->id,
@@ -119,6 +134,8 @@ class MaterialProcurementLifecycleTest extends TestCase
     {
         $requester = User::factory()->create(['name' => 'Requester Sendiri']);
         $other = User::factory()->create(['name' => 'Requester Lain']);
+        // FIX: izin create eksplisit untuk kedua pembuat pada uji My PR ini.
+        config(['platform.pr_create_user_ids' => [(string) $requester->id, (string) $other->id]]);
         $mine = $this->service->createRequest([
             'request_date' => '2026-10-02', 'created_by' => $requester->id, 'remarks' => 'Kebutuhan sendiri unik',
         ], [$this->item(4)]);
@@ -138,7 +155,10 @@ class MaterialProcurementLifecycleTest extends TestCase
     public function test_purchase_request_list_can_search_requester_and_filter_status(): void
     {
         $viewer = User::factory()->create();
+        config(['platform.pr_view_user_ids' => [(string) $viewer->id]]);
         $requester = User::factory()->create(['name' => 'Pemohon Filter Khusus']);
+        // FIX: izin create eksplisit untuk pembuat pada uji filter dan search ini.
+        config(['platform.pr_create_user_ids' => [(string) $requester->id]]);
         $draft = $this->service->createRequest([
             'request_date' => '2026-10-02', 'created_by' => $requester->id, 'remarks' => 'Purpose draft khusus',
         ], [$this->item(6)]);
@@ -160,6 +180,11 @@ class MaterialProcurementLifecycleTest extends TestCase
     {
         $requester = User::factory()->create(['name' => 'Pembuat PR Detail']);
         $approver = User::factory()->create(['name' => 'Penyetuju PR Detail']);
+        // FIX: izin create dan approve eksplisit untuk user pada uji detail ini.
+        config([
+            'platform.pr_create_user_ids' => [(string) $requester->id],
+            'platform.pr_approve_user_ids' => [(string) $approver->id],
+        ]);
         $pr = $this->service->createRequest([
             'request_date' => '2026-10-02', 'created_by' => $requester->id, 'remarks' => 'Purpose detail audit',
         ], [$this->item(8)]);
@@ -179,6 +204,7 @@ class MaterialProcurementLifecycleTest extends TestCase
     public function test_purchase_request_index_rejects_unknown_tab_and_status(): void
     {
         $user = User::factory()->create();
+        config(['platform.pr_view_user_ids' => [(string) $user->id]]);
 
         $this->actingAs($user)->get(route('mfg.material-requests.index', ['tab' => 'unknown']))->assertSessionHasErrors('tab');
         $this->actingAs($user)->get(route('mfg.material-requests.index', ['status' => 'PAID']))->assertSessionHasErrors('status');
@@ -188,9 +214,9 @@ class MaterialProcurementLifecycleTest extends TestCase
     {
         $auxiliary = AuxiliaryMaterial::create(['material_code' => 'AUX-PR', 'material_name' => 'Polybag', 'unit' => 'PCS', 'is_active' => true]);
         $item = ['item_type' => 'AUXILIARY', 'auxiliary_material_id' => $auxiliary->id, 'item_name' => 'Polybag', 'qty' => 10, 'unit' => 'PCS', 'rate' => 100];
-        $pr = $this->service->createRequest(['request_date' => '2026-09-30'], [$item]);
-        $this->service->submitRequest($pr->id, null);
-        $this->service->approveRequest($pr->id, null);
+        $pr = $this->service->createRequest(['request_date' => '2026-09-30', 'created_by' => $this->prCreator->id], [$item]);
+        $this->service->submitRequest($pr->id, $this->prCreator->id);
+        $this->service->approveRequest($pr->id, $this->prApprover->id);
         $detail = $pr->fresh('details')->details->sole();
         $po = $this->service->createOrderFromRequest($pr->id, $this->supplierId, [$item + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-30']);
         $this->assertDatabaseHas('mfg_material_purchase_order_details', ['po_id' => $po->id, 'item_type' => 'AUXILIARY', 'auxiliary_material_id' => $auxiliary->id]);

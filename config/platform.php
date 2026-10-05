@@ -1,6 +1,16 @@
 <?php
 
 return [
+    // FIX: akses PR hanya melalui ID eksplisit; seluruh allowlist default kosong.
+    'pr_view_user_ids' => array_values(array_filter(array_map(
+        'trim', explode(',', (string) env('PR_VIEW_USER_IDS', ''))
+    ), fn ($id) => ctype_digit($id) && (int) $id > 0)),
+    'pr_create_user_ids' => array_values(array_filter(array_map(
+        'trim', explode(',', (string) env('PR_CREATE_USER_IDS', ''))
+    ), fn ($id) => ctype_digit($id) && (int) $id > 0)),
+    'pr_approve_user_ids' => array_values(array_filter(array_map(
+        'trim', explode(',', (string) env('PR_APPROVE_USER_IDS', ''))
+    ), fn ($id) => ctype_digit($id) && (int) $id > 0)),
     'maklun_reversal_user_ids' => array_values(array_filter(array_map(
         'trim', explode(',', (string) env('MAKLUN_REVERSAL_USER_IDS', ''))
     ), fn ($id) => ctype_digit($id) && (int) $id > 0)),
