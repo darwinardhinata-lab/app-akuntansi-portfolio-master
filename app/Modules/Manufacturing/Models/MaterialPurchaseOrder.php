@@ -3,6 +3,7 @@
 namespace App\Modules\Manufacturing\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Modul Manufaktur — MaterialPurchaseOrder
@@ -31,6 +32,7 @@ class MaterialPurchaseOrder extends Model
         'rejected_by',
         'rejected_at',
         'rejection_reason',
+        'revision_no',
     ];
 
     protected $casts = [
@@ -38,8 +40,8 @@ class MaterialPurchaseOrder extends Model
         'submitted_at' => 'datetime',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
+        'revision_no' => 'integer',
     ];
-
 
     public function supplier()
     {
@@ -51,4 +53,8 @@ class MaterialPurchaseOrder extends Model
         return $this->hasMany(MaterialPurchaseOrderDetail::class, 'po_id');
     }
 
+    public function histories(): HasMany
+    {
+        return $this->hasMany(MaterialPurchaseOrderHistory::class, 'order_id')->orderBy('id');
+    }
 }
