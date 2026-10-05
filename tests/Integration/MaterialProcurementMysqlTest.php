@@ -63,6 +63,13 @@ class MaterialProcurementMysqlTest extends TestCase
         $pr = $service->createRequest(['request_date' => '2026-09-28', 'created_by' => $creator->id], [$item]);
         $service->submitRequest($pr->id, $creator->id);
         $service->approveRequest($pr->id, $approver->id);
+        // FIX: verifier terisolasi juga memeriksa histori transisi PR pada revisi awal.
+        $this->assertSame(0, $pr->fresh()->revision_no);
+        $this->assertSame(['CREATED', 'SUBMITTED', 'APPROVED'], $pr->histories()->pluck('action')->all());
+        $this->assertDatabaseHas('mfg_material_purchase_request_histories', [
+            'request_id' => $pr->id, 'action' => 'APPROVED', 'from_status' => 'SUBMITTED',
+            'to_status' => 'APPROVED', 'actor_id' => $approver->id, 'revision_no' => 0,
+        ]);
         $detail = $pr->fresh('details')->details->sole();
         $po = $service->createOrderFromRequest($pr->id, $supplier->id, [$item + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-28']);
         $service->submitOrder($po->id, null);

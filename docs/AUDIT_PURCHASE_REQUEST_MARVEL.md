@@ -474,12 +474,18 @@ migration dan tidak menjalankan migrate operasional, push, merge, atau deploy.
 FK restrict juga melarang penghapusan PR atau user yang dirujuk histori.
 Allowlist kosong tetap menolak akses sampai operator memberi izin manual.
 
-### 13.4 Verifikasi sementara
+### 13.4 Verifikasi akhir
 
 - Langkah 5: 36 test PR passed, 375 assertions, termasuk 16 test revision/history.
 - History append-only, penolakan otorisasi/status/quantity, alasan revisi,
   rollback keenam operasi, actor HTTP, legacy notice, dan form edit diuji.
 - Lint, Pint class/test, diff check, dan view:cache lulus pada Langkah 5.
-- Suite penuh Tahap 3 belum dijalankan; hanya dijalankan sekali pada Langkah 7.
+- Langkah 7: targeted PR + BOM 37 passed, 387 assertions.
+- Suite penuh `php artisan test --stop-on-failure`: 308 passed, 10384 assertions;
+  dijalankan sekali pada Langkah 7, termasuk TranslationCatalogTest.
+- Syntax 13 PHP yang berubah lulus, Pint --test 8 class/test lulus (bukan routes),
+  diff check bersih, view:cache berhasil, dan 10 route PR terdaftar.
+- Fixture MySQL ditambah assertion histori CREATED/SUBMITTED/APPROVED dan
+  revision_no 0; verifier tersebut tidak dijalankan dan tidak termasuk suite default.
 - Verifier MySQL integration tidak dijalankan; verifikasi concurrency MySQL
   dan trigger DB tetap batas verifikasi/rollout.
