@@ -257,7 +257,7 @@ class MaterialRequestRevisionHistoryTest extends TestCase
     {
         $pr = $this->draft();
         $this->actingAs($this->creator)->put(route('mfg.material-requests.update', $pr->id), [
-            'request_date' => '2026-10-04', 'remarks' => 'Edit melalui HTTP', 'items' => [$this->item(7)],
+            'request_date' => '2026-10-04', 'remarks' => 'Edit melalui HTTP', 'items' => [$this->item(7) + ['remarks' => 'Catatan detail HTTP']],
             'actor_id' => $this->outsider->id, 'created_by' => $this->outsider->id,
             'approval_status' => 'APPROVED', 'revision_no' => 99,
         ])->assertRedirect(route('mfg.material-requests.show', $pr->id))->assertSessionHas('success');
@@ -265,6 +265,7 @@ class MaterialRequestRevisionHistoryTest extends TestCase
         $this->assertSame('DRAFT', $pr->fresh()->approval_status);
         $this->assertSame(0, $pr->fresh()->revision_no);
         $this->assertSame('Edit melalui HTTP', $pr->fresh()->remarks);
+        $this->assertSame('Catatan detail HTTP', $pr->details()->sole()->remarks);
         $this->assertHistory($pr, 'EDITED', 'DRAFT', 'DRAFT', $this->creator->id);
     }
 
@@ -333,6 +334,42 @@ class MaterialRequestRevisionHistoryTest extends TestCase
         return $this->service->createRequest([
             'request_date' => '2026-10-03', 'created_by' => $this->creator->id, 'remarks' => 'Header awal',
         ], [$this->item(5)])->fresh();
+    }
+
+    public function test_edit_view_prefills_all_details_and_preserves_old_input(): void
+    {
+        $pr = $this->draft();
+        $this->service->updateRequest($pr->id, ['remarks' => 'Header multibaris'], [
+            $this->item(5) + ['remarks' => 'Catatan detail satu'], $this->item(3),
+        ], $this->creator->id);
+        $this->actingAs($this->creator)->get(route('mfg.material-requests.edit', $pr->id))
+            ->assertOk()->assertSee('Header multibaris')->assertSee('Catatan detail satu')
+            ->assertSee('items[0][qty]', false)->assertSee('items[1][qty]', false)
+            ->assertSee('name="_method" value="PUT"', false);
+        $this->withSession(['_old_input' => [
+            'remarks' => 'Input lama dipertahankan', 'items' => [$this->item(8) + ['remarks' => 'Detail input lama']],
+        ]])->get(route('mfg.material-requests.edit', $pr->id))
+            ->assertOk()->assertSee('Input lama dipertahankan')->assertSee('Detail input lama');
+    }
+
+    public function test_detail_edit_and_revision_controls_follow_authorization_and_ordered_quantity(): void
+    {
+        $pr = $this->draft();
+        $editUrl = route('mfg.material-requests.edit', $pr->id);
+        $reviseUrl = route('mfg.material-requests.revise', $pr->id);
+        $this->actingAs($this->creator)->get(route('mfg.material-requests.show', $pr->id))
+            ->assertOk()->assertSee($editUrl, false)->assertDontSee($reviseUrl, false);
+        $this->actingAs($this->approver)->get(route('mfg.material-requests.show', $pr->id))
+            ->assertOk()->assertDontSee($editUrl, false)->assertDontSee($reviseUrl, false);
+        $this->service->submitRequest($pr->id, $this->creator->id);
+        $this->service->rejectRequest($pr->id, 'Alasan penolakan untuk tampilan', $this->approver->id);
+        $this->actingAs($this->creator)->get(route('mfg.material-requests.show', $pr->id))
+            ->assertOk()->assertSee($reviseUrl, false)->assertDontSee($editUrl, false)
+            ->assertSee('Alasan revisi')->assertSee('textarea', false);
+        $pr->details()->sole()->update(['qty_ordered' => 1]);
+        $this->get(route('mfg.material-requests.show', $pr->id))->assertOk()->assertDontSee($reviseUrl, false);
+        $pr->update(['approval_status' => 'DRAFT']);
+        $this->get(route('mfg.material-requests.show', $pr->id))->assertOk()->assertDontSee($editUrl, false);
     }
 
     private function rejected(): MaterialPurchaseRequest

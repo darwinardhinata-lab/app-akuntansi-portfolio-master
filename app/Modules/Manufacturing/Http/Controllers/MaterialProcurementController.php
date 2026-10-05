@@ -71,7 +71,7 @@ class MaterialProcurementController extends Controller
     {
         abort_unless(MaterialRequestAuthorization::canView(auth()->user()), 403);
         $materialRequest = MaterialPurchaseRequest::with([
-            'details', 'creator', 'submitter', 'approver', 'rejector',
+            'details', 'creator', 'submitter', 'approver', 'rejector', 'histories.actor',
         ])->findOrFail($id);
 
         return view('manufacturing.material_procurement.request_show', compact('materialRequest'));
@@ -223,6 +223,8 @@ class MaterialProcurementController extends Controller
             $rules['items.*.rate'] = 'required|numeric|min:0';
             $rules['items.*.source_request_detail_id'] = 'required|exists:mfg_material_purchase_request_details,id';
         }
+
+        $rules['items.*.remarks'] = 'nullable|string';
 
         return $request->validate($rules)['items'];
     }

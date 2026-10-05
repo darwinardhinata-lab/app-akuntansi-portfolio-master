@@ -9,7 +9,17 @@
         <div class="d-flex gap-2"><button type="button" class="btn btn-outline-secondary" onclick="window.print()"><i class="fa-solid fa-print me-1"></i> Print</button><a href="{{ route('mfg.material-requests.index', ['tab' => 'list']) }}" class="btn btn-outline-primary">Kembali</a></div>
     </div>
 
+    @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+    @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
+    @if($errors->any())<div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
+
     <div class="d-flex flex-wrap gap-2 mb-3">
+        @if(\App\Support\MaterialRequestAuthorization::canEdit(auth()->user(), $materialRequest) && !$materialRequest->details->contains(fn ($detail) => (float) $detail->qty_ordered > 0))
+        <a class="btn btn-outline-secondary" href="{{ route('mfg.material-requests.edit', $materialRequest->id) }}">Edit</a>
+        @endif
+        @if(\App\Support\MaterialRequestAuthorization::canRevise(auth()->user(), $materialRequest) && !$materialRequest->details->contains(fn ($detail) => (float) $detail->qty_ordered > 0))
+        <form method="POST" action="{{ route('mfg.material-requests.revise', $materialRequest->id) }}" class="d-flex flex-wrap gap-2">@csrf<label for="revision_reason" class="form-label">Alasan revisi</label><textarea id="revision_reason" name="reason" class="form-control" required minlength="10" maxlength="1000" rows="2">{{ old('reason') }}</textarea><button class="btn btn-warning">Revise</button></form>
+        @endif
         @if(\App\Support\MaterialRequestAuthorization::canSubmit(auth()->user(), $materialRequest))
         <form method="POST" action="{{ route('mfg.material-requests.submit', $materialRequest->id) }}">@csrf<button class="btn btn-outline-primary">Submit</button></form>
         @endif
@@ -38,6 +48,21 @@
         <div class="col-md-4"><div class="text-muted small">Approved</div><div>{{ $materialRequest->approved_at?->format('d-m-Y H:i') ?? '-' }} @if($materialRequest->approver) oleh {{ $materialRequest->approver->name }} @endif</div></div>
         <div class="col-md-4"><div class="text-muted small">Rejected</div><div>{{ $materialRequest->rejected_at?->format('d-m-Y H:i') ?? '-' }} @if($materialRequest->rejector) oleh {{ $materialRequest->rejector->name }} @endif</div></div>
         @if($materialRequest->rejection_reason)<div class="col-12"><div class="text-muted small">Alasan Penolakan</div><div>{{ $materialRequest->rejection_reason }}</div></div>@endif
-    </div><div class="form-text mt-3">Riwayat ini berasal dari snapshot status existing, belum merupakan approval history append-only.</div></div></div>
+    </div></div></div>
+
+    <div class="card mt-3"><div class="card-header fw-semibold">History PR</div>
+        @if($materialRequest->histories->isEmpty())
+        <div class="card-body text-muted">PR dibuat sebelum pencatatan histori. Riwayat ini berasal dari snapshot status existing, belum merupakan approval history append-only.</div>
+        @else
+        <div class="table-responsive"><table class="table align-middle mb-0">
+            <thead><tr><th>Waktu</th><th>Aksi</th><th>Dari → Ke</th><th>Aktor</th><th>Alasan</th><th>Revisi</th></tr></thead>
+            <tbody>@foreach($materialRequest->histories as $history)<tr>
+                <td>{{ $history->created_at?->format('d-m-Y H:i:s') }}</td><td>{{ $history->action }}</td>
+                <td>{{ $history->from_status ?? '-' }} → {{ $history->to_status }}</td><td>{{ $history->actor?->name ?? '-' }}</td>
+                <td style="white-space: pre-wrap">{{ $history->reason ?? '-' }}</td><td>{{ $history->revision_no }}</td>
+            </tr>@endforeach</tbody>
+        </table></div>
+        @endif
+    </div>
 </div>
 @endsection

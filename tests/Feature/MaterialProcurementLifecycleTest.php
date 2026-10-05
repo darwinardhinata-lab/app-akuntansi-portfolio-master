@@ -198,7 +198,11 @@ class MaterialProcurementLifecycleTest extends TestCase
             ->assertSeeText('Pembuat PR Detail')
             ->assertSeeText('Penyetuju PR Detail')
             ->assertSeeText('Purpose detail audit')
-            ->assertSeeText('belum merupakan approval history append-only');
+            ->assertSeeText('History PR')
+            ->assertSeeText('CREATED')
+            ->assertSeeText('SUBMITTED')
+            ->assertSeeText('APPROVED')
+            ->assertDontSeeText('belum merupakan approval history append-only');
     }
 
     public function test_purchase_request_index_rejects_unknown_tab_and_status(): void
