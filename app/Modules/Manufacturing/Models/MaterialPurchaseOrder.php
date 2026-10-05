@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class MaterialPurchaseOrder extends Model
 {
+    public const APPROVED = 'APPROVED';
+
     protected $table = 'mfg_material_purchase_orders';
 
     protected $fillable = [

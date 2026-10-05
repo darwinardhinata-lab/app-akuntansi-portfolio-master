@@ -7,6 +7,7 @@ use App\Models\JournalDetail;
 use App\Support\DocumentSequence;
 use App\Support\JournalBalanceValidator;
 use App\Modules\Manufacturing\Models\MaterialReceipt;
+use App\Modules\Manufacturing\Models\MaterialPurchaseOrder;
 use App\Modules\Manufacturing\Models\MaterialReceiptDetail;
 use App\Modules\Manufacturing\Models\Yarn;
 use App\Modules\Manufacturing\Models\Fabric;
@@ -42,6 +43,43 @@ class MaterialReceiptService
         }
 
         return DB::transaction(function () use ($header, $items) {
+            // FIX: periksa semua referensi PO sebelum resolusi COA dan penulisan stok/jurnal.
+            $orderIds = [];
+            if (!empty($header['po_id'])) {
+                $orderIds[] = (int) $header['po_id'];
+            }
+
+            $detailIds = collect($items)->pluck('po_detail_id')->filter()->unique()->values();
+            if ($detailIds->isNotEmpty()) {
+                $details = DB::table('mfg_material_purchase_order_details')
+                    ->whereIn('id', $detailIds)->get(['id', 'po_id']);
+                if ($details->count() !== $detailIds->count()) {
+                    throw new Exception('Referensi detail Material PO tidak ditemukan.');
+                }
+                foreach ($details as $detail) {
+                    if (!empty($header['po_id']) && (int) $detail->po_id !== (int) $header['po_id']) {
+                        throw new Exception('Detail Material PO tidak sesuai dengan PO penerimaan.');
+                    }
+                    $orderIds[] = (int) $detail->po_id;
+                }
+            }
+
+            // FIX: urutan lock numerik konsisten untuk receipt yang merujuk lebih dari satu PO.
+            $orderIds = array_unique($orderIds);
+            sort($orderIds, SORT_NUMERIC);
+            foreach ($orderIds as $orderId) {
+                $order = MaterialPurchaseOrder::whereKey($orderId)->lockForUpdate()->first();
+                if (!$order) {
+                    throw new Exception('Material PO penerimaan tidak ditemukan.');
+                }
+                if ($order->approval_status !== MaterialPurchaseOrder::APPROVED) {
+                    throw new Exception("Material PO {$order->po_number} belum APPROVED; penerimaan barang ditolak.");
+                }
+                if (!in_array($order->status, ['APPROVED', 'PARTIAL'], true)) {
+                    throw new Exception("Material PO {$order->po_number} tidak terbuka untuk penerimaan barang.");
+                }
+            }
+
             $now = now();
             // Material procurement is a manufacturing flow. It must not fall
             // back to legacy 11210/11220/22010 codes that are not part of the
