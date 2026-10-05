@@ -88,18 +88,21 @@ Model history menolak event updating/deleting (termasuk update/save/delete).
 Immutability bukan absolut: raw SQL, bulk query yang melewati event, dan admin DB
 masih dapat mengubah record. Belum ada trigger DB; tetap backlog rollout.
 
-## 6. Receipt/MRN: celah yang belum ditutup
+## 6. Receipt/MRN: temuan baseline Tahap 4
 
 Inspeksi terbatas membuktikan MaterialReceiptController menampilkan PO berdasarkan
 status legacy APPROVED/PARTIAL. MaterialReceiptService memeriksa sisa quantity,
 tetapi belum memeriksa approval_status APPROVED pada pemanggilan langsung.
 Filter form bukan kontrol server-side yang cukup.
 
-**Desain G belum diterapkan:** jalur tersebut menangani COA, stok/ledger, dan
+**Pada akhir Tahap 4, desain G belum diterapkan:** jalur tersebut menangani COA, stok/ledger, dan
 posting jurnal. Sesuai aturan, service receipt tidak diubah; patch guard receipt
 memerlukan persetujuan manual terpisah. Dengan demikian fitur approval PO ini
 belum boleh diklaim mengamankan receipt terhadap PO belum APPROVED. Penutupan
 celah tersebut merupakan prasyarat keamanan rollout jalur penerimaan barang.
+
+Temuan baseline di atas ditangani setelah persetujuan manual pada Tahap 5,
+sebagaimana bagian 9. Batas penerimaan non-PO tetap berlaku.
 
 ## 7. Migration dan risiko rollout
 
@@ -140,3 +143,106 @@ dijalankan. Push branch, merge main, dan deploy tidak dilakukan.
   verifier tidak dijalankan dan tidak termasuk suite default Unit/Feature.
 - Matching PO/GRN/Bill, Factory, Purchase Type, approval bertingkat, backfill,
   trigger DB, dan isolasi company/factory belum diimplementasikan.
+
+## 9. Tahap 5: Guard Receipt
+
+### 9.1 Guard yang disetujui dan jalur terlindungi
+
+Setelah review diff dan persetujuan manual, MaterialReceiptService::createAndPost
+memeriksa referensi PO di awal transaksi, sebelum `$now`, resolusi COA, generator
+nomor, atau SQL mutasi. DocumentSequence::generateSecure sendiri hanya membaca/
+lock; mutasi stok pertama tetap berada pada MaterialCostHelper::receiveStock.
+
+- Header `po_id` dan seluruh PO yang dirujuk `items.*.po_detail_id` diperiksa.
+- Detail tidak ditemukan atau berbeda PO dari header ditolak dengan exception.
+- ID PO unik diurutkan numerik, kemudian PO di-load dengan lockForUpdate.
+- approval_status wajib MaterialPurchaseOrder::APPROVED; status legacy wajib
+  APPROVED atau PARTIAL, mengikuti definisi PO terbuka existing.
+- DRAFT/SUBMITTED/REJECTED, PO tidak ditemukan, dan status tidak terbuka ditolak
+  dengan pesan Indonesia sebelum mutasi. Receipt merujuk beberapa PO ditolak
+  seluruhnya bila salah satu belum APPROVED.
+- Service langsung dan HTTP MaterialReceiptController::store terlindungi melalui
+  service yang sama. Tidak ditemukan command penerimaan PO lain dalam direktori
+  app/Modules/Manufacturing dan app/Console pada inventaris terbatas.
+
+**Guard tidak mengubah jurnal/stok/COA.** Logika posting, pemilihan akun,
+perhitungan MAC, update stok/ledger, dan quantity received existing tidak diubah.
+Controller menampilkan exception melalui pesan error existing, bukan bypass.
+
+### 9.2 Jalur yang sengaja tidak dilindungi oleh approval PO
+
+- **Receipt TANPA referensi PO tetap diizinkan (baseline).** Ini celah kontrol
+  procurement yang diketahui dan memerlukan keputusan bisnis terpisah, bukan
+  diklaim tertutup oleh guard ini. Menghilangkan semua referensi PO dari payload
+  tetap menjadikan penerimaan sebagai MRN non-PO.
+- **Import material receipt TIDAK melindungi PO:** format existing tidak mempunyai
+  field PO/header-detail. Import membuat MRN non-PO; tidak ada perluasan format
+  atau klaim import PO terlindungi. Test membuktikan kondisi tersebut.
+- **Void receipt sengaja tidak diguard.** Pembalikan receipt existing tidak boleh
+  terhalang approval PO saat ini; logika void tetap unchanged.
+- Validasi lengkap matching supplier/material/header/detail dan kewajiban setiap
+  baris mempunyai detail PO bukan bagian patch ini. Matching PO/GRN/Bill tetap
+  backlog. Guard memeriksa referensi yang diberikan, bukan mengarang linkage.
+
+### 9.3 Receipt sebagian/penuh dan batas lifecycle existing
+
+Test sukses memakai alur nyata createRequest -> submitRequest -> approveRequest
+-> createOrderFromRequest -> submitOrder -> approveOrder -> receipt, dengan
+actor berbeda dan izin eksplisit. approveOrder mengisi status legacy APPROVED.
+
+Receipt pertama 4 dari 10 dan receipt kedua sisa 6 berhasil; status PO setelah
+keduanya tetap APPROVED. Service receipt existing hanya increment qty_received,
+tidak mengubah status menjadi PARTIAL/RECEIVED atau menutup fulfillment. Receipt
+tambahan dengan detail PO yang sama ditolak guard sisa quantity existing dengan
+pesan "melebihi sisa PO". Jangan menganggap guard status menutup PO setelah
+penerimaan penuh. Tanpa detail PO, kontrol sisa quantity tidak berlaku pada baris
+tersebut; kewajiban linkage detail tetap keputusan terpisah.
+
+Revise terhadap PO yang sudah memiliki qty_received > 0 tetap ditolak oleh
+aturan Tahap 4. PO REJECTED yang direvisi secara sah kembali DRAFT dan wajib
+disubmit/approve ulang sebelum receipt berreferensi PO.
+
+### 9.4 Rollout legacy: opsi A, tanpa auto-approve
+
+PO lama non-APPROVED akan ditolak menerima barang setelah guard aktif. Pilihan
+yang digunakan adalah **A: proses PO lama yang masih terbuka melalui workflow
+submit -> approve baru**, dengan aktor berizin dan SoD; tidak ada auto-approve,
+backfill status, atau grant otomatis. REJECTED perlu revise dengan alasan dahulu.
+PO legacy tanpa pembuat/identitas yang valid memerlukan penanganan operator
+terpisah; kode tidak mengarang pembuat atau bypass SoD.
+
+Query berikut **hanya usulan SELECT read-only, tidak dijalankan oleh Cline**.
+Definisi open menggunakan fulfillment OPEN dan status DRAFT/APPROVED/PARTIAL,
+serta masih ada sisa detail yang belum diterima:
+
+```sql
+SELECT COUNT(*) AS open_po_non_approved
+FROM mfg_material_purchase_orders AS po
+WHERE po.fulfillment_status = 'OPEN'
+  AND po.status IN ('DRAFT', 'APPROVED', 'PARTIAL')
+  AND (po.approval_status IS NULL OR po.approval_status <> 'APPROVED')
+  AND EXISTS (
+      SELECT 1
+      FROM mfg_material_purchase_order_details AS detail
+      WHERE detail.po_id = po.id
+        AND detail.qty > COALESCE(detail.qty_received, 0)
+  );
+```
+
+Tidak ada migration baru pada Tahap 5. Empat migration PR/PO Tahap 3–4 tetap
+wajib diterapkan manual dan diverifikasi operator sebelum aktivasi kode terkait;
+migration staging/operasional, push, merge, deploy tidak dilakukan oleh Cline.
+Concurrency lock MySQL belum diuji; guard detail-source lookup bukan matching
+menyeluruh. Tetap review semua batas non-PO/linkage sebelum rollout.
+
+### 9.5 Verifikasi sementara Tahap 5
+
+- Langkah 4: 45 targeted tests passed, 645 assertions, termasuk 8 guard tests.
+- Penolakan service memeriksa snapshot receipt/detail/ledger/jurnal, PO/detail PO,
+  saldo/MAC dan tidak ada SQL mutasi sebelum penolakan guard.
+- Posting sukses end-to-end dibandingkan baseline MaterialReceiptCoaMappingTest;
+  alur receipt sebagian/sisa, import non-PO, revisi, mismatch/missing detail,
+  dan campuran dua PO diuji.
+- Lint tiga PHP lulus; Pint model/test lulus. Pint --test service melaporkan style
+  existing; tidak diformat ulang agar patch sensitif hanya guard yang disetujui.
+- Suite penuh Tahap 5 belum dijalankan; hanya sekali pada Langkah 6.
