@@ -13,7 +13,9 @@ use App\Modules\Manufacturing\Models\Supplier;
 use App\Modules\Manufacturing\Models\Yarn;
 use App\Modules\Manufacturing\Services\MaterialProcurementService;
 use App\Support\MaterialRequestAuthorization;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class MaterialProcurementController extends Controller
 {
@@ -91,6 +93,57 @@ class MaterialProcurementController extends Controller
             SystemLog::record('CREATE', 'Manufacturing Material Purchase Request', 'Membuat Material PR: '.$pr->request_number);
 
             return redirect()->route('mfg.material-requests.index')->with('success', 'Material PR '.$pr->request_number.' dibuat sebagai DRAFT.');
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
+    public function requestEdit(int $id)
+    {
+        $materialRequest = MaterialPurchaseRequest::with('details')->findOrFail($id);
+        abort_unless(MaterialRequestAuthorization::canEdit(auth()->user(), $materialRequest), 403);
+        abort_if($materialRequest->details->contains(fn ($detail) => (float) $detail->qty_ordered > 0), 403);
+
+        return view('manufacturing.material_procurement.request_edit', $this->masters() + compact('materialRequest'));
+    }
+
+    public function requestUpdate(Request $request, int $id)
+    {
+        $materialRequest = MaterialPurchaseRequest::findOrFail($id);
+        abort_unless(MaterialRequestAuthorization::canEdit($request->user(), $materialRequest), 403);
+        abort_if($materialRequest->details()->where('qty_ordered', '>', 0)->exists(), 403);
+        $header = $request->validate([
+            'request_date' => 'required|date', 'required_date' => 'nullable|date', 'remarks' => 'nullable|string',
+        ]);
+        $items = $this->validateItems($request, false);
+        try {
+            // FIX: actor berasal dari autentikasi; payload tidak boleh mengganti pembuat/status/revisi.
+            $pr = $this->service->updateRequest($id, $header, $items, auth()->id());
+            SystemLog::record('UPDATE', 'Manufacturing Material Purchase Request', 'Mengedit Material PR: '.$pr->request_number);
+
+            return redirect()->route('mfg.material-requests.show', $id)->with('success', 'Material PR diperbarui.');
+        } catch (AuthorizationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
+    public function requestRevise(Request $request, int $id)
+    {
+        $materialRequest = MaterialPurchaseRequest::findOrFail($id);
+        abort_unless(MaterialRequestAuthorization::canRevise($request->user(), $materialRequest), 403);
+        abort_if($materialRequest->details()->where('qty_ordered', '>', 0)->exists(), 403);
+        $reason = $request->input('reason');
+        $reason = is_string($reason) ? trim($reason) : $reason;
+        Validator::make(['reason' => $reason], ['reason' => 'required|string|min:10|max:1000'])->validate();
+        try {
+            $pr = $this->service->reviseRequest($id, $reason, auth()->id());
+            SystemLog::record('REVISE', 'Manufacturing Material Purchase Request', 'Merevisi Material PR: '.$pr->request_number);
+
+            return redirect()->route('mfg.material-requests.show', $id)->with('success', 'Material PR kembali DRAFT untuk revisi.');
+        } catch (AuthorizationException $e) {
+            throw $e;
         } catch (\Throwable $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }

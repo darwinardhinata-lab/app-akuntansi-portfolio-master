@@ -253,6 +253,81 @@ class MaterialRequestRevisionHistoryTest extends TestCase
             ->assertOk()->assertSeeText('PR dibuat sebelum pencatatan histori');
     }
 
+    public function test_http_update_uses_authenticated_actor_and_ignores_forged_fields(): void
+    {
+        $pr = $this->draft();
+        $this->actingAs($this->creator)->put(route('mfg.material-requests.update', $pr->id), [
+            'request_date' => '2026-10-04', 'remarks' => 'Edit melalui HTTP', 'items' => [$this->item(7)],
+            'actor_id' => $this->outsider->id, 'created_by' => $this->outsider->id,
+            'approval_status' => 'APPROVED', 'revision_no' => 99,
+        ])->assertRedirect(route('mfg.material-requests.show', $pr->id))->assertSessionHas('success');
+        $this->assertSame($this->creator->id, $pr->fresh()->created_by);
+        $this->assertSame('DRAFT', $pr->fresh()->approval_status);
+        $this->assertSame(0, $pr->fresh()->revision_no);
+        $this->assertSame('Edit melalui HTTP', $pr->fresh()->remarks);
+        $this->assertHistory($pr, 'EDITED', 'DRAFT', 'DRAFT', $this->creator->id);
+    }
+
+    public function test_http_edit_update_and_revise_deny_unauthorized_users_before_validation(): void
+    {
+        $draft = $this->draft();
+        $rejected = $this->rejected();
+        $admin = User::factory()->create(['role' => 'ADMIN']);
+        config(['platform.pr_create_user_ids' => [(string) $this->creator->id, (string) $this->outsider->id]]);
+        foreach ([$this->outsider, $admin] as $user) {
+            $this->actingAs($user)->get(route('mfg.material-requests.edit', $draft->id))->assertForbidden();
+            $this->put(route('mfg.material-requests.update', $draft->id), [])->assertForbidden();
+            $this->post(route('mfg.material-requests.revise', $rejected->id), [])->assertForbidden();
+        }
+        config(['platform.pr_create_user_ids' => []]);
+        $this->actingAs($this->creator)->get(route('mfg.material-requests.edit', $draft->id))->assertForbidden();
+        $this->put(route('mfg.material-requests.update', $draft->id), [])->assertForbidden();
+        $this->post(route('mfg.material-requests.revise', $rejected->id), [])->assertForbidden();
+        $this->assertSame('Header awal', $draft->fresh()->remarks);
+        $this->assertSame('REJECTED', $rejected->fresh()->approval_status);
+        $this->assertSame(1, $draft->histories()->count());
+        $this->assertSame(3, $rejected->histories()->count());
+    }
+
+    public function test_http_revision_validates_reason_and_uses_authenticated_actor(): void
+    {
+        $pr = $this->rejected();
+        $this->actingAs($this->creator);
+        foreach (['', 'Pendek', str_repeat('a', 1001), ['bukan string']] as $reason) {
+            $this->post(route('mfg.material-requests.revise', $pr->id), ['reason' => $reason])
+                ->assertSessionHasErrors('reason');
+            $this->assertSame('REJECTED', $pr->fresh()->approval_status);
+            $this->assertSame(3, $pr->histories()->count());
+        }
+        $this->post(route('mfg.material-requests.revise', $pr->id), [
+            'reason' => 'Kebutuhan diperiksa kembali', 'actor_id' => $this->outsider->id,
+        ])->assertRedirect(route('mfg.material-requests.show', $pr->id))->assertSessionHas('success');
+        $this->assertSame('DRAFT', $pr->fresh()->approval_status);
+        $this->assertHistory($pr, 'REVISED', 'REJECTED', 'DRAFT', $this->creator->id, 'Kebutuhan diperiksa kembali', 1);
+    }
+
+    public function test_http_edit_revision_deny_wrong_status_and_ordered_quantity(): void
+    {
+        $pr = $this->draft();
+        $this->actingAs($this->creator);
+        foreach (['SUBMITTED', 'APPROVED', 'REJECTED'] as $status) {
+            $pr->update(['approval_status' => $status]);
+            $this->get(route('mfg.material-requests.edit', $pr->id))->assertForbidden();
+            $this->put(route('mfg.material-requests.update', $pr->id), [])->assertForbidden();
+        }
+        foreach (['DRAFT', 'SUBMITTED', 'APPROVED'] as $status) {
+            $pr->update(['approval_status' => $status]);
+            $this->post(route('mfg.material-requests.revise', $pr->id), [])->assertForbidden();
+        }
+        $pr->details()->sole()->update(['qty_ordered' => 1]);
+        $pr->update(['approval_status' => 'DRAFT']);
+        $this->get(route('mfg.material-requests.edit', $pr->id))->assertForbidden();
+        $this->put(route('mfg.material-requests.update', $pr->id), [])->assertForbidden();
+        $pr->update(['approval_status' => 'REJECTED']);
+        $this->post(route('mfg.material-requests.revise', $pr->id), [])->assertForbidden();
+        $this->assertSame(1, $pr->histories()->count());
+    }
+
     private function draft(): MaterialPurchaseRequest
     {
         return $this->service->createRequest([
