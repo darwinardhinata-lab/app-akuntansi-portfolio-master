@@ -12,6 +12,7 @@ use App\Modules\Manufacturing\Models\Yarn;
 use App\Support\DocumentSequence;
 use App\Support\MaterialRequestAuthorization;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class MaterialProcurementService
 {
@@ -26,10 +27,13 @@ class MaterialProcurementService
                 'request_date' => $header['request_date'], 'required_date' => $header['required_date'] ?? null, 'source_work_order_id' => $header['source_work_order_id'] ?? null,
                 'remarks' => $header['remarks'] ?? null, 'created_by' => $header['created_by'] ?? null,
                 'approval_status' => MaterialPurchaseRequest::DRAFT,
+                'revision_no' => 0,
             ]);
             foreach ($items as $item) {
                 $request->details()->create($this->requestDetailAttributes($item));
             }
+
+            $this->recordRequestHistory($request, 'CREATED', null, $header['created_by']);
 
             return $request;
         });
@@ -45,6 +49,7 @@ class MaterialProcurementService
                 throw new \RuntimeException('PR harus memiliki minimal satu detail.');
             }
             $request->update(['approval_status' => MaterialPurchaseRequest::SUBMITTED, 'submitted_by' => $actorId, 'submitted_at' => now()]);
+            $this->recordRequestHistory($request, 'SUBMITTED', MaterialPurchaseRequest::DRAFT, $actorId);
 
             return $request;
         });
@@ -57,6 +62,7 @@ class MaterialProcurementService
             MaterialRequestAuthorization::ensure(MaterialRequestAuthorization::canApprove(User::find($actorId), $request));
             $this->requireStatus($request->approval_status, MaterialPurchaseRequest::SUBMITTED, 'PR hanya dapat disetujui dari SUBMITTED.');
             $request->update(['approval_status' => MaterialPurchaseRequest::APPROVED, 'approved_by' => $actorId, 'approved_at' => now()]);
+            $this->recordRequestHistory($request, 'APPROVED', MaterialPurchaseRequest::SUBMITTED, $actorId);
 
             return $request;
         });
@@ -72,9 +78,77 @@ class MaterialProcurementService
             }
             $this->requireStatus($request->approval_status, MaterialPurchaseRequest::SUBMITTED, 'PR hanya dapat ditolak dari SUBMITTED.');
             $request->update(['approval_status' => MaterialPurchaseRequest::REJECTED, 'rejected_by' => $actorId, 'rejected_at' => now(), 'rejection_reason' => $reason]);
+            $this->recordRequestHistory($request, 'REJECTED', MaterialPurchaseRequest::SUBMITTED, $actorId, $reason);
 
             return $request;
         });
+    }
+
+    public function updateRequest(int $id, array $header, array $items, ?int $actorId): MaterialPurchaseRequest
+    {
+        return DB::transaction(function () use ($id, $header, $items, $actorId) {
+            $request = MaterialPurchaseRequest::lockForUpdate()->findOrFail($id);
+            MaterialRequestAuthorization::ensure(MaterialRequestAuthorization::canEdit(User::find($actorId), $request));
+            $this->requireStatus($request->approval_status, MaterialPurchaseRequest::DRAFT, 'PR hanya dapat diedit dari DRAFT.');
+            $this->requireUnorderedRequest($request);
+            $this->validateItems($items);
+            $data = array_intersect_key($header, array_flip(['request_date', 'required_date', 'remarks']));
+            Validator::make($data, [
+                'request_date' => 'sometimes|required|date',
+                'required_date' => 'nullable|date',
+                'remarks' => 'nullable|string',
+            ])->validate();
+            // FIX: hanya header bisnis dapat diedit; identitas, status dan nomor revisi tidak berasal dari payload.
+            $request->update($data);
+            $request->details()->delete();
+            foreach ($items as $item) {
+                $request->details()->create($this->requestDetailAttributes($item));
+            }
+            $this->recordRequestHistory($request, 'EDITED', MaterialPurchaseRequest::DRAFT, $actorId);
+
+            return $request;
+        });
+    }
+
+    public function reviseRequest(int $id, string $reason, ?int $actorId): MaterialPurchaseRequest
+    {
+        return DB::transaction(function () use ($id, $reason, $actorId) {
+            $request = MaterialPurchaseRequest::lockForUpdate()->findOrFail($id);
+            MaterialRequestAuthorization::ensure(MaterialRequestAuthorization::canRevise(User::find($actorId), $request));
+            $this->requireStatus($request->approval_status, MaterialPurchaseRequest::REJECTED, 'PR hanya dapat direvisi dari REJECTED.');
+            $this->requireUnorderedRequest($request);
+            $reason = trim($reason);
+            Validator::make(['reason' => $reason], ['reason' => 'required|string|min:10|max:1000'])->validate();
+            // FIX: snapshot siklus lama dibersihkan; histori penolakan tetap tersimpan tanpa perubahan.
+            $request->update([
+                'approval_status' => MaterialPurchaseRequest::DRAFT,
+                'revision_no' => $request->revision_no + 1,
+                'submitted_by' => null, 'submitted_at' => null,
+                'approved_by' => null, 'approved_at' => null,
+                'rejected_by' => null, 'rejected_at' => null, 'rejection_reason' => null,
+            ]);
+            $this->recordRequestHistory($request, 'REVISED', MaterialPurchaseRequest::REJECTED, $actorId, $reason);
+
+            return $request;
+        });
+    }
+
+    private function requireUnorderedRequest(MaterialPurchaseRequest $request): void
+    {
+        // FIX: detail dikunci bersama header sebelum pemeriksaan quantity dan penggantian detail.
+        $details = $request->details()->lockForUpdate()->get();
+        if ($details->contains(fn ($detail) => (float) $detail->qty_ordered > 0)) {
+            throw new \RuntimeException('PR dengan quantity ordered tidak dapat diedit atau direvisi.');
+        }
+    }
+
+    private function recordRequestHistory(MaterialPurchaseRequest $request, string $action, ?string $fromStatus, ?int $actorId, ?string $reason = null): void
+    {
+        // FIX: insert histori memakai transaksi pemanggil; kegagalan insert membatalkan mutasi PR.
+        $request->histories()->create([
+            'action' => $action, 'from_status' => $fromStatus, 'to_status' => $request->approval_status,
+            'revision_no' => $request->revision_no, 'actor_id' => $actorId, 'reason' => $reason,
+        ]);
     }
 
     public function createOrderFromRequest(int $requestId, int $supplierId, array $items, array $header): MaterialPurchaseOrder

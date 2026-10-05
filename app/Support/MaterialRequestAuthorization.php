@@ -33,6 +33,18 @@ class MaterialRequestAuthorization
             && (int) $request->submitted_by !== (int) $user->id;
     }
 
+    public static function canEdit(?User $user, MaterialPurchaseRequest $request): bool
+    {
+        return self::canCreate($user) && (int) $request->created_by === (int) $user->id
+            && $request->approval_status === MaterialPurchaseRequest::DRAFT;
+    }
+
+    public static function canRevise(?User $user, MaterialPurchaseRequest $request): bool
+    {
+        return self::canCreate($user) && (int) $request->created_by === (int) $user->id
+            && $request->approval_status === MaterialPurchaseRequest::REJECTED;
+    }
+
     public static function ensure(bool $allowed): void
     {
         if (! $allowed) {
