@@ -59,6 +59,8 @@ class MaterialProcurementMysqlTest extends TestCase
         config([
             'platform.pr_create_user_ids' => [(string) $creator->id],
             'platform.pr_approve_user_ids' => [(string) $approver->id],
+            'platform.po_create_user_ids' => [(string) $creator->id],
+            'platform.po_approve_user_ids' => [(string) $approver->id],
         ]);
         $pr = $service->createRequest(['request_date' => '2026-09-28', 'created_by' => $creator->id], [$item]);
         $service->submitRequest($pr->id, $creator->id);
@@ -71,9 +73,15 @@ class MaterialProcurementMysqlTest extends TestCase
             'to_status' => 'APPROVED', 'actor_id' => $approver->id, 'revision_no' => 0,
         ]);
         $detail = $pr->fresh('details')->details->sole();
-        $po = $service->createOrderFromRequest($pr->id, $supplier->id, [$item + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-28']);
-        $service->submitOrder($po->id, null);
-        $service->approveOrder($po->id, null);
+        $po = $service->createOrderFromRequest($pr->id, $supplier->id, [$item + ['source_request_detail_id' => $detail->id]], ['po_date' => '2026-09-28', 'created_by' => $creator->id]);
+        $service->submitOrder($po->id, $creator->id);
+        $service->approveOrder($po->id, $approver->id);
+        // FIX: histori PO dan identitas approver diperiksa tanpa melonggarkan SoD fixture.
+        $this->assertSame(['CREATED', 'SUBMITTED', 'APPROVED'], $po->histories()->pluck('action')->all());
+        $this->assertDatabaseHas('mfg_material_purchase_order_histories', [
+            'order_id' => $po->id, 'action' => 'APPROVED', 'from_status' => 'SUBMITTED',
+            'to_status' => 'APPROVED', 'actor_id' => $approver->id, 'revision_no' => 0,
+        ]);
 
         $this->assertDatabaseHas('mfg_material_purchase_orders', ['id' => $po->id, 'approval_status' => 'APPROVED', 'fulfillment_status' => 'OPEN']);
         $this->assertDatabaseHas('mfg_material_purchase_order_details', ['po_id' => $po->id, 'source_request_detail_id' => $detail->id, 'qty' => 20]);

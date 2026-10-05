@@ -124,13 +124,19 @@ penghapusan PO/user yang dirujuk history. Allowlist global bukan isolasi company
 factory. Verifikasi concurrency MySQL belum dilakukan; verifier terisolasi tidak
 dijalankan. Push branch, merge main, dan deploy tidak dilakukan.
 
-## 8. Verifikasi sementara dan backlog
+## 8. Verifikasi akhir dan backlog
 
 - Langkah 6: 41 targeted test passed, 572 assertions; termasuk 21 test PO.
 - Test mencakup history/append-only, izin/ADMIN/ownership, SoD fleksibel, reason,
   edit/revise, rollback enam operasi, reservasi PO lain/baris duplikat, approval
   tanpa perubahan stok/ledger/jurnal, actor HTTP, form edit, history dan legacy.
 - Lint, Pint class/test, diff check, view:cache lulus; 10 route PO tersedia.
-- Suite penuh hanya akan dijalankan sekali pada Langkah 8.
+- Langkah 8: targeted PR/PO 57 passed, 849 assertions.
+- Suite penuh `php artisan test --stop-on-failure`: 329 passed, 10860 assertions;
+  dijalankan sekali pada Langkah 8.
+- Lint 15 PHP berubah lulus; Pint --test 8 class/test lulus, bukan routes;
+  diff check bersih, view:cache berhasil, dan 10 route PO terdaftar.
+- Fixture MySQL diberi izin dan actor PO eksplisit serta assertion history PO;
+  verifier tidak dijalankan dan tidak termasuk suite default Unit/Feature.
 - Matching PO/GRN/Bill, Factory, Purchase Type, approval bertingkat, backfill,
   trigger DB, dan isolasi company/factory belum diimplementasikan.
