@@ -235,7 +235,7 @@ migration staging/operasional, push, merge, deploy tidak dilakukan oleh Cline.
 Concurrency lock MySQL belum diuji; guard detail-source lookup bukan matching
 menyeluruh. Tetap review semua batas non-PO/linkage sebelum rollout.
 
-### 9.5 Verifikasi sementara Tahap 5
+### 9.5 Verifikasi akhir Tahap 5
 
 - Langkah 4: 45 targeted tests passed, 645 assertions, termasuk 8 guard tests.
 - Penolakan service memeriksa snapshot receipt/detail/ledger/jurnal, PO/detail PO,
@@ -245,4 +245,11 @@ menyeluruh. Tetap review semua batas non-PO/linkage sebelum rollout.
   dan campuran dua PO diuji.
 - Lint tiga PHP lulus; Pint model/test lulus. Pint --test service melaporkan style
   existing; tidak diformat ulang agar patch sensitif hanya guard yang disetujui.
-- Suite penuh Tahap 5 belum dijalankan; hanya sekali pada Langkah 6.
+- Langkah 6: targeted 45 passed, 645 assertions; suite penuh
+  `php artisan test --stop-on-failure` 337 passed, 10951 assertions, sekali.
+- Diff Tahap 5 dan staged diff check bersih; tidak ada migration baru.
+- Pint --test keseluruhan tidak hijau: service tetap melaporkan style, sedangkan
+  model/test lulus. Tidak menjalankan autofix service karena berpotensi mengubah
+  banyak baris posting/stok di luar guard yang disetujui. Batas style tetap terbuka.
+- Fixture MySQL tidak memanggil receipt sehingga tidak perlu diubah; verifier
+  tidak dijalankan. Query SELECT rollout tetap hanya teks, tidak dieksekusi.
