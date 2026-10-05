@@ -369,6 +369,43 @@ class MaterialOrderApprovalTest extends TestCase
         return $this->service->createOrderFromRequest($this->pr->id, $this->supplierId, [$this->orderItem($qty)], ['po_date' => '2026-10-05', 'created_by' => $this->creator->id])->fresh();
     }
 
+    public function test_edit_view_preserves_multiple_details_and_old_input(): void
+    {
+        $po = $this->order();
+        $this->service->updateOrder($po->id, ['remarks' => 'Header edit PO'], [$this->orderItem(4), $this->orderItem(6)], $this->creator->id);
+        $this->actingAs($this->creator)->get(route('mfg.material-orders.edit', $po->id))
+            ->assertOk()->assertSeeText('Supplier PO')->assertSee('Header edit PO')
+            ->assertSee('items[0][qty]', false)->assertSee('items[1][qty]', false)
+            ->assertSee('items[0][source_request_detail_id]', false)->assertSee('name="_method" value="PUT"', false);
+        $this->withSession(['_old_input' => ['remarks' => 'Input lama PO', 'items' => [$this->orderItem(8)]]])
+            ->get(route('mfg.material-orders.edit', $po->id))->assertOk()->assertSee('Input lama PO');
+    }
+
+    public function test_view_controls_follow_permissions_sod_status_and_receipt_quantity(): void
+    {
+        $po = $this->order();
+        $show = route('mfg.material-orders.show', $po->id);
+        $edit = route('mfg.material-orders.edit', $po->id);
+        $submit = route('mfg.material-orders.submit', $po->id);
+        $approve = route('mfg.material-orders.approve', $po->id);
+        $reject = route('mfg.material-orders.reject', $po->id);
+        $revise = route('mfg.material-orders.revise', $po->id);
+        $this->actingAs($this->creator)->get($show)->assertOk()->assertSee($edit, false)->assertSee($submit, false)->assertDontSee($approve, false);
+        config(['platform.po_view_user_ids' => [(string) $this->outsider->id]]);
+        $this->actingAs($this->outsider)->get($show)->assertOk()->assertDontSee($edit, false)->assertDontSee($submit, false);
+        $this->service->submitOrder($po->id, $this->creator->id);
+        $this->actingAs($this->approver)->get($show)->assertOk()->assertSee($approve, false)->assertSee($reject, false)->assertDontSee($edit, false);
+        $this->get(route('mfg.material-orders.index'))->assertOk()->assertSee('text-bg-warning', false)->assertSee($approve, false);
+        config(['platform.po_approve_user_ids' => [(string) $this->approver->id, (string) $this->creator->id]]);
+        $this->actingAs($this->creator)->get($show)->assertOk()->assertDontSee($approve, false)->assertDontSee($reject, false);
+        $this->service->rejectOrder($po->id, 'Harga perlu diperiksa', $this->approver->id);
+        $this->get($show)->assertOk()->assertSee($revise, false)->assertSee('textarea', false);
+        $po->details()->sole()->update(['qty_received' => 1]);
+        $this->get($show)->assertOk()->assertDontSee($revise, false);
+        $po->update(['approval_status' => 'DRAFT']);
+        $this->get($show)->assertOk()->assertDontSee($edit, false);
+    }
+
     public function test_edit_keeps_other_po_reservations_and_duplicate_create_cannot_exceed_pr(): void
     {
         $po = $this->order(10);

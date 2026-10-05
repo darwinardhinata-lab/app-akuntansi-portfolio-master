@@ -231,7 +231,7 @@ class MaterialProcurementController extends Controller
 
     public function orderEdit(int $id)
     {
-        $materialOrder = MaterialPurchaseOrder::with('details')->findOrFail($id);
+        $materialOrder = MaterialPurchaseOrder::with(['details', 'supplier'])->findOrFail($id);
         abort_unless(MaterialOrderAuthorization::canEdit(auth()->user(), $materialOrder), 403);
         $this->authorizeUnreceivedOrder($materialOrder);
 
