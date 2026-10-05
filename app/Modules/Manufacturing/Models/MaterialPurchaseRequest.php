@@ -19,11 +19,11 @@ class MaterialPurchaseRequest extends Model
 
     protected $table = 'mfg_material_purchase_requests';
 
-    protected $fillable = ['request_number', 'request_date', 'required_date', 'source_work_order_id', 'approval_status', 'submitted_by', 'submitted_at', 'approved_by', 'approved_at', 'rejected_by', 'rejected_at', 'rejection_reason', 'remarks', 'created_by'];
+    protected $fillable = ['request_number', 'request_date', 'required_date', 'source_work_order_id', 'approval_status', 'submitted_by', 'submitted_at', 'approved_by', 'approved_at', 'rejected_by', 'rejected_at', 'rejection_reason', 'remarks', 'created_by', 'revision_no'];
 
     protected function casts(): array
     {
-        return ['request_date' => 'date', 'required_date' => 'date', 'submitted_at' => 'datetime', 'approved_at' => 'datetime', 'rejected_at' => 'datetime'];
+        return ['request_date' => 'date', 'required_date' => 'date', 'submitted_at' => 'datetime', 'approved_at' => 'datetime', 'rejected_at' => 'datetime', 'revision_no' => 'integer'];
     }
 
     public function details(): HasMany
@@ -34,6 +34,11 @@ class MaterialPurchaseRequest extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function histories(): HasMany
+    {
+        return $this->hasMany(MaterialPurchaseRequestHistory::class, 'request_id')->orderBy('id');
     }
 
     public function submitter(): BelongsTo
