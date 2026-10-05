@@ -253,3 +253,50 @@ menyeluruh. Tetap review semua batas non-PO/linkage sebelum rollout.
   banyak baris posting/stok di luar guard yang disetujui. Batas style tetap terbuka.
 - Fixture MySQL tidak memanggil receipt sehingga tidak perlu diubah; verifier
   tidak dijalankan. Query SELECT rollout tetap hanya teks, tidak dieksekusi.
+
+### 9.6 Review dan backlog wajib sebelum matching
+
+- Celah over-receipt (sedang): receipt dengan po_id tetapi baris tanpa
+  po_detail_id dapat melewati kontrol sisa quantity. Backlog wajib sebelum
+  matching PO/GRN/Bill: Tahap 6 kecil untuk mewajibkan linkage setiap baris ke
+  detail PO bila header po_id ada, dengan gerbang persetujuan manual baru.
+  Review ini bukan persetujuan untuk mengubah perilaku receipt sekarang.
+- Status PO tetap APPROVED setelah quantity terpenuhi. Laporan PO open tidak
+  boleh bergantung pada status saja; gunakan sisa quantity detail. Pertimbangkan
+  juga baris legacy tanpa detail/quantity linkage saat rekonsiliasi matching.
+- Style Pint service receipt tetap terbuka; jangan melakukan format ulang
+  file sensitif sebagai bagian perbaikan linkage tanpa scope yang disetujui.
+
+### 9.7 Urutan rollout dari review operator
+
+Checklist ini dikerjakan operator, bukan dieksekusi oleh Cline:
+
+1. Push branch fitur (bukan main), lalu backup database penuh di luar server;
+   rollback utama memakai restore terverifikasi, bukan migrate:rollback.
+2. Restore salinan staging dengan nama baru; jangan menganggap pergantian nama
+   otomatis menjamin keamanan. Periksa target koneksi dan guard database.
+3. Terapkan migration berurutan timestamp dan verifikasi schema. Menurut review
+   operator ada 10 migration: enam paket 2026_10_02_040000 sampai 090000, dua PR
+   2026_10_03_090001/090002, dua PO 2026_10_05_090001/090002. Daftar enam paket
+   sebelumnya belum diverifikasi ulang dalam pencatatan review ini.
+4. Review konfigurasi setiap verifier MySQL sebelum menjalankan: fixture
+   MaterialProcurementMysqlTest membuat database terisolasi sendiri, bukan
+   otomatis memakai database staging hanya karena APP_ENV atau DB_DATABASE.
+   Verifier tidak dijalankan oleh Cline; concurrency MySQL masih belum terbukti.
+5. Operator mengisi allowlist PR/PO dan correction/reversal bila diperlukan,
+   menjaga SoD; flag maklun issue/receipt tetap false. Tidak ada grant otomatis.
+6. Hitung dampak legacy memakai SELECT read-only bagian 9.4 dan proses opsi A:
+   submit -> approve, revise dahulu bila REJECTED; identitas legacy kosong
+   memerlukan keputusan operator, bukan bypass.
+7. Smoke test staging siklus PR -> PO -> receipt sebagian/sisa dengan akun
+   berbeda, jurnal seimbang dan stok tepat; uji negatif self-approval, PO DRAFT,
+   serta user tanpa izin. Jangan aktifkan kode baru sebelum schema terverifikasi.
+8. Produksi hanya melalui jendela perawatan dan prosedur operator; ulangi
+   verifikasi schema/config/legacy, clear config/view sesuai checklist operator.
+   Merge main hanya lewat Pull Request setelah staging lulus.
+
+Urutan pengembangan berikutnya: operator menyelesaikan persiapan/staging/smoke
+test (A–E), Tahap 6 linkage detail melalui persetujuan manual baru, kemudian
+matching PO/GRN/Bill dengan persetujuan per langkah bila menyentuh jurnal/COA.
+Tidak ada push, backup/restore, migration, perubahan .env, deploy, atau merge
+yang dilakukan sebagai bagian pencatatan review ini.
