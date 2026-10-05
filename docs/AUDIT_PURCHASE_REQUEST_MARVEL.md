@@ -385,3 +385,101 @@ grant otomatis).
   produksi otomatis, perubahan `.env` produksi, migration operasional, push,
   merge, atau deploy. Edit/revision, history append-only, Factory, Purchase Type,
   dan approval bertingkat tetap di luar scope.
+
+## 13. Tahap 3: Revision & History
+
+Bagian ini menggantikan batas snapshot/edit/revision yang dicatat pada Tahap 1
+dan Tahap 2 untuk fitur yang dijelaskan di bawah. Temuan awal tetap dipertahankan
+sebagai catatan baseline, bukan deskripsi perilaku terbaru.
+
+### 13.1 Desain A–F dan implementasi
+
+**A — Histori append-only:** tabel `mfg_material_purchase_request_histories`
+berisi `id`, `request_id` (FK PR, restrict on delete), `action` (CREATED,
+SUBMITTED, APPROVED, REJECTED, REVISED, EDITED), `from_status` nullable,
+`to_status`, `revision_no` unsigned integer, `actor_id` nullable (FK users,
+restrict on delete), `reason` text nullable, dan `created_at`. Tidak ada
+`updated_at`. Relasi `histories()` diurutkan menurut ID naik; aktor ditampilkan
+melalui relasi `actor()`.
+
+**B — Nomor revisi:** kolom PR `revision_no` unsigned integer default 0.
+Pembuatan PR dimulai pada revisi 0; tiap revise yang berhasil menaikkan nilai
+tepat satu. Edit biasa tidak menaikkan nomor revisi.
+
+**C — Guard model:** `MaterialPurchaseRequestHistory` melempar exception pada
+event `updating` dan `deleting`. Update melalui model, perubahan lalu `save()`,
+dan delete melalui model ditolak tanpa mengubah record tersimpan.
+
+**D — Aturan edit/revisi:**
+
+- EDIT hanya untuk pembuat dengan izin create eksplisit, status DRAFT.
+  Header bisnis yang boleh berubah: tanggal permintaan, tanggal dibutuhkan,
+  dan catatan. Seluruh detail diganti dalam satu transaksi; action EDITED
+  merekam DRAFT → DRAFT pada nomor revisi yang sama.
+- REVISE hanya untuk pembuat berizin create, status REJECTED. Alasan wajib
+  10–1000 karakter setelah trim; hasil DRAFT dan `revision_no + 1`.
+  Snapshot submitted/approved/rejected beserta waktu dan alasan penolakan
+  dibersihkan. Record REJECTED lama tidak diubah; REVISED menyimpan alasan baru.
+- SUBMITTED/APPROVED/REJECTED tidak dapat diedit langsung; APPROVED tidak dapat
+  direvisi. Detail mana pun dengan `qty_ordered > 0` melarang edit dan revise.
+- Header dan detail dikunci sebelum perubahan; status, ownership, izin, dan
+  quantity diperiksa kembali di service setelah lock. HTTP menolak akses yang
+  tidak berwenang dengan 403. Actor berasal dari autentikasi, bukan payload;
+  service menerima actor-ID dari pemanggil internal tepercaya.
+- Allowlist Tahap 2 tetap global dan default kosong; ADMIN tidak mendapat
+  bypass. Tidak ada grant role/permission produksi otomatis.
+
+**E — Atomicity:** create, submit, approve, reject, edit, dan revise menulis
+history dalam transaksi database yang sama dengan header/detail/status.
+Kegagalan insert history membatalkan perubahan PR. Test mensimulasikan exception
+insert untuk keenam operasi dan memeriksa header, detail, dan histori tetap utuh.
+
+**F — Legacy tanpa backfill:** PR sebelum fitur ini tidak diberi histori
+buatan. Detail menampilkan "PR dibuat sebelum pencatatan histori" bila histori
+kosong. Bila PR legacy kemudian ditransisikan, histori hanya mencatat aksi baru,
+bukan merekonstruksi siklus lama.
+
+### 13.2 Tampilan dan batas fitur
+
+Form edit mengikuti label Indonesia existing, mempertahankan semua baris detail
+dan old input, serta catatan detail. Tabel History menampilkan waktu, aksi,
+dari → ke, aktor, alasan, dan nomor revisi. Tombol Edit/Revise hanya tampil untuk
+user berwenang pada status yang sesuai dan tanpa quantity ordered; UI bukan
+pengaman utama. Snapshot status masih ditampilkan sebagai ringkasan, sedangkan
+riwayat aksi kini berasal dari tabel append-only.
+
+Histori **bukan immutability absolut**: raw SQL, query builder/bulk update yang
+melewati event model, dan administrator DB masih dapat mengubahnya. Belum ada
+trigger DB; trigger/proteksi tingkat database tetap backlog rollout. Histori
+EDITED adalah catatan aksi/status, bukan snapshot lengkap versi header/detail.
+
+Hubungan PR → PO approval dan matching PO/GRN/Bill merupakan tahap berikutnya.
+Factory, Purchase Type, approval bertingkat, dan isolasi company/factory tidak
+ditambahkan pada Tahap 3. COA dan jurnal tidak diubah.
+
+### 13.3 Migration dan risiko rollout
+
+Dua file migration dibuat, **belum dijalankan pada database operasional**:
+
+- `2026_10_03_090001_create_material_purchase_request_histories_table.php`
+- `2026_10_03_090002_add_revision_no_to_material_purchase_requests_table.php`
+
+Migration diuji hanya melalui SQLite in-memory dengan RefreshDatabase.
+**Operator wajib menjalankan migration secara manual sebelum deploy/aktivasi
+kode Tahap 3.** Kode yang memakai tabel history atau kolom revision_no tidak
+boleh berjalan di database operasional sebelum schema diterapkan; bila belum
+diterapkan, pembacaan detail/penulisan PR dapat gagal. Cline hanya membuat file
+migration dan tidak menjalankan migrate operasional, push, merge, atau deploy.
+
+FK restrict juga melarang penghapusan PR atau user yang dirujuk histori.
+Allowlist kosong tetap menolak akses sampai operator memberi izin manual.
+
+### 13.4 Verifikasi sementara
+
+- Langkah 5: 36 test PR passed, 375 assertions, termasuk 16 test revision/history.
+- History append-only, penolakan otorisasi/status/quantity, alasan revisi,
+  rollback keenam operasi, actor HTTP, legacy notice, dan form edit diuji.
+- Lint, Pint class/test, diff check, dan view:cache lulus pada Langkah 5.
+- Suite penuh Tahap 3 belum dijalankan; hanya dijalankan sekali pada Langkah 7.
+- Verifier MySQL integration tidak dijalankan; verifikasi concurrency MySQL
+  dan trigger DB tetap batas verifikasi/rollout.
