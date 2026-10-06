@@ -36,6 +36,8 @@ Route::post('/form-pengajuan/kirim', [App\Http\Controllers\PaymentPlanController
 
 // ── Authenticated ERP routes ──────────────────────────────────
 Route::middleware(['auth'])->group(function () {
+    Route::get('/settings/customs', [\App\Modules\CustomsReports\Http\Controllers\CustomsSettingsController::class, 'edit'])->name('customs-settings.edit');
+    Route::put('/settings/customs', [\App\Modules\CustomsReports\Http\Controllers\CustomsSettingsController::class, 'update'])->name('customs-settings.update');
     Route::get('/purchase-receipts', [\App\Http\Controllers\PurchaseReceiptController::class, 'index'])->name('grn.index');
     Route::get('/purchase-receipts/{id}', [\App\Http\Controllers\PurchaseReceiptController::class, 'show'])->name('grn.show');
 
@@ -295,6 +297,7 @@ Route::middleware(['auth'])->group(function () {
 // --- MODUL KEPABEANAN (CEISA H2H Integration) ---
 // ==========================================
 require base_path('routes/customs.php');
+require base_path('routes/kepabean.php');
 require base_path('routes/customs_reports.php');
 
 require base_path('routes/platform.php');

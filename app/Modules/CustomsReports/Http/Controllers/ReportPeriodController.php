@@ -78,6 +78,7 @@ class ReportPeriodController extends Controller
 
     public function show(ReportPeriod $period)
     {
+        $this->syncInternalDraft($period);
         $lines = $period->lines()->orderBy('id')->get();
         $rejectAssistData = $period->report_type === ReportPeriod::TYPE_MUTASI_REJECT
             ? $this->service->rejectAssistData($period->periode_bulan, $period->periode_tahun)
@@ -178,6 +179,7 @@ class ReportPeriodController extends Controller
      */
     public function export(Request $request, ReportPeriod $period)
     {
+        $this->syncInternalDraft($period);
         $export = match ($period->report_type) {
             ReportPeriod::TYPE_PEMASUKAN, ReportPeriod::TYPE_PENGELUARAN => new DokumenPabeanExport($period),
             ReportPeriod::TYPE_MUTASI_BAHAN_BAKU, ReportPeriod::TYPE_MUTASI_BARANG_JADI,
@@ -243,6 +245,9 @@ class ReportPeriodController extends Controller
      */
     public function populateFromH2H(Request $request, ReportPeriod $period)
     {
+        if (! config('customs.enabled', false)) {
+            return back()->with('error', __('customs_settings.locked'));
+        }
         if (! in_array($period->report_type, [ReportPeriod::TYPE_PEMASUKAN, ReportPeriod::TYPE_PENGELUARAN], true)) {
             return back()->with('error', 'Auto-populate hanya tersedia untuk laporan Pemasukan & Pengeluaran.');
         }
@@ -267,7 +272,7 @@ class ReportPeriodController extends Controller
     }
 
     /**
-     * Auto-populate mutasi from read-only Manufacturing and Inventory ledgers.
+     * Rebuild any of the seven draft reports from read-only operational sources.
      */
     public function populateMutasi(Request $request, ReportPeriod $period)
     {
@@ -276,15 +281,18 @@ class ReportPeriodController extends Controller
         }
 
         try {
-            match ($period->report_type) {
-                ReportPeriod::TYPE_MUTASI_BAHAN_BAKU => $this->service->populateMutasiBahanBaku($period),
-                ReportPeriod::TYPE_MUTASI_BARANG_JADI => $this->service->populateMutasiBarangJadi($period),
-                default => throw new \RuntimeException('Auto-populate hanya tersedia untuk Mutasi Bahan Baku dan Mutasi Barang Jadi.'),
-            };
+            app(\App\Modules\CustomsReports\Services\InternalReportSyncService::class)->sync($period);
 
-            return back()->with('success', 'Data mutasi berhasil diambil otomatis dari data produksi.');
+            return back()->with('success', 'Data laporan berhasil disinkronkan otomatis dari sistem.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal populate mutasi: ' . $e->getMessage());
+            return back()->with('error', 'Gagal sinkronisasi laporan: ' . $e->getMessage());
+        }
+    }
+
+    private function syncInternalDraft(ReportPeriod $period): void
+    {
+        if (! config('customs.enabled') && app(\App\Modules\CustomsReports\Services\CustomsSettingsService::class)->autoSyncInternal()) {
+            app(\App\Modules\CustomsReports\Services\InternalReportSyncService::class)->sync($period);
         }
     }
 }

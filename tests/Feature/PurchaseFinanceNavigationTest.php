@@ -149,7 +149,7 @@ class PurchaseFinanceNavigationTest extends TestCase
 
     public function test_admin_visibility_and_section_order_are_preserved(): void
     {
-        config(['customs.enabled' => false]);
+        config(['customs.enabled' => false, 'customs.reports_enabled' => false]);
         foreach (['ADMIN' => 1, 'STAFF' => 0] as $role => $expected) {
             $this->actingAs(new \App\Models\User(['name' => 'User', 'role' => $role]));
             $xpath = $this->renderNavigation('dashboard');
@@ -178,6 +178,39 @@ class PurchaseFinanceNavigationTest extends TestCase
                 $this->assertTrue(app('translator')->hasForLocale('erp.'.$key, $locale), $locale.':'.$key);
             }
         }
+    }
+
+    public function test_customs_menu_visibility_follows_the_module_flag(): void
+    {
+        config(['customs.reports_enabled' => false]);
+        $this->assertTrue(Route::has('customs.index'));
+        $this->assertTrue(Route::has('customs-reports.index'));
+
+        foreach ([false, true] as $enabled) {
+            config(['customs.enabled' => $enabled]);
+            $xpath = $this->renderNavigation('dashboard');
+            $this->assertSame($enabled ? 1 : 0, $xpath->query('//*[@id="sectionCustoms"]')->length);
+
+            foreach (['customs.index', 'customs-reports.index'] as $name) {
+                $this->assertSame($enabled ? 1 : 0, $xpath->query('//*[@id="sectionCustoms"]//a[@href="'.route($name).'"]')->length, $name);
+            }
+        }
+    }
+
+    public function test_manual_customs_reports_are_available_without_h2h(): void
+    {
+        config(['customs.enabled' => false, 'customs.reports_enabled' => true]);
+        $xpath = $this->renderNavigation('customs-reports.index');
+
+        $this->assertSame(1, $xpath->query('//*[@id="sectionCustoms"]')->length);
+        $this->assertSame(1, $xpath->query('//*[@id="menuLaporanCeisa"]//a[@href="'.route('customs-reports.index').'"]')->length);
+        $this->assertSame(0, $xpath->query('//*[@id="sectionCustoms"]//a[@href="'.route('customs.index').'"]')->length);
+        $this->assertSame(1, $xpath->query('//*[@id="menuInswTracking"]')->length);
+        $this->assertSame('true', $xpath->query('//a[@href="#sectionCustoms"]')->item(0)->getAttribute('aria-expanded'));
+
+        $this->actingAs(\App\Models\User::factory()->create());
+        $this->get(route('customs-reports.index'))->assertOk();
+        $this->assertFalse(config('customs.enabled'));
     }
 
     public function test_customs_reports_do_not_activate_the_documents_link(): void

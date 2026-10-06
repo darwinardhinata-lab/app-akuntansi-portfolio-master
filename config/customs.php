@@ -2,6 +2,7 @@
 
 return [
     'enabled' => env('CEISA_ENABLED', false), // WAJIB false secara default
+    'reports_enabled' => env('CUSTOMS_REPORTS_ENABLED', true),
 
     'default_environment' => env('CEISA_ENV', 'sandbox'),
 

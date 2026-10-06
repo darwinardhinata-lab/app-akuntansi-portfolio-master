@@ -49,7 +49,7 @@ class PosisiImport extends StringValueBinder implements ToModel, WithHeadingRow,
         $normalized = $this->normalizeRow($row);
 
         $jumlahBarang = IndonesianNumberParser::parse(
-            $this->col($normalized, 'jumlah_barang', 'jumlahbarang')
+            $this->col($normalized, 'jumlah_barang', 'jumlahbarang', 'jumlah')
         );
 
         // 0,00 adalah nilai SAH — hanya null (kosong/tak terbaca) yang dilewati.
@@ -64,7 +64,7 @@ class PosisiImport extends StringValueBinder implements ToModel, WithHeadingRow,
             'report_period_id' => $this->reportPeriod->id,
             'kode_barang'      => $this->col($normalized, 'kode_barang', 'kodebarang'),
             'nama_barang'      => $this->col($normalized, 'nama_barang', 'namabarang'),
-            'satuan_barang'    => $this->col($normalized, 'satuan_barang', 'satuanbarang'),
+            'satuan_barang'    => $this->col($normalized, 'satuan_barang', 'satuanbarang', 'satuan'),
             'jumlah_barang'    => $jumlahBarang,
             'keterangan'       => $this->col($normalized, 'keterangan') ?: null,
         ]);

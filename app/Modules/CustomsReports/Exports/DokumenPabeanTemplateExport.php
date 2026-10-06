@@ -22,22 +22,14 @@ class DokumenPabeanTemplateExport implements FromArray, WithHeadings, ShouldAuto
 
     public function headings(): array
     {
-        return [
-            'Jenis Dokumen Pabean',
-            'No. Pendaftaran Dokumen Pabean',
-            'Tgl. Dokumen Pabean',
-            $this->reportPeriod->noBuktiLabel(),
-            'Tgl. Bukti',
-            $this->reportPeriod->pihakTerkaitLabel(),
-            'Kode Barang',
-            'Nama Barang',
-            'Jumlah Barang',
-            'Satuan Barang',
-            'Mata Uang',
-            'Nilai',
-            'Seri Faktur Pajak',
-            'Nilai Faktur Pajak',
-        ];
+        // Flat, unambiguous headings for import; the screen uses grouped headings.
+        $columns = \App\Modules\CustomsReports\Support\ReportLayout::columns($this->reportPeriod->report_type);
+        unset($columns['no']);
+        $columns['no_pendaftaran_dok_pabean'] = 'No. Pendaftaran Dokumen Pabean';
+        $columns['tgl_dok_pabean'] = 'Tgl. Dokumen Pabean';
+        $columns['no_bukti'] = $this->reportPeriod->noBuktiLabel();
+        $columns['tgl_bukti'] = 'Tgl. Bukti';
+        return array_values($columns);
     }
 
     public function array(): array

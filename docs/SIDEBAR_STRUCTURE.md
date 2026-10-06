@@ -29,6 +29,27 @@ dan keberadaan route. Tidak ada perubahan RBAC backend, database atau posting.
 
 ## Validasi
 
+### Jika menu Bea Cukai tidak muncul
+
+- Untuk laporan manual, set `CUSTOMS_REPORTS_ENABLED=true` pada `.env`.
+  Menu Bea Cukai, laporan CEISA dan INSW tersedia tanpa mengaktifkan H2H.
+- `CEISA_ENABLED=true` mengaktifkan dokumen/integrasi H2H dan laporan untuk
+  kompatibilitas instalasi lama. Jangan aktifkan H2H pada company-scope A2/GRN:
+  guard operasional akan memblokir SO/PO karena H2H belum mendukung ownership A2.
+- Pastikan empat migrasi `2026_09_22_08000*` tabel `cbr_` sudah dijalankan.
+  Jika status masih `Pending` tetapi tabel sudah ada, jangan hapus tabel atau
+  menjalankan `migrate:fresh`: periksa kesesuaian schema dan histori migrasi
+  terlebih dahulu. Instalasi lokal yang diperiksa memiliki keempat tabel dan
+  halaman laporan dapat dirender, tetapi histori migrasinya belum tercatat.
+- Untuk pengujian lokal, pertahankan `CEISA_ENV=sandbox`. Mengaktifkan modul
+  bukan berarti koneksi H2H sudah siap; kredensial dan endpoint harus divalidasi
+  terpisah sebelum submit dokumen.
+- Setelah mengubah flag, jalankan `php artisan config:clear`,
+  `php artisan route:clear`, dan `php artisan view:clear`, lalu muat ulang halaman.
+- Verifikasi dengan `php artisan route:list --name=customs`.
+- Default `config/customs.php` dan `.env.example` tetap nonaktif untuk keamanan
+  instalasi baru. `.env` bersifat lokal dan tidak ikut distribusi Git.
+
 PHPUnit: `tests/Feature/PurchaseFinanceNavigationTest.php` menggunakan SQLite
 in-memory untuk render DOM, urutan section, target collapse unik, pemetaan
 route, active state, label ID/EN/zh_CN, feature flag dan visibilitas ADMIN.

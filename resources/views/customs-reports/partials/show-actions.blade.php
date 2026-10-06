@@ -20,17 +20,18 @@
     <div class="card-body d-flex flex-wrap gap-2 py-2">
 
         @if($period->isDraft())
-            @if(in_array($period->report_type, [\App\Modules\CustomsReports\Models\ReportPeriod::TYPE_PEMASUKAN, \App\Modules\CustomsReports\Models\ReportPeriod::TYPE_PENGELUARAN]))
+            @if(config('customs.enabled', false) && in_array($period->report_type, [\App\Modules\CustomsReports\Models\ReportPeriod::TYPE_PEMASUKAN, \App\Modules\CustomsReports\Models\ReportPeriod::TYPE_PENGELUARAN]))
                 <button type="button" class="btn btn-outline-info btn-sm" onclick="openPopulateModal()">
                     <i class="fa-solid fa-magic me-1"></i> Populate dari H2H
                 </button>
             @endif
-            @if(in_array($period->report_type, [\App\Modules\CustomsReports\Models\ReportPeriod::TYPE_MUTASI_BAHAN_BAKU, \App\Modules\CustomsReports\Models\ReportPeriod::TYPE_MUTASI_BARANG_JADI]))
+            @if(! config('customs.enabled'))
                 <button type="button" class="btn btn-outline-info btn-sm" onclick="populateMutasi()">
-                    <i class="fa-solid fa-magic me-1"></i> Ambil Otomatis dari Data Produksi
+                    <i class="fa-solid fa-magic me-1"></i> {{ __('customs_settings.sync') }}
                 </button>
             @endif
 
+            @if(config('customs.enabled') || ! app(\App\Modules\CustomsReports\Services\CustomsSettingsService::class)->autoSyncInternal())
             <label class="btn btn-outline-success btn-sm mb-0" id="importBtn">
                 <i class="fa-solid fa-file-arrow-up me-1"></i> Import Excel
                 <input type="file" id="importFileInput" name="file_excel" accept=".xlsx,.xls,.csv" style="display:none">
@@ -39,6 +40,7 @@
             <a href="{{ route('customs-reports.template', $period) }}" class="btn btn-outline-secondary btn-sm">
                 <i class="fa-solid fa-file-csv me-1"></i> Template
             </a>
+            @endif
 
             <button type="button" class="btn btn-outline-warning btn-sm" onclick="finalizePeriod()">
                 <i class="fa-solid fa-check-to-slot me-1"></i> Finalisasi
@@ -67,7 +69,7 @@
 <form id="populateMutasiForm" action="{{ route('customs-reports.populate-mutasi', $period) }}" method="POST">@csrf</form>
 
 <script>
-document.getElementById('importFileInput').addEventListener('change', function(e) {
+document.getElementById('importFileInput')?.addEventListener('change', function(e) {
     var file = e.target.files[0];
     if (!file) return;
     var fd = new FormData();
@@ -93,7 +95,7 @@ function openPopulateModal() {
     }
 }
 function populateMutasi() {
-    if (confirm('Ambil data mutasi otomatis dari ledger produksi? Data manual dengan kode barang yang sama akan diperbarui.')) {
+    if (confirm('Bangun ulang laporan dari transaksi sistem? Seluruh baris draft, termasuk input/import sebelumnya, akan diganti dengan data sumber terbaru.')) {
         document.getElementById('populateMutasiForm').submit();
     }
 }

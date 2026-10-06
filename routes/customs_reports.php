@@ -14,12 +14,11 @@ use Illuminate\Support\Facades\Route;
 | Mutasi Barang Jadi, Mutasi Barang Modal, Mutasi Barang Reject.
 | (Riwayat Aktivitas — Fase B terpisah, tidak masuk di sini.)
 |
-| Route DISEDIAAKAN ketika config('customs.enabled') = true (sama seperti
-| H2H module), agar konsisten dengan sidebar menu. Di environment testing
-| CEISA_ENABLED=true sehingga route terdaftar otomatis.
+| Laporan manual dapat diaktifkan melalui CUSTOMS_REPORTS_ENABLED tanpa H2H.
+| CEISA_ENABLED tetap menyediakan laporan untuk kompatibilitas instalasi lama.
 */
 
-if (config('customs.enabled')) {
+if (config('customs.reports_enabled', false) || config('customs.enabled')) {
     Route::get('/customs-reports/riwayat-aktivitas', [ActivityReportController::class, 'index'])
         ->middleware(['auth'])
         ->name('customs-reports.riwayat-aktivitas');

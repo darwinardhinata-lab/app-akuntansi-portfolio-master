@@ -16,8 +16,8 @@ class PosisiTemplateExport implements FromArray, WithHeadings, ShouldAutoSize
         return [
             'Kode Barang',
             'Nama Barang',
-            'Satuan Barang',
-            'Jumlah Barang',
+            'Satuan',
+            'Jumlah',
             'Keterangan',
         ];
     }

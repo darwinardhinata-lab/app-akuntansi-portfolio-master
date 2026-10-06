@@ -751,21 +751,28 @@
         {{-- ================================================================
              SECTION: CUSTOMS (CEISA H2H Integration)
         ================================================================ --}}
-        @if(config('customs.enabled', false) && \Illuminate\Support\Facades\Route::has('customs.index'))
+        @if((config('customs.enabled', false) && \Illuminate\Support\Facades\Route::has('customs.index')) || ((config('customs.reports_enabled', false) || config('customs.enabled', false)) && \Illuminate\Support\Facades\Route::has('customs-reports.index')))
         <div class="nav-section-label">{{ __('erp.compliance_navigation') }}</div>
         <div class="nav-section">
-            <a href="#sectionCustoms" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'true' : 'false' }}">
+            <a href="#sectionCustoms" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('customs.*', 'customs-reports.*', 'kepabean.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('customs.*', 'customs-reports.*', 'kepabean.*') ? 'true' : 'false' }}">
                 <span class="section-icon"><i class="fa-solid fa-file-signature text-info"></i></span>
                 <span class="section-text">{{ __('erp.customs_module') }}</span>
                 <i class="fa-solid fa-chevron-down section-chevron"></i>
             </a>
-            <div class="collapse section-collapse {{ request()->routeIs('customs.*') || request()->routeIs('customs-reports.*') ? 'show' : '' }}" id="sectionCustoms">
+            <div class="collapse section-collapse {{ request()->routeIs('customs.*', 'customs-reports.*', 'kepabean.*') ? 'show' : '' }}" id="sectionCustoms">
+                @if(\Illuminate\Support\Facades\Route::has('kepabean.dashboard'))
+                <a href="{{ route('kepabean.dashboard') }}" class="nav-link {{ request()->routeIs('kepabean.dashboard') ? 'active' : '' }}"><span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span><span class="nav-text">{{ __('kepabean.dashboard') }}</span></a>
+                <a href="{{ route('kepabean.documents') }}" class="nav-link {{ request()->routeIs('kepabean.*') && ! request()->routeIs('kepabean.dashboard') ? 'active' : '' }}"><span class="nav-icon"><i class="fa-solid fa-file-invoice"></i></span><span class="nav-text">{{ __('kepabean.documents') }}</span></a>
+                @endif
+                @if(config('customs.enabled', false) && \Illuminate\Support\Facades\Route::has('customs.index'))
                 <a href="{{ route('customs.index') }}" class="nav-link {{ request()->routeIs('customs.index') || request()->routeIs('customs.documents.*') || request()->routeIs('customs.show') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-file-invoice text-info"></i></span>
                     <span class="nav-text">{{ __('erp.customs_documents') }}</span>
                 </a>
 
                 {{-- SUBSECTION: LAPORAN CEISA --}}
+                @endif
+                @if((config('customs.reports_enabled', false) || config('customs.enabled', false)) && \Illuminate\Support\Facades\Route::has('customs-reports.index'))
                 <a href="#menuLaporanCeisa" data-bs-toggle="collapse" class="nav-link {{ request()->routeIs('customs-reports.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-chart-line text-success"></i></span>
                     <span class="nav-text">Laporan CEISA</span>
@@ -783,6 +790,7 @@
                 </div>
 
                 {{-- SUBSECTION: TRACKING INSW (Hyperlink Eksternal Portal INSW) --}}
+                @endif
                 <a href="#menuInswTracking" data-bs-toggle="collapse" class="nav-link">
                     <span class="nav-icon"><i class="fa-solid fa-globe text-primary"></i></span>
                     <span class="nav-text">{{ __('customs.insw.title') }}</span>
@@ -841,12 +849,12 @@
 
         @auth
         <div class="nav-section">
-            <a href="#sectionAdministration" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('platform.*', 'company.*', 'users.*', 'logs.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('platform.*', 'company.*', 'users.*', 'logs.*') ? 'true' : 'false' }}">
+            <a href="#sectionAdministration" data-bs-toggle="collapse" class="section-toggle {{ request()->routeIs('platform.*', 'company.*', 'users.*', 'logs.*', 'customs-settings.*') ? 'active' : '' }}" aria-expanded="{{ request()->routeIs('platform.*', 'company.*', 'users.*', 'logs.*', 'customs-settings.*') ? 'true' : 'false' }}">
                 <span class="section-icon"><i class="fa-solid fa-sliders"></i></span>
                 <span class="section-text">{{ __('erp.administration_navigation') }}</span>
                 <i class="fa-solid fa-chevron-down section-chevron"></i>
             </a>
-            <div class="collapse section-collapse {{ request()->routeIs('platform.*', 'company.*', 'users.*', 'logs.*') ? 'show' : '' }}" id="sectionAdministration">
+            <div class="collapse section-collapse {{ request()->routeIs('platform.*', 'company.*', 'users.*', 'logs.*', 'customs-settings.*') ? 'show' : '' }}" id="sectionAdministration">
                 <a href="{{ route('platform.company.edit') }}" class="nav-link {{ request()->routeIs('platform.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-building"></i></span>
                     <span class="nav-text">{{ __('erp.company_party_navigation') }}</span>
@@ -856,6 +864,10 @@
                     <span class="nav-text">{{ __('erp.bc_company_profile') }}</span>
                 </a>
             @if(auth()->check() && auth()->user()->role === 'ADMIN')
+            <a href="{{ route('customs-settings.edit') }}" class="nav-link {{ request()->routeIs('customs-settings.*') ? 'active' : '' }}">
+                <span class="nav-icon"><i class="fa-solid fa-sliders text-info"></i></span>
+                <span class="nav-text">{{ __('customs_settings.title') }}</span>
+            </a>
             <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
                 <span class="nav-icon"><i class="fa-solid fa-users-gear text-danger"></i></span>
                 <span class="nav-text">{{ __('erp.user_management') }}</span>

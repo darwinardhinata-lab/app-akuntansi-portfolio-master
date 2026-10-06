@@ -69,11 +69,11 @@ class DokumenPabeanImport extends StringValueBinder implements ToModel, WithHead
 
         // Parse angka format Indonesia
         $jumlahBarang = IndonesianNumberParser::parse(
-            $this->col($normalized, 'jumlah_barang', 'jumlahbarang')
+            $this->col($normalized, 'jumlah_barang', 'jumlahbarang', 'qty')
         ) ?? 0;
 
         $nilai = IndonesianNumberParser::parse(
-            $this->col($normalized, 'nilai')
+            $this->col($normalized, 'nilai', 'nilai_barang')
         );
 
         // Nilai 0,0000 adalah nilai SAH (bukan invalid) — hanya null (kosong/tak terbaca) yang dilewati.
@@ -88,17 +88,21 @@ class DokumenPabeanImport extends StringValueBinder implements ToModel, WithHead
 
         $line = new DokumenPabeanLine([
             'report_period_id'         => $this->reportPeriod->id,
-            'jenis_dok_pabean'         => $this->col($normalized, 'jenis_dok_pabean', 'jenis_dokumen_pabean'),
+            'jenis_dok_pabean'         => $this->col($normalized, 'jenis_dok_pabean', 'jenis_dokumen_pabean', 'jenis'),
+            'no_aju'                  => $this->col($normalized, 'no_aju'),
+            'bruto'                   => IndonesianNumberParser::parse($this->col($normalized, 'bruto')),
+            'netto'                   => IndonesianNumberParser::parse($this->col($normalized, 'netto')),
+            'harga_idr'               => IndonesianNumberParser::parse($this->col($normalized, 'harga_idr')),
             'no_pendaftaran_dok_pabean' => $this->col($normalized, 'no_pendaftaran_dok_pabean', 'no_pendaftaran_dokumen_pabean'),
             'tgl_dok_pabean'           => $tglDokPabean,
             'no_bukti'                 => $this->col($normalized, 'no_bukti', 'no_bukti_penerimaan_barang', 'no_bukti_pengeluaran'),
             'tgl_bukti'                => $tglBukti,
-            'pihak_terkait'            => $this->col($normalized, 'pihak_terkait', 'pengirim_barang', 'penerima_barang'),
+            'pihak_terkait'            => $this->col($normalized, 'pihak_terkait', 'pengirim_barang', 'penerima_barang', 'pemasok_pengirim', 'penerima'),
             'kode_barang'              => $this->col($normalized, 'kode_barang', 'kodebarang'),
             'nama_barang'              => $this->col($normalized, 'nama_barang', 'namabarang'),
             'jumlah_barang'            => $jumlahBarang,
-            'satuan_barang'            => $this->col($normalized, 'satuan_barang', 'satuanbarang'),
-            'mata_uang'                => $this->col($normalized, 'mata_uang', 'matauang'),
+            'satuan_barang'            => $this->col($normalized, 'satuan_barang', 'satuanbarang', 'unit'),
+            'mata_uang'                => $this->col($normalized, 'mata_uang', 'matauang', 'currency'),
             'nilai'                    => $nilai,
             'seri_faktur_pajak'        => $this->col($normalized, 'seri_faktur_pajak', 'serifakturpajak', 'seri_faktur_pajak') ?: null,
             'nilai_faktur_pajak'       => $nilaiFaktur,

@@ -44,7 +44,7 @@ class ReportPeriodService
                 );
             }
 
-            return ReportPeriod::create([
+            $period = ReportPeriod::create([
                 'report_type'     => $reportType,
                 'periode_bulan'   => $bulan,
                 'periode_tahun'   => $tahun,
@@ -52,6 +52,12 @@ class ReportPeriodService
                 'catatan'         => $catatan,
                 'created_by'      => $createdBy ?? Auth::id(),
             ]);
+
+            if (! config('customs.enabled') && app(CustomsSettingsService::class)->autoSyncInternal()) {
+                app(InternalReportSyncService::class)->sync($period);
+            }
+
+            return $period;
         });
     }
 
@@ -72,6 +78,9 @@ class ReportPeriodService
                 );
             }
 
+            if (app(CustomsSettingsService::class)->autoSyncInternal() && ! config('customs.enabled')) {
+                app(InternalReportSyncService::class)->sync($locked);
+            }
             $locked->update([
                 'status'        => ReportPeriod::STATUS_FINAL,
                 'finalized_at'  => now(),
@@ -161,6 +170,7 @@ class ReportPeriodService
                 \App\Modules\CustomsReports\Models\DokumenPabeanLine::create([
                     'report_period_id'         => $period->id,
                     'jenis_dok_pabean'         => $jenisDokMapping[$doc->document_type] ?? 'TBD',
+                    'no_aju'                  => $doc->nomor_aju,
                     'no_pendaftaran_dok_pabean' => $doc->nomor_pendaftaran ?? $doc->nomor_aju ?? '',
                     'tgl_dok_pabean'           => $doc->responded_at ? $doc->responded_at->format('Y-m-d') : now()->format('Y-m-d'),
                     'no_bukti'                 => $doc->internal_number,
@@ -233,7 +243,7 @@ class ReportPeriodService
         DB::transaction(function () use ($period, $products, $startDate, $endDate): void {
             foreach ($products as $product) {
                 $query = DB::table('inventory_ledgers')->where('product_id', $product->id);
-                $hasMovement = (clone $query)->whereBetween('transaction_date', [$startDate, $endDate])->exists();
+                $hasMovement = (clone $query)->where('transaction_date', '<=', $endDate)->exists();
                 if (! $hasMovement) {
                     continue;
                 }
@@ -276,7 +286,7 @@ class ReportPeriodService
         $end = $start->copy()->endOfMonth();
         $startDate = $start->toDateString();
         $endDate = $end->toDateString();
-        $items = DB::table($table)->select([...$groupColumns, $idColumn])->whereBetween('transaction_date', [$startDate, $endDate])->distinct()->get();
+        $items = DB::table($table)->select([...$groupColumns, $idColumn])->where('transaction_date', '<=', $endDate)->distinct()->get();
 
         DB::transaction(function () use ($period, $table, $idColumn, $identity, $groupColumns, $items, $startDate, $endDate): void {
             foreach ($items as $item) {

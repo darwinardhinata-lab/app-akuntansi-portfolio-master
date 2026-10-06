@@ -59,6 +59,11 @@ class MutasiImport extends StringValueBinder implements ToModel, WithHeadingRow,
         $jumlahBarang = IndonesianNumberParser::parse(
             $this->col($normalized, 'jumlah_barang', 'jumlahbarang')
         );
+        // The reference layout has no redundant Jumlah column; retain legacy validation if supplied.
+        if ($this->col($normalized, 'jumlah_barang', 'jumlahbarang') === null
+            && $this->col($normalized, 'saldo_awal', 'saldoawal') !== null) {
+            $jumlahBarang = 0;
+        }
         // 0,00 adalah nilai SAH (data export lama memang 0) — hanya null yang dilewati.
         if ($jumlahBarang === null) {
             $this->rowErrors[] = "Baris {$rowNumber}: jumlah_barang tidak valid, dilewati.";
@@ -70,11 +75,11 @@ class MutasiImport extends StringValueBinder implements ToModel, WithHeadingRow,
         ) ?? 0;
 
         $jumlahPemasukan = IndonesianNumberParser::parse(
-            $this->col($normalized, 'jumlah_pemasukan_barang', 'jumlahpemasukan_barang')
+            $this->col($normalized, 'jumlah_pemasukan_barang', 'jumlahpemasukan_barang', 'pemasukan')
         ) ?? 0;
 
         $jumlahPengeluaran = IndonesianNumberParser::parse(
-            $this->col($normalized, 'jumlah_pengeluaran_barang', 'jumlahpengeluaranbarang')
+            $this->col($normalized, 'jumlah_pengeluaran_barang', 'jumlahpengeluaranbarang', 'pengeluaran')
         ) ?? 0;
 
         $penyesuaian = IndonesianNumberParser::parse(
@@ -85,17 +90,17 @@ class MutasiImport extends StringValueBinder implements ToModel, WithHeadingRow,
             $this->col($normalized, 'saldo_akhir', 'saldoakhir')
         ) ?? 0;
 
-        $hasilPencacahan = $this->col($normalized, 'hasil_pencacahan', 'hasilmencacah', 'hasil_pencacahan');
+        $hasilPencacahan = $this->col($normalized, 'hasil_pencacahan', 'hasilmencacah', 'stock_opname');
 
         $jumlahSelisih = IndonesianNumberParser::parse(
-            $this->col($normalized, 'jumlah_selisih', 'jumlahselisih')
+            $this->col($normalized, 'jumlah_selisih', 'jumlahselisih', 'selisih')
         ) ?? 0;
 
         $line = new MutasiLine([
             'report_period_id'          => $this->reportPeriod->id,
             'kode_barang'               => $this->col($normalized, 'kode_barang', 'kodebarang'),
             'nama_barang'               => $this->col($normalized, 'nama_barang', 'namabarang'),
-            'satuan_barang'             => $this->col($normalized, 'satuan_barang', 'satuanbarang'),
+            'satuan_barang'             => $this->col($normalized, 'satuan_barang', 'satuanbarang', 'satuan'),
             'jumlah_barang'             => $jumlahBarang,
             'saldo_awal'                => $saldoAwal,
             'jumlah_pemasukan_barang'   => $jumlahPemasukan,

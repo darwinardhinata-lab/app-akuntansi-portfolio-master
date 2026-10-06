@@ -18,6 +18,10 @@ class DokumenPabeanLine extends Model
 
     protected $fillable = [
         'report_period_id',
+        'no_aju',
+        'bruto',
+        'netto',
+        'harga_idr',
         'jenis_dok_pabean',
         'no_pendaftaran_dok_pabean',
         'tgl_dok_pabean',
@@ -35,6 +39,9 @@ class DokumenPabeanLine extends Model
     ];
 
     protected $casts = [
+        'bruto' => 'decimal:4',
+        'netto' => 'decimal:4',
+        'harga_idr' => 'decimal:4',
         'tgl_dok_pabean'       => 'date',
         'tgl_bukti'            => 'date',
         'jumlah_barang'        => 'decimal:2',

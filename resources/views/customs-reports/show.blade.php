@@ -42,26 +42,24 @@
 
     @include('customs-reports.partials.show-actions', ['period' => $period, 'lines' => $lines, 'sc' => $sc])
 
+    @if(! config('customs.enabled'))
+        <div class="alert alert-info">{{ __('customs_settings.scope') }}</div>
+    @endif
+
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white fw-bold">
             <i class="fa-solid fa-list me-1"></i> Data Line Items ({{ $lines->count() }} baris)
         </div>
         <div class="table-responsive">
-            @if($period->report_type === ReportPeriod::TYPE_WIP)
-                @include('customs-reports.partials.table-posisi', ['lines' => $lines])
-            @elseif(in_array($period->report_type, [ReportPeriod::TYPE_MUTASI_BAHAN_BAKU, ReportPeriod::TYPE_MUTASI_BARANG_JADI, ReportPeriod::TYPE_MUTASI_BARANG_MODAL, ReportPeriod::TYPE_MUTASI_REJECT]))
-                @include('customs-reports.partials.table-mutasi', ['lines' => $lines])
-            @else
-                @include('customs-reports.partials.table-dokumen', ['lines' => $lines, 'period' => $period])
-            @endif
+            @include('customs-reports.partials.table-reference', ['lines' => $lines, 'period' => $period])
         </div>
     </div>
 
     @if($period->report_type === ReportPeriod::TYPE_MUTASI_REJECT)
         <div class="card shadow-sm border-0 mt-3">
-            <div class="card-header bg-warning-subtle fw-bold">Data bantu — bukan otomatis mengisi laporan</div>
+            <div class="card-header bg-warning-subtle fw-bold">Rincian sumber reject dan sisa produksi</div>
             <div class="card-body">
-                <p class="text-muted small">Unit berbeda-beda per tahap. Gunakan data mentah ini sebagai referensi saat mengisi manual; data tidak dijumlahkan lintas tahap.</p>
+                <p class="text-muted small">Laporan diisi otomatis per kejadian. Rincian berikut untuk penelusuran sumber; satuan berbeda tidak dijumlahkan lintas tahap.</p>
                 @foreach(['grey_fabric' => 'Penerimaan Kain Grey', 'fabric' => 'Penerimaan Kain Jadi', 'cutting' => 'Pemeriksaan Cutting', 'finishing' => 'Tahap Finishing'] as $key => $title)
                     <h6 class="mt-3">{{ $title }}</h6>
                     <div class="table-responsive"><table class="table table-sm table-bordered mb-0"><thead><tr>@foreach(($rejectAssistData[$key]->first() ? array_keys((array) $rejectAssistData[$key]->first()) : []) as $column)<th>{{ str_replace('_', ' ', $column) }}</th>@endforeach</tr></thead><tbody>

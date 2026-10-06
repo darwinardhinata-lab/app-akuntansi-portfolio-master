@@ -16,15 +16,14 @@ class MutasiTemplateExport implements FromArray, WithHeadings, ShouldAutoSize
         return [
             'Kode Barang',
             'Nama Barang',
-            'Satuan Barang',
-            'Jumlah Barang',
+            'Satuan',
             'Saldo Awal',
-            'Jumlah Pemasukan Barang',
-            'Jumlah Pengeluaran Barang',
-            'Penyesuaian/Adjustment',
+            'Pemasukan',
+            'Pengeluaran',
+            'Penyesuaian',
             'Saldo Akhir',
-            'Hasil Pencacahan',
-            'Jumlah Selisih',
+            'Stock Opname',
+            'Selisih',
             'Keterangan',
         ];
     }
