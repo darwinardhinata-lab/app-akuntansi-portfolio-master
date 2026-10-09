@@ -49,7 +49,7 @@ class InternalReportSyncTest extends TestCase
         $this->actingAs(User::factory()->create(['role' => 'ADMIN']));
         DB::table('assets')->where('asset_code', 'AST-1')->update(['quantity' => 3]);
         $this->get(route('customs-reports.show', $period))->assertOk();
-        $this->assertSame('3.00', $period->lines()->first()->saldo_akhir);
+        $this->assertSame('2.00', $period->lines()->first()->saldo_akhir);
         $this->assertSame(1, $period->lines()->count());
         app(ReportPeriodService::class)->finalize($period);
         DB::table('assets')->where('asset_code', 'AST-1')->delete();

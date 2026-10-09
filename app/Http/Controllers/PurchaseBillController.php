@@ -18,6 +18,12 @@ use App\Services\InventorySyncService;
 
 class PurchaseBillController extends Controller
 {
+    public function show($id)
+    {
+        $bill = PurchaseBill::with(['details.account', 'purchaseOrder'])->findOrFail($id);
+        return view('purchase_bill.show', compact('bill'));
+    }
+
     public function dispatchSyncJob()
     {
         try {

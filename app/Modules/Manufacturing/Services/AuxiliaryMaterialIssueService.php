@@ -20,6 +20,7 @@ class AuxiliaryMaterialIssueService
     public function issue(array $data): AuxiliaryMaterialIssue
     {
         return DB::transaction(function () use ($data) {
+            \App\Support\AccountingPeriodGuard::source([$data['issue_date'] ?? null]);
             $usageType = $data['usage_type'];
             if (! in_array($usageType, ['WIP', 'EXPENSE'], true)) throw new Exception('Tujuan pemakaian bahan penolong tidak valid.');
             if ($usageType === 'WIP' && empty($data['work_order_id'])) throw new Exception('Issue ke WIP wajib memilih SPK.');

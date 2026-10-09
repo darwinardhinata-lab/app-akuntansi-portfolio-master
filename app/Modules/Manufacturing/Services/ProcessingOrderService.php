@@ -40,6 +40,7 @@ class ProcessingOrderService
     {
         \App\Support\MaklunIssueGuard::enabled();
         return DB::transaction(function () use ($processingOrderId, $fabricId, $qty, $issueDate, $lotNumber, $color) {
+            \App\Support\AccountingPeriodGuard::source([$issueDate]);
             $order = ProcessingOrder::lockForUpdate()->findOrFail($processingOrderId);
             $fabric = Fabric::lockForUpdate()->findOrFail($fabricId);
             $sourceAccount = \App\Support\MaklunIssueGuard::source($order->status, $qty, $fabric->inventory_account_code);

@@ -37,7 +37,7 @@ class SalesInvoiceExport implements FromQuery, WithHeadings, WithMapping, Should
             $inv->invoice_number,
             $inv->salesOrder ? $inv->salesOrder->so_number : '-',
             $inv->contact_name,
-            $inv->payment_status,
+            $inv->cancelled_at ? __('erp.audit_cancelled') : $inv->payment_status,
             $inv->sub_total,
             $inv->disc_amount,
             $inv->tax_amount,

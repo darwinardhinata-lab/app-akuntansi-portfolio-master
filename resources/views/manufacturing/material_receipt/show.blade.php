@@ -33,12 +33,18 @@
                     <div class="small text-muted">Bruto: Rp {{ number_format($receipt->gross_amount, 2) }}</div>
                     <div class="small text-muted">Pajak: Rp {{ number_format($receipt->tax_amount, 2) }}</div>
                     <div class="fw-bold text-primary">Neto: Rp {{ number_format($receipt->net_amount, 2) }}</div>
-                    @if($receipt->status === 'POSTED')
+                    @if($receipt->status === 'POSTED' && \App\Modules\Manufacturing\Support\MaterialReceiptVoidAuthorization::allows(auth()->user()))
                         <form action="{{ route('mfg.material-receipts.void', $receipt->id) }}" method="POST" class="mt-2 no-print"
-                              onsubmit="return confirm(__('erp.confirm_void_mrn'))">
+                              onsubmit="return confirm({{ Illuminate\Support\Js::from(__('erp.confirm_void_mrn')) }})">
                             @csrf
+                            <label for="mrnVoidReason">{{ __('erp.audit_mrn_void_reason') }}</label>
+                            <textarea id="mrnVoidReason" name="reason" class="form-control" minlength="5" maxlength="1000" required>{{ old('reason') }}</textarea>
                             <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-rotate-left me-1"></i>{{ __('erp.void_mrn') }}</button>
                         </form>
+                    @endif
+                    @if($receipt->voided_at)
+                        <p class="small mt-2">{{ __('erp.audit_mrn_void_reason') }}: {{ $receipt->void_reason }}<br>
+                            {{ $receipt->voided_at }} · User #{{ $receipt->voided_by }} · {{ $receipt->reversal_journal_id }}</p>
                     @endif
                 </div>
             </div>

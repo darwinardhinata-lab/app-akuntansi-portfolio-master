@@ -74,7 +74,7 @@
 
     <div class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
         <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.filter_analytics_search') }}</div>
-        <form action="{{ route('po.index') }}" method="GET" id="filterForm" class="row g-2 align-items-end">
+        <form action="{{ route(request()->routeIs('inbound.index') ? 'inbound.index' : 'po.index') }}" method="GET" id="filterForm" class="row g-2 align-items-end">
             <div class="col-12 col-sm-6 col-md-2">
                 <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.start_date_short') }}</label>
                 <input type="date" name="start_date" class="form-control form-control-sm" value="{{ request('start_date') }}">
@@ -101,7 +101,7 @@
             </div>
             <div class="col-12 col-sm-12 col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-search"></i> {{ __('erp.search_btn') }}</button>
-                <a href="{{ route('po.index') }}" class="btn btn-sm btn-danger fw-bold" title="{{ __('erp.reset_filter') }}"><i class="fa-solid fa-sync"></i></a>
+                <a href="{{ route(request()->routeIs('inbound.index') ? 'inbound.index' : 'po.index') }}" class="btn btn-sm btn-danger fw-bold" title="{{ __('erp.reset_filter') }}"><i class="fa-solid fa-sync"></i></a>
             </div>
         </form>
     </div>

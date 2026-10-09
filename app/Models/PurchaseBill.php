@@ -25,4 +25,9 @@ class PurchaseBill extends Model
     {
         return $this->hasMany(PurchaseBillDetail::class);
     }
+
+    public function purchaseOrder()
+    {
+        return $this->belongsTo(PurchaseOrder::class);
+    }
 }

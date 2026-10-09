@@ -516,7 +516,7 @@
         });
 
         // ==================== PIVOT ANALYTICS ====================
-        const rawData = @json($analyticData ?? []);
+        const rawData = {{ Illuminate\Support\Js::from($analyticData ?? []) }};
 
         function renderPivotMatrix() {
             const rowDim = document.getElementById('pivotRow').value; 
@@ -535,22 +535,22 @@
             table.innerHTML = ""; 
 
             let headerHtml = `<thead class="table-secondary text-uppercase fw-bold"><tr>`;
-            headerHtml += `<th class="ps-3 py-3" style="width: 25%;">${rowDim.replace('_', ' ')}</th>`;
+            headerHtml += `<th class="ps-3 py-3" style="width: 25%;">${escapePivotText(rowDim.replace('_', ' '))}</th>`;
             
             uniqueCols.forEach(col => {
-                headerHtml += `<th class="text-end py-3">${formatColumnHeader(col, colDim)}</th>`;
+                headerHtml += `<th class="text-end py-3">${escapePivotText(formatColumnHeader(col, colDim))}</th>`;
             });
             headerHtml += `<th class="text-end pe-3 py-3 bg-dark text-white">{{ __('erp.grand_total_caps') }}</th>`;
             headerHtml += `</tr></thead>`;
 
             let bodyHtml = `<tbody>`;
-            let colTotals = {}; 
+            let colTotals = Object.create(null);
             uniqueCols.forEach(c => colTotals[c] = 0);
             let absoluteGrandTotal = 0;
 
             uniqueRows.forEach(rowKey => {
                 bodyHtml += `<tr>`;
-                bodyHtml += `<td class="ps-3 fw-bold text-dark">${rowKey}</td>`;
+                bodyHtml += `<td class="ps-3 fw-bold text-dark">${escapePivotText(rowKey)}</td>`;
                 
                 let rowGrandTotal = 0;
 
@@ -590,9 +590,15 @@
             return num.toLocaleString('id-ID') + ' Pcs';
         }
 
+        function escapePivotText(value) {
+            return String(value ?? '').replace(/[&<>"']/g, character => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[character]);
+        }
+
         function formatColumnHeader(colVal, colType) {
             if (colType === 'bulan') {
-                let split = colVal.split('-');
+                let split = String(colVal ?? '').split('-');
                 if (split.length === 2) {
                     let months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
                     let mIdx = parseInt(split[1]) - 1;

@@ -29,6 +29,7 @@ class MaterialReceipt extends Model
     ];
 
     protected $casts = [
+        'voided_at' => 'datetime',
         'receipt_date' => 'date',
         'supplier_doc_date' => 'date',
     ];

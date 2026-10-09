@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // MySQL needs a replacement supporting index before dropping the FK's unique index.
+        Schema::table('mfg_cutting_checks', function (Blueprint $table) {
+            $table->index('cutting_order_id', 'mfg_cutting_checks_order_lookup');
+        });
         Schema::table('mfg_cutting_checks', function (Blueprint $table) {
             $table->dropUnique('mfg_cutting_check_one_per_order');
         });

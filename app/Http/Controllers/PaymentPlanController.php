@@ -331,6 +331,7 @@ class PaymentPlanController extends Controller
             \App\Support\PaymentPlanProtection::editable($current);
             \App\Support\PaymentPlanProtection::unreceivedOrders($current);
             $oldKategori = $current->kategori_payment;
+            \App\Support\PaymentMakerChecker::edited($current);
 
             $current->update([
                 'id_divisi' => $request->id_divisi,
@@ -468,6 +469,7 @@ class PaymentPlanController extends Controller
                 'status_payment' => $current->status_payment === 'APPROVED' ? 'PENGAJUAN' : $current->status_payment,
                 'updated_at' => now(),
             ]);
+            \App\Support\PaymentMakerChecker::edited($current);
         });
         SystemLog::record('UPDATE', 'Payment Plan', 'Menetapkan COA untuk pengajuan: ' . $current->no_transaksi);
         return redirect()->back()->with('success', 'COA (Akun Biaya) berhasil ditetapkan!');
@@ -490,6 +492,11 @@ class PaymentPlanController extends Controller
                 ]);
             }
             \App\Support\PaymentPlanWorkflow::transition($current, $request->status_payment);
+            if ($request->status_payment === 'APPROVED') {
+                \App\Support\PaymentMakerChecker::approve($current);
+            } elseif (in_array($request->status_payment, ['PENGAJUAN', 'REJECTED'], true)) {
+                $current->forceFill(['approver_user_id' => null, 'approved_at' => null, 'approval_fingerprint' => null])->save();
+            }
             $previousStatus = $current->status_payment;
             $current->update(['status_payment' => $request->status_payment, 'updated_at' => now()]);
             SystemLog::record('UPDATE', 'Payment Plan', 'Transisi '.$current->no_transaksi.': '.$previousStatus.' -> '.$current->status_payment
@@ -573,6 +580,7 @@ class PaymentPlanController extends Controller
 
             DB::beginTransaction();
             try {
+                if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
                 $item = PaymentPlan::where('id_payment', $item->id_payment)->lockForUpdate()->firstOrFail();
                 if ($item->status_payment !== 'PAID') {
                     throw new \RuntimeException(__('erp.payment_paid_posting_guard'));
@@ -624,11 +632,8 @@ class PaymentPlanController extends Controller
                 ];
 
                 // FIX: Update purchase_bills.payment_status for PEMBAYARAN HUTANG
-                if ($kategori === 'PEMBAYARAN HUTANG' && $item->ref_bill_number) {
-                    $bill = \App\Models\PurchaseBill::where('bill_number', $item->ref_bill_number)->first();
-                    if ($bill) {
-                        $bill->update(['payment_status' => 'PAID']);
-                    }
+                if (str_contains(strtoupper($item->kategori_payment ?? ''), 'PEMBAYARAN HUTANG')) {
+                    app(\App\Services\BillPaymentAllocationService::class)->allocate($item, $journalId);
                 }
 
                 $item->forceFill($updateData)->save();
@@ -692,7 +697,8 @@ class PaymentPlanController extends Controller
     {
         set_time_limit(300);
         ini_set('auto_detect_line_endings', true);
-        $request->validate(['file_csv' => 'required|file']);
+        $request->validate(['file_csv' => 'required|file', 'number_format' => 'nullable|in:id,en']);
+        $numberFormat = $request->input('number_format') ?: 'id';
         $file = $request->file('file_csv');
         $handle = fopen($file->getRealPath(), 'r');
 
@@ -700,6 +706,7 @@ class PaymentPlanController extends Controller
         $failed = 0;
         $skipped = [];
         $errorMessages = [];
+        $rowNumber = 0;
 
         $firstLine = fgets($handle);
         if (!$firstLine) {
@@ -717,6 +724,7 @@ class PaymentPlanController extends Controller
         DB::beginTransaction();
         try {
             while (($row = fgetcsv($handle, 4000, $delimiter)) !== false) {
+                $rowNumber++;
                 try {
                     $no_pp = trim($row[0] ?? '');
                     $tanggal = trim($row[1] ?? '');
@@ -740,18 +748,10 @@ class PaymentPlanController extends Controller
                     $nominal_raw = trim($row[14] ?? '0');
                     $nominal_aktual_raw = trim($row[15] ?? '');
 
-                    $qty = (is_numeric($qty_raw) && (float)$qty_raw > 0) ? (float)$qty_raw : 1;
-
-                    $nominal_clean = preg_replace('/[^0-9.]/', '', str_replace(',', '.', $nominal_raw));
-                    $nominal = (is_numeric($nominal_clean) && $nominal_clean !== '') ? (float) $nominal_clean : 0;
-
-                    $nominal_aktual = null;
-                    if ($nominal_aktual_raw !== '') {
-                        $aktual_clean = preg_replace('/[^0-9.]/', '', str_replace(',', '.', $nominal_aktual_raw));
-                        if (is_numeric($aktual_clean) && $aktual_clean !== '') {
-                            $nominal_aktual = (float) $aktual_clean;
-                        }
-                    }
+                    $qty = \App\Support\PaymentImportAmount::normalize($qty_raw, $numberFormat, false, 8);
+                    $nominal = \App\Support\PaymentImportAmount::normalize($nominal_raw, $numberFormat);
+                    $nominal_aktual = $nominal_aktual_raw === '' ? null
+                        : \App\Support\PaymentImportAmount::normalize($nominal_aktual_raw, $numberFormat, true);
 
                     if (is_numeric($tanggal) && strlen($tanggal) <= 5) {
                         $parsedDate = date('Y-m-d', Date::excelToTimestamp($tanggal));
@@ -762,7 +762,7 @@ class PaymentPlanController extends Controller
 
                     if ($status == 'APPROVE') $status = 'APPROVED';
                     if ($status == 'REJECT') $status = 'REJECTED';
-                    if ($status === 'POSTED') {
+                    if ($status !== 'PENGAJUAN') {
                         throw \Illuminate\Validation\ValidationException::withMessages([
                             'status_payment' => __('erp.payment_posted_action_guard'),
                         ]);
@@ -869,7 +869,7 @@ class PaymentPlanController extends Controller
                 } catch (\Throwable $e) {
                     $failed++;
                     if (count($errorMessages) < 5) {
-                        $errorMessages[] = "[BARIS " . ($inserted + $failed + 1) . "]: " . explode(' (Connection', $e->getMessage())[0];
+                        $errorMessages[] = "[BARIS " . $rowNumber . "]: " . explode(' (Connection', $e->getMessage())[0];
                     }
                 }
             }
@@ -996,6 +996,7 @@ class PaymentPlanController extends Controller
                 'status_payment' => $current->status_payment === 'APPROVED' ? 'PENGAJUAN' : $current->status_payment,
                 'updated_at' => now(),
             ]);
+            \App\Support\PaymentMakerChecker::edited($current);
         });
 
         SystemLog::record('UPDATE', 'Payment Plan', 'Menetapkan Rekening Sumber Dana: ' . $current->no_transaksi);
@@ -1077,7 +1078,7 @@ class PaymentPlanController extends Controller
         $q = trim($request->input('term', $request->input('q', '')));
         
         // purchase_bills table: contact_name (not vendor_name), transaction_date (not bill_date)
-        $query = \App\Models\PurchaseBill::where('payment_status', 'UNPAID');
+        $query = \App\Models\PurchaseBill::whereIn('payment_status', ['UNPAID', 'PARTIAL']);
 
         if ($vendorName !== '') {
             $query->where('contact_name', 'like', "%{$vendorName}%");

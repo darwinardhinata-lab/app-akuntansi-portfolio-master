@@ -49,7 +49,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/system-logs/entity-ajax', [App\Http\Controllers\SystemLogController::class, 'getEntityLogs'])->name('logs.entity');
 
     // === MANAJEMEN USER (DIAMANKAN OLEH CONTROLLER UNTUK ADMIN SAJA) ===
-    Route::resource('users', App\Http\Controllers\UserController::class);
+    Route::resource('users', App\Http\Controllers\UserController::class)->except(['show']);
 
    // --- KODE AKUN (COA) ---
     Route::get('/akun', [App\Http\Controllers\AccountController::class, 'index'])->name('account.index');
@@ -141,6 +141,15 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/divisi/{id}/delete', [DivisiController::class, 'destroy'])->name('divisi.destroy');
 
     // --- PAYMENT PLAN ---
+    Route::post('/accounting-periods', [\App\Http\Controllers\AccountingPeriodController::class, 'update'])->name('accounting-periods.update');
+    Route::post('/payment-plan/{id}/reapprove-paid', [\App\Http\Controllers\PaymentPlanCorrectionController::class, 'reapprove'])
+        ->middleware(\App\Http\Middleware\AuthorizePaymentAction::class.':approve')->name('payment.reapprove_paid');
+    Route::post('/invoice-payment-allocations/{id}/reverse', [\App\Http\Controllers\InvoicePaymentAllocationController::class, 'reverse'])
+        ->middleware(\App\Http\Middleware\AuthorizePaymentAction::class.':reverse')->name('invoice-payment-allocations.reverse');
+    Route::get('/invoice-payment-allocations', [\App\Http\Controllers\InvoicePaymentAllocationController::class, 'index'])
+        ->middleware(\App\Http\Middleware\AuthorizePaymentAction::class.':post')->name('invoice-payment-allocations.index');
+    Route::post('/invoice-payment-allocations', [\App\Http\Controllers\InvoicePaymentAllocationController::class, 'store'])
+        ->middleware(\App\Http\Middleware\AuthorizePaymentAction::class.':post')->name('invoice-payment-allocations.store');
     Route::get('/payment-plan', [PaymentPlanController::class, 'index'])->name('payment.index');
     Route::get('/payment-plan/create', [PaymentPlanController::class, 'create'])->name('payment.create');
     Route::get('/payment-plan/template', [PaymentPlanController::class, 'downloadTemplate'])->name('payment.template');
@@ -150,15 +159,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payment-plan/api/pos-by-vendor', [PaymentPlanController::class, 'apiPOsByVendor'])->name('payment.api.pos');
     Route::post('/payment-plan', [PaymentPlanController::class, 'store'])->name('payment.store');
     Route::post('/payment-plan/import', [PaymentPlanController::class, 'importCsv'])->middleware('throttle:5,1')->name('payment.import');
-    Route::post('/payment-plan/post-journal', [PaymentPlanController::class, 'postJournal'])->name('payment.post_journal');
+    Route::post('/payment-plan/post-journal', [PaymentPlanController::class, 'postJournal'])->middleware(\App\Http\Middleware\AuthorizePaymentAction::class.':post')->name('payment.post_journal');
     Route::get('/payment-plan/{id}/edit', [PaymentPlanController::class, 'edit'])->name('payment.edit');
     Route::get('/payment-plan/{id}/correction', [\App\Http\Controllers\PaymentPlanCorrectionController::class, 'edit'])->whereNumber('id')->name('payment.correction.edit');
     Route::post('/payment-plan/{id}/correction', [\App\Http\Controllers\PaymentPlanCorrectionController::class, 'store'])->whereNumber('id')->middleware('throttle:10,1')->name('payment.correction.store');
     Route::put('/payment-plan/{id}/update', [PaymentPlanController::class, 'update'])->name('payment.update');
     Route::delete('/payment-plan/{id}/delete', [PaymentPlanController::class, 'destroy'])->name('payment.destroy');
-    Route::post('/payment-plan/{id}/set-coa', [PaymentPlanController::class, 'setCoa'])->name('payment.set_coa');
-    Route::post('/payment-plan/{id}/set-rekening', [PaymentPlanController::class, 'setRekening'])->name('payment.set_rekening');
-    Route::post('/payment-plan/{id}/update-status', [PaymentPlanController::class, 'updateStatus'])->name('payment.update_status');
+    Route::post('/payment-plan/{id}/set-coa', [PaymentPlanController::class, 'setCoa'])->middleware(\App\Http\Middleware\AuthorizePaymentAction::class.':account')->name('payment.set_coa');
+    Route::post('/payment-plan/{id}/set-rekening', [PaymentPlanController::class, 'setRekening'])->middleware(\App\Http\Middleware\AuthorizePaymentAction::class.':account')->name('payment.set_rekening');
+    Route::post('/payment-plan/{id}/update-status', [PaymentPlanController::class, 'updateStatus'])->middleware(\App\Http\Middleware\AuthorizePaymentAction::class.':status')->name('payment.update_status');
     Route::get('/payment-plan/export/worklist', [PaymentPlanController::class, 'exportManualWorklist'])->name('payment.export.worklist');
     Route::get('/payment-plan/export/kasbank', [PaymentPlanController::class, 'exportKasBank'])->name('payment.export.kasbank');
 
@@ -221,7 +230,7 @@ Route::middleware(['auth'])->group(function () {
 
     // --- MASTER PAJAK ---
     Route::post('/tax/generate-default', [App\Http\Controllers\TaxController::class, 'generateDefault'])->name('tax.generate');
-    Route::resource('tax', App\Http\Controllers\TaxController::class);
+    Route::resource('tax', App\Http\Controllers\TaxController::class)->except(['show']);
     
     // --- MANAJEMEN PENJUALAN (SALES ORDER) ---
     Route::get('/sales-order', [App\Http\Controllers\SalesOrderController::class, 'index'])->name('so.index');
@@ -266,13 +275,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/purchase-returns', [App\Http\Controllers\PurchaseReturnController::class, 'store'])->name('purchase-returns.store');
     Route::get('/purchase-returns/get-po-items/{id}', [App\Http\Controllers\PurchaseReturnController::class, 'getPoItems'])->name('purchase-returns.get-po-items');
     Route::get('/purchase-returns/{id}', [App\Http\Controllers\PurchaseReturnController::class, 'show'])->name('purchase-returns.show');
-    Route::post('/purchase-returns/{id}/process', [App\Http\Controllers\PurchaseReturnController::class, 'process'])->name('purchase-returns.process');
 
     // --- TAGIHAN PEMBELIAN (PURCHASE BILLS) ---
     Route::get('/purchase-bills', [App\Http\Controllers\PurchaseBillController::class, 'index'])->name('purchase-bills.index');
     Route::get('/purchase-bills/create', [App\Http\Controllers\PurchaseBillController::class, 'create'])->name('purchase-bills.create');
     Route::post('/purchase-bills', [App\Http\Controllers\PurchaseBillController::class, 'store'])->name('purchase-bills.store');
-    Route::get('/purchase-bills/get-pos', [App\Http\Controllers\PurchaseBillController::class, 'getPosBySupplier'])->name('purchase-bills.get-pos');
     Route::get('/purchase-bills/{id}', [App\Http\Controllers\PurchaseBillController::class, 'show'])->name('purchase-bills.show');
     Route::delete('/purchase-bills/{id}', [App\Http\Controllers\PurchaseBillController::class, 'destroy'])->name('purchase-bills.destroy');
     Route::post('/purchase-bills/sync-temp', [App\Http\Controllers\PurchaseBillController::class, 'dispatchSyncJob'])->name('purchase-bills.sync_temp');

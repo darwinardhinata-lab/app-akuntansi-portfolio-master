@@ -5,7 +5,7 @@ namespace App\Imports;
 use App\Jobs\TranslateAccountNamesJob;
 use App\Models\Account;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 
@@ -21,6 +21,24 @@ class AccountImport implements ToCollection, WithStartRow
 
     public function collection(Collection $rows)
     {
+        // Validate the whole collection before any account is written.
+        $balanceMap = [
+            'DEBET' => 'DEBET', 'DEBIT' => 'DEBET', '借方' => 'DEBET',
+            'KREDIT' => 'KREDIT', 'CREDIT' => 'KREDIT', '贷方' => 'KREDIT',
+        ];
+        $reportLabels = ['NERACA', 'LABA RUGI', 'BALANCE SHEET', 'PROFIT & LOSS',
+            'PROFIT AND LOSS', 'INCOME STATEMENT', '资产负债表', '损益表', '损益'];
+        foreach ($rows->values() as $index => $row) {
+            if (trim($row[1] ?? '') === '' || trim($row[2] ?? '') === '') {
+                continue;
+            }
+            if (!isset($balanceMap[strtoupper(trim($row[4] ?? ''))])
+                || !in_array(strtoupper(trim($row[5] ?? '')), $reportLabels, true)) {
+                throw ValidationException::withMessages([
+                    'file' => __('erp.audit_coa_import_invalid', ['row' => $index + $this->startRow()]),
+                ]);
+            }
+        }
         // FIX: kumpulkan account_code & coa_type yang kena sentuh di batch ini,
         // supaya bisa dispatch 1 job translate setelah loop selesai (bukan per baris)
         $touchedAccountCodes = [];
@@ -42,14 +60,7 @@ class AccountImport implements ToCollection, WithStartRow
             // Chinese Simplified (Pos Saldo berisi 借方/贷方) tidak match string apa pun
             // di sini, sehingga JATUH DIAM-DIAM ke fallback default 'DEBET' di bawah --
             // berisiko akun kredit tersimpan salah jadi debit tanpa error apa pun.
-            $posSaldoValid = true;
-            if (str_contains($posSaldo, 'DEB') || str_contains($posSaldo, '借')) {
-                $posSaldo = 'DEBET';
-            } elseif (str_contains($posSaldo, 'KRE') || str_contains($posSaldo, '贷')) {
-                $posSaldo = 'KREDIT';
-            } else {
-                $posSaldoValid = false;
-            }
+            $posSaldo = $balanceMap[$posSaldo];
 
             // =================================================================
             // MAPPING: Konversi nilai report_pos ke bahasa Indonesia
@@ -69,7 +80,6 @@ class AccountImport implements ToCollection, WithStartRow
                 '损益' => 'LABA RUGI',
             ];
             $posLaporanKey = strtoupper(trim($posLaporan));
-            $posLaporanValid = isset($reportPosMap[$posLaporanKey]) || in_array($posLaporan, ['NERACA', 'LABA RUGI'], true);
             $posLaporanNormalized = $reportPosMap[$posLaporanKey] ?? $posLaporan;
 
             // =================================================================
@@ -110,24 +120,13 @@ class AccountImport implements ToCollection, WithStartRow
                 $tipeNormalized = substr($tipeNormalized, 0, 50);
             }
 
-            // FIX: log peringatan (bukan silent fail) kalau Pos Saldo/Pos Laporan
-            // tidak dikenali sama sekali, supaya ketahuan di log bukan cuma
-            // tersembunyi sebagai default yang salah.
-            if (!$posSaldoValid || !$posLaporanValid) {
-                Log::warning('AccountImport: Pos Saldo/Pos Laporan tidak dikenali, dipakai nilai default.', [
-                    'account_code'      => $kode,
-                    'pos_saldo_raw'     => $row[4] ?? null,
-                    'pos_laporan_raw'   => $row[5] ?? null,
-                ]);
-            }
-
             Account::updateOrCreate(
                 ['account_code' => $kode],
                 [
                     'account_name'   => $nama,
                     'coa_type'       => empty($tipeNormalized) ? 'Lainnya' : $tipeNormalized,
-                    'normal_balance' => in_array($posSaldo, ['DEBET', 'KREDIT']) ? $posSaldo : 'DEBET',
-                    'report_pos'     => in_array($posLaporanNormalized, ['NERACA', 'LABA RUGI']) ? $posLaporanNormalized : 'NERACA',
+                    'normal_balance' => $posSaldo,
+                    'report_pos'     => $posLaporanNormalized,
                 ]
             );
 

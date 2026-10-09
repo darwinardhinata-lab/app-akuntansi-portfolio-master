@@ -18,6 +18,19 @@
         </div>
         <div class="card-body">
             <div class="alert alert-info">{{ __('erp.payment_workflow_notice') }}</div>
+            @if($data->status_payment === 'PAID' && auth()->user()?->role === 'FINANCE'
+                && in_array((string) auth()->id(), array_map('strval', config('platform.payment_approve_user_ids', [])), true)
+                && $data->maker_user_id && $data->last_editor_user_id
+                && (int) $data->maker_user_id !== (int) auth()->id()
+                && (int) $data->last_editor_user_id !== (int) auth()->id()
+                && !\App\Support\PaymentPlanProtection::hasJournal($data))
+                <form action="{{ route('payment.reapprove_paid', $data->id_payment) }}" method="POST" class="mb-3">
+                    @csrf
+                    <label for="reapproval-reason" class="form-label">{{ __('erp.payment_reapproval_label') }}</label>
+                    <input id="reapproval-reason" name="reason" class="form-control mb-2" required minlength="10" maxlength="1000">
+                    <button class="btn btn-outline-primary" type="submit">{{ __('erp.payment_reapproval_label') }}</button>
+                </form>
+            @endif
             @if($data->status_payment === 'PAID' && \App\Support\PaymentPlanCorrectionAccess::allowed(auth()->user()) && !\App\Support\PaymentPlanProtection::hasJournal($data))
                 <a class="btn btn-outline-warning mb-3" href="{{ route('payment.correction.edit', $data->id_payment) }}">{{ __('erp.payment_correction_title') }}</a>
             @endif

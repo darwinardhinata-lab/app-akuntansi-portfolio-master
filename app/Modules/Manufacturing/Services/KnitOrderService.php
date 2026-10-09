@@ -49,6 +49,7 @@ class KnitOrderService
         }
 
         return DB::transaction(function () use ($knitOrderId, $issueDate, $items) {
+            \App\Support\AccountingPeriodGuard::source([$issueDate]);
             $knitOrder = KnitOrder::lockForUpdate()->findOrFail($knitOrderId);
             $now = now();
             $issues = [];

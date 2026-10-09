@@ -36,6 +36,7 @@ return [
     // COA tambahan untuk retur dan operasional lain
     'biaya_kirim'      => env('COA_BIAYA_KIRIM'),
     'retur_penjualan'  => env('COA_RETUR_PENJUALAN', '411006'),
+    'selisih_retur_pembelian' => env('COA_SELISIH_RETUR_PEMBELIAN'),
     'retur_shopee'     => env('COA_RETUR_SHOPEE'),
     'retur_tiktok'     => env('COA_RETUR_TIKTOK'),
     'kerugian_barang_cacat' => env('COA_KERUGIAN_BARANG_CACAT'),

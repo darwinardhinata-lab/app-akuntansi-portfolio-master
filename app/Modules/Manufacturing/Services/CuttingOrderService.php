@@ -46,6 +46,7 @@ class CuttingOrderService
     public function create(int $workOrderId, int $fabricId, array $data): CuttingOrder
     {
         return DB::transaction(function () use ($workOrderId, $fabricId, $data) {
+            \App\Support\AccountingPeriodGuard::source([$data['order_date'] ?? null]);
             $company = app(OperationalCompany::class)->company();
             $coa = app(CompanyCoaResolver::class);
             $wipAccount = $coa->account($company, 'wip_inventory');
@@ -132,6 +133,7 @@ class CuttingOrderService
     public function recordCheck(int $cuttingOrderId, array $data): CuttingCheck
     {
         return DB::transaction(function () use ($cuttingOrderId, $data) {
+            if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
             $cuttingOrder = CuttingOrder::lockForUpdate()->findOrFail($cuttingOrderId);
             if ($cuttingOrder->status !== 'OPEN' || CuttingCheck::where('cutting_order_id', $cuttingOrder->id)->whereNull('voided_at')->exists()) {
                 throw new Exception("QC Cutting untuk '{$cuttingOrder->cutting_order_number}' sudah diposting atau statusnya tidak dapat diperiksa ulang.");
@@ -219,6 +221,7 @@ class CuttingOrderService
     public function void(int $cuttingOrderId): bool
     {
         return DB::transaction(function () use ($cuttingOrderId) {
+            if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
             $cuttingOrder = CuttingOrder::lockForUpdate()->findOrFail($cuttingOrderId);
 
             if ($cuttingOrder->status !== 'OPEN') {
@@ -269,6 +272,7 @@ class CuttingOrderService
     public function voidCheck(int $cuttingCheckId): bool
     {
         return DB::transaction(function () use ($cuttingCheckId) {
+            if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
             $check = CuttingCheck::lockForUpdate()->findOrFail($cuttingCheckId);
             $cuttingOrder = CuttingOrder::lockForUpdate()->findOrFail($check->cutting_order_id);
 

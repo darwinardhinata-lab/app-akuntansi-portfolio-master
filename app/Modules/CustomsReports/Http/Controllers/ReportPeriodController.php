@@ -78,7 +78,6 @@ class ReportPeriodController extends Controller
 
     public function show(ReportPeriod $period)
     {
-        $this->syncInternalDraft($period);
         $lines = $period->lines()->orderBy('id')->get();
         $rejectAssistData = $period->report_type === ReportPeriod::TYPE_MUTASI_REJECT
             ? $this->service->rejectAssistData($period->periode_bulan, $period->periode_tahun)
@@ -154,7 +153,11 @@ class ReportPeriodController extends Controller
                 default => throw new \RuntimeException('Tipe laporan tidak didukung untuk import.'),
             };
 
-            Excel::import($import, $filePath);
+            \Illuminate\Support\Facades\DB::transaction(function () use ($period, $import, $filePath) {
+                // Hold the same header lock as sync/finalize until imported rows are saved.
+                \App\Modules\CustomsReports\Support\ManualReportImport::protect($period);
+                Excel::import($import, $filePath);
+            });
 
             $message = "{$import->getSuccessCount()} baris berhasil di-import.";
 
@@ -179,7 +182,6 @@ class ReportPeriodController extends Controller
      */
     public function export(Request $request, ReportPeriod $period)
     {
-        $this->syncInternalDraft($period);
         $export = match ($period->report_type) {
             ReportPeriod::TYPE_PEMASUKAN, ReportPeriod::TYPE_PENGELUARAN => new DokumenPabeanExport($period),
             ReportPeriod::TYPE_MUTASI_BAHAN_BAKU, ReportPeriod::TYPE_MUTASI_BARANG_JADI,
@@ -281,6 +283,9 @@ class ReportPeriodController extends Controller
         }
 
         try {
+            if ($period->source_mode !== 'INTERNAL') {
+                throw new \RuntimeException('Periode manual/legacy dilindungi dari rebuild internal. Buat periode internal terpisah setelah rekonsiliasi.');
+            }
             app(\App\Modules\CustomsReports\Services\InternalReportSyncService::class)->sync($period);
 
             return back()->with('success', 'Data laporan berhasil disinkronkan otomatis dari sistem.');
@@ -289,10 +294,4 @@ class ReportPeriodController extends Controller
         }
     }
 
-    private function syncInternalDraft(ReportPeriod $period): void
-    {
-        if (! config('customs.enabled') && app(\App\Modules\CustomsReports\Services\CustomsSettingsService::class)->autoSyncInternal()) {
-            app(\App\Modules\CustomsReports\Services\InternalReportSyncService::class)->sync($period);
-        }
-    }
 }

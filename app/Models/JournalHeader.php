@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class JournalHeader extends Model
 {
+    protected function newBaseQueryBuilder()
+    {
+        return \App\Support\ProtectedJournalQuery::table('journal_headers');
+    }
+
     public function newEloquentBuilder($query)
     {
         return new \App\Support\JournalHeaderBuilder($query);
@@ -166,6 +171,24 @@ class JournalHeader extends Model
     public function getDescriptionAttribute(): ?string
     {
         return $this->attributes['notes'] ?? null;
+    }
+
+    /** Preserve legacy write callers without introducing a description column. */
+    public function fill(array $attributes)
+    {
+        if (array_key_exists('description', $attributes)) {
+            if (!array_key_exists('notes', $attributes)) {
+                $attributes['notes'] = $attributes['description'];
+            }
+            unset($attributes['description']);
+        }
+
+        return parent::fill($attributes);
+    }
+
+    public function setDescriptionAttribute($value): void
+    {
+        $this->attributes['notes'] = $value;
     }
 
     public function details()

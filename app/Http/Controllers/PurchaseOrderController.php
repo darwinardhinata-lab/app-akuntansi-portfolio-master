@@ -44,6 +44,9 @@ class PurchaseOrderController extends Controller
         $status = $request->get('status');
         
         $ordersQuery = PurchaseOrder::with('details')
+            ->when($request->routeIs('inbound.index'), function ($q) {
+                $q->whereIn('status', ['APPROVED', 'PARTIAL', 'RECEIVED']);
+            })
             ->when($search, function($q) use ($search) {
                 $q->where(function($query) use ($search) {
                     $query->where('po_number', 'like', "%{$search}%")
@@ -84,16 +87,9 @@ class PurchaseOrderController extends Controller
 
     public function inboundIndex(Request $request)
     {
-        $search = $request->get('search');
-        
-        $orders = PurchaseOrder::with('details')
-            ->whereIn('status', ['APPROVED', 'PARTIAL', 'RECEIVED'])
-            ->when($search, function($q) use ($search) {
-                $q->where('po_number', 'like', "%{$search}%")
-                  ->orWhere('contact_name', 'like', "%{$search}%");
-            })->orderBy('transaction_date', 'desc')->paginate(50)->appends(['search' => $search]);
-
-        return view('purchase_order.inbound', compact('orders', 'search'));
+        // Reuse the receiving form, filters, export and batched advance lookup.
+        // index() retains the inbound status scope for this named route.
+        return $this->index($request);
     }
 
     public function create()

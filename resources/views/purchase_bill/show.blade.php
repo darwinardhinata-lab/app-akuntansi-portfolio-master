@@ -24,11 +24,11 @@
                 </div>
                 <div class="col-md-3">
                     <small class="text-muted fw-bold d-block">{{ __('erp.date') }}</small>
-                    <span class="fw-bold">{{ date('d M Y', strtotime($bill->transaction_date)) }}</span>
+                    <span class="fw-bold">{{ date('d M Y', strtotime($bill->bill_date ?? $bill->transaction_date)) }}</span>
                 </div>
                 <div class="col-md-3">
                     <small class="text-muted fw-bold d-block">{{ __('erp.supplier_label') }}</small>
-                    <span class="fw-bold">{{ $bill->contact_name }}</span>
+                    <span class="fw-bold">{{ $bill->vendor_name ?? $bill->contact_name }}</span>
                 </div>
                 <div class="col-md-3">
                     <small class="text-muted fw-bold d-block">{{ __('erp.ref_po') }}</small>
@@ -54,49 +54,43 @@
             <table class="table table-bordered align-middle mb-0" style="font-size: 0.85rem;">
                 <thead class="table-dark">
                     <tr>
-                        <th class="ps-3 py-3">{{ __('erp.product_code') }}</th>
+                        <th class="ps-3 py-3">{{ __('erp.account_code') }}</th>
                         <th class="py-3">{{ __('erp.description_label') }}</th>
-                        <th class="text-end py-3">{{ __('erp.price_label') }}</th>
-                        <th class="text-center py-3">{{ __('erp.qty') }}</th>
-                        <th class="text-end py-3">{{ __('erp.discount_label') }}</th>
                         <th class="text-end py-3">{{ __('erp.subtotal_label') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($bill->details as $det)
                     <tr>
-                        <td class="ps-3 fw-bold">{{ $det->item_code }}</td>
+                        <td class="ps-3 fw-bold">{{ $det->account_code }}</td>
                         <td>{{ $det->description ?? '-' }}</td>
-                        <td class="text-end">Rp {{ number_format($det->price, 0, ',', '.') }}</td>
-                        <td class="text-center fw-bold">{{ $det->qty }}</td>
-                        <td class="text-end">Rp {{ number_format($det->disc_amount, 0, ',', '.') }}</td>
                         <td class="text-end fw-bold text-primary">Rp {{ number_format($det->amount, 0, ',', '.') }}</td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">{{ __('erp.no_item_detail') }}</td>
+                        <td colspan="3" class="text-center py-4 text-muted">{{ __('erp.no_item_detail') }}</td>
                     </tr>
                     @endforelse
                 </tbody>
                 <tfoot class="table-light fw-bold">
                     <tr>
-                        <td colspan="5" class="text-end pe-3">{{ __('erp.subtotal_colon') }}</td>
+                        <td colspan="2" class="text-end pe-3">{{ __('erp.subtotal_colon') }}</td>
                         <td class="text-end">Rp {{ number_format($bill->sub_total, 0, ',', '.') }}</td>
                     </tr>
                     <tr>
-                        <td colspan="5" class="text-end pe-3">{{ __('erp.discount_colon') }}</td>
+                        <td colspan="2" class="text-end pe-3">{{ __('erp.discount_colon') }}</td>
                         <td class="text-end text-danger">- Rp {{ number_format($bill->disc_amount, 0, ',', '.') }}</td>
                     </tr>
                     <tr>
-                        <td colspan="5" class="text-end pe-3">{{ __('erp.tax_colon') }}</td>
+                        <td colspan="2" class="text-end pe-3">{{ __('erp.tax_colon') }}</td>
                         <td class="text-end">Rp {{ number_format($bill->tax_amount, 0, ',', '.') }}</td>
                     </tr>
                     <tr>
-                        <td colspan="5" class="text-end pe-3">{{ __('erp.shipping_cost_colon') }}</td>
+                        <td colspan="2" class="text-end pe-3">{{ __('erp.shipping_cost_colon') }}</td>
                         <td class="text-end">Rp {{ number_format($bill->shipping_cost, 0, ',', '.') }}</td>
                     </tr>
                     <tr class="table-primary">
-                        <td colspan="5" class="text-end pe-3 fs-5">{{ __('erp.grand_total_colon_caps') }}</td>
+                        <td colspan="2" class="text-end pe-3 fs-5">{{ __('erp.grand_total_colon_caps') }}</td>
                         <td class="text-end fs-5 fw-bold text-primary">Rp {{ number_format($bill->grand_total, 0, ',', '.') }}</td>
                     </tr>
                 </tfoot>
@@ -107,12 +101,6 @@
     <div class="d-flex justify-content-between">
         <a href="{{ route('purchase-bills.index') }}" class="btn btn-light fw-bold px-4">
             <i class="fa-solid fa-arrow-left me-1"></i> {{ __('erp.back_to') }} {{ __('erp.list_label') }}</a>
-        <form action="{{ route('purchase-bills.destroy', $bill->id) }}" method="POST" onsubmit="return confirm('Hapus tagihan ini?')">
-            @csrf @method('DELETE')
-            <button type="submit" class="btn btn-outline-danger fw-bold px-4">
-                <i class="fa-solid fa-trash me-1"></i> {{ __('erp.delete_btn') }}
-            </button>
-        </form>
     </div>
 </div>
 @endsection

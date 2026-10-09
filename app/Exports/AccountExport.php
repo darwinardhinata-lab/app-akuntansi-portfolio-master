@@ -7,10 +7,13 @@ use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\Exportable;
-use Illuminate\Contracts\View\View;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
 use Illuminate\Http\Request;
 
-class AccountExport implements FromQuery, WithHeadings, WithMapping
+class AccountExport extends DefaultValueBinder implements FromQuery, WithHeadings, WithMapping, WithCustomValueBinder
 {
     use Exportable;
 
@@ -50,35 +53,37 @@ class AccountExport implements FromQuery, WithHeadings, WithMapping
     public function headings(): array
     {
         return [
-            'Kode Akun',
-            'Nama Akun',
-            'Tipe COA',
-            'Pos Saldo',
-            'Pos Laporan',
-            'Created At',
-            'Updated At',
+            ['DAFTAR AKUN (COA)'],
+            ['Data dimulai dari baris ke-6. Nilai master asli digunakan untuk impor ulang.'],
+            ['Kolom B: Kode, Kolom C: Nama, Kolom D: Tipe, Kolom E: Saldo, Kolom F: Laporan'],
+            [''],
+            ['NO', 'KODE AKUN', 'NAMA AKUN', 'TIPE COA', 'POS SALDO', 'POS LAPORAN', 'Created At', 'Updated At'],
         ];
     }
 
-    /**
-     * FIX: ditambahkan supaya export mengikuti locale aktif saat request
-     * (app()->getLocale(), diset SetLocaleMiddleware). Sebelumnya tanpa
-     * WithMapping, Excel package export atribut mentah apa adanya (selalu
-     * locale id) walau UI sedang dalam mode en/zh_CN.
-     *
-     * Kolom mentah accounts.coa_type / normal_balance / report_pos TIDAK
-     * ikut berubah di database -- ini murni transformasi output export.
-     */
+    // This workbook is an importable interchange format, not a translated report.
     public function map($account): array
     {
         return [
+            null,
             $account->account_code,
-            $account->translatedName(),
-            $account->translatedCoaType(),
-            $account->translatedNormalBalance(),
-            $account->translatedReportPos(),
+            $account->account_name,
+            $account->coa_type,
+            $account->normal_balance,
+            $account->report_pos,
             optional($account->created_at)->format('Y-m-d H:i:s'),
             optional($account->updated_at)->format('Y-m-d H:i:s'),
         ];
+    }
+
+    public function bindValue(Cell $cell, $value): bool
+    {
+        // Preserve leading zeros and render formula-like master text literally.
+        if (is_string($value)) {
+            $cell->setValueExplicit($value, DataType::TYPE_STRING);
+            return true;
+        }
+
+        return parent::bindValue($cell, $value);
     }
 }

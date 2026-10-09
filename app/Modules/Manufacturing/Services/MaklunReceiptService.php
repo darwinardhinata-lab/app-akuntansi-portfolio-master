@@ -36,6 +36,7 @@ class MaklunReceiptService
         ])->validate();
 
         return DB::transaction(function () use ($knitting, $orderId, $data) {
+            \App\Support\AccountingPeriodGuard::source([$data['receipt_date']]);
             $order = ($knitting ? KnitOrder::query() : ProcessingOrder::query())->lockForUpdate()->findOrFail($orderId);
             $receipts = $knitting ? $order->greyFabricReceipts() : $order->fabricReceipts();
             if ($order->status !== 'ISSUED' || $receipts->exists()) {
@@ -107,7 +108,9 @@ class MaklunReceiptService
         $reason = MaklunReversalAuthorization::validate($reason);
 
         return DB::transaction(function () use ($knitting, $receiptId, $reason) {
+            if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
             $receipt = ($knitting ? GreyFabricReceipt::query() : FabricReceipt::query())->lockForUpdate()->findOrFail($receiptId);
+            \App\Support\AccountingPeriodGuard::source([substr((string) $receipt->receipt_date, 0, 10), now()->toDateString()]);
             if ($receipt->posting_status !== 'POSTED' || ! $receipt->coa_snapshot || ! $receipt->journal_id) {
                 throw new RuntimeException('Receipt legacy/void tanpa snapshot tidak dapat dibalik otomatis.');
             }

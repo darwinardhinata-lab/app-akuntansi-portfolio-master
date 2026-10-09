@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'period_close_user_ids' => array_filter(array_map('trim', explode(',', (string) env('PERIOD_CLOSE_USER_IDS', '')))),
+    'period_reopen_user_ids' => array_filter(array_map('trim', explode(',', (string) env('PERIOD_REOPEN_USER_IDS', '')))),
+    'mrn_void_user_ids' => array_filter(array_map('trim', explode(',', (string) env('MRN_VOID_USER_IDS', '')))),
+    'payment_reverse_user_ids' => array_filter(array_map('trim', explode(',', (string) env('PAYMENT_REVERSE_USER_IDS', '')))),
+    // Explicit FINANCE allowlists; empty by default, no ADMIN bypass.
+    'payment_approve_user_ids' => array_filter(array_map('trim', explode(',', (string) env('PAYMENT_APPROVE_USER_IDS', '')))),
+    'payment_pay_user_ids' => array_filter(array_map('trim', explode(',', (string) env('PAYMENT_PAY_USER_IDS', '')))),
+    'payment_post_user_ids' => array_filter(array_map('trim', explode(',', (string) env('PAYMENT_POST_USER_IDS', '')))),
+    'payment_account_user_ids' => array_filter(array_map('trim', explode(',', (string) env('PAYMENT_ACCOUNT_USER_IDS', '')))),
     // FIX: akses PO memerlukan ID eksplisit; semua allowlist default kosong.
     'po_view_user_ids' => array_values(array_filter(array_map(
         'trim', explode(',', (string) env('PO_VIEW_USER_IDS', ''))

@@ -41,6 +41,7 @@ class DokumenPabeanImport extends StringValueBinder implements ToModel, WithHead
 
     public function model(array $row): ?DokumenPabeanLine
     {
+        \App\Modules\CustomsReports\Support\ManualReportImport::protect($this->reportPeriod);
         // Guard: tolak import jika periode sudah FINAL / DIUNGGAH
         if ($this->reportPeriod->isFinal() || $this->reportPeriod->isUploaded()) {
             throw new \RuntimeException(

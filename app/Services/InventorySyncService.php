@@ -86,13 +86,28 @@ class InventorySyncService
         string $description = '',
         bool $execute = true
     ): array {
+        if (DB::transactionLevel() === 0) {
+            return DB::transaction(fn () => $this->processStockMovements($items, $evidenceNumber, $transactionDate, $docType, $description, $execute));
+        }
         \App\Support\GrnProtection::evidence($evidenceNumber);
+        if ($execute) \App\Support\AccountingPeriodGuard::source([$transactionDate]);
         // 1. Map doc type to direction
         $direction = self::STOCK_DIRECTIONS[$docType] ?? null;
         if ($direction === null) {
             throw new Exception("Unknown document type '{$docType}' for inventory sync. Valid types: " . implode(', ', array_keys(self::STOCK_DIRECTIONS)));
         }
+        if (InventoryLedger::where('evidence_number', 'REV-' . hash('sha256', $direction . ':' . $evidenceNumber))->exists()) {
+            throw new Exception(__('erp.audit_stock_reversal_invalid'));
+        }
 
+        // The shared product/ledger schema stores whole-unit quantities.
+        foreach ($items as $item) {
+            $qty = $item['qty'] ?? null;
+            $cost = $item['unit_cost'] ?? 0;
+            if (!is_numeric($qty) || (float) $qty <= 0 || floor((float) $qty) != (float) $qty || !is_numeric($cost) || (float) $cost < 0) {
+                throw new Exception(__('erp.audit_stock_invalid_input'));
+            }
+        }
         // Filter out items with zero or negative qty
         $items = array_filter($items, function ($item) {
             return (float) ($item['qty'] ?? 0) > 0;
@@ -117,6 +132,7 @@ class InventorySyncService
         // 3. Preload products by SKU in a SINGLE query (no N+1)
         //    lockForUpdate ensures no race condition on stock_quantity
         $products = Product::whereIn('sku', $skus)
+            ->orderBy('id')
             ->lockForUpdate()
             ->get()
             ->keyBy('sku');
@@ -136,8 +152,7 @@ class InventorySyncService
 
             $product = $products->get($sku);
             if (!$product) {
-                // Skip items whose SKU doesn't exist in products table
-                continue;
+                throw new Exception(__('erp.audit_stock_product_missing', ['sku' => $sku]));
             }
 
             $productId = $product->id;
@@ -179,6 +194,9 @@ class InventorySyncService
 
                 $totalValue += $lineTotal;
             } else {
+                if ($qty > $oldStock) {
+                    throw new Exception(__('erp.audit_stock_insufficient', ['sku' => $sku]));
+                }
                 // ---- Stock OUT (INV, PR) ----
                 // Subtract from stock, use current MAC as unit cost
                 $newStock = $oldStock - $qty;
@@ -266,45 +284,63 @@ class InventorySyncService
      */
     public function reverseStockMovements(string $evidenceNumber, string $docType): array
     {
-        \App\Support\GrnProtection::evidence($evidenceNumber);
-        $direction = self::STOCK_DIRECTIONS[$docType] ?? 'IN';
-        $reverseDirection = $direction === 'IN' ? 'OUT' : 'IN';
-
-        // Aggregate stock changes per product
-        $stockChanges = InventoryLedger::where('evidence_number', $evidenceNumber)
-            ->where('type', $direction)
-            ->groupBy('product_id')
-            ->select('product_id', DB::raw('SUM(qty) as total_qty'), DB::raw('SUM(total_cost) as total_value'))
-            ->get();
-
-        $reversedQty = [];
-        $reversedValue = 0.0;
-
-        foreach ($stockChanges as $row) {
-            $productId = $row->product_id;
-            $qty = (int) $row->total_qty;
-            $value = (float) $row->total_value;
-
-            $product = Product::find($productId);
-            if ($product) {
-                $newStock = $direction === 'IN'
-                    ? $product->stock_quantity - $qty
-                    : $product->stock_quantity + $qty;
-
-                $product->update(['stock_quantity' => $newStock]);
+        return DB::transaction(function () use ($evidenceNumber, $docType) {
+            if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
+            \App\Support\GrnProtection::evidence($evidenceNumber);
+            $direction = self::STOCK_DIRECTIONS[$docType] ?? null;
+            if (!$direction) {
+                throw new Exception("Unknown document type: {$docType}");
+            }
+            $originals = InventoryLedger::where('evidence_number', $evidenceNumber)
+                ->where('type', $direction)->orderBy('id')->get();
+            \App\Support\AccountingPeriodGuard::source(array_merge($originals->pluck('transaction_date')->map(fn ($date) => substr((string) $date, 0, 10))->all(), [now()->toDateString()]));
+            $products = Product::whereIn('id', $originals->pluck('product_id'))
+                ->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $reversalNumber = 'REV-' . hash('sha256', $direction . ':' . $evidenceNumber);
+            if (InventoryLedger::where('evidence_number', $reversalNumber)->exists()) {
+                return ['reversed_qty' => [], 'reversed_value' => 0.0];
+            }
+            $reversedQty = [];
+            $reversedValue = 0.0;
+            foreach ($originals->groupBy('product_id') as $productId => $rows) {
+                $product = $products->get($productId);
+                $laterRows = InventoryLedger::where('product_id', $productId)->where('id', '>', $rows->last()->id)->get();
+                $hasDownstream = $laterRows->contains(function ($later) {
+                    if (str_starts_with($later->evidence_number, 'REV-')) {
+                        return false;
+                    }
+                    $laterReversal = 'REV-' . hash('sha256', $later->type . ':' . $later->evidence_number);
+                    return !InventoryLedger::where('evidence_number', $laterReversal)->where('product_id', $later->product_id)->exists();
+                });
+                if (!$product || $hasDownstream) {
+                    throw new Exception(__('erp.audit_stock_downstream'));
+                }
+                $qty = (float) $rows->sum('qty');
+                $value = (float) $rows->sum('total_cost');
+                $sign = $direction === 'IN' ? -1 : 1;
+                $snapshot = $laterRows->last() ?? $rows->last();
+                if ((float) $product->stock_quantity != (float) $snapshot->running_qty
+                    || abs((float) $product->average_cost - (float) $snapshot->moving_average_cost) > 0.011) {
+                    throw new Exception(__('erp.audit_stock_reversal_invalid'));
+                }
+                $newStock = (float) $product->stock_quantity + $sign * $qty;
+                $newValue = round((float) $snapshot->running_value + $sign * $value, 2);
+                if ($newStock < 0 || $newValue < -0.01 || ($newStock == 0 && abs($newValue) > 0.01)) {
+                    throw new Exception(__('erp.audit_stock_reversal_invalid'));
+                }
+                $average = $newStock > 0 ? max(0, $newValue) / $newStock : 0;
+                $product->update(['stock_quantity' => $newStock, 'average_cost' => $average]);
+                InventoryLedger::create([
+                    'transaction_date' => now()->toDateString(), 'evidence_number' => $reversalNumber,
+                    'product_id' => $productId, 'type' => $direction === 'IN' ? 'OUT' : 'IN',
+                    'qty' => $qty, 'unit_cost' => $qty > 0 ? $value / $qty : 0, 'total_cost' => $value,
+                    'running_qty' => $newStock, 'running_value' => max(0, $newValue),
+                    'moving_average_cost' => $average, 'description' => 'Pembalikan stok: ' . $evidenceNumber,
+                ]);
                 $reversedQty[$productId] = $qty;
                 $reversedValue += $value;
             }
-        }
-
-        // Delete the inventory ledger entries
-        InventoryLedger::where('evidence_number', $evidenceNumber)
-            ->where('type', $direction)
-            ->delete();
-
-        return [
-            'reversed_qty'   => $reversedQty,
-            'reversed_value' => $reversedValue,
-        ];
+            return ['reversed_qty' => $reversedQty, 'reversed_value' => $reversedValue];
+        });
     }
 }

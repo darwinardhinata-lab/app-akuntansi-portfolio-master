@@ -11,6 +11,19 @@ use Illuminate\Validation\ValidationException;
 
 class PaymentPlanCorrectionController extends Controller
 {
+    public function reapprove(Request $request, int $id)
+    {
+        $data = $request->validate(['reason' => 'required|string|min:10|max:1000']);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($id, $data) {
+            $payment = PaymentPlan::lockForUpdate()->findOrFail($id);
+            PaymentPlanCorrectionService::eligible($payment);
+            \App\Support\PaymentMakerChecker::approve($payment);
+            \App\Support\PaymentPlanWorkflow::realized($payment->refresh());
+            \App\Models\SystemLog::record('UPDATE', 'Payment Plan', 'Reapproval PAID '.$payment->no_transaksi.'; reason: '.trim($data['reason']));
+        });
+        return redirect()->route('payment.edit', $id)->with('success', __('erp.payment_reapproval_success'));
+    }
+
     public function edit(Request $request, int $id)
     {
         abort_unless(PaymentPlanCorrectionAccess::allowed($request->user()), 403);

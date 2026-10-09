@@ -37,6 +37,7 @@ class GrnReceivingService
         $hash = hash('sha256', json_encode([(int) $poId, $date, $due ?: null, $bill, $normalized], JSON_THROW_ON_ERROR));
 
         return DB::transaction(function () use ($companyId, $poId, $date, $due, $bill, $key, $normalized, $hash, $postLegacy) {
+            \App\Support\AccountingPeriodGuard::source([$date]);
             // Serializes new GRN events within the sole MGI deployment, including cross-PO bill/key collisions.
             Company::whereKey($companyId)->lockForUpdate()->firstOrFail();
             $po = PurchaseOrder::with('details')->lockForUpdate()->findOrFail($poId);

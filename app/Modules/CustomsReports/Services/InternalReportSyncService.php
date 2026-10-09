@@ -17,7 +17,7 @@ class InternalReportSyncService
     {
         DB::transaction(function () use ($period) {
             $period = ReportPeriod::lockForUpdate()->findOrFail($period->id);
-            if (! $period->isDraft()) {
+            if (! $period->isDraft() || $period->source_mode !== 'INTERNAL') {
                 return;
             }
             $start = Carbon::create($period->periode_tahun, $period->periode_bulan, 1)->startOfMonth()->toDateString();

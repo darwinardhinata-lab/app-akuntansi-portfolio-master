@@ -38,7 +38,8 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold small text-muted">{{ __('erp.actual_stock') }}</label>
-                    <input type="number" name="stock_quantity" class="form-control fw-bold text-primary" value="{{ $product->stock_quantity }}" required>
+                    <input type="number" class="form-control fw-bold text-primary" value="{{ $product->stock_quantity }}" readonly>
+                    <small class="text-muted">{{ __('erp.audit_stock_master_readonly') }}</small>
                 </div>
             </div>
             <hr class="my-4">

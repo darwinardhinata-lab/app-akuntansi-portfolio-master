@@ -137,6 +137,16 @@ class MaterialReceiptPoDetailLinkageTest extends TestCase
         $this->reject($this->header($po), [$this->linked($po, 1)], $po->po_number, ['0.00', '1.00']);
     }
 
+    public function test_supplier_and_quantity_precision_rejected_before_mutation(): void
+    {
+        $po = $this->order();
+        $other = Supplier::create(['supplier_code' => 'SUP-OTHER', 'supplier_name' => 'Other', 'supplier_type' => 'RAW_MATERIAL']);
+        $this->reject(array_replace($this->header($po), ['supplier_id' => $other->id]), [$this->linked($po, 1)], 'Supplier');
+        foreach ([0, -1, 0.001] as $qty) {
+            $this->reject($this->header($po), [$this->linked($po, $qty)], 'Qty');
+        }
+    }
+
     public function test_pure_non_po_receipt_still_succeeds(): void
     {
         $receipt = $this->receipts->createAndPost($this->header(), [$this->item(2)]);
@@ -152,15 +162,80 @@ class MaterialReceiptPoDetailLinkageTest extends TestCase
         $this->reject($this->header(), [$this->linked($approved, 1), $this->linked($draft, 1)], 'po_id');
     }
 
-    public function test_void_characterizes_known_baseline_quantity_not_restored(): void
+    public function test_void_restores_po_quantity_and_preserves_history_idempotently(): void
+    {
+        $this->buyer->update(['role' => 'FINANCE']);
+        config(['platform.mrn_void_user_ids' => [$this->buyer->id]]);
+        $this->actingAs($this->buyer);
+        $po = $this->order();
+        $receipt = $this->receipts->createAndPost($this->header($po), [$this->linked($po, 10)]);
+        $this->assertTrue($this->receipts->void($receipt->id, 'Audit void correction'));
+        $this->assertSame('VOIDED', $receipt->fresh()->status);
+        $this->assertEquals(0, $this->yarn->fresh()->stock_quantity);
+        $this->assertEquals(0, $po->details()->sole()->qty_received);
+        $this->assertDatabaseCount('mfg_material_ledgers', 2);
+        $this->assertDatabaseCount('journal_headers', 2);
+        $this->assertNotNull($receipt->fresh()->journal_id);
+        $audit = $receipt->fresh();
+        $this->assertSame('Audit void correction', $audit->void_reason);
+        $this->assertEquals($this->buyer->id, $audit->voided_by);
+        $this->assertNotNull($audit->voided_at);
+        $this->assertNotNull($audit->reversal_journal_id);
+        $this->assertTrue($this->receipts->void($receipt->id, 'Audit void correction'));
+        $this->assertDatabaseCount('journal_headers', 2);
+        $this->assertSame($audit->getAttributes(), $receipt->fresh()->getAttributes());
+    }
+
+    public function test_void_rejects_later_material_movement_without_mutation(): void
+    {
+        $this->buyer->update(['role' => 'FINANCE']);
+        config(['platform.mrn_void_user_ids' => [$this->buyer->id]]);
+        $this->actingAs($this->buyer);
+        $po = $this->order();
+        $receipt = $this->receipts->createAndPost($this->header($po), [$this->linked($po, 10)]);
+        $this->receipts->createAndPost($this->header(), [$this->item(1)]);
+        $before = $this->snapshot();
+        try {
+            $this->receipts->void($receipt->id, 'Audit void correction');
+            $this->fail('Later movement must block void.');
+        } catch (\Exception $e) {
+            $this->assertStringContainsString('mutasi lanjutan', $e->getMessage());
+        }
+        $this->assertSame($before, $this->snapshot());
+    }
+
+    public function test_void_restores_opening_mac_for_duplicate_material_lines(): void
+    {
+        $this->buyer->update(['role' => 'FINANCE']);
+        config(['platform.mrn_void_user_ids' => [$this->buyer->id]]);
+        $this->actingAs($this->buyer);
+        $this->yarn->update(['stock_quantity' => 5, 'average_cost' => 50]);
+        $po = $this->order();
+        $receipt = $this->receipts->createAndPost($this->header($po), [$this->linked($po, 4), $this->linked($po, 6)]);
+        $this->receipts->void($receipt->id, 'Audit void correction');
+        $this->assertEquals(5, $this->yarn->fresh()->stock_quantity);
+        $this->assertEqualsWithDelta(50, $this->yarn->fresh()->average_cost, 0.01);
+        $this->assertEquals(0, $po->details()->sole()->qty_received);
+        $this->assertDatabaseCount('mfg_material_ledgers', 3);
+    }
+
+    public function test_http_void_form_visibility_and_audit_in_three_locales(): void
     {
         $po = $this->order();
         $receipt = $this->receipts->createAndPost($this->header($po), [$this->linked($po, 10)]);
-        $this->assertTrue($this->receipts->void($receipt->id));
-        $this->assertSame('VOIDED', $receipt->fresh()->status);
-        $this->assertEquals(0, $this->yarn->fresh()->stock_quantity);
-        // FIX: baseline bermasalah: void tidak mengembalikan qty_received; perbaikan ditunda Tahap 6b.
-        $this->assertEquals(10, $po->details()->sole()->qty_received);
+        $this->actingAs($this->buyer);
+        $this->get(route('mfg.material-receipts.show', $receipt->id))->assertOk()->assertDontSee('name="reason"', false);
+        $this->buyer->update(['role' => 'FINANCE']);
+        config(['platform.mrn_void_user_ids' => [$this->buyer->id]]);
+        foreach (['id', 'en', 'zh_CN'] as $locale) {
+            app()->setLocale($locale);
+            $this->get(route('mfg.material-receipts.show', $receipt->id))->assertOk()->assertSee('name="reason"', false);
+        }
+        $this->post(route('mfg.material-receipts.void', $receipt->id), ['reason' => 'Supplier document correction'])->assertSessionHas('success');
+        $this->assertSame('Supplier document correction', $receipt->fresh()->void_reason);
+        $this->post(route('mfg.material-receipts.void', $receipt->id), ['reason' => 'Different retry reason'])->assertSessionHas('success');
+        $this->assertSame('Supplier document correction', $receipt->fresh()->void_reason);
+        $this->assertDatabaseCount('journal_headers', 2);
     }
 
     private function order(float $qty = 10, bool $approve = true): MaterialPurchaseOrder

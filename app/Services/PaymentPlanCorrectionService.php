@@ -51,6 +51,7 @@ class PaymentPlanCorrectionService
                     throw ValidationException::withMessages(['payment' => __('erp.payment_correction_no_change')]);
                 }
                 $payment->save();
+                \App\Support\PaymentMakerChecker::edited($payment);
                 SystemLog::record('UPDATE', 'Payment Plan', 'Koreksi terbatas PAID '.$payment->no_transaksi.' '.json_encode([
                     'reason' => $data['reason'], 'changes' => $changes,
                 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));

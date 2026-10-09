@@ -1,3 +1,6 @@
+@if($hasMore ?? false)
+    <div class="alert alert-info small">{{ __('erp.audit_log_limit') }}</div>
+@endif
 @if($logs->isEmpty())
     <div class="text-center py-4 text-muted">
         <i class="fa-solid fa-clock-rotate-left fa-2x mb-2 opacity-50 d-block"></i>

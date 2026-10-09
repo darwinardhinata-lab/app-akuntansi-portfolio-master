@@ -39,6 +39,7 @@ class PosisiImport extends StringValueBinder implements ToModel, WithHeadingRow,
 
     public function model(array $row): ?PosisiLine
     {
+        \App\Modules\CustomsReports\Support\ManualReportImport::protect($this->reportPeriod);
         // Guard: tolak import jika periode sudah FINAL / DIUNGGAH
         if ($this->reportPeriod->isFinal() || $this->reportPeriod->isUploaded()) {
             throw new \RuntimeException(

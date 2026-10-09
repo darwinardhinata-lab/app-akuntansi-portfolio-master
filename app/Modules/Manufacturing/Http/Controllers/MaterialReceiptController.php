@@ -89,12 +89,13 @@ class MaterialReceiptController extends Controller
         return view('manufacturing.material_receipt.show', compact('receipt'));
     }
 
-    public function void($id)
+    public function void(Request $request, $id)
     {
+        abort_unless(\App\Modules\Manufacturing\Support\MaterialReceiptVoidAuthorization::allows($request->user()), 403);
+        $data = $request->validate(['reason' => 'required|string|min:5|max:1000']);
         try {
             $receipt = MaterialReceipt::findOrFail($id);
-            $this->service->void((int) $id);
-            SystemLog::record('VOID', 'Manufacturing Material Receipt', "Void MRN: {$receipt->receipt_number}");
+            $this->service->void((int) $id, $data['reason']);
             return redirect()->route('mfg.material-receipts.show', $id)
                 ->with('success', "MRN {$receipt->receipt_number} berhasil di-void. Jurnal & kartu stok telah dibalik.");
         } catch (\Exception $e) {
@@ -139,9 +140,9 @@ class MaterialReceiptController extends Controller
         $rows = [
             ['TEMPLATE IMPORT MRN MASSAL'],
             ['Baris dgn REF SEMENTARA yang sama akan digabung jadi 1 MRN. Nomor MRN resmi digenerate otomatis oleh sistem (bukan dari kolom ini).'],
-            ['Setiap grup TETAP akan melalui validasi & posting jurnal yang sama seperti input manual (bisa gagal jika data tidak valid).'],
+            ['Seluruh grup ditolak jika satu item invalid. Angka tanpa pemisah ribuan, maksimal 2 desimal. Kolom PO opsional; jika diisi setiap item wajib PO DETAIL ID. Header grup harus konsisten.'],
             [''], [''],
-            ['REF SEMENTARA', 'TANGGAL (YYYY-MM-DD)', 'KODE SUPPLIER', 'NO DOKUMEN SUPPLIER', 'PAJAK', 'TIPE ITEM (YARN/FABRIC)', 'KODE ITEM', 'NAMA ITEM', 'QTY', 'SATUAN', 'RATE', 'LOT'],
+            ['REF SEMENTARA', 'TANGGAL (YYYY-MM-DD)', 'KODE SUPPLIER', 'NO DOKUMEN SUPPLIER', 'PAJAK', 'TIPE ITEM (YARN/FABRIC/AUXILIARY)', 'KODE ITEM', 'NAMA ITEM', 'QTY', 'SATUAN', 'RATE', 'LOT', 'NO MATERIAL PO', 'PO DETAIL ID', 'TANGGAL DOKUMEN SUPPLIER'],
             ['MRN-EXCEL-1', '2026-08-20', 'SUP-YARN-01', 'INV-0001', '0', 'YARN', 'Y-COTTON-30S', 'Cotton Combed 30s', '100', 'KGS', '45000', 'LOT-A'],
             ['MRN-EXCEL-1', '2026-08-20', 'SUP-YARN-01', 'INV-0001', '0', 'FABRIC', 'FB-GREY-180', 'Kain Grey 180gsm', '50', 'KGS', '52000', 'LOT-B'],
         ];

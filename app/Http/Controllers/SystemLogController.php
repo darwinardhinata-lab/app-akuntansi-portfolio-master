@@ -11,6 +11,7 @@ class SystemLogController extends Controller
      */
     public function index()
     {
+        abort_unless(auth()->user()?->role === 'ADMIN', 403);
         $logs = \App\Models\SystemLog::with('user')->orderBy('created_at', 'desc')->paginate(50);
         return view('system_log.index', compact('logs'));
     }
@@ -68,19 +69,25 @@ class SystemLogController extends Controller
      */
     public function getEntityLogs(Request $request)
     {
-        $keyword = $request->get('keyword');
-        
-        if (!$keyword) {
-            return response()->json(['status' => 'error', 'message' => 'Keyword / Nomor Referensi tidak valid.']);
+        abort_unless($request->user()?->role === 'ADMIN', 403);
+        $data = $request->validate(['keyword' => 'required|string|max:200']);
+        $keyword = trim($data['keyword']);
+        if ($keyword === '') {
+            throw \Illuminate\Validation\ValidationException::withMessages(['keyword' => __('erp.audit_log_keyword')]);
         }
+        $escaped = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $keyword);
 
         $logs = \App\Models\SystemLog::with('user')
-            ->where('description', 'LIKE', "%{$keyword}%")
+            ->whereRaw("description LIKE ? ESCAPE '!'", ['%'.$escaped.'%'])
             ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->limit(101)
             ->get();
+        $hasMore = $logs->count() > 100;
+        $logs = $logs->take(100);
 
         $html = view('system_log.partials.ajax_list', compact('logs', 'keyword'))->render();
 
-        return response()->json(['status' => 'success', 'html' => $html]);
+        return response()->json(['status' => 'success', 'html' => $html, 'count' => $logs->count(), 'has_more' => $hasMore]);
     }
 }

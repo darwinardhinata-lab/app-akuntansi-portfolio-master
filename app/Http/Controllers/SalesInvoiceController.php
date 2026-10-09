@@ -58,7 +58,7 @@ class SalesInvoiceController extends Controller
         // 2. BIG DATA PIVOT ENGINE (Aggregasi multidimensi langsung dari MySQL)
         // ======================================================================
         // Mengompres 200.000 baris menjadi ringkasan dimensi agar browser tidak hang
-        $pivotQuery = DB::table('sales_invoices as si')
+        $pivotQuery = DB::table('sales_invoices as si')->whereNull('si.cancelled_at')
             ->join('sales_invoice_details as sid', 'si.id', '=', 'sid.sales_invoice_id')
             ->leftJoin('sales_orders as so', 'si.sales_order_id', '=', 'so.id')
             ->select([
@@ -278,55 +278,12 @@ class SalesInvoiceController extends Controller
 
     public function destroy($id)
     {
-        DB::beginTransaction();
         try {
-            $invoice = SalesInvoice::findOrFail($id);
-            if (config('platform.order_company_scope_enabled') && $invoice->sales_order_id) {
-                \App\Models\SalesOrder::whereKey($invoice->sales_order_id)->firstOrFail();
-            }
-
-
-            // 1. Hapus Jurnal Akuntansi yang tercipta dari Faktur Ini
-            $journalIds = JournalHeader::where('evidence_number', $invoice->invoice_number)->pluck('journal_id');
-            if ($journalIds->isNotEmpty()) {
-                JournalDetail::whereIn('journal_id', $journalIds)->delete();
-                JournalHeader::whereIn('journal_id', $journalIds)->delete();
-            }
-
-            // 2. Kembalikan Stok Barang ke Gudang & Hapus Riwayat Kartu Stok
-            $stockChanges = DB::table('inventory_ledgers')
-                ->where('evidence_number', $invoice->invoice_number)
-                ->where('type', 'OUT')
-                ->groupBy('product_id')
-                ->select('product_id', DB::raw('SUM(qty) as total_qty'))
-                ->pluck('total_qty', 'product_id');
-
-            foreach ($stockChanges as $productId => $qty) {
-                Product::where('id', $productId)->increment('stock_quantity', (int)$qty);
-            }
-            InventoryLedger::where('evidence_number', $invoice->invoice_number)->delete();
-
-            // 3. Jika Faktur berasal dari SO, ubah status SO kembali ke APPROVED agar bisa diproses ulang
-            if ($invoice->sales_order_id) {
-                $orders = DB::table('sales_orders')->where('id', $invoice->sales_order_id);
-                if (config('platform.order_company_scope_enabled')) {
-                    $orders->where('company_id', app(\App\Modules\Platform\Support\OperationalCompany::class)->id());
-                }
-                $orders->update(['status' => 'APPROVED']);
-            }
-
-            // 4. Hapus Detail & Header Invoice
-            SalesInvoiceDetail::where('sales_invoice_id', $invoice->id)->delete();
-            $invoice->delete();
-
-            DB::commit();
-            SystemLog::record('DELETE', 'Sales Invoice', 'Membatalkan dan menghapus faktur: ' . $invoice->invoice_number);
-            
-            return redirect()->route('invoice.index')->with('success', 'Faktur berhasil dihapus. Stok telah dikembalikan ke Gudang dan Jurnal Keuangan otomatis dibatalkan.');
+            $invoice = app(\App\Services\InvoiceCancellationService::class)->cancel($id);
+            SystemLog::record('CANCEL', 'Sales Invoice', 'Membatalkan faktur: '.$invoice->invoice_number);
+            return redirect()->route('invoice.index')->with('success', __('erp.audit_invoice_cancelled'));
         } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal menghapus faktur: ' . $e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
-
 }

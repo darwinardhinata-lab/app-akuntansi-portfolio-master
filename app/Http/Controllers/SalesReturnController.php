@@ -27,6 +27,7 @@ class SalesReturnController extends Controller
     {
         // Ambil daftar invoice unik
         $invoices = SalesInvoice::with('salesOrder')
+            ->whereNull('cancelled_at')
             ->orderBy('transaction_date', 'desc')
             ->limit(300)
             ->get()
@@ -47,7 +48,7 @@ class SalesReturnController extends Controller
 
     public function getInvoiceItems($id)
     {
-        $invoice = SalesInvoice::with('details.product')->findOrFail($id);
+        $invoice = SalesInvoice::with('details.product')->whereNull('cancelled_at')->findOrFail($id);
         $items = $invoice->details->map(function($det) {
             return [
                 'id' => $det->id,
@@ -73,12 +74,17 @@ class SalesReturnController extends Controller
             'return_date' => 'required|date',
             'contact_name' => 'required|string',
             'details' => 'required|array|min:1',
-            'details.*.item_code' => 'required|string',
+            'details.*.item_code' => 'required|string|distinct',
             'details.*.qty_returned' => 'required|integer|min:1',
         ]);
 
         DB::beginTransaction();
         try {
+            if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
+            $invoice = SalesInvoice::lockForUpdate()->findOrFail($request->sales_invoice_id);
+            if ($invoice->cancelled_at) {
+                throw new \RuntimeException(__('erp.audit_invoice_cancel_blocked'));
+            }
             $prefix = 'SR-' . date('Ymd', strtotime($request->return_date)) . '-';
             $secureReturnNumber = DocumentSequence::generateSecure('sales_returns', 'return_number', $prefix);
 
@@ -90,19 +96,18 @@ class SalesReturnController extends Controller
             ]);
 
             foreach ($request->details as $det) {
-                $product = Product::where('sku', $det['item_code'])->first();
                 $qtyReturned = (int) ($det['qty_returned'] ?? 0);
-                if ($qtyReturned <= 0) continue;
+                $line = app(\App\Services\SalesReturnQuotaService::class)->line($invoice, $det['item_code'], $qtyReturned, $return->id);
 
                 SalesReturnDetail::create([
                     'sales_return_id' => $return->id,
-                    'product_id' => $product ? $product->id : null,
+                    'product_id' => $line->product_id,
                     'item_code' => $det['item_code'],
-                    'description' => $det['description'] ?? ($product->name ?? ''),
+                    'description' => $line->description,
                     'qty_returned' => $qtyReturned,
                     'qty_approved' => 0,
                     'condition' => 'GOOD',
-                    'unit_price' => (float) ($det['price'] ?? 0),
+                    'unit_price' => (float) $line->price,
                     'subtotal_refund' => 0,
                 ]);
             }
@@ -127,6 +132,14 @@ class SalesReturnController extends Controller
 
     public function process(Request $request, $id)
     {
+        $request->validate([
+            'decision' => 'required|in:APPROVE,REJECT,FAILED_DELIVERY',
+            'items' => 'required_unless:decision,REJECT|array',
+            'items.*.qty_approved' => 'required|integer|min:0',
+            'items.*.condition' => 'required|in:GOOD,DEFECTIVE',
+            'refund_shipping_cost' => 'nullable|numeric|min:0',
+            'return_shipping_cost' => 'nullable|numeric|min:0',
+        ]);
         $return = SalesReturn::with(['details', 'invoice.details'])->findOrFail($id);
 
         // 1. SAFETY NET: Prevent double processing
@@ -139,6 +152,14 @@ class SalesReturnController extends Controller
 
         DB::beginTransaction();
         try {
+            if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
+            // Always lock the invoice before the return: same order as creation/cancellation.
+            $invoice = SalesInvoice::lockForUpdate()->findOrFail($return->sales_invoice_id);
+            $return = SalesReturn::with(['details', 'invoice.details'])->lockForUpdate()->findOrFail($id);
+            if ($invoice->cancelled_at || $return->status !== 'PENDING_INSPECTION'
+                || JournalHeader::where('sales_ret_id', $return->id)->exists()) {
+                throw new \RuntimeException(__('erp.audit_return_guard'));
+            }
             $return->update([
                 'status' => $decision,
                 'inspected_by' => auth()->user()->name ?? 'Tim Gudang',
@@ -154,6 +175,12 @@ class SalesReturnController extends Controller
 
             $refundShipping = (float) $request->input('refund_shipping_cost', 0);
             $returnShipping = (float) $request->input('return_shipping_cost', 0);
+            $shippingUsed = SalesReturn::where('sales_invoice_id', $invoice->id)
+                ->where('id', '!=', $return->id)->whereIn('status', ['APPROVE', 'FAILED_DELIVERY'])->sum('refund_shipping_cost');
+            if ($refundShipping + $shippingUsed > (float) $invoice->shipping_cost
+                || count($request->items ?? []) !== $return->details->count()) {
+                throw new \RuntimeException(__('erp.audit_return_guard'));
+            }
 
             $totalRefundGoods = 0;
             $totalCogsGood = 0;
@@ -173,11 +200,17 @@ class SalesReturnController extends Controller
             $invItems = [];
 
             foreach ($return->details as $det) {
-                $qtyApproved = (int) ($request->input("items.{$det->id}.qty_approved") ?? $det->qty_returned);
-                $condition = $request->input("items.{$det->id}.condition") ?? 'GOOD';
+                if (!$request->has("items.{$det->id}.qty_approved")) {
+                    throw new \RuntimeException(__('erp.audit_return_guard'));
+                }
+                $qtyApproved = (int) $request->input("items.{$det->id}.qty_approved");
+                $condition = $request->input("items.{$det->id}.condition");
+                if ($qtyApproved > $det->qty_returned) {
+                    throw new \RuntimeException(__('erp.audit_return_guard'));
+                }
 
-                $invDetail = $return->invoice->details->where('product_id', $det->product_id)->first();
-                $unitPrice = $invDetail ? $invDetail->price : 0;
+                $invDetail = app(\App\Services\SalesReturnQuotaService::class)->line($invoice, $det->item_code, $qtyApproved, $return->id);
+                $unitPrice = (float) $invDetail->price;
 
                 $ledgerOut = $ledgersOut->get($det->product_id);
                 
@@ -230,6 +263,11 @@ class SalesReturnController extends Controller
             }
 
             $totalRefundAmount = $totalRefundGoods + $refundShipping;
+            $previousRefund = SalesReturn::where('sales_invoice_id', $invoice->id)
+                ->where('id', '!=', $return->id)->whereIn('status', ['APPROVE', 'FAILED_DELIVERY'])->sum('total_refund_amount');
+            if (round($totalRefundAmount + $previousRefund, 2) > round((float) $invoice->grand_total, 2)) {
+                throw new \RuntimeException(__('erp.audit_return_guard'));
+            }
 
             $return->update([
                 'refund_shipping_cost' => $refundShipping,
@@ -283,6 +321,9 @@ class SalesReturnController extends Controller
             }
 
             if (!empty($jDetails)) {
+                if (!\App\Support\JournalBalanceValidator::isBalanced($jDetails)) {
+                    throw new \RuntimeException(__('erp.audit_return_guard'));
+                }
                 JournalDetail::insert($jDetails);
             }
 

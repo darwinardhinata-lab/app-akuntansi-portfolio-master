@@ -29,6 +29,7 @@ class ReportPeriod extends Model
     protected $table = 'cbr_report_periods';
 
     protected $fillable = [
+        'source_mode',
         'report_type',
         'periode_bulan',
         'periode_tahun',

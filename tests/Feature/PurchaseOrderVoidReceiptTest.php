@@ -37,9 +37,10 @@ class PurchaseOrderVoidReceiptTest extends TestCase
         $this->assertEquals(7, (float) Product::where('sku', 'SKU-V10')->value('stock_quantity'));
         $this->assertNotNull(DB::table('purchase_bills')->where('bill_number', 'BIL-VOID-10')->value('journal_id'));
 
-        // PO-1: semua efek receive terhapus dan tautan Bill dilepas.
+        // PO-1: stock reversed, original ledger retained, Bill link detached.
         $this->assertDatabaseMissing('journal_headers', ['source_doc_no' => 'BIL-VOID-1']);
-        $this->assertDatabaseMissing('inventory_ledgers', ['evidence_number' => 'BIL-VOID-1']);
+        $this->assertDatabaseHas('inventory_ledgers', ['evidence_number' => 'BIL-VOID-1', 'type' => 'IN']);
+        $this->assertDatabaseHas('inventory_ledgers', ['evidence_number' => 'REV-' . hash('sha256', 'IN:BIL-VOID-1'), 'type' => 'OUT']);
         $this->assertDatabaseHas('purchase_orders', ['id' => $po1, 'status' => 'APPROVED']);
         $this->assertEquals(0, (float) Product::where('sku', 'SKU-V1')->value('stock_quantity'));
         $this->assertNull(DB::table('purchase_bills')->where('bill_number', 'BIL-VOID-1')->value('journal_id'));
@@ -61,10 +62,28 @@ class PurchaseOrderVoidReceiptTest extends TestCase
         $this->assertNotNull(DB::table('purchase_bills')->where('bill_number', 'BIL-VOID-X')->value('journal_id'));
 
         $this->assertDatabaseMissing('journal_headers', ['source_doc_no' => 'BIL-VOID-U']);
-        $this->assertDatabaseMissing('inventory_ledgers', ['evidence_number' => 'BIL-VOID-U']);
+        $this->assertDatabaseHas('inventory_ledgers', ['evidence_number' => 'BIL-VOID-U', 'type' => 'IN']);
         $this->assertDatabaseHas('purchase_orders', ['id' => $poUnderscore, 'status' => 'APPROVED']);
         $this->assertEquals(0, (float) Product::where('sku', 'SKU-VU')->value('stock_quantity'));
         $this->assertNull(DB::table('purchase_bills')->where('bill_number', 'BIL-VOID-U')->value('journal_id'));
+    }
+
+    public function test_void_rejects_consumed_receipt_without_deleting_financial_history(): void
+    {
+        $po = $this->receivePo('PO-CONSUMED', 'SKU-CONSUMED', 'BIL-CONSUMED', 10);
+        app(\App\Services\InventorySyncService::class)->processStockMovements(
+            [['sku' => 'SKU-CONSUMED', 'qty' => 8]], 'INV-CONSUMED', '2026-10-06', 'INV'
+        );
+        try {
+            app(PurchaseOrderService::class)->voidReceipt($po);
+            $this->fail('Consumed receipt was voided');
+        } catch (\Exception $e) {
+            $this->assertSame(__('erp.audit_stock_downstream'), $e->getMessage());
+        }
+        $this->assertDatabaseHas('purchase_orders', ['id' => $po, 'status' => 'RECEIVED']);
+        $this->assertDatabaseHas('journal_headers', ['source_doc_no' => 'BIL-CONSUMED']);
+        $this->assertEquals(2, Product::where('sku', 'SKU-CONSUMED')->value('stock_quantity'));
+        $this->assertDatabaseCount('inventory_ledgers', 2);
     }
 
     private function receivePo(string $poNumber, string $sku, string $billNumber, int $qty): int

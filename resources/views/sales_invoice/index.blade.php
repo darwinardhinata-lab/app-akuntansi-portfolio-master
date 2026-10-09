@@ -88,17 +88,19 @@
                                 <td><span class="badge bg-light text-secondary border"><i class="fa-solid fa-warehouse me-1"></i>{{ $inv->salesOrder->location_name ?? 'Pusat' }}</span></td>
                                 <td class="text-end fw-bold text-dark">Rp {{ number_format($inv->grand_total, 0, ',', '.') }}</td>
                                 <td class="text-center">
-                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger px-2 py-1 small fw-bold">{{ $inv->payment_status }}</span>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger px-2 py-1 small fw-bold">{{ $inv->cancelled_at ? __('erp.audit_cancelled') : $inv->payment_status }}</span>
                                 </td>
                                 <td class="text-center pe-4">
                                     <div class="btn-group">
                                         <button type="button" onclick="showEntityLog('{{ $inv->invoice_number }}')" class="btn btn-sm btn-outline-secondary" title="{{ __('erp.activity_log') }}"><i class="fa-solid fa-clock-rotate-left"></i></button>
                                         <a href="{{ route('invoice.show', $inv->id) }}" class="btn btn-sm btn-outline-primary" title="{{ __('erp.view_invoice_details') }}"><i class="fa-solid fa-eye"></i></a>
-                                        <form action="{{ route('invoice.destroy', $inv->id) }}" method="POST" class="m-0" onsubmit="return confirm('Hapus faktur ini? Stok dan Jurnal akan dibatalkan.')">
+                                        @if (!$inv->cancelled_at && $inv->payment_status === 'UNPAID')
+                                        <form action="{{ route('invoice.destroy', $inv->id) }}" method="POST" class="m-0" data-confirm="{{ __('erp.audit_invoice_cancel_confirm') }}" onsubmit="return confirm(this.dataset.confirm)">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('erp.delete_btn') }}" style="border-top-left-radius: 0; border-bottom-left-radius: 0;"><i class="fa-solid fa-trash"></i></button>
                                         </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -161,7 +163,14 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     // Oper data aggregasi dari controller ke JavaScript Engine
-    const rawData = @json($analyticData);
+    const rawData = {{ Illuminate\Support\Js::from($analyticData) }};
+
+    // Database/import labels are untrusted text, not table markup.
+    function escapePivotText(value) {
+        return String(value ?? '').replace(/[&<>"']/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[character]));
+    }
 
     function renderPivotMatrix() {
         const rowDim = document.getElementById('pivotRow').value; 
@@ -183,23 +192,23 @@
 
         // 1. MEMBUAT HEADER TABEL PIVOT
         let headerHtml = `<thead class="table-secondary text-uppercase fw-bold"><tr>`;
-        headerHtml += `<th class="ps-3 py-3" style="width: 25%;">${rowDim.replace('_', ' ')}</th>`;
+        headerHtml += `<th class="ps-3 py-3" style="width: 25%;">${escapePivotText(rowDim.replace('_', ' '))}</th>`;
         
         uniqueCols.forEach(col => {
-            headerHtml += `<th class="text-end py-3">${formatColumnHeader(col, colDim)}</th>`;
+            headerHtml += `<th class="text-end py-3">${escapePivotText(formatColumnHeader(col, colDim))}</th>`;
         });
         headerHtml += `<th class="text-end pe-3 py-3 bg-dark text-white">{{ __('erp.grand_total_caps') }}</th>`;
         headerHtml += `</tr></thead>`;
 
         // 2. MEMBUAT ISI BARIS DATA MATRIX
         let bodyHtml = `<tbody>`;
-        let colTotals = {}; 
+        let colTotals = Object.create(null);
         uniqueCols.forEach(c => colTotals[c] = 0);
         let absoluteGrandTotal = 0;
 
         uniqueRows.forEach(rowKey => {
             bodyHtml += `<tr>`;
-            bodyHtml += `<td class="ps-3 fw-bold text-dark">${rowKey}</td>`;
+            bodyHtml += `<td class="ps-3 fw-bold text-dark">${escapePivotText(rowKey)}</td>`;
             
             let rowGrandTotal = 0;
 
@@ -246,7 +255,7 @@
     // Helper formatter khusus untuk merapikan teks Header Kolom
     function formatColumnHeader(colVal, colType) {
         if (colType === 'bulan') {
-            let split = colVal.split('-');
+            let split = String(colVal ?? '').split('-');
             if (split.length === 2) {
                 let months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
                 let mIdx = parseInt(split[1]) - 1;

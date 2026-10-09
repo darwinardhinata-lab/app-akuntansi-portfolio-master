@@ -94,6 +94,7 @@ class WorkOrderService
         }
 
         return DB::transaction(function () use ($workOrderId, $productId, $qtyFinished, $completionDate) {
+            \App\Support\AccountingPeriodGuard::source([$completionDate]);
             $wo = WorkOrder::lockForUpdate()->findOrFail($workOrderId);
 
             if ($wo->status === 'COMPLETED') {
@@ -188,6 +189,7 @@ class WorkOrderService
     public function voidCompletion(int $workOrderId): bool
     {
         return DB::transaction(function () use ($workOrderId) {
+            if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
             $wo = WorkOrder::lockForUpdate()->findOrFail($workOrderId);
 
             if ($wo->status !== 'COMPLETED') {

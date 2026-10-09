@@ -55,7 +55,7 @@ class ProductController extends Controller
             'sku'            => 'required|unique:products,sku',
             'name'           => 'required|string|max:255',
             'sell_price'     => 'required|numeric',
-            'stock_quantity' => 'required|numeric'
+            'stock_quantity' => 'nullable|numeric|in:0'
         ]);
 
         Product::create([
@@ -64,7 +64,7 @@ class ProductController extends Controller
             'category_name'  => $request->category_name ?? '-',
             'variation'      => $request->variation ?? '-',
             'sell_price'     => $request->sell_price,
-            'stock_quantity' => $request->stock_quantity,
+            'stock_quantity' => 0,
         ]);
 
         SystemLog::record('CREATE', 'Master Barang', 'Menambahkan produk: ' . strtoupper($request->sku) . ' - ' . $request->name);
@@ -78,6 +78,7 @@ class ProductController extends Controller
         ini_set('memory_limit', '1024M'); 
 
         $request->validate(['file_csv' => 'required|file']);
+        $transactionStarted = false;
         
         try {
             $content = file_get_contents($request->file('file_csv')->getRealPath());
@@ -88,50 +89,75 @@ class ProductController extends Controller
             $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
             $content = preg_replace('/\r\n|\r/', "\n", $content);
             
-            $lines = explode("\n", $content);
-            $lines = array_map('trim', $lines);
-            $lines = array_filter($lines, fn($l) => $l !== '');
-
-            if (count($lines) < 2) return redirect()->back()->with('error', 'File CSV kosong.');
-
-            $headerLine = array_shift($lines);
-            $delimiter = substr_count($headerLine, ';') >= 5 ? ';' : ',';
+            $headerLine = strtok($content, "\n");
+            $delimiter = substr_count((string) $headerLine, ';') >= 5 ? ';' : ',';
+            $stream = fopen('php://temp', 'r+');
+            fwrite($stream, $content);
+            rewind($stream);
+            try {
+                $header = fgetcsv($stream, 0, $delimiter);
+                $exportHeader = (new \App\Exports\ProductExport(Product::query()))->headings();
+                $legacyHeader = ['Item Group', 'Group Description', 'Item Name', 'Item Code',
+                    'Category', 'Keterangan/Varian', 'Merek', 'Ukuran', 'Berat', 'Panjang', 'Lebar',
+                    'Sell Price', 'Purchase Price', 'Barcode', 'Pajak', 'Minimum Stock', 'Maximum Stock', 'Stock'];
+                $normalize = fn ($values) => array_map(fn ($value) => strtolower(trim((string) $value)), $values);
+                $isExport = is_array($header) && $normalize($header) === $normalize($exportHeader);
+                if (!$isExport && (!is_array($header) || $normalize($header) !== $normalize($legacyHeader))) {
+                    throw new \RuntimeException(__('erp.audit_product_import_header'));
+                }
+                $rows = [];
+                $rowNumber = 1;
+                while (($row = fgetcsv($stream, 0, $delimiter)) !== false) {
+                    $rowNumber++;
+                    if ($row === [null]) continue;
+                    if (count($row) !== count($header)) {
+                        throw new \RuntimeException(__('erp.audit_product_import_row', ['row' => $rowNumber]));
+                    }
+                    $rows[] = $row;
+                }
+            } finally {
+                fclose($stream);
+            }
+            if (!$rows) throw new \RuntimeException(__('erp.audit_product_import_header'));
 
             $inserted = 0;
             DB::beginTransaction();
+            $transactionStarted = true;
 
-            foreach ($lines as $line) {
-                $r = str_getcsv($line, $delimiter, '"', '\\');
+            foreach ($rows as $index => $r) {
+                $sku = trim($r[$isExport ? 0 : 3]);
+                $name = trim($r[$isExport ? 1 : 2]);
 
-                $sku = trim($r[3] ?? '');
-                $name = trim($r[2] ?? '');
+                if ($sku === '' || $name === '') {
+                    throw new \RuntimeException(__('erp.audit_product_import_row', ['row' => $index + 2]));
+                }
 
-                if (empty($sku) || empty($name) || strtolower($sku) == 'sku') continue;
-
-                $sellPrice = preg_replace('/[^0-9\.]/', '', $r[11] ?? '0');
-                $stock = preg_replace('/[^0-9\-]/', '', $r[17] ?? '0');
+                $sellPrice = $isExport ? trim($r[4]) : preg_replace('/[^0-9\.]/', '', $r[11] ?? '0');
+                if (!is_numeric($sellPrice) || !is_finite((float) $sellPrice) || (float) $sellPrice < 0) {
+                    throw new \RuntimeException(__('erp.audit_product_import_row', ['row' => $index + 2]));
+                }
 
                 Product::updateOrCreate(
                     ['sku' => $sku],
                     [
                         'name'           => $name,
-                        'category_name'  => trim($r[4] ?? ''),
-                        'variation'      => trim($r[5] ?? ''),
+                        'category_name'  => trim($r[$isExport ? 3 : 4]),
+                        'variation'      => trim($r[$isExport ? 2 : 5]),
                         'sell_price'     => floatval($sellPrice),
-                        'stock_quantity' => (int) $stock,
-                    ]
+                    ] + ($isExport ? ['unit' => trim($r[7])] : [])
                 );
                 $inserted++;
             }
 
             DB::commit();
+            $transactionStarted = false;
 
             SystemLog::record('IMPORT', 'Master Barang', 'Import master produk berhasil. ' . $inserted . ' SKU terekam.');
 
             return redirect()->back()->with('success', "Import Berhasil! {$inserted} SKU Barang berhasil disinkronisasi ke Master Product.");
 
         } catch (\Exception $e) {
-            DB::rollBack();
+            if ($transactionStarted) DB::rollBack();
             return redirect()->back()->with('error', 'Gagal Import: ' . $e->getMessage());
         }
     }
@@ -150,7 +176,7 @@ class ProductController extends Controller
             'sku'            => 'required|unique:products,sku,'.$id,
             'name'           => 'required|string|max:255',
             'sell_price'     => 'required|numeric',
-            'stock_quantity' => 'required|numeric'
+            'stock_quantity' => 'prohibited'
         ]);
 
         $product->update([
@@ -159,7 +185,6 @@ class ProductController extends Controller
             'category_name'  => $request->category_name ?? '-',
             'variation'      => $request->variation ?? '-',
             'sell_price'     => $request->sell_price,
-            'stock_quantity' => $request->stock_quantity,
         ]);
 
         SystemLog::record('UPDATE', 'Master Barang', 'Mengubah data produk: ' . strtoupper($request->sku) . ' - ' . $request->name);

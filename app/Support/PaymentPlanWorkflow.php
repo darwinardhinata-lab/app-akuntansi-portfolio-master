@@ -26,6 +26,7 @@ class PaymentPlanWorkflow
     /** Manual realization evidence; not a substitute for bank reconciliation. */
     public static function realized(PaymentPlan $payment): void
     {
+        PaymentMakerChecker::verified($payment);
         PaymentFundingAccount::resolve($payment->jenis_transaksi);
         $details = $payment->details()->get();
         $valid = $payment->tgl_transaksi && $payment->jenis_transaksi

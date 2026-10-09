@@ -21,6 +21,7 @@ class PurchaseOrderService
                 fn ($id, $date, $items, $bill, $due, $accounts) => $this->receiveLegacy($id, $date, $items, $bill, $due, $accounts));
         }
         return DB::transaction(function () use ($poId, $receiveDate, $itemsToReceive, $billNumber, $dueDate) {
+            \App\Support\AccountingPeriodGuard::source([$receiveDate]);
             $locked = PurchaseOrder::lockForUpdate()->findOrFail($poId);
             // Recheck after waiting on the lock: a concurrent GRN may have bound the PO.
             \App\Support\GrnProtection::po($locked);
@@ -36,6 +37,7 @@ class PurchaseOrderService
     {
         DB::beginTransaction();
         try {
+            \App\Support\AccountingPeriodGuard::source([$receiveDate]);
             // B13 FIX: Lock baris PO agar qty_received & status tidak bentrok saat receive paralel
             $po = PurchaseOrder::with('details')->lockForUpdate()->findOrFail($poId);
 
@@ -69,6 +71,9 @@ class PurchaseOrderService
             $evidenceNumber = $billNumber ?? \App\Support\DocumentSequence::generateSecure(
                 'purchase_bills', 'bill_number', 'BIL-' . $po->po_number . '-'
             );
+            if (InventoryLedger::where('evidence_number', 'REV-' . hash('sha256', 'IN:' . $evidenceNumber))->exists()) {
+                throw new Exception(__('erp.audit_stock_reversal_invalid'));
+            }
             $now = now();
 
             // FIX ANTI-DOBEL: Cek apakah evidence_number (nomor Bill) sudah pernah dijurnal
@@ -204,6 +209,7 @@ class PurchaseOrderService
     {
         DB::beginTransaction();
         try {
+            if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
             // B13 FIX: Lock baris PO agar void tidak bentrok dengan receive paralel
             $po = PurchaseOrder::lockForUpdate()->findOrFail($poId);
             \App\Support\GrnProtection::po($po);
@@ -226,7 +232,17 @@ class PurchaseOrderService
                 ->values()
                 ->toArray();
 
+            if (empty($evidenceNumbers)) {
+                throw new Exception(__('erp.audit_stock_reversal_invalid'));
+            }
+
             if (!empty($evidenceNumbers)) {
+                // Reverse newest receipts first; the service rejects any downstream usage.
+                $orderedEvidence = InventoryLedger::whereIn('evidence_number', $evidenceNumbers)
+                    ->where('type', 'IN')->orderByDesc('id')->pluck('evidence_number')->unique();
+                foreach ($orderedEvidence as $evidence) {
+                    app(InventorySyncService::class)->reverseStockMovements($evidence, 'BIL');
+                }
                 // 1. Batch delete jurnal akuntansi
                 $journalIds = JournalHeader::whereIn('source_doc_no', $evidenceNumbers)->pluck('journal_id');
                 if ($journalIds->isNotEmpty()) {
@@ -239,32 +255,6 @@ class PurchaseOrderService
                     \App\Support\ProtectedJournalQuery::table('journal_headers')->whereIn('journal_id', $journalIds)->delete();
                 }
 
-                // 2. Kalkulasi balik stok dari InventoryLedger (Kembalikan ke posisi awal)
-                $stockChanges = DB::table('inventory_ledgers')
-                    ->whereIn('evidence_number', $evidenceNumbers)
-                    ->where('type', 'IN')
-                    ->groupBy('product_id')
-                    ->select('product_id', DB::raw('SUM(qty) as total_qty'), DB::raw('SUM(total_cost) as total_value'))
-                    ->get();
-
-                foreach ($stockChanges as $row) {
-                    $product = Product::find($row->product_id);
-                    if ($product) {
-                        $newStock = $product->stock_quantity - (int)$row->total_qty;
-
-                        $currentValue = $product->stock_quantity * $product->average_cost;
-                        $newValue = $currentValue - (float) $row->total_value;
-                        $newAverage = $newStock > 0 ? max(0, $newValue / $newStock) : 0;
-
-                        $product->update([
-                            'stock_quantity' => $newStock,
-                            'average_cost' => $newAverage
-                        ]);
-                    }
-                }
-
-                // 3. Batch delete kartu stok (Inventory Ledger)
-                InventoryLedger::whereIn('evidence_number', $evidenceNumbers)->delete();
             }
 
             // Kembalikan status PO menjadi belum diterima

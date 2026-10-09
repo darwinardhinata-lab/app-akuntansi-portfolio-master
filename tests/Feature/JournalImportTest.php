@@ -11,6 +11,25 @@ class JournalImportTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_closed_month_csv_import_does_not_create_or_wipe_journals(): void
+    {
+        config(['platform.period_lifecycle_preview_enabled' => true]);
+        foreach (['11100', '21100'] as $code) {
+            DB::table('accounts')->insert(['account_code' => $code, 'account_name' => $code, 'coa_type' => 'ASSET', 'normal_balance' => 'DEBET', 'report_pos' => 'NERACA']);
+        }
+        DB::table('accounting_periods')->insert(['month' => '2026-09', 'closed' => true]);
+        $content = implode("\n", [
+            'Tanggal,No Jurnal,No Bukti,Deskripsi,Col5,Col6,Nilai Debet,Nilai Kredit,Akun',
+            '2026-09-10,GJ-CLOSED,REF,Test,,,100.00,0.00,11100 - Kas',
+            '2026-09-10,GJ-CLOSED,REF,Test,,,0.00,100.00,21100 - Hutang',
+        ]);
+        $result = app(\App\Services\JournalCsvImportService::class)->import(UploadedFile::fake()->createWithContent('closed.csv', $content));
+        $this->assertSame('error', $result['status']);
+        $this->assertStringContainsString('closed', $result['message']);
+        $this->assertDatabaseCount('journal_headers', 0);
+        $this->assertDatabaseCount('journal_details', 0);
+    }
+
     public function test_csv_import_creates_header_and_details()
     {
         $this->withoutMiddleware();

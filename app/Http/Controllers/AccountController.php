@@ -231,9 +231,8 @@ class AccountController extends Controller
     public function openingBalanceForm()
     {
         $accounts = Account::orderBy('account_code', 'asc')->get();
-        // FIX #004: Use user-specific or session-based opening balance key
-        $evidenceKey = 'SA-' . (auth()->id() ?? '00000');
-        $header = JournalHeader::where('evidence_number', $evidenceKey)->first();
+        $header = app(\App\Services\OpeningBalanceService::class)->query()
+            ->orderByDesc('transaction_date')->first();
         $existingDetails = [];
 
         if ($header) {
@@ -260,17 +259,7 @@ class AccountController extends Controller
         try {
             DB::beginTransaction();
 
-            // FIX #004: Use user-specific opening balance evidence key
-            $evidenceKey = 'SA-' . (auth()->id() ?? '00000');
-
-            $header = JournalHeader::updateOrCreate(
-                ['evidence_number' => $evidenceKey],
-                [
-                    'transaction_date' => $request->transaction_date,
-                    'description'      => 'SETUP SALDO AWAL SISTEM (OPENING BALANCE)',
-                    'jj_id'            => time(), // FIX 1364
-                ]
-            );
+            $header = app(\App\Services\OpeningBalanceService::class)->headerForDate($request->transaction_date);
 
             $primaryKeyId = $header->journal_id ?? $header->id;
 
@@ -356,12 +345,7 @@ class AccountController extends Controller
 
         DB::beginTransaction();
         try {
-            // FIX #004: Use user/session-specific opening balance key
-            $evidenceKey = 'SA-' . (auth()->id() ?? 'system');
-            $header = JournalHeader::updateOrCreate(
-                ['evidence_number' => $evidenceKey],
-                ['transaction_date' => $tanggal, 'description' => 'SETUP SALDO AWAL SISTEM (OPENING BALANCE)', 'jj_id' => time()] // FIX 1364
-            );
+            $header = app(\App\Services\OpeningBalanceService::class)->headerForDate($tanggal);
             $primaryKeyId = $header->getKey();
             JournalDetail::where('journal_id', $primaryKeyId)->delete();
 

@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class JournalDetail extends Model
 {
+    protected function newBaseQueryBuilder()
+    {
+        return \App\Support\ProtectedJournalQuery::table('journal_details');
+    }
+
     protected static function booted(): void
     {
         static::creating(function (JournalDetail $detail) {

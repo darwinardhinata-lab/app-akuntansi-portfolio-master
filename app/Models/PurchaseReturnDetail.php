@@ -9,6 +9,8 @@ class PurchaseReturnDetail extends Model {
         'item_code',
         'description',
         'qty_returned',
+        'price',
+        'subtotal',
         'qty_approved',
         'condition',
         'unit_price',

@@ -201,6 +201,7 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
 
         try {
             // --- FASE AUTO-WIPE ---
+            \App\Support\AccountingPeriodGuard::source(array_values(array_unique($datesInChunk)));
             $minDate = min($datesInChunk);
             $maxDate = max($datesInChunk);
             $prefixList = array_keys($prefixes);

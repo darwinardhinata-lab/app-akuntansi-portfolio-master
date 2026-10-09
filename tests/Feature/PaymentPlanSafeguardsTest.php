@@ -85,7 +85,11 @@ class PaymentPlanSafeguardsTest extends TestCase
     public function test_posted_cannot_be_assigned_manually_but_ordinary_approval_still_works(): void
     {
         $this->withoutMiddleware();
+        $maker = \App\Models\User::factory()->create();
+        $checker = \App\Models\User::factory()->create(['role' => 'FINANCE']);
+        $this->actingAs($maker);
         $payment = $this->payment();
+        $this->actingAs($checker);
         $this->postJson(route('payment.update_status', $payment->id_payment), ['status_payment' => 'POSTED'])
             ->assertUnprocessable()->assertJsonValidationErrors('status_payment');
         $this->assertSame('PENGAJUAN', $payment->fresh()->status_payment);
@@ -204,8 +208,14 @@ class PaymentPlanSafeguardsTest extends TestCase
                 'created_at' => now(), 'updated_at' => now(),
             ]);
         }
-        $payment = $this->payment('APPROVED');
+        $maker = \App\Models\User::factory()->create(['role' => 'FINANCE']);
+        $checker = \App\Models\User::factory()->create(['role' => 'FINANCE']);
+        $this->actingAs($maker);
+        $payment = $this->payment('PENGAJUAN');
         $payment->update(['id_akun' => '61100', 'jenis_transaksi' => '111101']);
+        $this->actingAs($checker);
+        \App\Support\PaymentMakerChecker::approve($payment->refresh());
+        $payment->update(['status_payment' => 'APPROVED']);
 
         return $payment->refresh();
     }

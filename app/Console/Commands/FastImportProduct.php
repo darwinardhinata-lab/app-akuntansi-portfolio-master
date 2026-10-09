@@ -53,7 +53,6 @@ class FastImportProduct extends Command
             if (empty($sku) || strtolower($sku) === 'sku') continue;
 
             $sellPrice = NumberParser::parseDecimal($row[11] ?? '0');
-            $stock = preg_replace('/[^0-9\-]/', '', $row[17] ?? '0');
 
             $batch[] = [
                 'sku'            => mb_substr($sku, 0, 255),
@@ -61,7 +60,7 @@ class FastImportProduct extends Command
                 'category_name'  => mb_substr(trim($row[4] ?? ''), 0, 255),
                 'variation'      => mb_substr(trim($row[5] ?? ''), 0, 255),
                 'sell_price'     => $sellPrice,
-                'stock_quantity' => (int) $stock,
+                'stock_quantity' => 0,
                 'created_at'     => $now,
                 'updated_at'     => $now,
             ];
@@ -71,7 +70,7 @@ class FastImportProduct extends Command
                 DB::table('products')->upsert(
                     $batch, 
                     ['sku'], 
-                    ['name', 'category_name', 'variation', 'sell_price', 'stock_quantity', 'updated_at']
+                    ['name', 'category_name', 'variation', 'sell_price', 'updated_at']
                 );
                 
                 $count += count($batch);
@@ -84,7 +83,7 @@ class FastImportProduct extends Command
             DB::table('products')->upsert(
                 $batch, 
                 ['sku'], 
-                ['name', 'category_name', 'variation', 'sell_price', 'stock_quantity', 'updated_at']
+                ['name', 'category_name', 'variation', 'sell_price', 'updated_at']
             );
             $count += count($batch);
         }

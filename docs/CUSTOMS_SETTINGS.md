@@ -20,15 +20,16 @@ Ketujuh laporan membangun snapshot dari sumber operasional:
    dan finishing reject; setiap kejadian dan satuan dipisahkan. Histori
    pengeluaran reject belum tersedia, saldo adalah akumulasi tercatat.
 
-Sinkronisasi berjalan saat draft dibuat, dibuka, diekspor dan difinalisasi,
-serta melalui tombol sinkronisasi ulang. Seluruh baris draft dibangun ulang
-secara transaksional, termasuk menghapus transaksi sumber yang sudah batal
-atau dihapus. Baris manual/import akan tergantikan; tombol import disembunyikan
-pada mode otomatis. FINAL/DIUNGGAH tidak diubah. Tidak ada background sync
+Sinkronisasi berjalan saat draft INTERNAL dibuat, difinalisasi,
+serta melalui tombol sinkronisasi ulang. Show/export hanya membaca snapshot.
+Baris draft INTERNAL dibangun ulang secara transaksional; periode MANUAL dan
+LEGACY dilindungi dari rebuild. Import menandai periode MANUAL dan menambahkan
+baris, bukan menghapus atau menggabungkan snapshot sebelumnya. FINAL/DIUNGGAH tidak diubah. Tidak ada background sync
 atau request CEISA. Data pabean yang tidak tersedia dibiarkan kosong, termasuk
 tanggal dokumen (nullable); laporan internal belum merupakan bukti persetujuan DJBC.
 
 Deploy hanya migrasi baru `2026_10_06_100001_create_cbr_settings_table.php`.
 Jalankan juga `2026_10_06_110001_allow_missing_internal_customs_date.php`.
+Proteksi sumber memerlukan `2026_10_08_120000_add_customs_report_source_mode.php` sebelum kode baru diaktifkan.
 Jangan menjalankan migrate:fresh pada database operasional. Kredensial CEISA
 tidak disimpan pada tabel pengaturan atau audit log ini.

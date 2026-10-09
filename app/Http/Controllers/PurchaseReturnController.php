@@ -16,6 +16,12 @@ use App\Services\InventorySyncService;
 
 class PurchaseReturnController extends Controller
 {
+    public function show($id)
+    {
+        $return = PurchaseReturn::with(['details', 'purchaseOrder'])->findOrFail($id);
+        return view('purchase_return.read_only', compact('return'));
+    }
+
     public function index(Request $request)
     {
         $returns = PurchaseReturn::with('purchaseOrder')->orderBy('return_date', 'desc')->paginate(50);
@@ -42,15 +48,17 @@ class PurchaseReturnController extends Controller
         $request->validate([
             'purchase_order_id' => 'required|exists:purchase_orders,id',
             'return_date' => 'required|date',
-            'items' => 'required|array',
+            'items' => 'required|array|min:1',
+            'items.*' => 'required|integer|min:0',
         ]);
 
         DB::beginTransaction();
         try {
+            \App\Support\AccountingPeriodGuard::source([$request->return_date]);
             $prefix = 'PR-' . date('Ymd', strtotime($request->return_date)) . '-';
             $secureReturnNumber = DocumentSequence::generateSecure('purchase_returns', 'return_number', $prefix);
 
-            $po = PurchaseOrder::findOrFail($request->purchase_order_id);
+            $po = PurchaseOrder::lockForUpdate()->findOrFail($request->purchase_order_id);
             $return = PurchaseReturn::create([
                 'return_number' => $secureReturnNumber,
                 'purchase_order_id' => $po->id,
@@ -66,6 +74,14 @@ class PurchaseReturnController extends Controller
             // bukan query per item (2 query per baris retur).
             $itemIds  = array_keys($request->items);
             $poDetails = PurchaseOrderDetail::where('purchase_order_id', $po->id)->whereIn('id', $itemIds)->get()->keyBy('id');
+            foreach ($request->items as $itemId => $qty) {
+                if ($qty > 0 && !$poDetails->has($itemId)) {
+                    throw new \Exception("Detail PO #{$itemId} tidak ditemukan.");
+                }
+            }
+            if (!in_array($po->status, ['PARTIAL', 'RECEIVED'], true)) {
+                throw new \RuntimeException(__('erp.audit_return_guard'));
+            }
             $productIds = $poDetails->pluck('product_id')->filter()->unique()->toArray();
             $products   = Product::whereIn('id', $productIds)->get()->keyBy('id');
 
@@ -79,6 +95,14 @@ class PurchaseReturnController extends Controller
                 $poDetail = $poDetails->get($itemId);
                 if (!$poDetail) {
                     throw new \Exception("Detail PO #{$itemId} tidak ditemukan.");
+                }
+                $used = DB::table('purchase_return_details as d')
+                    ->join('purchase_returns as r', 'r.id', '=', 'd.purchase_return_id')
+                    ->where('r.purchase_order_id', $po->id)->where('d.item_code', $poDetail->item_code)
+                    ->where('r.status', 'COMPLETED')->sum('d.qty_returned');
+                if ($po->details()->where('item_code', $poDetail->item_code)->count() !== 1
+                    || $qty + $used > (int) $poDetail->qty_received) {
+                    throw new \RuntimeException(__('erp.audit_return_guard'));
                 }
                 $product = $products->get($poDetail->product_id);
                 if (!$product) {
@@ -117,7 +141,7 @@ class PurchaseReturnController extends Controller
             // yang akan bulk insert ke inventory_ledgers dan bulk update products.
             if (!empty($invItems)) {
                 $inventoryService = new InventorySyncService();
-                $inventoryService->processStockMovements(
+                $inventoryResult = $inventoryService->processStockMovements(
                     $invItems,
                     $secureReturnNumber,
                     $request->return_date,
@@ -141,10 +165,9 @@ class PurchaseReturnController extends Controller
                 'transaction_type' => 'Purchase Return',
             ]);
 
-            $jDetails = [
-                ['journal_id' => $journalHeader->getKey(), 'account_code' => $akunHutang, 'position' => 'DEBET', 'amount' => $totalReturnAmount, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null],
-                ['journal_id' => $journalHeader->getKey(), 'account_code' => config('coa.persediaan'), 'position' => 'KREDIT', 'amount' => $totalReturnAmount, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null],
-            ];
+            $jDetails = app(\App\Services\PurchaseReturnValuationService::class)->journalDetails(
+                $journalHeader->getKey(), $akunHutang, $totalReturnAmount, $inventoryResult['cogs_value']
+            );
 
             if (!\App\Support\JournalBalanceValidator::isBalanced($jDetails)) {
                 throw new \Exception("Jurnal retur tidak balance.");

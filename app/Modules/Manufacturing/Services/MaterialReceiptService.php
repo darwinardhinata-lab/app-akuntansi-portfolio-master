@@ -43,6 +43,7 @@ class MaterialReceiptService
         }
 
         return DB::transaction(function () use ($header, $items) {
+            \App\Support\AccountingPeriodGuard::source([$header['receipt_date'] ?? null]);
             // FIX: periksa semua referensi PO sebelum resolusi COA dan penulisan stok/jurnal.
             $orderIds = [];
             if (!empty($header['po_id'])) {
@@ -73,10 +74,50 @@ class MaterialReceiptService
                     throw new Exception('Material PO penerimaan tidak ditemukan.');
                 }
                 if ($order->approval_status !== MaterialPurchaseOrder::APPROVED) {
-                    throw new Exception("Material PO {$order->po_number} belum APPROVED; penerimaan barang ditolak.");
+                    throw new Exception("Material PO {$order->po_number} belum APPROVED; penerimaan barang ditolak (po_id {$order->id}).");
                 }
                 if (!in_array($order->status, ['APPROVED', 'PARTIAL'], true)) {
                     throw new Exception("Material PO {$order->po_number} tidak terbuka untuk penerimaan barang.");
+                }
+                if ((int) $order->supplier_id !== (int) ($header['supplier_id'] ?? 0)) {
+                    throw new Exception('Supplier penerimaan tidak sesuai dengan Material PO.');
+                }
+            }
+
+            foreach ($items as $row) {
+                if (!empty($header['po_id']) && empty($row['po_detail_id'])) {
+                    throw new Exception('po_detail_id wajib untuk setiap item penerimaan dengan po_id.');
+                }
+                if (empty($header['po_id']) && !empty($row['po_detail_id'])) {
+                    throw new Exception('po_id wajib jika item memiliki po_detail_id.');
+                }
+            }
+            if (!empty($header['po_id'])) {
+                $lockedDetails = DB::table('mfg_material_purchase_order_details')->whereIn('id', $detailIds)
+                    ->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+                $requested = [];
+                foreach ($items as $row) {
+                    $detail = $lockedDetails->get($row['po_detail_id']);
+                    $type = $row['item_type'] ?? '';
+                    $idField = ['YARN' => 'yarn_id', 'FABRIC' => 'fabric_id', 'AUXILIARY' => 'auxiliary_material_id'][$type] ?? null;
+                    if (!$idField || $detail->item_type !== $type
+                        || (int) ($row[$idField] ?? 0) !== (int) $detail->$idField
+                        || ($row['unit'] ?? null) !== $detail->unit) {
+                        throw new Exception('Identitas material atau unit tidak sesuai dengan detail Material PO.');
+                    }
+                    $qty = (string) ($row['qty'] ?? '');
+                    if (!preg_match('/^\d+(?:\.\d{1,2})?$/D', $qty) || bccomp($qty, '0', 2) <= 0) {
+                        throw new Exception('Qty penerimaan harus positif dengan maksimal 2 desimal.');
+                    }
+                    $requested[$detail->id] = bcadd($requested[$detail->id] ?? '0', $qty, 2);
+                }
+                foreach ($requested as $id => $quantity) {
+                    $detail = $lockedDetails->get($id);
+                    $remaining = bcsub((string) $detail->qty, (string) $detail->qty_received, 2);
+                    if (bccomp($quantity, $remaining, 2) > 0) {
+                        throw new Exception("Material PO {$order->po_number}: qty terima ".number_format((float) $quantity, 2, '.', '')
+                            .' melebihi sisa PO '.number_format((float) $remaining, 2, '.', '')." (po_detail_id {$id}).");
+                    }
                 }
             }
 
@@ -99,9 +140,9 @@ class MaterialReceiptService
             $yarnIds   = collect($items)->where('item_type', 'YARN')->pluck('yarn_id')->filter()->unique()->all();
             $fabricIds = collect($items)->where('item_type', 'FABRIC')->pluck('fabric_id')->filter()->unique()->all();
             $auxiliaryIds = collect($items)->where('item_type', 'AUXILIARY')->pluck('auxiliary_material_id')->filter()->unique()->all();
-            $yarns     = $yarnIds ? Yarn::whereIn('id', $yarnIds)->lockForUpdate()->get()->keyBy('id') : collect();
-            $fabrics   = $fabricIds ? Fabric::whereIn('id', $fabricIds)->lockForUpdate()->get()->keyBy('id') : collect();
-            $auxiliaries = $auxiliaryIds ? AuxiliaryMaterial::whereIn('id', $auxiliaryIds)->lockForUpdate()->get()->keyBy('id') : collect();
+            $yarns     = $yarnIds ? Yarn::whereIn('id', $yarnIds)->orderBy('id')->lockForUpdate()->get()->keyBy('id') : collect();
+            $fabrics   = $fabricIds ? Fabric::whereIn('id', $fabricIds)->orderBy('id')->lockForUpdate()->get()->keyBy('id') : collect();
+            $auxiliaries = $auxiliaryIds ? AuxiliaryMaterial::whereIn('id', $auxiliaryIds)->orderBy('id')->lockForUpdate()->get()->keyBy('id') : collect();
 
             $grossAmount = 0;
             $costByAccount = []; // [account_code => total] utk Debit jurnal (yarn vs kain dipisah akun)
@@ -115,18 +156,6 @@ class MaterialReceiptService
 
                 // RULES.md §5 (pola "H2 FIX" PurchaseOrderService) — Validasi Qty Terima:
                 // qtyTerima <= (qtyPO - qtyReceivedSebelumnya), jika MRN ini berasal dari PO.
-                if (!empty($row['po_detail_id'])) {
-                    $poDetail = DB::table('mfg_material_purchase_order_details')->where('id', $row['po_detail_id'])->lockForUpdate()->first();
-                    if ($poDetail) {
-                        $sisaBolehTerima = (float) $poDetail->qty - (float) $poDetail->qty_received;
-                        if ($qty > $sisaBolehTerima) {
-                            throw new Exception(
-                                "Qty terima '{$row['item_name']}' ({$qty}) melebihi sisa PO yang belum diterima ({$sisaBolehTerima}). " .
-                                "Cek kembali PO Detail ID {$row['po_detail_id']}."
-                            );
-                        }
-                    }
-                }
 
                 if ($row['item_type'] === 'YARN') {
                     $rawMaterialAccount ??= $coa->account($company, 'raw_material_inventory');
@@ -264,67 +293,9 @@ class MaterialReceiptService
         });
     }
 
-    /**
-     * STAGE 5 — Void MRN: membalik jurnal + kartu stok bahan baku, mengikuti
-     * pola persis PurchaseOrderService::voidReceipt() (lock, hapus jurnal by
-     * evidence_number, kurangi kembali stok & average_cost, hapus baris ledger).
-     *
-     * PEMBATASAN PENTING: hanya bisa void MRN yang stoknya BELUM terpakai
-     * sama sekali di tahap berikutnya (yarn issue / fabric issue / cutting).
-     * Ini untuk mencegah average_cost yang sudah dipakai di transaksi lain
-     * jadi tidak konsisten. Jika stok sudah terpakai sebagian, tolak void dan
-     * arahkan user membuat jurnal koreksi manual.
-     */
-    public function void(int $receiptId): bool
+    /** Reverse a posted MRN while retaining source history. */
+    public function void(int $receiptId, string $reason): bool
     {
-        return DB::transaction(function () use ($receiptId) {
-            $receipt = MaterialReceipt::with('details.yarn', 'details.fabric', 'details.auxiliaryMaterial')->lockForUpdate()->findOrFail($receiptId);
-
-            if ($receipt->status === 'VOIDED') {
-                throw new Exception("MRN '{$receipt->receipt_number}' sudah berstatus VOIDED.");
-            }
-
-            foreach ($receipt->details as $detail) {
-                $item = $detail->item_type === 'YARN' ? $detail->yarn : ($detail->item_type === 'FABRIC' ? $detail->fabric : $detail->auxiliaryMaterial);
-                if (!$item) continue;
-
-                // Cek apakah qty yang diterima MRN ini sudah terpakai (stok saat ini < qty MRN
-                // berarti sebagian sudah keluar lagi via issue/cutting sejak MRN ini diposting).
-                if ((float) $item->stock_quantity < (float) $detail->qty) {
-                    throw new Exception(
-                        "Tidak bisa void: stok {$detail->item_name} sudah terpakai sebagian sejak MRN ini diposting. " .
-                        "Buat jurnal koreksi manual di menu Jurnal Umum, atau hubungi admin."
-                    );
-                }
-            }
-
-            // Aman untuk dibalik: kurangi qty & value, ledger IN dihapus.
-            foreach ($receipt->details as $detail) {
-                $item = $detail->item_type === 'YARN' ? $detail->yarn : ($detail->item_type === 'FABRIC' ? $detail->fabric : $detail->auxiliaryMaterial);
-                if (!$item) continue;
-
-                $currentValue = (float) $item->stock_quantity * (float) $item->average_cost;
-                $newStock = (float) $item->stock_quantity - (float) $detail->qty;
-                $newValue = $currentValue - (float) $detail->amount;
-                $newMac = $newStock > 0 ? max(0, $newValue / $newStock) : 0;
-
-                $item->stock_quantity = $newStock;
-                $item->average_cost = $newMac;
-                $item->save();
-            }
-
-            MaterialLedger::where('evidence_number', $receipt->receipt_number)->delete();
-
-            if ($receipt->journal_id) {
-                JournalDetail::where('journal_id', $receipt->journal_id)->delete();
-                JournalHeader::where('journal_id', $receipt->journal_id)->delete();
-            }
-
-            $receipt->status = 'VOIDED';
-            $receipt->journal_id = null;
-            $receipt->save();
-
-            return true;
-        });
+        return app(MaterialReceiptVoidService::class)->void($receiptId, $reason);
     }
 }

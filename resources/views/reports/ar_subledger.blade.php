@@ -10,6 +10,9 @@
         <div>
             <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-hand-holding-dollar text-warning me-2"></i>{{ __('erp.ar_management_title') }}</h4>
             <p class="text-muted small mb-0">{{ __('erp.ar_management_desc') }}</p>
+            @if(auth()->user()?->role === 'FINANCE' && in_array((string) auth()->id(), array_map('strval', config('platform.payment_post_user_ids', [])), true))
+                <a class="btn btn-outline-primary mt-2" href="{{ route('invoice-payment-allocations.index') }}">{{ __('erp.audit_ar_allocation_title') }}</a>
+            @endif
         </div>
     </div>
 

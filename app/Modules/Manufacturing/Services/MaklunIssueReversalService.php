@@ -21,9 +21,11 @@ class MaklunIssueReversalService
         $reason = MaklunReversalAuthorization::validate($reason);
 
         return DB::transaction(function () use ($knitting, $id, $reason) {
+            if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
             $candidate = ($knitting ? YarnIssue::query() : FabricIssue::query())->findOrFail($id);
             $order = ($knitting ? KnitOrder::query() : ProcessingOrder::query())->lockForUpdate()->findOrFail($knitting ? $candidate->knit_order_id : $candidate->processing_order_id);
             $issue = ($knitting ? YarnIssue::query() : FabricIssue::query())->lockForUpdate()->findOrFail($id);
+            \App\Support\AccountingPeriodGuard::source([substr((string) $issue->issue_date, 0, 10), now()->toDateString()]);
             $receipts = $knitting ? $order->greyFabricReceipts() : $order->fabricReceipts();
             if (! $issue->source_account_code || $issue->reversed_at || (float) ($issue->returned_qty ?? 0) != 0
                 || ! in_array($order->status, ['ISSUED', 'CANCELED'], true)

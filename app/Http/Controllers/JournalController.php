@@ -174,6 +174,11 @@ class JournalController extends Controller
     public function edit($id)
     {
         $journal = JournalHeader::with('details')->findOrFail($id);
+        try {
+            \App\Support\SourceJournalProtection::check($journal);
+        } catch (\RuntimeException $e) {
+            return redirect()->route('jurnal.index')->with('error', $e->getMessage());
+        }
         $accounts = Account::orderBy('account_code', 'asc')->get();
         $helpers = HelperCode::orderBy('helper_code', 'asc')->get();
 
@@ -203,7 +208,8 @@ class JournalController extends Controller
 
         try {
             DB::beginTransaction();
-            $journal = JournalHeader::findOrFail($id);
+            $journal = JournalHeader::lockForUpdate()->findOrFail($id);
+            \App\Support\SourceJournalProtection::check($journal);
 
             $journal->update([
                 'transaction_date' => $request->transaction_date,
@@ -285,7 +291,8 @@ class JournalController extends Controller
     {
         try {
             DB::beginTransaction();
-            $journal = JournalHeader::findOrFail($id);
+            $journal = JournalHeader::lockForUpdate()->findOrFail($id);
+            \App\Support\SourceJournalProtection::check($journal);
 
             // Hapus aset tetap yang terhubung ke detail jurnal ini sebelum detail dihapus
             $detailIds = $journal->details()->pluck('id')->toArray();
@@ -317,9 +324,9 @@ class JournalController extends Controller
         try {
             DB::beginTransaction();
 
-            $journals = JournalHeader::whereIn('journal_id', $ids)->get();
-            if ($journals->isEmpty()) {
-                $journals = JournalHeader::whereIn('id', $ids)->get();
+            $journals = JournalHeader::whereIn('journal_id', $ids)->lockForUpdate()->get();
+            foreach ($journals as $journal) {
+                \App\Support\SourceJournalProtection::check($journal);
             }
 
             $journalIds = $journals->pluck('journal_id')->toArray();

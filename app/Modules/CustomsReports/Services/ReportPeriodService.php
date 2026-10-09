@@ -49,6 +49,7 @@ class ReportPeriodService
                 'periode_bulan'   => $bulan,
                 'periode_tahun'   => $tahun,
                 'status'          => ReportPeriod::STATUS_DRAFT,
+                'source_mode' => !config('customs.enabled') && app(CustomsSettingsService::class)->autoSyncInternal() ? 'INTERNAL' : 'MANUAL',
                 'catatan'         => $catatan,
                 'created_by'      => $createdBy ?? Auth::id(),
             ]);

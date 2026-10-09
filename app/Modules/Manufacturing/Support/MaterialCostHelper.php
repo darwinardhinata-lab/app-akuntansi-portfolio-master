@@ -36,6 +36,7 @@ class MaterialCostHelper
      */
     public static function receiveStock(Model $item, string $itemType, float $qty, float $unitCost, string $date, string $evidence, string $description): array
     {
+        \App\Support\AccountingPeriodGuard::source([$date]);
         $now = now();
         $oldStock = (float) $item->stock_quantity;
         $oldMac   = (float) $item->average_cost;
@@ -84,6 +85,7 @@ class MaterialCostHelper
      */
     public static function issueStock(Model $item, string $itemType, float $qty, string $date, string $evidence, string $description): array
     {
+        \App\Support\AccountingPeriodGuard::source([$date]);
         $oldStock = (float) $item->stock_quantity;
         $oldMac   = (float) $item->average_cost;
 

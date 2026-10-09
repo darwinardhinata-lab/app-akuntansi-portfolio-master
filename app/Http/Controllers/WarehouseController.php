@@ -116,6 +116,7 @@ class WarehouseController extends Controller
                 ->select('contact_name')->distinct()->pluck('contact_name');
         } elseif ($tab == 'retur_penjualan') {
             $invoices = \App\Models\SalesInvoice::with('salesOrder')
+                ->whereNull('cancelled_at')
                 ->orderBy('transaction_date', 'desc')->limit(300)->get();
                 
             $lastReturn = \App\Models\SalesReturn::orderBy('id', 'desc')->first();
@@ -141,9 +142,10 @@ class WarehouseController extends Controller
     }
 
     public function storeInbound(Request $request) {
-        $request->validate(['evidence_number' => 'required', 'transaction_date' => 'required|date', 'offset_account' => 'required', 'items' => 'required|array']);
+        $request->validate(['evidence_number' => 'required|string|max:100', 'transaction_date' => 'required|date', 'offset_account' => 'required', 'items' => 'required|array|min:1', 'items.*.product_id' => 'required|exists:products,id', 'items.*.qty' => 'required|integer|min:1', 'items.*.unit_cost' => 'required|numeric|min:0']);
         DB::beginTransaction();
         try {
+            \App\Support\AccountingPeriodGuard::source([$request->transaction_date]);
             $now = now();
             $totalValue = 0;
             $ledgers = [];
@@ -152,7 +154,7 @@ class WarehouseController extends Controller
                 if (isset($item['qty']) && $item['qty'] > 0) {
                     // FIX: Kunci baris produk dengan lockForUpdate
                     $product = Product::where('id', $item['product_id'])->lockForUpdate()->firstOrFail();
-                    $qty = (int) $item['qty'];
+                    $qty = (float) $item['qty'];
                     $cost = (float) $item['unit_cost'];
                     
                     $oldStock = $product->stock_quantity;
@@ -173,8 +175,10 @@ class WarehouseController extends Controller
                     ];
                 }
             }
-            if ($totalValue > 0) {
+            if ($ledgers) {
                 InventoryLedger::insert($ledgers);
+            }
+            if ($totalValue > 0) {
                 $jh = JournalHeader::create(['transaction_date' => $request->transaction_date, 'evidence_number' => $request->evidence_number, 'description' => $request->description ?? 'Barang Masuk Manual', 'source_doc_no' => $request->evidence_number, 'transaction_type' => 'Inbound']);
                 JournalDetail::insert([
                     ['journal_id' => $jh->getKey(), 'account_code' => config('coa.persediaan'), 'position' => 'DEBET', 'amount' => $totalValue, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null],
@@ -198,9 +202,10 @@ class WarehouseController extends Controller
     }
 
     public function storeOutbound(Request $request) {
-        $request->validate(['evidence_number' => 'required', 'transaction_date' => 'required|date', 'offset_account' => 'required', 'items' => 'required|array']);
+        $request->validate(['evidence_number' => 'required|string|max:100', 'transaction_date' => 'required|date', 'offset_account' => 'required', 'items' => 'required|array|min:1', 'items.*.product_id' => 'required|exists:products,id', 'items.*.qty' => 'required|integer|min:1']);
         DB::beginTransaction();
         try {
+            \App\Support\AccountingPeriodGuard::source([$request->transaction_date]);
             $now = now();
             $totalValue = 0;
             $ledgers = [];
@@ -209,7 +214,7 @@ class WarehouseController extends Controller
                 if (isset($item['qty']) && $item['qty'] > 0) {
                     // FIX: Kunci baris produk dengan lockForUpdate
                     $product = Product::where('id', $item['product_id'])->lockForUpdate()->firstOrFail();
-                    $qty = (int) $item['qty'];
+                    $qty = (float) $item['qty'];
                     if ($qty > $product->stock_quantity) throw new \Exception("Stok tidak cukup untuk " . $product->name);
                     
                     $cost = $product->average_cost;
@@ -226,8 +231,10 @@ class WarehouseController extends Controller
                     ];
                 }
             }
-            if ($totalValue > 0) {
+            if ($ledgers) {
                 InventoryLedger::insert($ledgers);
+            }
+            if ($totalValue > 0) {
                 $jh = JournalHeader::create(['transaction_date' => $request->transaction_date, 'evidence_number' => $request->evidence_number, 'description' => $request->description ?? 'Barang Keluar Manual', 'source_doc_no' => $request->evidence_number, 'transaction_type' => 'Outbound']);
                 JournalDetail::insert([
                     ['journal_id' => $jh->getKey(), 'account_code' => $request->offset_account, 'position' => 'DEBET', 'amount' => $totalValue, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null],

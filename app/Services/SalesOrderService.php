@@ -19,6 +19,7 @@ class SalesOrderService
     {
         DB::beginTransaction();
         try {
+            if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
             // FIX #1: tangkap komponen yang sebelumnya hilang agar jurnal tetap balance
             $shippingDiscount = (float) ($financials['shipping_discount'] ?? 0);
             $otherCost        = (float) ($financials['other_cost'] ?? 0);
@@ -49,12 +50,7 @@ class SalesOrderService
             } else {
                 // FIX: Gunakan sequence dari DB — rand() berisiko duplikat saat concurrent request
                 $invoicePrefix = 'INV-' . date('ymd') . '-';
-                $lastInv = DB::table('sales_invoices')
-                    ->where('invoice_number', 'like', $invoicePrefix . '%')
-                    ->orderByDesc('invoice_number')
-                    ->value('invoice_number');
-                $seq = $lastInv ? ((int) substr($lastInv, strlen($invoicePrefix)) + 1) : 1;
-                $invoiceNumber = $invoicePrefix . str_pad($seq, 4, '0', STR_PAD_LEFT);
+                $invoiceNumber = \App\Support\DocumentSequence::reserve('sales_invoices', 'invoice_number', $invoicePrefix);
             }
 
             // C5 FIX: Hitung ulang nilai dari actualItems untuk validasi server-side
@@ -256,6 +252,7 @@ class SalesOrderService
     {
         DB::beginTransaction();
         try {
+            if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
             // B13 FIX: Lock baris SO agar void tidak bentrok dengan ship paralel
             $so = SalesOrder::lockForUpdate()->findOrFail($soId);
 

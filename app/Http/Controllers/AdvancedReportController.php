@@ -160,7 +160,7 @@ class AdvancedReportController extends Controller
             // 1. Tagihan Belum Lunas (Subquery Optimization)
             $subquery = \App\Support\ProtectedJournalQuery::table('journal_details')
                 ->select('journal_id',
-                    DB::raw('SUM(CASE WHEN position = "DEBET" THEN amount ELSE -amount END) as remaining_balance'),
+                    DB::raw('SUM(CASE WHEN position = "DEBET" THEN amount ELSE -amount END) - COALESCE((SELECT SUM(a.amount) FROM invoice_payment_allocations a JOIN sales_invoices i ON i.id = a.sales_invoice_id WHERE i.journal_id = journal_details.journal_id AND a.reversed_at IS NULL), 0) - COALESCE((SELECT SUM(r.total_refund_amount) FROM sales_returns r JOIN sales_invoices i ON i.id = r.sales_invoice_id WHERE i.journal_id = journal_details.journal_id AND r.status NOT IN (\'PENDING_INSPECTION\', \'REJECT\')), 0) as remaining_balance'),
                     DB::raw('SUM(CASE WHEN position = "DEBET" THEN amount ELSE 0 END) as total_invoice')
                 )
                 ->whereIn('account_code', $kodeAkunPiutang)
@@ -169,6 +169,7 @@ class AdvancedReportController extends Controller
 
             $unpaidInvoices = \App\Support\ProtectedJournalQuery::table('journal_headers')
                 ->joinSub($subquery, 'details', 'journal_headers.journal_id', '=', 'details.journal_id')
+                ->whereNotIn('journal_headers.journal_id', DB::table('invoice_payment_allocations')->whereNotNull('reversal_journal_id')->select('reversal_journal_id'))
                 ->select('journal_headers.evidence_number', 'journal_headers.transaction_date', 'journal_headers.notes', 'details.remaining_balance', 'details.total_invoice')
                 ->orderBy('journal_headers.transaction_date', 'asc')
                 ->simplePaginate(50);
@@ -222,7 +223,12 @@ class AdvancedReportController extends Controller
 
             $unpaidBills = \App\Support\ProtectedJournalQuery::table('journal_headers')
                 ->joinSub($subquery, 'details', 'journal_headers.journal_id', '=', 'details.journal_id')
-                ->select('journal_headers.evidence_number', 'journal_headers.transaction_date', 'journal_headers.notes', 'details.remaining_balance', 'details.total_invoice')
+                ->leftJoin('purchase_bills as bill', 'bill.journal_id', '=', 'journal_headers.journal_id')
+                ->leftJoinSub(DB::table('bill_payment_allocations')->select('purchase_bill_id', DB::raw('SUM(amount) as allocated_amount'))->groupBy('purchase_bill_id'),
+                    'allocations', 'allocations.purchase_bill_id', '=', 'bill.id')
+                ->whereRaw('details.remaining_balance - COALESCE(allocations.allocated_amount, 0) > 0')
+                ->select('journal_headers.evidence_number', 'journal_headers.transaction_date', 'journal_headers.notes', 'details.total_invoice',
+                    DB::raw('details.remaining_balance - COALESCE(allocations.allocated_amount, 0) as remaining_balance'))
                 ->orderBy('journal_headers.transaction_date', 'asc')
                 ->simplePaginate(50);
         } elseif ($tab === 'pembayaran') {

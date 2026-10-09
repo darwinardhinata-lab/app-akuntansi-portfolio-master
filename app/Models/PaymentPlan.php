@@ -9,6 +9,18 @@ class PaymentPlan extends Model
     protected $table = 'transaksi_payment_plan';
     protected $primaryKey = 'id_payment';
 
+    protected static function booted(): void
+    {
+        static::creating(function (PaymentPlan $payment) {
+            // Actor provenance is server-owned; anonymous/imported rows remain unverified.
+            $payment->maker_user_id = auth()->id();
+            $payment->last_editor_user_id = auth()->id();
+            $payment->approver_user_id = null;
+            $payment->approved_at = null;
+            $payment->approval_fingerprint = null;
+        });
+    }
+
     protected $fillable = [
         'no_transaksi',
         'id_divisi',

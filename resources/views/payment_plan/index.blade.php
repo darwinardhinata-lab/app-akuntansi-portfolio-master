@@ -402,6 +402,12 @@
 
                     <label class="fw-bold text-dark">{{ __('erp.choose_csv_payment_plan') }}</label>
                     <input type="file" name="file_csv" accept=".csv" class="form-control mt-2" required>
+                    <label for="paymentNumberFormat" class="fw-bold mt-3">{{ __('erp.audit_payment_import_format') }}</label>
+                    <select id="paymentNumberFormat" name="number_format" class="form-select">
+                        <option value="id">{{ __('erp.audit_payment_import_id') }}</option>
+                        <option value="en">{{ __('erp.audit_payment_import_en') }}</option>
+                    </select>
+                    <p class="small text-muted mt-2 mb-0">{{ __('erp.audit_payment_import_amount') }}</p>
                 </div>
                 <div class="modal-footer bg-white">
                     <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">{{ __('erp.cancel') }}</button>
