@@ -13,6 +13,7 @@ Acceptance: no writes, no automatic historical matching, bounded processing (cur
 - [x] Run regression tests and document exclusions (AP return credits, historical matching and global GL).
 
 ## Final closure work (requested; not yet implemented)
+Deployment review increment: [x] repeat-safe cutting-check supporting index and forward repair, verified fresh MySQL fixture and SQLite; production migration not run. Other deployment prerequisites remain open.
 - [x] Approve maker/checker matrix: maker differs from approver; payer/poster may equal approver under their own allowlists. Legacy unknown provenance remains blocked.
 - [ ] Implement trusted actor provenance, stale-approval invalidation and self-approval tests.
 - [x] Approve global database calendar-month policy: each journal balanced; separate FINANCE close/reopen allowlists, reason and audit events, no ADMIN bypass.
