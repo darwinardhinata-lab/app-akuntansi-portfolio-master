@@ -118,4 +118,22 @@ class AccountingPeriodLifecycleTest extends TestCase
         $this->assertDatabaseCount('inventory_ledgers', 0);
         $this->assertDatabaseCount('journal_headers', 0);
     }
+
+    public function test_invalid_calendar_date_and_missing_detail_parent_fail_closed(): void
+    {
+        foreach ([
+            fn () => JournalHeader::create(['transaction_date' => '2026-02-30']),
+            fn () => \App\Models\JournalDetail::create(['journal_id' => 'MISSING-PARENT', 'account_code' => '111101', 'position' => 'DEBET', 'amount' => 10]),
+            fn () => \App\Support\ProtectedJournalQuery::table('journal_details')->insert(['journal_id' => '', 'account_code' => '111101', 'position' => 'DEBET', 'amount' => 10]),
+        ] as $operation) {
+            try {
+                $operation();
+                $this->fail('Invalid protected write accepted.');
+            } catch (\RuntimeException $e) {
+                $this->assertNotEmpty($e->getMessage());
+            }
+        }
+        $this->assertDatabaseCount('journal_headers', 0);
+        $this->assertDatabaseCount('journal_details', 0);
+    }
 }

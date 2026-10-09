@@ -37,13 +37,16 @@ class ProtectedJournalQuery extends Builder
         if (!AccountingPeriodGuard::enabled()) return $operation();
         return $this->connection->transaction(function () use ($operation, $values, $insert) {
             AccountingPeriodGuard::lock();
-            if (!$insert) AccountingPeriodGuard::journals((clone $this)->pluck('journal_id')->all());
+            if (!$insert) AccountingPeriodGuard::journals((clone $this)->lockForUpdate()->pluck('journal_id')->all());
             $rows = $insert && isset($values[0]) && is_array($values[0]) ? $values : ($values ? [$values] : []);
             foreach ($rows as $row) {
                 if ($this->from === 'journal_headers' && ($insert || array_key_exists('transaction_date', $row))) {
                     AccountingPeriodGuard::dates([$row['transaction_date'] ?? null]);
                 }
-                if ($this->from === 'journal_details' && isset($row['journal_id'])) {
+                if ($this->from === 'journal_details' && ($insert || array_key_exists('journal_id', $row))) {
+                    if (!isset($row['journal_id']) || !is_string($row['journal_id']) || trim($row['journal_id']) === '') {
+                        throw new RuntimeException('Explicit journal parent is required for period protection.');
+                    }
                     AccountingPeriodGuard::journals([$row['journal_id']]);
                 }
             }

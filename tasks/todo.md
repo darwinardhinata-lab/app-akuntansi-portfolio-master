@@ -26,6 +26,9 @@ Deployment review increment: [x] repeat-safe cutting-check supporting index and 
   - [ ] Actual MySQL close/post concurrency tests before operational enablement.
     - [x] Close-first/header-post actual local MySQL test on random isolated fixture; stale snapshot bug reproduced and corrected with locking read.
     - [ ] Post-first, source/detail/import races and complete coverage before enablement.
+      - [x] Balanced/unbalanced header-detail post-first close race with old snapshot on real MySQL; current locking close scan.
+      - [x] Calendar date and missing/empty detail-parent fail-closed guard; current-read target IDs.
+      - [ ] Source/import races and remaining production/command/connection coverage.
 - [ ] Inventory historical ambiguity; implement explicit AP credit allocation and GL tie-out.
 - [ ] Approve refund VAT/discount/rounding and paid-invoice cash versus credit policy.
 - [ ] Implement cumulative refund quotas and audited idempotent disbursement.

@@ -29,8 +29,8 @@ class AccountingPeriodService
             if ($close) {
                 $start = \Illuminate\Support\Carbon::createFromFormat('!Y-m', $month);
                 foreach (ProtectedJournalQuery::table('journal_headers')->where('transaction_date', '>=', $start->toDateString())
-                    ->where('transaction_date', '<', $start->copy()->addMonth()->toDateString())->cursor() as $header) {
-                    $lines = ProtectedJournalQuery::table('journal_details')->where('journal_id', $header->journal_id)->get();
+                    ->where('transaction_date', '<', $start->copy()->addMonth()->toDateString())->lockForUpdate()->cursor() as $header) {
+                    $lines = ProtectedJournalQuery::table('journal_details')->where('journal_id', $header->journal_id)->lockForUpdate()->get();
                     if ($lines->isEmpty() || !$lines->every(fn ($line) => in_array($line->position, ['DEBET', 'KREDIT'], true) && (float) $line->amount >= 0)
                         || !JournalBalanceValidator::isBalanced($lines->map(fn ($line) => (array) $line)->all())) {
                         throw ValidationException::withMessages(['period' => 'Unbalanced/invalid journal: '.$header->journal_id]);

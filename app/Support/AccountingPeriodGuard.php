@@ -21,7 +21,8 @@ class AccountingPeriodGuard
     public static function dates(array $dates): void
     {
         foreach ($dates as $date) {
-            if (!is_string($date) || !preg_match('/\A\d{4}-(0[1-9]|1[0-2])-\d{2}(?:[ T].*)?\z/', $date)) {
+            if (!is_string($date) || !preg_match('/\A(\d{4})-(0[1-9]|1[0-2])-(\d{2})(?:[ T].*)?\z/', $date, $parts)
+                || !checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1])) {
                 throw new \RuntimeException('Explicit valid transaction date is required for period protection.');
             }
             $month = substr($date, 0, 7);
@@ -35,7 +36,9 @@ class AccountingPeriodGuard
 
     public static function journals(array $ids): void
     {
-        $dates = ProtectedJournalQuery::table('journal_headers')->whereIn('journal_id', array_unique($ids))->pluck('transaction_date')->all();
+        $ids = array_unique($ids);
+        $dates = ProtectedJournalQuery::table('journal_headers')->whereIn('journal_id', $ids)->lockForUpdate()->pluck('transaction_date')->all();
+        if (count($dates) !== count($ids)) throw new \RuntimeException('Period protection requires every journal parent to exist.');
         self::dates($dates);
     }
 
