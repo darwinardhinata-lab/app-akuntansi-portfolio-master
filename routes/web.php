@@ -304,6 +304,7 @@ Route::middleware(['auth'])->group(function () {
 // --- MODUL KEPABEANAN (CEISA H2H Integration) ---
 // ==========================================
 require base_path('routes/customs.php');
+require base_path('routes/currency.php'); // FIX: multicurrency — pendaftaran modul berflag default off.
 require base_path('routes/kepabean.php');
 require base_path('routes/customs_reports.php');
 

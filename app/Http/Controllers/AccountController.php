@@ -246,7 +246,7 @@ class AccountController extends Controller
         $defaultDate  = date('Y-m-d', strtotime('last day of previous month'));
         $existingDate = $header ? $header->transaction_date : $defaultDate;
 
-        return view('account.opening_balance', compact('accounts', 'existingDetails', 'existingDate'));
+        return view('account.opening_balance', compact('accounts', 'header', 'existingDetails', 'existingDate'));
     }
 
     public function openingBalanceStore(Request $request)
@@ -256,10 +256,82 @@ class AccountController extends Controller
             'balances'         => 'required|array',
         ]);
 
+        // FIX: multicurrency — isolate the new path from legacy float parsing.
+        $hasCurrencyAccount = Account::query()->whereIn('account_code', array_keys($request->balances))
+            ->whereNotNull('currency_code')->exists();
+        if ($hasCurrencyAccount) {
+            try {
+                if (! config('platform.multicurrency_enabled')) {
+                    throw new \RuntimeException('Multicurrency belum diaktifkan; saldo awal akun valas ditolak.');
+                }
+                DB::transaction(function () use ($request) {
+                    $date = \Carbon\Carbon::parse($request->transaction_date);
+                    \App\Support\AccountingPeriodGuard::source([$date->toDateString()]);
+                    $service = app(\App\Modules\Currency\Services\FxPostingService::class);
+                    $base = $service::baseCurrency();
+                    $accounts = Account::query()->whereIn('account_code', array_keys($request->balances))
+                        ->sharedLock()->get()->keyBy('account_code');
+                    $lines = [];
+                    $rates = [];
+                    foreach ($request->balances as $code => $rawAmount) {
+                        $account = $accounts->get($code);
+                        if (! $account) {
+                            throw new \RuntimeException('Akun saldo awal tidak ditemukan: '.$code);
+                        }
+                        $currency = $account->currency_code ?? $base;
+                        $foreign = $currency !== $base;
+                        $raw = $foreign ? $request->input('amount_txn.'.$code, $rawAmount) : $rawAmount;
+                        // FIX: multicurrency — string-only normalization; legacy IDR parsing stays below.
+                        $amount = \App\Support\JournalAmount::normalize($raw);
+                        if (\App\Modules\Currency\Support\Money::compare($amount, '0') === 0) {
+                            continue;
+                        }
+                        if (\App\Modules\Currency\Support\Money::compare($amount, '0') < 0) {
+                            throw new \RuntimeException('Nominal saldo awal harus positif.');
+                        }
+                        $line = ['account_code' => (string) $code, 'helper_code' => null,
+                            'position' => strtoupper($account->normal_balance), 'currency_code' => $currency];
+                        if ($foreign) {
+                            if (! isset($rates[$currency])) {
+                                $rates[$currency] = $service->resolvePostingRate($currency, $date,
+                                    $request->input('exchange_rates.'.$currency), $request->input('rate_reasons.'.$currency));
+                            }
+                            $line['amount_txn'] = $amount;
+                            $line['exchange_rate'] = $rates[$currency]['rate'];
+                        } else {
+                            $line['amount'] = $amount;
+                        }
+                        $lines[] = $line;
+                    }
+                    $header = app(\App\Services\OpeningBalanceService::class)->headerForDate($date->toDateString());
+                    $lines = $service::prepareOpeningLines($lines, $header->journal_type);
+                    $header->forceFill(['currency_code' => $base, 'exchange_rate' => '1.00000000'])->save();
+                    JournalDetail::query()->where('journal_id', $header->getKey())->delete();
+                    foreach ($lines as $line) {
+                        JournalDetail::query()->create(array_merge($line, ['journal_id' => $header->getKey()]));
+                    }
+                    foreach ($rates as $currency => $metadata) {
+                        $service->markRateUsed($metadata);
+                        if ($metadata['override']) {
+                            SystemLog::record('UPDATE', 'Saldo Awal', 'Override kurs '.$currency.': master '.($metadata['master_rate'] ?? '-').' → '.$metadata['rate'].'; alasan: '.$metadata['reason']);
+                        }
+                    }
+                });
+                return redirect()->route('account.index')->with('success', 'Setup Saldo Awal COA berhasil disimpan dan seimbang (Balance)!');
+            } catch (\Exception $e) {
+                return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat menyimpan: '.$e->getMessage());
+            }
+        }
+
         try {
             DB::beginTransaction();
 
             $header = app(\App\Services\OpeningBalanceService::class)->headerForDate($request->transaction_date);
+
+            if (! config('platform.multicurrency_enabled')
+                && JournalDetail::query()->where('journal_id', $header->getKey())->whereNotNull('amount_txn')->exists()) {
+                throw new \RuntimeException('Multicurrency belum diaktifkan; saldo awal valas yang sudah ada tidak dapat diganti.');
+            }
 
             $primaryKeyId = $header->journal_id ?? $header->id;
 
@@ -346,6 +418,11 @@ class AccountController extends Controller
         DB::beginTransaction();
         try {
             $header = app(\App\Services\OpeningBalanceService::class)->headerForDate($tanggal);
+            if (! config('platform.multicurrency_enabled')
+                && JournalDetail::query()->where('journal_id', $header->getKey())->whereNotNull('amount_txn')->exists()) {
+                fclose($handle);
+                throw new \RuntimeException('Multicurrency belum diaktifkan; saldo awal valas yang sudah ada tidak dapat diganti.');
+            }
             $primaryKeyId = $header->getKey();
             JournalDetail::where('journal_id', $primaryKeyId)->delete();
 
@@ -361,6 +438,12 @@ class AccountController extends Controller
                 $kodeAkun = trim($r[0]);
                 if (array_key_exists($kodeAkun, $accountMapping)) {
                     $kodeAkun = $accountMapping[$kodeAkun];
+                }
+
+                // FIX: multicurrency — reject the entire import before committing any replacement.
+                if (Account::query()->where('account_code', $kodeAkun)->whereNotNull('currency_code')->exists()) {
+                    fclose($handle);
+                    throw new \RuntimeException('Akun valas: gunakan form saldo awal.');
                 }
 
                                 // FIX: DRY — gunakan NumberParser helper

@@ -38,6 +38,8 @@ class JournalDetail extends Model
     protected $keyType = 'int'; 
 
     protected $fillable = [
+        // FIX: multicurrency — nilai transaksi terpisah dari amount mata uang dasar.
+        'currency_code', 'amount_txn', 'exchange_rate',
         'journal_id',
         'account_code',
         'helper_code',

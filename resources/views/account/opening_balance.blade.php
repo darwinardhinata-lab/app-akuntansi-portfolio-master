@@ -98,7 +98,14 @@
         </div>
     @endif
 
-    <form action="#" method="POST" class="card border-0 shadow-sm p-4" style="border-radius: 12px;">
+    {{-- FIX: multicurrency — snapshot valas ditampilkan sebagai nominal transaksi, bukan nominal dasar. --}}
+    @php
+        $fxEnabled = (bool) config('platform.multicurrency_enabled');
+        $fxBase = $fxEnabled ? \App\Modules\Currency\Services\FxPostingService::baseCurrency() : 'IDR';
+        $fxCodes = $fxEnabled ? $accounts->pluck('currency_code')->filter(fn ($code) => $code && $code !== $fxBase)->unique() : collect();
+        $fxSnapshots = $fxEnabled && $header ? $header->details()->get()->keyBy('account_code') : collect();
+    @endphp
+    <form action="{{ route('account.store_opening_balance') }}" method="POST" class="card border-0 shadow-sm p-4" style="border-radius: 12px;">
         @csrf
 
         <div class="row mb-4 bg-light p-3 rounded border g-3 align-items-center">
@@ -110,6 +117,13 @@
                 <span class="text-muted small">{{ __('erp.hint_opening_balance_must_balance') }} <b>{{ __('erp.total_debit_equals_credit') }}</b>.</span>
             </div>
         </div>
+
+        @foreach($fxCodes as $fxCode)
+        <div class="row g-2 mb-3 fx-opening-rate" data-currency="{{ $fxCode }}">
+            <div class="col-md-4"><label class="form-label">{{ $fxCode }} — {{ __('currency.rate') }}<input type="text" inputmode="decimal" name="exchange_rates[{{ $fxCode }}]" class="form-control fx-rate" value="{{ old('exchange_rates.'.$fxCode) }}"></label></div>
+            <div class="col-md-6"><label class="form-label">{{ __('currency.override_reason') }}<input type="text" name="rate_reasons[{{ $fxCode }}]" class="form-control" value="{{ old('rate_reasons.'.$fxCode) }}"></label><small class="fx-rate-status text-muted"></small></div>
+        </div>
+        @endforeach
 
         <div class="table-responsive mb-4 border rounded overflow-hidden">
             <table class="table table-coa mb-0">
@@ -146,7 +160,13 @@
                                 <span class="badge-normal {{ $badgeCls }}">{{ $posName }}</span>
                             </td>
                             <td class="pe-3">
+                                @if($fxEnabled && $acc->currency_code && $acc->currency_code !== $fxBase)
+                                <input type="hidden" name="balances[{{ $acc->account_code }}]" value="0">
+                                <label>{{ $acc->currency_code }}<input type="text" inputmode="decimal" name="amount_txn[{{ $acc->account_code }}]" class="input-balance amount-input" value="{{ old('amount_txn.'.$acc->account_code, $fxSnapshots->get($acc->account_code)?->amount_txn ?? '') }}" placeholder="0" data-pos="{{ $posName }}" data-currency="{{ $acc->currency_code }}"></label>
+                                <small class="fx-equivalent text-muted"></small>
+                                @else
                                 <input type="text" name="balances[{{ $acc->account_code }}]" class="input-balance amount-input" value="{{ $currVal != 0 ? number_format($currVal, 2, ',', '.') : '' }}" placeholder="0" data-pos="{{ $posName }}">
+                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -180,8 +200,15 @@
                 let rawValue = $(this).val();
                 if (rawValue) {
                     // Bersihkan titik ribuan dan ubah koma menjadi titik standar desimal matematika
-                    let cleaned = rawValue.replace(/\./g, '').replace(',', '.');
+                    let cleaned = $(this).data('currency') && !rawValue.includes(',') ? rawValue : rawValue.replace(/\./g, '').replace(',', '.');
                     let val = parseFloat(cleaned) || 0;
+                    // FIX: multicurrency — preview saja; validasi dan pembulatan final selalu di server.
+                    if ($(this).data('currency')) {
+                        const currency = $(this).data('currency');
+                        const rate = $('.fx-opening-rate').filter(function () { return $(this).data('currency') === currency; }).find('.fx-rate').val();
+                        val *= Number(rate) || 0;
+                        $(this).closest('td').find('.fx-equivalent').text(@json($fxBase) + ' ' + val.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                    }
                     let pos = $(this).data('pos');
 
                     if (pos === 'DEBET')  totDeb += val;
@@ -206,6 +233,30 @@
         }
 
         $('.amount-input').on('input', calculateTotals);
+        @if($fxEnabled && $fxCodes->isNotEmpty())
+        // FIX: multicurrency — lookup tidak mengubah alasan override atau data master.
+        async function lookupOpeningRates() {
+            for (const row of document.querySelectorAll('.fx-opening-rate')) {
+                const input = row.querySelector('.fx-rate');
+                const status = row.querySelector('.fx-rate-status');
+                try {
+                    const query = new URLSearchParams({currency: row.dataset.currency, date: document.querySelector('input[name="transaction_date"]').value, type: 'SPOT'});
+                    const response = await fetch(@json(route('currency.rates.lookup')) + '?' + query, {headers: {'Accept': 'application/json'}});
+                    if (!response.ok) throw new Error('lookup');
+                    const result = await response.json();
+                    input.value = result.found ? result.rate : '';
+                    status.textContent = result.found ? result.source : @json(__('currency.missing'));
+                } catch (error) {
+                    input.value = '';
+                    status.textContent = @json(__('currency.missing'));
+                }
+            }
+            calculateTotals();
+        }
+        $('.fx-rate').on('input', calculateTotals);
+        $('input[name="transaction_date"]').on('change', lookupOpeningRates);
+        lookupOpeningRates();
+        @endif
         calculateTotals();
     });
 </script>

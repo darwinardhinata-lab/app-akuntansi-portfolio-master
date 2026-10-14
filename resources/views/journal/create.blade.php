@@ -38,7 +38,7 @@
         <p class="text-muted small">{{ __('erp.record_manual_accounting_tx') }}</p>
     </div>
 
-    @if ($errors->any())
+    @if (isset($errors) && $errors->any())
         <div class="alert alert-danger shadow-sm border-0 rounded-3">
             <ul class="mb-0">
                 @foreach ($errors->all() as $error)
@@ -50,6 +50,21 @@
 
     <form action="{{ route('jurnal.store') }}" method="POST" id="formJurnal">
         @csrf
+        {{-- FIX: multicurrency — pilihan valas hanya tersedia di balik flag; default tetap basis. --}}
+        @if(config('platform.multicurrency_enabled'))
+        @php($fxBase = \App\Modules\Currency\Services\FxPostingService::baseCurrency())
+        <div class="card-modern mb-4 row g-3">
+            <div class="col-md-3"><label class="form-label">{{ __('currency.title') }}<select name="currency_code" id="fxCurrency" class="form-control">
+                <option value="{{ $fxBase }}">{{ $fxBase }}</option>
+                @foreach(\App\Modules\Currency\Models\Currency::query()->where('active', true)->where('code', '<>', $fxBase)->orderBy('code')->get() as $currency)
+                <option value="{{ $currency->code }}">{{ $currency->code }} — {{ $currency->name }}</option>
+                @endforeach
+            </select></label></div>
+            <div class="col-md-3"><label class="form-label">{{ __('currency.rate') }}<input name="exchange_rate" id="fxRate" type="text" inputmode="decimal" class="form-control" disabled></label><small id="fxRateStatus"></small></div>
+            <div class="col-md-6"><label class="form-label">{{ __('currency.override_reason') }}<input name="rate_reason" id="fxReason" type="text" class="form-control" disabled></label></div>
+            <div class="col-12"><small>{{ __('currency.equivalent') }}: <span id="fxEquivalent">—</span></small></div>
+        </div>
+        @endif
         
         <div class="card-modern mb-4">
             <div class="row g-4">
@@ -287,6 +302,43 @@
         // Jalankan saat pertama kali halaman dimuat
         initSelect2();
         hitungTotal();
+        @if(config('platform.multicurrency_enabled'))
+        // FIX: multicurrency — nominal form dipetakan ke amount_txn; konversi final hanya di server.
+        function syncForeignInputs() {
+            const foreign = $('#fxCurrency').val() !== @json($fxBase);
+            $('.amount-input').each(function () {
+                $(this).attr('name', $(this).attr('name').replace(/\[(amount|amount_txn)\]$/, foreign ? '[amount_txn]' : '[amount]'));
+            });
+            $('#fxRate, #fxReason').prop('disabled', !foreign);
+            let total = 0;
+            $('#baris-jurnal tr').each(function () {
+                if ($(this).find('.position-select').val() === 'DEBET') total += amountToCents($(this).find('.amount-input').val());
+            });
+            $('#fxEquivalent').text(@json($fxBase) + ' ' + (total / 100 * (foreign ? Number($('#fxRate').val()) || 0 : 1)).toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+        }
+        async function lookupManualRate() {
+            syncForeignInputs();
+            if ($('#fxCurrency').val() === @json($fxBase)) return;
+            const currency = $('#fxCurrency').val();
+            const date = $('input[name="transaction_date"]').val();
+            try {
+                const response = await fetch(@json(route('currency.rates.lookup')) + '?' + new URLSearchParams({currency, date, type: 'SPOT'}), {headers: {'Accept': 'application/json'}});
+                if (!response.ok) throw new Error('lookup');
+                const result = await response.json();
+                if (currency !== $('#fxCurrency').val() || date !== $('input[name="transaction_date"]').val()) return;
+                $('#fxRate').val(result.found ? result.rate : '');
+                $('#fxRateStatus').text(result.found ? result.source : @json(__('currency.missing')));
+            } catch (error) {
+                $('#fxRate').val('');
+                $('#fxRateStatus').text(@json(__('currency.missing')));
+            }
+            syncForeignInputs();
+        }
+        $('#fxCurrency, input[name="transaction_date"]').on('change', lookupManualRate);
+        $(document).on('input change', '.amount-input, .position-select, #fxRate', syncForeignInputs);
+        $('#btn-tambah').on('click', syncForeignInputs);
+        syncForeignInputs();
+        @endif
     });
 </script>
 @endsection

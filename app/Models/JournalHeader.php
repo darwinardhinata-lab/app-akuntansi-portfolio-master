@@ -25,6 +25,8 @@ class JournalHeader extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
+        // FIX: multicurrency — snapshot aditif, tanpa mengubah hook jurnal.
+        'currency_code', 'exchange_rate',
         // --- Kolom Bawaan Sistem Anda ---
         'journal_id',
         'transaction_date',

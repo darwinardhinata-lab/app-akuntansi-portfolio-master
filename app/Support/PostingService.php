@@ -21,8 +21,26 @@ class PostingService
      * @param  string|Closure(float): string|null  $unbalancedMessage
      * @throws Exception
      */
-    public static function post(array $headerAttributes, array $lines, string|Closure|null $unbalancedMessage = null): JournalHeader
+    // FIX: multicurrency — argumen FX opsional; jalur null tetap identik dengan sebelumnya.
+    public static function post(array $headerAttributes, array $lines, string|Closure|null $unbalancedMessage = null, ?array $fx = null): JournalHeader
     {
+        // FIX: multicurrency — validasi sebelum write; transaksi atomik hanya untuk jalur FX baru.
+        if ($fx !== null) {
+            if (! config('platform.multicurrency_enabled')) {
+                throw new \RuntimeException('Multicurrency belum diaktifkan; posting valas dibatalkan.');
+            }
+            return \Illuminate\Support\Facades\DB::transaction(function () use ($headerAttributes, $lines, $unbalancedMessage, $fx) {
+                // FIX: multicurrency — status master tidak boleh berubah di antara validasi dan insert.
+                if (is_string($fx['currency'] ?? null)) {
+                    \App\Modules\Currency\Services\FxPostingService::requireForeignCurrency($fx['currency'], $fx['company_id'] ?? null);
+                }
+                $lines = \App\Modules\Currency\Services\FxPostingService::validateLines($lines, $fx);
+                $headerAttributes['currency_code'] = $fx['currency'];
+                $headerAttributes['exchange_rate'] = \App\Modules\Currency\Support\Money::round($fx['rate'], 8);
+
+                return self::post($headerAttributes, $lines, $unbalancedMessage);
+            });
+        }
         if (! JournalBalanceValidator::isBalanced($lines)) {
             $difference = JournalBalanceValidator::getDifference($lines);
             $message = $unbalancedMessage instanceof Closure

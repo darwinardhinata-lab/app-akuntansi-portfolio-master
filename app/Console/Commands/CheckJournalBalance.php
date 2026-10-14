@@ -8,13 +8,19 @@ use Illuminate\Support\Str;
 
 class CheckJournalBalance extends Command
 {
-    protected $signature = 'jurnal:check-balance {start_date} {end_date}';
+    // FIX: multicurrency — audit FX opsional; jalur default tetap tanpa perubahan.
+    protected $signature = 'jurnal:check-balance {start_date} {end_date} {--fx : Audit snapshot dan keseimbangan valas}';
     protected $description = 'Audit jurnal yang Debet != Kredit pada rentang tanggal tertentu';
 
     public function handle()
     {
         $start = $this->argument('start_date');
         $end   = $this->argument('end_date');
+
+        // FIX: multicurrency — jalur FX portable SQLite/MySQL, tanpa query LEFT legacy.
+        if ($this->option('fx')) {
+            return $this->checkFx((string) $start, (string) $end);
+        }
 
         // 1. CEK JURNAL YANG DEBET != KREDIT PER EVIDENCE NUMBER
         $unbalanced = \App\Support\ProtectedJournalQuery::table('journal_details')
@@ -79,5 +85,46 @@ class CheckJournalBalance extends Command
                 $ghost->map(fn($r) => [$r->evidence_number, $r->transaction_date, $r->account_code ?: '(KOSONG)', $r->position, number_format($r->amount, 2, ',', '.')])
             );
         }
+    }
+
+    // FIX: multicurrency — audit hanya membaca, termasuk snapshot yang diubah lewat insert langsung.
+    private function checkFx(string $start, string $end): int
+    {
+        $failed = false;
+        foreach (\App\Support\ProtectedJournalQuery::table('journal_headers')
+            ->whereDate('transaction_date', '>=', $start)->whereDate('transaction_date', '<=', $end)
+            ->orderBy('journal_id')->cursor() as $header) {
+            $rows = \App\Support\ProtectedJournalQuery::table('journal_details')->where('journal_id', $header->journal_id)->get();
+            try {
+                $lines = $rows->map(fn ($row) => (array) $row)->all();
+                if (! \App\Support\JournalBalanceValidator::isBalanced($lines)) {
+                    throw new \RuntimeException('Jurnal tidak balance dalam IDR.');
+                }
+                $isFx = $header->currency_code !== 'IDR' || $rows->contains(fn ($row) => $row->amount_txn !== null);
+                if ($isFx) {
+                    foreach ($lines as &$line) {
+                        $line['amount'] = (string) $line['amount'];
+                        if ($line['amount_txn'] === null) {
+                            if ($line['currency_code'] !== 'IDR' || \App\Modules\Currency\Support\Money::compare((string) $line['exchange_rate'], '1') !== 0) {
+                                throw new \RuntimeException('Snapshot penyesuaian FX bukan IDR.');
+                            }
+                            $line['fx_adjustment'] = true;
+                        } else {
+                            $line['amount_txn'] = (string) $line['amount_txn'];
+                        }
+                    }
+                    unset($line);
+                    \App\Modules\Currency\Services\FxPostingService::validateLines($lines, ['currency' => $header->currency_code, 'rate' => (string) $header->exchange_rate]);
+                }
+            } catch (\Throwable $exception) {
+                $failed = true;
+                $this->error('FX GAGAL '.$header->journal_id.': '.$exception->getMessage());
+            }
+        }
+        if (! $failed) {
+            $this->info('FX LULUS: snapshot dan keseimbangan jurnal valid. Audit read-only.');
+        }
+
+        return $failed ? self::FAILURE : self::SUCCESS;
     }
 }

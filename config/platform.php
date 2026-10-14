@@ -1,6 +1,8 @@
 <?php
 
 return [
+    // FIX: multicurrency — modul baru tetap nonaktif sampai review staging selesai.
+    'multicurrency_enabled' => env('PLATFORM_MULTICURRENCY_ENABLED', false),
     'period_close_user_ids' => array_filter(array_map('trim', explode(',', (string) env('PERIOD_CLOSE_USER_IDS', '')))),
     'period_reopen_user_ids' => array_filter(array_map('trim', explode(',', (string) env('PERIOD_REOPEN_USER_IDS', '')))),
     'mrn_void_user_ids' => array_filter(array_map('trim', explode(',', (string) env('MRN_VOID_USER_IDS', '')))),

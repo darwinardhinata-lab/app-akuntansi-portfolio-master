@@ -83,6 +83,11 @@ class JournalController extends Controller
 
     public function store(Request $request)
     {
+        // Cabang valas tidak melewati normalisasi amount legacy (nominalnya amount_txn).
+        if ($request->filled('currency_code') && config('platform.multicurrency_enabled')
+            && $request->input('currency_code') !== \App\Modules\Currency\Services\FxPostingService::baseCurrency()) {
+            return $this->storeForeignJournal($request);
+        }
         $this->normalizeJournalAmounts($request);
 
         $request->validate([
@@ -174,6 +179,10 @@ class JournalController extends Controller
     public function edit($id)
     {
         $journal = JournalHeader::with('details')->findOrFail($id);
+        if (\App\Modules\Currency\Support\Money::compare((string) $journal->exchange_rate, '1') !== 0
+            || $journal->details()->whereNotNull('amount_txn')->exists()) {
+            return redirect()->route('jurnal.index')->with('error', 'Jurnal valas tidak dapat diedit; hapus lalu buat ulang.');
+        }
         try {
             \App\Support\SourceJournalProtection::check($journal);
         } catch (\RuntimeException $e) {
@@ -187,6 +196,13 @@ class JournalController extends Controller
 
     public function update(Request $request, $id)
     {
+        $existing = JournalHeader::query()->findOrFail($id);
+        if (\App\Modules\Currency\Support\Money::compare((string) $existing->exchange_rate, '1') !== 0
+            || $existing->details()->whereNotNull('amount_txn')->exists()
+            || (config('platform.multicurrency_enabled') && $request->filled('currency_code')
+                && $request->input('currency_code') !== \App\Modules\Currency\Services\FxPostingService::baseCurrency())) {
+            return redirect()->back()->with('error', 'Jurnal valas tidak dapat diedit; hapus lalu buat ulang.');
+        }
         $this->normalizeJournalAmounts($request);
 
         $request->validate([
@@ -209,6 +225,10 @@ class JournalController extends Controller
         try {
             DB::beginTransaction();
             $journal = JournalHeader::lockForUpdate()->findOrFail($id);
+            if (\App\Modules\Currency\Support\Money::compare((string) $journal->exchange_rate, '1') !== 0
+                || $journal->details()->whereNotNull('amount_txn')->exists()) {
+                throw new \RuntimeException('Jurnal valas tidak dapat diedit; hapus lalu buat ulang.');
+            }
             \App\Support\SourceJournalProtection::check($journal);
 
             $journal->update([
@@ -262,6 +282,56 @@ class JournalController extends Controller
 
             return redirect()->back()->with('error', 'Gagal update: '.$e->getMessage());
         }
+    }
+
+    private function storeForeignJournal(Request $request)
+    {
+        $data = $request->validate([
+            'transaction_date' => 'required|date_format:Y-m-d',
+            'source_doc_no' => 'nullable|string|max:150',
+            'description' => 'required|string|max:255',
+            'currency_code' => 'required|string|size:3',
+            'exchange_rate' => 'nullable|string|max:30',
+            'rate_reason' => 'nullable|string|max:1000',
+            'details' => 'required|array|min:2',
+            'details.*.account_code' => 'required|string|exists:accounts,account_code',
+            'details.*.position' => 'required|in:DEBET,KREDIT',
+            'details.*.amount_txn' => 'required|string',
+            'details.*.helper_code' => 'nullable|string',
+        ]);
+        try {
+            DB::transaction(function () use ($data) {
+                \App\Support\AccountingPeriodGuard::source([$data['transaction_date']]);
+                $service = app(\App\Modules\Currency\Services\FxPostingService::class);
+                $date = \Carbon\Carbon::parse($data['transaction_date']);
+                $metadata = $service->resolvePostingRate($data['currency_code'], $date,
+                    $data['exchange_rate'] ?? null, $data['rate_reason'] ?? null);
+                $lines = $data['details'];
+                foreach ($lines as &$line) {
+                    $line['amount_txn'] = JournalAmount::normalize($line['amount_txn']);
+                }
+                unset($line);
+                $prepared = $service::prepareManualJournal($lines, $data['currency_code'], $metadata['rate'], $date);
+                $lines = $prepared['lines'];
+                $journal = JournalHeader::query()->create([
+                    'transaction_date' => $data['transaction_date'], 'source_doc_no' => $data['source_doc_no'] ?? null,
+                    'notes' => $data['description'], 'journal_type' => 'MANUAL',
+                    'currency_code' => $data['currency_code'], 'exchange_rate' => $metadata['rate'],
+                ]);
+                foreach ($lines as $line) {
+                    JournalDetail::query()->create(array_merge($line, ['journal_id' => $journal->getKey()]));
+                }
+                $service->markRateUsed($metadata);
+                if ($metadata['override']) {
+                    SystemLog::record('UPDATE', 'Jurnal Umum', 'Override kurs '.$data['currency_code'].': master '.($metadata['master_rate'] ?? 'tidak tersedia').' → '.$metadata['rate'].'; alasan: '.$metadata['reason']);
+                }
+                SystemLog::record('CREATE', 'Jurnal Umum', 'Menambahkan transaksi jurnal: '.$journal->evidence_number);
+            });
+        } catch (\RuntimeException|\InvalidArgumentException $exception) {
+            throw ValidationException::withMessages(['currency_code' => $exception->getMessage()]);
+        }
+
+        return redirect()->route('jurnal.index')->with('success', 'Transaksi Jurnal berhasil disimpan!');
     }
 
     /**

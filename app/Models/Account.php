@@ -16,6 +16,8 @@ class Account extends Model
 
     // Sesuaikan dengan kolom aktual di database
     protected $fillable = [
+        // FIX: multicurrency — deklarasi mata uang akun opsional, tanpa backfill.
+        'currency_code',
         'account_code',
         'account_name',
         'coa_type',       // SEBELUMNYA: type

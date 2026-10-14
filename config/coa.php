@@ -1,6 +1,12 @@
 <?php
 
 return [
+    // FIX: multicurrency — fail-closed; penetapan akun tetap kewenangan finance.
+    'fx_realized_gain' => env('COA_FX_REALIZED_GAIN'),
+    'fx_realized_loss' => env('COA_FX_REALIZED_LOSS'),
+    'fx_unrealized_gain' => env('COA_FX_UNREALIZED_GAIN'),
+    'fx_unrealized_loss' => env('COA_FX_UNREALIZED_LOSS'),
+    'fx_rounding' => env('COA_FX_ROUNDING'),
     /*
     |--------------------------------------------------------------------------
     | Mapping Chart of Accounts (COA) Sistem
