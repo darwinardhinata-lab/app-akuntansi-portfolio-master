@@ -2,6 +2,11 @@
 
 // FIX: multicurrency — katalog Inggris lengkap untuk label dan kesalahan modul.
 return [
+    'account_currency' => 'Account currency', 'account_currency_base' => 'Base currency (empty)',
+    'account_currency_used' => 'Currency cannot be changed or cleared after journal entries exist.',
+    'account_currency_invalid' => 'Select an active currency other than the company base currency.',
+    'account_currency_control' => 'Foreign currency is not allowed for control accounts.',
+    'account_currency_cash_only' => 'Foreign currency is only allowed for the Cash & Bank category.',
     // FIX: multicurrency — label formulir jurnal dan saldo awal valas.
     'override_reason' => 'Exchange rate override reason',
     'equivalent' => 'Base currency equivalent (preview)',

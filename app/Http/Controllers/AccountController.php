@@ -61,7 +61,9 @@ class AccountController extends Controller
     public function create()
     {
         $coaTypes = Account::select('coa_type')->whereNotNull('coa_type')->distinct()->orderBy('coa_type')->pluck('coa_type');
-        return view('account.create', compact('coaTypes'));
+        $currencies = config('platform.multicurrency_enabled')
+            ? \App\Modules\Currency\Models\Currency::query()->where('active', true)->orderBy('code')->get() : collect();
+        return view('account.create', compact('coaTypes', 'currencies'));
     }
 
     public function store(Request $request)
@@ -74,15 +76,21 @@ class AccountController extends Controller
             'report_pos'     => 'required|string'
         ]);
 
-        Account::create($request->only([
+        $attributes = $request->only([
             'account_code',
             'account_name', 
             'coa_type',
             'normal_balance',
             'report_pos'
-        ]));
-
-        SystemLog::record('CREATE', 'Master COA', 'Menambahkan akun baru: ' . $request->account_code . ' - ' . $request->account_name);
+        ]);
+        DB::transaction(function () use ($request, $attributes) {
+            $currency = $this->accountCurrencyAttributes($request);
+            Account::query()->create(array_merge($attributes, $currency));
+            SystemLog::record('CREATE', 'Master COA', 'Menambahkan akun baru: ' . $request->account_code . ' - ' . $request->account_name);
+            if (($currency['currency_code'] ?? null) !== null) {
+                SystemLog::record('UPDATE', 'Master COA', 'Mata uang akun '.$request->account_code.': NULL → '.$currency['currency_code']);
+            }
+        });
 
         return redirect()->route('account.index')->with('success', 'Master akun baru berhasil ditambahkan!');
     }
@@ -91,7 +99,9 @@ class AccountController extends Controller
     {
         $account = Account::where('account_code', $id)->first() ?? Account::findOrFail($id);
         $coaTypes = Account::select('coa_type')->whereNotNull('coa_type')->distinct()->orderBy('coa_type')->pluck('coa_type');
-        return view('account.edit', compact('account', 'coaTypes'));
+        $currencies = config('platform.multicurrency_enabled')
+            ? \App\Modules\Currency\Models\Currency::query()->where('active', true)->orderBy('code')->get() : collect();
+        return view('account.edit', compact('account', 'coaTypes', 'currencies'));
     }
 
     public function update(Request $request, $id)
@@ -105,16 +115,55 @@ class AccountController extends Controller
             'report_pos'     => 'required'
         ]);
 
-        $account->update($request->only([
+        $attributes = $request->only([
             'account_name',
             'coa_type',
             'normal_balance',
             'report_pos'
-        ]));
-
-        SystemLog::record('UPDATE', 'Master COA', 'Mengubah data akun: ' . $account->account_code . ' - ' . $account->account_name);
+        ]);
+        DB::transaction(function () use ($request, $account, $attributes) {
+            $locked = Account::query()->whereKey($account->getKey())->lockForUpdate()->firstOrFail();
+            $old = $locked->currency_code;
+            $currency = $this->accountCurrencyAttributes($request, $locked);
+            $locked->update(array_merge($attributes, $currency));
+            SystemLog::record('UPDATE', 'Master COA', 'Mengubah data akun: ' . $locked->account_code . ' - ' . $locked->account_name);
+            if (array_key_exists('currency_code', $currency) && $old !== $currency['currency_code']) {
+                SystemLog::record('UPDATE', 'Master COA', 'Mata uang akun '.$locked->account_code.': '.($old ?? 'NULL').' → '.($currency['currency_code'] ?? 'NULL'));
+            }
+        });
 
         return redirect()->route('account.index')->with('success', 'Data akun ' . $account->account_code . ' berhasil diperbarui!');
+    }
+
+    private function accountCurrencyAttributes(Request $request, ?Account $account = null): array
+    {
+        if (! config('platform.multicurrency_enabled')) {
+            return [];
+        }
+        $request->validate(['currency_code' => 'nullable|string|size:3']);
+        $code = $request->exists('currency_code') ? ($request->input('currency_code') ?: null) : $account?->currency_code;
+        if ($account && $code !== $account->currency_code && $account->journalDetails()->exists()) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['currency_code' => __('currency.account_currency_used')]);
+        }
+        if ($code !== null) {
+            $currency = \App\Modules\Currency\Models\Currency::query()->whereKey($code)->where('active', true)->sharedLock()->first();
+            if (! $currency || $code === \App\Modules\Currency\Support\BaseCurrency::code()) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['currency_code' => __('currency.account_currency_invalid')]);
+            }
+            $controls = array_filter(array_map(fn ($key) => config('coa.'.$key), [
+                'piutang_usaha', 'hutang_usaha', 'hutang_usaha_maklun', 'uang_muka_beli', 'uang_muka_jual',
+                'pajak_masukan', 'pajak_keluaran', 'persediaan', 'persediaan_bahan_baku_benang',
+                'persediaan_bahan_baku_kain', 'wip_produksi', 'persediaan_barang_jadi', 'akum_penyusutan',
+            ]));
+            if (in_array((string) ($account?->account_code ?? $request->input('account_code')), $controls, true)) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['currency_code' => __('currency.account_currency_control')]);
+            }
+            if ($request->input('coa_type', $account?->coa_type) !== 'Cash & Bank') {
+                throw \Illuminate\Validation\ValidationException::withMessages(['currency_code' => __('currency.account_currency_cash_only')]);
+            }
+        }
+
+        return ['currency_code' => $code];
     }
 
     public function destroy($id)

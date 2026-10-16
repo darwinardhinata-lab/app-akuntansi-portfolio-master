@@ -56,6 +56,18 @@
                 </div>
             </div>
             
+            @if(config('platform.multicurrency_enabled'))
+            <div class="mt-3">
+                <label class="form-label" for="currency_code">{{ __('currency.account_currency') }}</label>
+                <select class="form-select" id="currency_code" name="currency_code">
+                    <option value="">{{ __('currency.account_currency_base') }}</option>
+                    @foreach($currencies as $currency)
+                    <option value="{{ $currency->code }}" @selected(old('currency_code', $account->currency_code) === $currency->code)>{{ $currency->code }} — {{ $currency->name }}</option>
+                    @endforeach
+                </select>
+                @error('currency_code')<div class="text-danger">{{ $message }}</div>@enderror
+            </div>
+            @endif
             <hr class="my-4">
             
             <div class="d-flex justify-content-end gap-2">

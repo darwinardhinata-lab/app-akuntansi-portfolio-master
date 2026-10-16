@@ -2,6 +2,11 @@
 
 // FIX: multicurrency — seluruh label modul dan kesalahan bisnis dapat diterjemahkan.
 return [
+    'account_currency' => 'Mata uang akun', 'account_currency_base' => 'Mata uang dasar (kosong)',
+    'account_currency_used' => 'Mata uang akun yang sudah memiliki jurnal tidak dapat diubah atau dikosongkan.',
+    'account_currency_invalid' => 'Pilih mata uang aktif selain mata uang dasar perusahaan.',
+    'account_currency_control' => 'Mata uang asing tidak diperbolehkan untuk akun kontrol.',
+    'account_currency_cash_only' => 'Mata uang asing hanya diperbolehkan untuk tipe Cash & Bank.',
     // FIX: multicurrency — label formulir jurnal dan saldo awal valas.
     'override_reason' => 'Alasan override kurs',
     'equivalent' => 'Ekuivalen mata uang dasar (preview)',

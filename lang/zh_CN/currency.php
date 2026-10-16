@@ -2,6 +2,11 @@
 
 // FIX: multicurrency — katalog Mandarin lengkap untuk label dan kesalahan modul.
 return [
+    'account_currency' => '账户币种', 'account_currency_base' => '本位币（留空）',
+    'account_currency_used' => '已有日记账记录的账户不能更改或清空币种。',
+    'account_currency_invalid' => '请选择非公司本位币的有效币种。',
+    'account_currency_control' => '控制账户不允许使用外币。',
+    'account_currency_cash_only' => '只有 Cash & Bank 类别允许使用外币。',
     // FIX: multicurrency — label formulir jurnal dan saldo awal valas.
     'override_reason' => '汇率覆盖原因',
     'equivalent' => '本位币等值（预览）',
