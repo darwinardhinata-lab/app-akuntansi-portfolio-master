@@ -17,6 +17,7 @@ use App\Support\JournalBalanceValidator;
 use App\Support\JournalDocumentLinkResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -179,8 +180,7 @@ class JournalController extends Controller
     public function edit($id)
     {
         $journal = JournalHeader::with('details')->findOrFail($id);
-        if (\App\Modules\Currency\Support\Money::compare((string) $journal->exchange_rate, '1') !== 0
-            || $journal->details()->whereNotNull('amount_txn')->exists()) {
+        if ($this->hasForeignCurrencySnapshot($journal)) {
             return redirect()->route('jurnal.index')->with('error', 'Jurnal valas tidak dapat diedit; hapus lalu buat ulang.');
         }
         try {
@@ -194,11 +194,22 @@ class JournalController extends Controller
         return view('journal.edit', compact('journal', 'accounts', 'helpers'));
     }
 
+    private function hasForeignCurrencySnapshot(JournalHeader $journal): bool
+    {
+        // Legacy databases do not have FX columns until the currency migration runs.
+        if (array_key_exists('exchange_rate', $journal->getAttributes())
+            && \App\Modules\Currency\Support\Money::compare((string) $journal->exchange_rate, '1') !== 0) {
+            return true;
+        }
+
+        return Schema::hasColumn('journal_details', 'amount_txn')
+            && $journal->details()->whereNotNull('amount_txn')->exists();
+    }
+
     public function update(Request $request, $id)
     {
         $existing = JournalHeader::query()->findOrFail($id);
-        if (\App\Modules\Currency\Support\Money::compare((string) $existing->exchange_rate, '1') !== 0
-            || $existing->details()->whereNotNull('amount_txn')->exists()
+        if ($this->hasForeignCurrencySnapshot($existing)
             || (config('platform.multicurrency_enabled') && $request->filled('currency_code')
                 && $request->input('currency_code') !== \App\Modules\Currency\Services\FxPostingService::baseCurrency())) {
             return redirect()->back()->with('error', 'Jurnal valas tidak dapat diedit; hapus lalu buat ulang.');
@@ -225,8 +236,7 @@ class JournalController extends Controller
         try {
             DB::beginTransaction();
             $journal = JournalHeader::lockForUpdate()->findOrFail($id);
-            if (\App\Modules\Currency\Support\Money::compare((string) $journal->exchange_rate, '1') !== 0
-                || $journal->details()->whereNotNull('amount_txn')->exists()) {
+            if ($this->hasForeignCurrencySnapshot($journal)) {
                 throw new \RuntimeException('Jurnal valas tidak dapat diedit; hapus lalu buat ulang.');
             }
             \App\Support\SourceJournalProtection::check($journal);

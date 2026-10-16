@@ -52,4 +52,68 @@ class ManualJournalCurrencyPrecisionTest extends TestCase
             ],
         ];
     }
+
+    public function test_legacy_schema_allows_edit_and_update_with_currency_flag_off_or_on(): void
+    {
+        $migration = require database_path('migrations/2026_10_11_100001_add_currency_to_journal_tables.php');
+        $migration->down();
+        $id = $this->createEditableJournal();
+
+        foreach ([false, true] as $enabled) {
+            config(['platform.multicurrency_enabled' => $enabled]);
+            $this->get(route('jurnal.edit', $id))->assertOk()->assertViewIs('journal.edit');
+            $this->put(route('jurnal.update', $id), $this->payload('1.250,50', '1.250,50'))
+                ->assertRedirect(route('jurnal.index'))->assertSessionMissing('error');
+            $this->assertDatabaseHas('journal_headers', ['journal_id' => $id, 'notes' => 'Pengujian nominal dua desimal']);
+            $this->assertDatabaseHas('journal_details', ['journal_id' => $id, 'amount' => '1250.50']);
+        }
+    }
+
+    public function test_migrated_base_currency_journal_allows_edit_and_update(): void
+    {
+        $id = $this->createEditableJournal();
+        $this->get(route('jurnal.edit', $id))->assertOk()->assertViewIs('journal.edit');
+        $this->put(route('jurnal.update', $id), $this->payload('1.250,50', '1.250,50'))
+            ->assertRedirect(route('jurnal.index'))->assertSessionMissing('error');
+    }
+
+    public function test_non_unit_exchange_rate_blocks_edit_and_update(): void
+    {
+        $id = $this->createEditableJournal();
+        DB::table('journal_headers')->where('journal_id', $id)->update(['exchange_rate' => '15800']);
+        $this->assertForeignJournalIsProtected($id);
+    }
+
+    public function test_transaction_snapshot_blocks_edit_and_update_even_at_unit_rate(): void
+    {
+        $id = $this->createEditableJournal();
+        DB::table('journal_details')->where('journal_id', $id)->update(['amount_txn' => '100']);
+        $this->assertForeignJournalIsProtected($id);
+    }
+
+    private function createEditableJournal(): string
+    {
+        $id = 'JRN-20261005-000004';
+        DB::table('journal_headers')->insert([
+            'journal_id' => $id, 'transaction_date' => '2026-10-05',
+            'journal_type' => 'MANUAL', 'evidence_number' => 'GJ-20261005-0001', 'notes' => 'Original',
+        ]);
+        DB::table('journal_details')->insert([
+            ['journal_id' => $id, 'account_code' => '11100', 'position' => 'DEBET', 'amount' => '100'],
+            ['journal_id' => $id, 'account_code' => '21100', 'position' => 'KREDIT', 'amount' => '100'],
+        ]);
+
+        return $id;
+    }
+
+    private function assertForeignJournalIsProtected(string $id): void
+    {
+        $message = 'Jurnal valas tidak dapat diedit; hapus lalu buat ulang.';
+        $this->get(route('jurnal.edit', $id))->assertRedirect(route('jurnal.index'))->assertSessionHas('error', $message);
+        $this->from(route('jurnal.index'))->put(route('jurnal.update', $id), $this->payload('1.250,50', '1.250,50'))
+            ->assertRedirect(route('jurnal.index'))->assertSessionHas('error', $message);
+        $this->assertDatabaseHas('journal_headers', ['journal_id' => $id, 'notes' => 'Original']);
+        $this->assertDatabaseCount('journal_details', 2);
+        $this->assertDatabaseHas('journal_details', ['journal_id' => $id, 'amount' => '100']);
+    }
 }

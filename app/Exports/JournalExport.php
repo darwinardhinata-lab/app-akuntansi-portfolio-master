@@ -49,7 +49,7 @@ class JournalExport implements FromArray, WithHeadings, WithStyles, WithBatchIns
         if (!empty($this->search)) {
             $headerQuery->where(function($q) {
                 $q->where('evidence_number', 'like', '%' . $this->search . '%')
-                  ->orWhere('description', 'like', '%' . $this->search . '%')
+                  ->orWhere('notes', 'like', '%' . $this->search . '%')
                   ->orWhereHas('details', function($qDet) {
                       $qDet->where('account_code', 'like', '%' . $this->search . '%')
                            ->orWhereHas('account', function($qAcc) {
@@ -98,24 +98,21 @@ class JournalExport implements FromArray, WithHeadings, WithStyles, WithBatchIns
                 }
 
                 $journalDetails = $details->get($journal->journal_id, collect());
-                $detailCount = 0;
+                $totalDebet = $journalDetails->filter(fn ($detail) => strtoupper($detail->position) === 'DEBET')->sum('amount');
+                $totalKredit = $journalDetails->filter(fn ($detail) => strtoupper($detail->position) === 'KREDIT')->sum('amount');
 
                 foreach ($journalDetails as $detail) {
                     $rows[] = [
                         date('d M Y', strtotime($journal->transaction_date)),
-                        $journal->evidence_number,
-                        $journal->description,
-                        $detail->account_name ?? $detail->account_code,
-                        $detail->helper_code,
-                        $detail->position,
-                        number_format($detail->amount, 2, ',', '.')
+                        $journal->journal_no ?: $journal->evidence_number,
+                        $journal->source_doc_no ?: $journal->evidence_number,
+                        $journal->notes,
+                        number_format($totalDebet, 2, ',', '.'),
+                        number_format($totalKredit, 2, ',', '.'),
+                        number_format(strtoupper($detail->position) === 'DEBET' ? $detail->amount : 0, 2, ',', '.'),
+                        number_format(strtoupper($detail->position) === 'KREDIT' ? $detail->amount : 0, 2, ',', '.'),
+                        $detail->account_code . ($detail->account_name ? ' - ' . $detail->account_name : '')
                     ];
-                    $detailCount++;
-                }
-
-                // Add empty separator row
-                if ($detailCount > 0) {
-                    $rows[] = ['', '', '', '', '', '', ''];
                 }
 
                 $processedCount++;
@@ -145,12 +142,14 @@ class JournalExport implements FromArray, WithHeadings, WithStyles, WithBatchIns
     {
         return [
             'Tanggal',
-            'No. Bukti',
-            'Keterangan',
-            'Akun',
-            'Helper Code',
-            'Posisi',
-            'Nominal (Rp)'
+            'No Jurnal',
+            'No Bukti',
+            'Deskripsi',
+            'Total Debet',
+            'Total Kredit',
+            'Nilai Debet',
+            'Nilai Kredit',
+            'Akun'
         ];
     }
 
@@ -161,7 +160,7 @@ class JournalExport implements FromArray, WithHeadings, WithStyles, WithBatchIns
             1 => ['font' => ['bold' => true]],
 
             // Style all cells with thin borders
-            'A1:G' . $sheet->getHighestRow() => [
+            'A1:I' . $sheet->getHighestRow() => [
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,

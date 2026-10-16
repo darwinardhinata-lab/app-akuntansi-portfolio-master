@@ -141,7 +141,9 @@ class JournalCsvImportService
                 $datesInChunk[] = $tanggal;
 
                 $evidenceNumber = empty($noJurnal) ? $noBukti : $noJurnal; 
-                if (empty($evidenceNumber)) $evidenceNumber = 'JRN-SYS-' . uniqid(); 
+                if ($evidenceNumber === '') {
+                    throw new \RuntimeException('Gagal import: No Jurnal atau No Bukti wajib diisi.');
+                }
                 
                 if (str_contains($evidenceNumber, '-')) {
                     $prefix = explode('-', $evidenceNumber)[0];
@@ -238,9 +240,7 @@ class JournalCsvImportService
                 $evidenceChunks = array_chunk($sourceDocumentNumbersToImport, 200);
                 $allHeadersToDelete = collect();
                 foreach ($evidenceChunks as $evChunk) {
-                    $chunkHeaders = JournalHeader::where('journal_type', 'IMPORT')
-                        ->whereIn('source_doc_no', $evChunk)
-                        ->pluck('journal_id');
+                    $chunkHeaders = \App\Support\JournalImportIdentity::replacementIds($evChunk);
                     $allHeadersToDelete = $allHeadersToDelete->merge($chunkHeaders);
                 }
 
@@ -257,9 +257,9 @@ class JournalCsvImportService
                 $sourceDocumentNumbers = array_unique(array_column($parsedRows, 'evidence'));
                 $existingHeaders = [];
                 foreach (array_chunk($sourceDocumentNumbers, 500) as $chunk) {
-                    $headersInChunk = JournalHeader::where('journal_type', 'IMPORT')
-                        ->whereIn('source_doc_no', $chunk)
-                        ->pluck('journal_id', 'source_doc_no')
+                    $headersInChunk = \App\Support\JournalImportIdentity::matching($chunk)
+                        ->where('journal_type', 'IMPORT')
+                        ->pluck('journal_id', 'journal_no')
                         ->toArray();
                     $existingHeaders = array_merge($existingHeaders, $headersInChunk);
                 }
@@ -295,7 +295,8 @@ class JournalCsvImportService
                         $headersToInsert[] = [
                             'journal_id'       => $newId,
                             'evidence_number'  => $evidenceNumber,
-                            'source_doc_no'    => $sourceDocumentNumber,
+                            'journal_no'       => $sourceDocumentNumber,
+                            'source_doc_no'    => $pRow['noBukti'] ?: $sourceDocumentNumber,
                             'transaction_date' => $pRow['tanggal'],
                             'notes'            => substr($pRow['deskripsi'], 0, 255),
                             'journal_type'     => 'IMPORT',
@@ -394,11 +395,10 @@ class JournalCsvImportService
                     foreach (array_chunk($roundingEntries, 200) as $chunk) \App\Support\ProtectedJournalQuery::table('journal_details')->insert($chunk);
                 }
 
-                DB::commit();
-
                 // POST-PROCESSING: Create Asset records for fixed asset accounts
                 // This ensures assets purchased via journal import are tracked in Aset Tetap
                 $this->createAssetsFromImportedJournals($headerCache);
+                DB::commit();
 
                 SystemLog::record('IMPORT', 'Jurnal Umum', 'Import jurnal berhasil. ' . count($parsedRows) . ' mutasi terekam.');
                 $pesan = 'Import Berhasil Sempurna! ' . count($parsedRows) . ' mutasi terekam.';

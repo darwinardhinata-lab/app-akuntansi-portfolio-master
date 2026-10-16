@@ -95,6 +95,9 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
             $datesInChunk[] = $tanggal;
 
             $evidenceNumber = empty($noJurnal) ? $noBukti : $noJurnal; 
+            if ($evidenceNumber === '') {
+                throw new \RuntimeException('Gagal import: No Jurnal atau No Bukti wajib diisi.');
+            }
             if (!empty($evidenceNumber) && str_contains($evidenceNumber, '-')) {
                 $prefix = explode('-', $evidenceNumber)[0];
                 $prefixes[$prefix] = true;
@@ -196,7 +199,6 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
             }
         }
 
-        DB::unprepared('SET FOREIGN_KEY_CHECKS=0;'); 
         DB::beginTransaction();
 
         try {
@@ -216,9 +218,7 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
             $evidenceChunks = array_chunk($sourceDocumentNumbersToImport, 200);
             $allHeadersToDelete = collect();
             foreach ($evidenceChunks as $evChunk) {
-                $chunkHeaders = JournalHeader::where('journal_type', 'IMPORT')
-                    ->whereIn('source_doc_no', $evChunk)
-                    ->pluck('journal_id');
+                $chunkHeaders = \App\Support\JournalImportIdentity::replacementIds($evChunk);
                 $allHeadersToDelete = $allHeadersToDelete->merge($chunkHeaders);
             }
 
@@ -246,9 +246,9 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
             $sourceDocumentNumbers = array_unique(array_column($parsedRows, 'evidence'));
             $existingHeaders = [];
             foreach (array_chunk($sourceDocumentNumbers, 500) as $chunk) {
-                $headersInChunk = JournalHeader::where('journal_type', 'IMPORT')
-                    ->whereIn('source_doc_no', $chunk)
-                    ->pluck('journal_id', 'source_doc_no')
+                $headersInChunk = \App\Support\JournalImportIdentity::matching($chunk)
+                    ->where('journal_type', 'IMPORT')
+                    ->pluck('journal_id', 'journal_no')
                     ->toArray();
                 $existingHeaders = array_merge($existingHeaders, $headersInChunk);
             }
@@ -280,9 +280,10 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
                     $headersToInsert[] = [
                         'journal_id'       => $newId,
                         'evidence_number'  => $evidenceNumber,
+                        'journal_no'       => $sourceDocumentNumber,
                         'source_doc_no'    => $pRow['no_bukti'] ?: $sourceDocumentNumber,
                         'transaction_date' => $pRow['tanggal'],
-                        'description'      => substr($evidenceNumber . ' - ' . $pRow['deskripsi'], 0, 255),
+                        'notes'            => substr($pRow['deskripsi'], 0, 255),
                         'journal_type'     => 'IMPORT',
                         'jj_id'            => time() + $seq, // FIX 1364: Bypass constraint NOT NULL legacy
                         'created_at'       => now(),
@@ -401,15 +402,12 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
                 }
             }
 
-            DB::commit();
-            DB::unprepared('SET FOREIGN_KEY_CHECKS=1;');
-
             // POST-PROCESSING: Create Asset records for Aset Tetap
             $this->createAssetsFromImportedJournals($headerCache);
+            DB::commit();
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
-            DB::unprepared('SET FOREIGN_KEY_CHECKS=1;');
             throw $e; 
         }
     }
@@ -443,7 +441,7 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
             ->toArray();
 
         $headerDescriptions = JournalHeader::whereIn('journal_id', $journalIds)
-            ->pluck('description', 'journal_id')
+            ->pluck('notes', 'journal_id')
             ->toArray();
 
         $assetsToCreate = [];
