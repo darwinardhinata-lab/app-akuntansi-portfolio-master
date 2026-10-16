@@ -7,6 +7,41 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Akses development melalui Wi-Fi lokal (Windows)
+
+Dari folder project, jalankan script berikut di PowerShell:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\serve-lan.ps1
+```
+
+Untuk menggunakan port lain:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\serve-lan.ps1 -Port 8080
+```
+
+Script menggunakan PHP dari PATH, atau PHP XAMPP jika project berada di
+`<xampp>\htdocs\<project>`. Laravel dijalankan pada `0.0.0.0` dengan port bawaan
+`8000`. Buka URL IP lokal yang ditampilkan script dari HP/laptop pada Wi-Fi yang
+sama (bukan `0.0.0.0` atau `localhost`). Jika ada beberapa IP, pilih interface
+Wi-Fi/Ethernet yang digunakan. Hentikan server dengan **Ctrl+C**. Port yang sudah
+dipakai akan menghasilkan error, bukan pindah port otomatis.
+
+Script tidak mengubah `.env`, cache konfigurasi, atau firewall. Jika tidak bisa
+diakses, izinkan TCP pada port pilihan melalui Windows Firewall hanya untuk
+profil **Private**, idealnya dengan cakupan **Local subnet**; jangan matikan
+firewall. Periksa juga AP/client isolation pada router. Gunakan hanya jaringan
+tepercaya: server development ini bukan untuk production atau akses internet.
+
+Jika aset frontend menggunakan Vite dan tidak tampil di HP, hentikan Vite lokal
+dan jalankan `npm run build` (pastikan file `public/hot` dari dev server tidak
+tertinggal). Script ini hanya menjalankan Laravel, bukan Vite atau queue worker.
+Jika redirect/URL absolut masih menunjuk ke localhost, sesuaikan `APP_URL` di
+`.env` dengan URL IP lokal dan jalankan `php artisan config:clear`. Autentikasi
+Sanctum lintas origin juga dapat memerlukan konfigurasi domain stateful, CORS,
+dan cookie; mengubah `APP_URL` saja tidak selalu cukup.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
