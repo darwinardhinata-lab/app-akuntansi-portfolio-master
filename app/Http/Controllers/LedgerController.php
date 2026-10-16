@@ -8,8 +8,23 @@ use App\Models\JournalDetail;
 use App\Support\JournalDocumentLinkResolver;
 use Illuminate\Support\Facades\DB;
 
+use App\Exports\LedgerExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 class LedgerController extends Controller
 {
+    public function export(Request $request)
+    {
+        $accounts  = Account::orderBy('account_code', 'asc')->get();
+        $accCode   = $request->get('account_code', $accounts->first()->account_code ?? '');
+        $startDate = $request->get('start_date', date('Y-m-01'));
+        $endDate   = $request->get('end_date', date('Y-m-t'));
+
+        $filename = 'Buku_Besar_' . ($accCode ?: 'Akun') . '_' . $startDate . '_sd_' . $endDate . '.xlsx';
+
+        return Excel::download(new LedgerExport($accCode, $startDate, $endDate), $filename);
+    }
+
     public function index(Request $request)
     {
         $accounts  = Account::orderBy('account_code', 'asc')->get();

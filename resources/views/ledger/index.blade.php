@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
     /* Mengunci font seluruh area Buku Besar menjadi Inter */
@@ -31,15 +32,29 @@
 
 <div class="container-fluid ledger-wrapper">
 
-    <div class="mb-4">
-        <h3 class="fw-bold mb-1" style="color: #0f172a;">{{ __('erp.general_ledger_title') }}</h3>
-        <p class="text-muted small mb-0">{{ __('erp.ledger_card_hint') }}</p>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 no-print">
+        <div>
+            <h3 class="fw-bold mb-1" style="color: #0f172a;">{{ __('erp.general_ledger_title') }}</h3>
+            <p class="text-muted small mb-0">{{ __('erp.ledger_card_hint') }}</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" onclick="exportPDF()" class="btn btn-danger fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" title="{{ __('erp.export_pdf') }}">
+                <i class="fa-solid fa-file-pdf me-1"></i> {{ __('erp.export_pdf') }}
+            </button>
+            <a href="{{ route('buku-besar.export', [
+                'account_code' => $accCode,
+                'start_date' => $startDate,
+                'end_date' => $endDate
+            ]) }}" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" title="{{ __('erp.export_excel') }}">
+                <i class="fa-solid fa-file-excel me-1"></i> {{ __('erp.export_excel_btn') }}
+            </a>
+        </div>
     </div>
 
-    <form action="{{ route('buku-besar.index') }}" method="GET" class="card p-3 mb-4 shadow-sm border-0 bg-white no-print" style="border-radius: 12px;">
+    <form id="filterLedgerForm" action="{{ route('buku-besar.index') }}" method="GET" class="card p-3 mb-4 shadow-sm border-0 bg-white no-print" style="border-radius: 12px;">
         <div class="row g-2 align-items-center">
             
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.select_account_coa') }}</label>
                 <select name="account_code" class="form-select form-select-sm select2-account">
                     @foreach($accounts as $acc)
@@ -69,9 +84,13 @@
                 </select>
             </div>
 
-            <div class="col-md-2 d-flex gap-2 mt-md-4 pt-md-1">
-                <button type="submit" class="btn btn-sm btn-primary fw-bold w-100"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.filter_label') }}</button>
-                <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-secondary fw-bold px-3"><i class="fa-solid fa-print"></i></button>
+            <div class="col-md-3 d-flex gap-2 mt-md-4 pt-md-1">
+                <button type="submit" class="btn btn-sm btn-primary fw-bold flex-grow-1"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.filter_label') }}</button>
+                <div class="btn-group shadow-sm">
+                    <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-secondary fw-bold px-2" title="{{ __('erp.print') }}"><i class="fa-solid fa-print"></i></button>
+                    <button type="button" onclick="exportPDF()" class="btn btn-sm btn-outline-danger fw-bold px-2" title="{{ __('erp.export_pdf') }}"><i class="fa-solid fa-file-pdf"></i></button>
+                    <a href="{{ route('buku-besar.export', ['account_code' => $accCode, 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn btn-sm btn-outline-success fw-bold px-2" title="{{ __('erp.export_excel') }}"><i class="fa-solid fa-file-excel"></i></a>
+                </div>
             </div>
 
         </div>
@@ -321,5 +340,18 @@
             placeholder: 'Ketik untuk mencari kode atau nama akun...'
         });
     });
+
+    function exportPDF() {
+        var element = document.getElementById('print-area');
+        var opt = {
+            margin: 0.3,
+            filename: 'Buku_Besar_{{ $accCode }}_{{ $startDate }}_sd_{{ $endDate }}.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
 </script>
 @endsection

@@ -83,6 +83,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/kode-bantu/download-template', [HelperCodeController::class, 'downloadTemplate'])->name('helper.download-template');
 
     Route::get('/buku-besar', [LedgerController::class, 'index'])->name('buku-besar.index');
+    Route::get('/buku-besar/export', [LedgerController::class, 'export'])->name('buku-besar.export');
 
     // --- SMART DOCUMENT TRACING ---
     Route::get('/trace-document/{evidence_number}', [\App\Http\Controllers\DocumentTraceController::class, 'trace'])->name('trace.document');
