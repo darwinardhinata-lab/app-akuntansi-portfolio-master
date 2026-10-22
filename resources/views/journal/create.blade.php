@@ -73,8 +73,8 @@
                     <input type="date" name="transaction_date" class="form-control input-header" value="{{ date('Y-m-d') }}" required>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">No. Transaksi / Dokumen Asli</label>
-                    <input type="text" name="source_doc_no" class="form-control input-header" placeholder="Contoh: INV-SUPPLIER-2026-101">
+                    <label class="form-label">{{ __('accounting.text_6774d1764ca0') }}</label>
+                    <input type="text" name="source_doc_no" class="form-control input-header" placeholder="{{ __('accounting.text_b8315da5b077') }}">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">{{ __('erp.journal_description') }}</label>
@@ -101,7 +101,7 @@
                                 <select name="details[0][account_code]" class="input-transparent select-account" required>
                                     <option value="">{{ __('erp.select_account_ph') }}</option>
                                     @foreach($accounts as $akun)
-                                        <option value="{{ $akun->account_code }}">{{ $akun->account_code }} - {{ $akun->account_name }}</option>
+                                        <option value="{{ $akun->account_code }}">{{ $akun->account_code }} - {{ $akun->translatedName() }}</option>
                                     @endforeach
                                 </select>
                             </td>
@@ -132,7 +132,7 @@
                                 <select name="details[1][account_code]" class="input-transparent select-account" required>
                                     <option value="">{{ __('erp.select_account_ph') }}</option>
                                     @foreach($accounts as $akun)
-                                        <option value="{{ $akun->account_code }}">{{ $akun->account_code }} - {{ $akun->account_name }}</option>
+                                        <option value="{{ $akun->account_code }}">{{ $akun->account_code }} - {{ $akun->translatedName() }}</option>
                                     @endforeach
                                 </select>
                             </td>
@@ -193,7 +193,7 @@
             $('.select-account, .select-helper').select2({ 
                 theme: 'bootstrap-5', 
                 width: '100%',
-                placeholder: "Pilih..."
+                placeholder: @json(__('accounting.select_placeholder'))
             });
         }
 

@@ -20,6 +20,11 @@ class ReportInterval
         return array_key_exists($interval, self::OPTIONS);
     }
 
+    public static function label(string $interval): string
+    {
+        return __('accounting.interval_'.$interval);
+    }
+
     public static function buildPeriods(string $interval, int $year, ?int $month = null): array
     {
         $periods = [];
@@ -60,7 +65,8 @@ class ReportInterval
                 for ($m = 1; $m <= 12; $m++) {
                     $start = sprintf('%04d-%02d-01', $year, $m);
                     $endD  = date('Y-m-t', strtotime($start));
-                    $periods[] = ['key' => sprintf('%04d-%02d', $year, $m), 'label' => $names[$m - 1], 'start' => $start, 'end' => $endD];
+                    $label = app()->getLocale() === 'id' ? $names[$m - 1] : \Carbon\Carbon::parse($start)->locale(app()->getLocale())->translatedFormat('M');
+                    $periods[] = ['key' => sprintf('%04d-%02d', $year, $m), 'label' => $label, 'start' => $start, 'end' => $endD];
                 }
                 break;
             case 'quarter':
@@ -129,6 +135,14 @@ class ReportInterval
     public static function isFuturePeriod(array $period, ?string $referenceDate = null): bool { return $period['start'] > ($referenceDate ?: date('Y-m-d')); }
     public static function rangeLabel(string $interval, int $year, ?int $month = null): string
     {
+        if (app()->getLocale() !== 'id') {
+            if ($interval === 'harian') {
+                return \Carbon\Carbon::create($year, max(1, min(12, $month ?: (int) date('n'))), 1)
+                    ->locale(app()->getLocale())->translatedFormat('F Y');
+            }
+
+            return $interval === 'tahunan' ? ($year - 4).' – '.$year : (string) $year;
+        }
         if ($interval == 'harian') {
             $namesFull = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
             return $namesFull[max(1, min(12, $month ?: (int) date('n'))) - 1] . ' ' . $year;

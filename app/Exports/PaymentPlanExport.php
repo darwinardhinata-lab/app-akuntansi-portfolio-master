@@ -24,8 +24,8 @@ class PaymentPlanExport implements FromQuery, WithHeadings, WithMapping, ShouldA
     public function headings(): array
     {
         return [
-            'Tgl Pengajuan', 'No Transaksi', 'Divisi', 'Kategori', 
-            'Rekening Ops', 'Vendor / PJ', 'Keterangan', 'Nominal (Rp)', 'Status'
+            __('accounting.text_662850866a9e'), __('accounting.transaction_number'), __('erp.division_label'), __('erp.category'),
+            __('accounting.text_38a3151a123f'), __('accounting.text_ff514412479c'), __('erp.description'), __('erp.amount_rp_caps'), __('erp.status')
         ];
     }
 

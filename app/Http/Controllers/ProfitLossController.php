@@ -130,11 +130,11 @@ class ProfitLossController extends Controller
     private function generateStructure($accounts, $data)
     {
         $structure = [
-            'pendapatan'      => ['title' => 'Pendapatan', 'items' => [], 'grand_total' => 0],
-            'hpp'             => ['title' => 'Beban Pokok Penjualan (HPP)', 'items' => [], 'grand_total' => 0],
-            'biaya'           => ['title' => 'Beban Operasional', 'items' => [], 'grand_total' => 0],
-            'pendapatan_lain' => ['title' => 'Pendapatan Lainnya', 'items' => [], 'grand_total' => 0],
-            'beban_lain'      => ['title' => 'Beban Lain-lain', 'items' => [], 'grand_total' => 0],
+            'pendapatan'      => ['title' => __('accounting.revenue'), 'items' => [], 'grand_total' => 0],
+            'hpp'             => ['title' => __('accounting.cogs'), 'items' => [], 'grand_total' => 0],
+            'biaya'           => ['title' => __('accounting.operating_expenses'), 'items' => [], 'grand_total' => 0],
+            'pendapatan_lain' => ['title' => __('accounting.other_revenue'), 'items' => [], 'grand_total' => 0],
+            'beban_lain'      => ['title' => __('accounting.other_expenses'), 'items' => [], 'grand_total' => 0],
         ];
 
         $fastData = [];
@@ -188,11 +188,11 @@ class ProfitLossController extends Controller
         $emptyTotals = array_fill_keys($periodKeys, 0);
 
         $structure = [
-            'pendapatan'      => ['title' => 'Pendapatan', 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
-            'hpp'             => ['title' => 'Beban Pokok Penjualan (HPP)', 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
-            'biaya'           => ['title' => 'Beban Operasional', 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
-            'pendapatan_lain' => ['title' => 'Pendapatan Lainnya', 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
-            'beban_lain'      => ['title' => 'Beban Lain-lain', 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
+            'pendapatan'      => ['title' => __('accounting.revenue'), 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
+            'hpp'             => ['title' => __('accounting.cogs'), 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
+            'biaya'           => ['title' => __('accounting.operating_expenses'), 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
+            'pendapatan_lain' => ['title' => __('accounting.other_revenue'), 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
+            'beban_lain'      => ['title' => __('accounting.other_expenses'), 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
         ];
 
         $fastData = [];

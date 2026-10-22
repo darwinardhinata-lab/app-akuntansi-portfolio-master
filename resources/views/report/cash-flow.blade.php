@@ -105,7 +105,7 @@
                     <label class="fw-bold text-muted small mb-0 text-nowrap">{{ __('erp.interval_colon') }}</label>
                     <select name="interval" class="form-select form-select-sm fw-bold" style="width: 140px;" onchange="this.form.submit()">
                         @foreach(\App\Support\ReportInterval::OPTIONS as $key => $label)
-                            <option value="{{ $key }}" {{ $interval == $key ? 'selected' : '' }}>{{ $label }}</option>
+                            <option value="{{ $key }}" {{ $interval == $key ? 'selected' : '' }}>{{ \App\Support\ReportInterval::label($key) }}</option>
                         @endforeach
                     </select>
 
@@ -141,8 +141,8 @@
             @endif
             <div style="text-align: center; width: 100%;">
                 <h4 style="margin: 0 0 4px 0; font-weight: 800; color: #4f46e5; text-transform: uppercase;">{{ $company?->company_name ?? 'BBW' }}</h4>
-                <h5 style="margin: 0 0 4px 0; font-weight: 800; color: #0f172a; letter-spacing: 0.5px;">LAPORAN ARUS KAS ({{ strtoupper($tab) }} METHOD)</h5>
-                <p style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 500;">{{ __('erp.period_colon') }} <span class="text-primary fw-bold">{{ \App\Support\ReportInterval::rangeLabel($interval, $year, $month) }} &middot; {{ \App\Support\ReportInterval::OPTIONS[$interval] ?? 'Bulanan' }}</span></p>
+                <h5 style="margin: 0 0 4px 0; font-weight: 800; color: #0f172a; letter-spacing: 0.5px;">{{ __('erp.cash_flow') }} ({{ $tab === 'direct' ? __('erp.direct_method') : __('erp.indirect_method') }})</h5>
+                <p style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 500;">{{ __('erp.period_colon') }} <span class="text-primary fw-bold">{{ \App\Support\ReportInterval::rangeLabel($interval, $year, $month) }} &middot; {{ \App\Support\ReportInterval::label($interval) }}</span></p>
             </div>
         </div>
 
@@ -215,7 +215,7 @@
                             <td class="num-cell pe-3 fw-bold bg-light text-danger">{{ number_format($report['outflows']['grand_total'], 2, ',', '.') }}</td>
                         </tr>
                     @else
-                        @foreach(['operasi' => 'I. ARUS KAS DARI AKTIVITAS OPERASI', 'investasi' => 'II. ARUS KAS DARI AKTIVITAS INVESTASI', 'pendanaan' => 'III. ARUS KAS DARI AKTIVITAS PENDANAAN'] as $secKey => $secTitle)
+                        @foreach(['operasi' => __('accounting.cash_operating'), 'investasi' => __('accounting.cash_investing'), 'pendanaan' => __('accounting.cash_financing')] as $secKey => $secTitle)
                             <tr class="category-title">
                                 <td class="col-fixed ps-3 text-primary {{ $secKey != 'operasi' ? 'mt-2' : '' }}">{{ $secTitle }}</td>
                                 @foreach($periods as $p)<td style="background-color: #ffffff;"></td>@endforeach
@@ -238,14 +238,14 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td class="col-fixed ps-3 text-muted small italic py-2">Tidak ada pergerakan aktivitas {{ strtolower(str_replace(['I. ', 'II. ', 'III. ', 'ARUS KAS DARI AKTIVITAS '], '', $secTitle)) }} di periode ini.</td>
+                                    <td class="col-fixed ps-3 text-muted small italic py-2">{{ __('accounting.no_activity') }}</td>
                                     @foreach($periods as $p)<td></td>@endforeach
                                     <td></td>
                                 </tr>
                             @endforelse
 
                             <tr class="line-total">
-                                <td class="col-fixed ps-3 text-uppercase text-muted small">KAS BERSIH DARI AKTIVITAS {{ strtoupper(str_replace(['I. ', 'II. ', 'III. ', 'ARUS KAS DARI AKTIVITAS '], '', $secTitle)) }}</td>
+                                <td class="col-fixed ps-3 text-uppercase text-muted small">{{ __('accounting.net_activity_cash', ['activity' => $secTitle]) }}</td>
                                 @foreach($periods as $p)
                                     <td class="num-cell fw-bold {{ $report[$secKey]['totals'][$p['key']] < 0 ? 'text-negative text-nowrap' : 'text-dark' }}">
                                         {{ $report[$secKey]['totals'][$p['key']] == 0 ? '-' : number_format($report[$secKey]['totals'][$p['key']], 2, ',', '.') }}

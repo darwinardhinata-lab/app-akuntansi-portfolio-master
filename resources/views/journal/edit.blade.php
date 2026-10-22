@@ -39,8 +39,8 @@
                     <input type="date" name="transaction_date" class="form-control input-header" value="{{ $journal->transaction_date }}" required>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">No. Transaksi / Dokumen Asli</label>
-                    <input type="text" name="source_doc_no" class="form-control input-header" value="{{ $journal->source_doc_no }}" placeholder="Contoh: INV-SUPPLIER-2026-101">
+                    <label class="form-label">{{ __('accounting.text_6774d1764ca0') }}</label>
+                    <input type="text" name="source_doc_no" class="form-control input-header" value="{{ $journal->source_doc_no }}" placeholder="{{ __('accounting.text_b8315da5b077') }}">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">{{ __('erp.description_label') }}</label>
@@ -68,7 +68,7 @@
                             <select name="details[{{ $index }}][account_code]" class="input-transparent select-account" required>
                                 @foreach($accounts as $akun)
                                     <option value="{{ $akun->account_code }}" {{ $detail->account_code == $akun->account_code ? 'selected' : '' }}>
-                                        {{ $akun->account_code }} - {{ $akun->account_name }}
+                                        {{ $akun->account_code }} - {{ $akun->translatedName() }}
                                     </option>
                                 @endforeach
                             </select>

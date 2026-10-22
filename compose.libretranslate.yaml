@@ -1,0 +1,23 @@
+# API contract / Docker options: https://docs.libretranslate.com/guides/installation/
+services:
+  libretranslate:
+    image: libretranslate/libretranslate:v1.9.6
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5001:5000"
+    environment:
+      LT_LOAD_ONLY: "id,en,zh"
+      LT_DISABLE_WEB_UI: "true"
+      LT_DISABLE_FILES_TRANSLATION: "true"
+      LT_CHAR_LIMIT: "5000"
+      LT_THREADS: "1"
+    volumes:
+      - libretranslate_models:/home/libretranslate/.local:rw
+    healthcheck:
+      test: ["CMD-SHELL", "./venv/bin/python scripts/healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 300s
+volumes:
+  libretranslate_models:

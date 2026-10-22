@@ -18,12 +18,14 @@ class JournalExport implements FromArray, WithHeadings, WithStyles, WithBatchIns
     protected $startDate;
     protected $endDate;
     protected $search;
+    protected $accountCodes;
 
-    public function __construct($startDate = null, $endDate = null, $search = null)
+    public function __construct($startDate = null, $endDate = null, $search = null, array $accountCodes = [])
     {
         $this->startDate = $startDate;
         $this->endDate = $endDate;
         $this->search = $search;
+        $this->accountCodes = $accountCodes;
     }
 
     public function array(): array
@@ -37,6 +39,12 @@ class JournalExport implements FromArray, WithHeadings, WithStyles, WithBatchIns
         // Build the query for journal headers only (without eager loading)
         $headerQuery = JournalHeader::orderBy('transaction_date', 'desc')
             ->orderBy('created_at', 'desc');
+        if ($this->accountCodes) {
+            $headerQuery->whereHas('details', fn ($detail) => $detail->whereIn('account_code', $this->accountCodes));
+        }
+        if (config('libretranslate.enabled')) {
+            $headerQuery->with('noteTranslations');
+        }
 
         if (!empty($this->startDate)) {
             $headerQuery->whereDate('transaction_date', '>=', $this->startDate);
@@ -92,6 +100,10 @@ class JournalExport implements FromArray, WithHeadings, WithStyles, WithBatchIns
                 ->get()
                 ->groupBy('journal_id');
 
+            $accountNames = \App\Models\Account::with('translations')
+                ->whereIn('account_code', $details->flatten(1)->pluck('account_code')->unique())->get()
+                ->mapWithKeys(fn ($account) => [$account->account_code => $account->translatedName()]);
+
             foreach ($journals as $journal) {
                 if ($limit > 0 && $processedCount >= $limit) {
                     break;
@@ -106,12 +118,12 @@ class JournalExport implements FromArray, WithHeadings, WithStyles, WithBatchIns
                         date('d M Y', strtotime($journal->transaction_date)),
                         $journal->journal_no ?: $journal->evidence_number,
                         $journal->source_doc_no ?: $journal->evidence_number,
-                        $journal->notes,
+                        $journal->display_notes,
                         number_format($totalDebet, 2, ',', '.'),
                         number_format($totalKredit, 2, ',', '.'),
                         number_format(strtoupper($detail->position) === 'DEBET' ? $detail->amount : 0, 2, ',', '.'),
                         number_format(strtoupper($detail->position) === 'KREDIT' ? $detail->amount : 0, 2, ',', '.'),
-                        $detail->account_code . ($detail->account_name ? ' - ' . $detail->account_name : '')
+                        $detail->account_code . (($name = $accountNames->get($detail->account_code, $detail->account_name)) ? ' - ' . $name : '')
                     ];
                 }
 
@@ -141,15 +153,15 @@ class JournalExport implements FromArray, WithHeadings, WithStyles, WithBatchIns
     public function headings(): array
     {
         return [
-            'Tanggal',
-            'No Jurnal',
-            'No Bukti',
-            'Deskripsi',
-            'Total Debet',
-            'Total Kredit',
-            'Nilai Debet',
-            'Nilai Kredit',
-            'Akun'
+            __('erp.date'),
+            __('accounting.text_fee1777b99a1'),
+            __('accounting.text_8491ba819ad7'),
+            __('accounting.text_7e9fd192194a'),
+            __('accounting.text_d660e8d17c93'),
+            __('accounting.text_e16136d28aef'),
+            __('accounting.text_ccb1653283e1'),
+            __('accounting.text_a2df1cc97ce7'),
+            __('accounting.text_ffcd7fbae331')
         ];
     }
 

@@ -24,11 +24,11 @@ class PaymentPlanManualWorklistExport implements FromCollection, WithHeadings, W
     public function headings(): array
     {
         return [
-            'No Transaksi (Ref ERP)', 'Tanggal', 'Kategori Payment', 'Rekening Ops', 'Status Payment',
-            'Nama (PJ)', 'Divisi', 'Pemasok/Toko', 'Nama Toko / Link', 'Keterangan',
-            'No VA/Rekening/Kode Bayar', 'Detil Akun (COA)', 'Qty', 'Satuan',
-            'Pengajuan (Rp)', 'Aktual (Rp)', 'Selisih (Rp)', 'Total (Rp)',
-            'No. Bill/PO Referensi', 'Sudah Diinput Manual? (Y/N)',
+            __('accounting.text_dd2019aa1190'), __('erp.date'), __('accounting.text_fad8f060036c'), __('accounting.text_38a3151a123f'), __('accounting.text_5c0e39e73645'),
+            __('accounting.text_0b58f36d8839'), __('erp.division_label'), __('accounting.text_219e0a4dda05'), __('accounting.text_686f018de41f'), __('erp.description'),
+            __('accounting.text_0d5879cbb053'), __('accounting.text_c15bba863e5e'), __('erp.qty_caps'), __('erp.unit'),
+            __('accounting.text_0321685f8cfe'), __('accounting.text_9d1b58523c1e'), __('accounting.text_f64dedd48aa9'), __('erp.total_rp_caps'),
+            __('accounting.text_c2f642f6871d'), __('accounting.text_b5dde9e1bc2e'),
         ];
     }
 

@@ -23,7 +23,7 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <h3 class="fw-bold mb-1" style="color: #0f172a;">{{ __('erp.setup_opening_balance') }}</h3>
-            <p class="text-muted small mb-0">Masukkan nominal saldo awal neraca & laba rugi. Sistem otomatis memposisikannya sesuai sifat saldo normal.</p>
+            <p class="text-muted small mb-0">{{ __('accounting.text_a423991b8ae7') }}</p>
         </div>
   
         <div class="d-flex flex-wrap gap-2">

@@ -57,7 +57,11 @@ class AccountTranslationService
             $translated = $this->translateBatch($sourceMap, $locale);
 
             foreach ($translated as $accountCode => $name) {
-                AccountTranslation::updateOrCreate(
+                // Never overwrite an existing/manual translation created during the API call.
+                if (Account::whereKey($accountCode)->value('account_name') !== ($sourceMap[$accountCode] ?? null)) {
+                    continue;
+                }
+                AccountTranslation::firstOrCreate(
                     ['account_code' => $accountCode, 'locale' => $locale],
                     [
                         'name'               => $name,
@@ -127,6 +131,31 @@ class AccountTranslationService
      */
     protected function translateBatch(array $sourceMap, string $locale): array
     {
+        if (config('libretranslate.enabled')) {
+            $target = config('libretranslate.targets.'.$locale);
+            if (!$target) {
+                return [];
+            }
+            $endpoint = app(LibreTranslateService::class)->endpoint();
+            $result = [];
+            foreach ($sourceMap as $key => $text) {
+                if (trim($text) === '' || mb_strlen($text) > config('libretranslate.max_characters')) {
+                    continue;
+                }
+                $response = Http::connectTimeout(3)->timeout(60)->withoutRedirecting()
+                    ->post($endpoint.'/translate', [
+                        'q' => $text, 'source' => config('libretranslate.source'),
+                        'target' => $target, 'format' => 'text',
+                    ]);
+                $translated = $response->json('translatedText');
+                if (!$response->successful() || !is_string($translated) || trim($translated) === '') {
+                    throw new \RuntimeException('Local COA translation failed; no external fallback used.');
+                }
+                $result[$key] = $translated;
+            }
+            return $result;
+        }
+
         $apiKey = config('services.deepl.key');
 
         if (empty($apiKey)) {

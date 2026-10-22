@@ -14,6 +14,9 @@
 <style>
     /* Mengunci font seluruh area Buku Besar menjadi Inter */
     .ledger-wrapper { font-family: 'Inter', sans-serif; color: #334155; }
+    [data-ledger-account] { margin-bottom: 1.5rem; }
+    .select2-container--bootstrap-5 .select2-selection--multiple { min-height: 38px; }
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice { white-space: normal; overflow-wrap: anywhere; }
     
     /* Menyelaraskan ukuran font, padding, dan kerapian baris tabel */
     .ledger-table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; border-bottom: 2px solid #e2e8f0; padding: 12px 10px; }
@@ -27,7 +30,10 @@
     .modal-journal-table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; }
     .modal-journal-table td { font-size: 0.85rem; vertical-align: middle; }
     
-    @media print { .no-print { display: none !important; } }
+    @media print {
+        .no-print { display: none !important; }
+        [data-ledger-account] + [data-ledger-account] { break-before: page; }
+    }
 </style>
 
 <div class="container-fluid ledger-wrapper">
@@ -42,7 +48,8 @@
                 <i class="fa-solid fa-file-pdf me-1"></i> {{ __('erp.export_pdf') }}
             </button>
             <a href="{{ route('buku-besar.export', [
-                'account_code' => $accCode,
+                'account_code' => count($accountCodes ?? [$accCode]) === 1 ? $accCode : null,
+                'account_codes' => count($accountCodes ?? [$accCode]) > 1 ? $accountCodes : null,
                 'start_date' => $startDate,
                 'end_date' => $endDate
             ]) }}" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" title="{{ __('erp.export_excel') }}">
@@ -55,14 +62,15 @@
         <div class="row g-2 align-items-center">
             
             <div class="col-md-3">
-                <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.select_account_coa') }}</label>
-                <select name="account_code" class="form-select form-select-sm select2-account">
+                <label for="ledgerAccounts" class="form-label small fw-bold text-muted mb-1">{{ __('erp.select_account_coa') }}</label>
+                <select id="ledgerAccounts" name="account_codes[]" multiple class="form-select form-select-sm select2-account">
                     @foreach($accounts as $acc)
-                        <option value="{{ $acc->account_code }}" {{ $accCode == $acc->account_code ? 'selected' : '' }}>
-                            {{ $acc->account_code }} - {{ $acc->account_name }}
+                        <option value="{{ $acc->account_code }}" {{ in_array($acc->account_code, $accountCodes ?? [$accCode]) ? 'selected' : '' }}>
+                            {{ $acc->account_code }} - {{ $acc->translatedName() }}
                         </option>
                     @endforeach
                 </select>
+                <div class="form-text small">{{ __('erp.multi_account_hint') }}</div>
             </div>
 
             <div class="col-md-2">
@@ -89,7 +97,7 @@
                 <div class="btn-group shadow-sm">
                     <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-secondary fw-bold px-2" title="{{ __('erp.print') }}"><i class="fa-solid fa-print"></i></button>
                     <button type="button" onclick="exportPDF()" class="btn btn-sm btn-outline-danger fw-bold px-2" title="{{ __('erp.export_pdf') }}"><i class="fa-solid fa-file-pdf"></i></button>
-                    <a href="{{ route('buku-besar.export', ['account_code' => $accCode, 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn btn-sm btn-outline-success fw-bold px-2" title="{{ __('erp.export_excel') }}"><i class="fa-solid fa-file-excel"></i></a>
+                    <a href="{{ route('buku-besar.export', ['account_codes' => $accountCodes ?? [$accCode], 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn btn-sm btn-outline-success fw-bold px-2" title="{{ __('erp.export_excel') }}"><i class="fa-solid fa-file-excel"></i></a>
                 </div>
             </div>
 
@@ -111,131 +119,14 @@
         </div>
     @endif
 
-    <div id="print-area" class="card border-0 shadow-sm p-0" style="border-radius: 12px;">
-        
-        <div class="border-bottom p-4 bg-white d-flex justify-content-between align-items-center">
-            <div>
-                <h5 class="fw-bold mb-1 text-uppercase" style="color: #1e293b;">
-                    KARTU AKUN: {{ $selectedAccount->account_code ?? $accCode }} - {{ $selectedAccount->account_name ?? '' }}
-                </h5>
-                <p class="text-muted small mb-0">Periode: {{ date('d M Y', strtotime($startDate)) }} s/d {{ date('d M Y', strtotime($endDate)) }}</p>
-            </div>
-            <div class="text-end bg-light p-2 px-3 rounded border">
-                <span class="small text-muted d-block fw-bold">{{ __('erp.normal_balance_caps') }}</span>
-                <span class="badge bg-dark fw-bold fs-6">{{ $isDebetNormal ? 'DEBET' : 'KREDIT' }}</span>
-            </div>
-        </div>
-
-        <div class="table-responsive bg-white">
-            <table class="table ledger-table align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th width="11%" class="ps-4">{{ __('erp.date') }}</th>
-                        <th width="14%">No. Bukti / No. Transaksi</th>
-                        <th width="33%">{{ __('erp.transaction_description') }}</th>
-                        <th width="13%" class="text-end">{{ __('erp.debit_rp') }}</th>
-                        <th width="13%" class="text-end">{{ __('erp.credit_rp') }}</th>
-                        <th width="11%" class="text-end">{{ __('erp.ending_balance_rp') }}</th>
-                        <th width="5%" class="text-center pe-4 no-print">{{ __('erp.journal') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="table-light fw-bold">
-                        <td colspan="3" class="ps-4 text-uppercase text-muted">
-                            {{ __('erp.opening_balance_label') }} 
-                            @if($page > 1) 
-                                <span class="text-primary">(Pindahan ke Hal {{ $page }})</span>
-                            @else 
-                                <span class="text-secondary">(Sebelum {{ date('d/m/Y', strtotime($startDate)) }})</span>
-                            @endif
-                        </td>
-                        <td class="text-end">-</td>
-                        <td class="text-end">-</td>
-                        <td class="text-end text-nowrap text-primary nominal-number">{{ number_format($pageOpeningBalance, 2, ',', '.') }}</td>
-                        <td class="text-center pe-4 no-print">-</td>
-                    </tr>
-
-                    @php 
-                        $runningBalance = $pageOpeningBalance;
-                        $totalPageBalance = 0;
-                    @endphp
-                    @forelse($transactions as $tx)
-                        @php 
-                            $deb = $tx->position == 'DEBET' ? $tx->amount : 0;
-                            $kre = $tx->position == 'KREDIT' ? $tx->amount : 0;
-                            $traceNumber = filled($tx->evidence_number) ? $tx->evidence_number : $tx->journal_id;
-                            $displayNumber = filled($tx->evidence_number) ? $tx->evidence_number : $tx->journal_id;
-                            $sourceLink = $tx->header?->document_link ?? ['url' => route('jurnal.edit', $tx->journal_id), 'label' => 'Edit Jurnal', 'is_journal' => true];
-                            
-                            if ($isDebetNormal) {
-                                $runningBalance += ($deb - $kre);
-                            } else {
-                                $runningBalance += ($kre - $deb);
-                            }
-                            
-                            $totalPageBalance += $runningBalance;
-                        @endphp
-                        <tr>
-                            <td class="ps-4 fw-medium text-nowrap">{{ date('d M Y', strtotime($tx->transaction_date)) }}</td>
-                            <td>
-                                <a href="{{ $sourceLink['url'] }}"
-                                   class="text-primary text-decoration-none fw-bold"
-                                   title="{{ $sourceLink['label'] }}">
-                                    <i class="fa-solid fa-link fa-sm me-1"></i> {{ $displayNumber }}
-                                </a>
-                                @if(filled($tx->source_doc_no))
-                                    <small class="d-block text-muted font-monospace mt-1">Trx: {{ $tx->source_doc_no }}</small>
-                                @endif
-                            </td>
-                            <td class="fw-medium text-dark">{{ $tx->notes }}</td>
-                            
-                            <td class="text-end text-nowrap nominal-number {{ $deb > 0 ? 'text-success fw-bold' : 'text-muted' }}">
-                                {{ $deb > 0 ? number_format($deb, 2, ',', '.') : '-' }}
-                            </td>
-                            <td class="text-end text-nowrap nominal-number {{ $kre > 0 ? 'text-danger fw-bold' : 'text-muted' }}">
-                                {{ $kre > 0 ? number_format($kre, 2, ',', '.') : '-' }}
-                            </td>
-                            <td class="text-end text-nowrap fw-bold text-dark nominal-number">
-                                {{ number_format($runningBalance, 2, ',', '.') }}
-                            </td>
-                            
-                            <td class="text-center pe-4 no-print">
-                                @if($tx->header && $tx->header->details)
-                                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalJournal-{{ $tx->header->journal_id ?? $tx->header->id }}" title="{{ __('erp.view_journal_pair') }}">
-                                        <i class="fa-solid fa-eye small"></i>
-                                    </button>
-                                @else
-                                    <span class="text-muted small">-</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-5 text-muted small">
-                                <i class="fa-solid fa-folder-open fa-2x mb-2 d-block text-secondary"></i>
-                                Tidak ada transaksi mutasi pada rentang tanggal/halaman ini.
-                            </td>
-                        </tr>
-                    @endforelse
-
-                    <tr class="table-dark fw-bold" style="font-size: 0.9rem;">
-                        <td colspan="5" class="ps-4 text-uppercase">{{ __('erp.total_balance_this_page') }}</td>
-                        <td class="text-end text-nowrap text-warning nominal-number">{{ number_format($totalPageBalance, 2, ',', '.') }}</td>
-                        <td class="no-print pe-4"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="card-footer bg-white border-top p-3 d-flex justify-content-end no-print">
-            {{ $transactions->links() }}
-        </div>
-
+    <div id="print-area">
+        @foreach(($sections ?? [get_defined_vars()]) as $section)
+            @include('ledger.account-card', $section)
+        @endforeach
     </div>
-
 </div>
 
-@foreach($transactions as $tx)
+@foreach(collect($sections ?? [['transactions' => $transactions]])->flatMap(fn ($section) => $section['transactions']->getCollection())->unique('journal_id') as $tx)
     @if($tx->header && $tx->header->details)
         @php 
             $headerObj = $tx->header; 
@@ -264,7 +155,7 @@
                             </div>
                             <div class="col-6">
                                 <span class="text-muted d-block fw-bold" style="font-size: 0.75rem;">{{ __('erp.general_notes_caps') }}</span>
-                                <span class="fw-medium text-dark">{{ $headerObj->description ?? '-' }}</span>
+                                <span class="fw-medium text-dark">{{ $headerObj->display_notes ?? '-' }}</span>
                             </div>
                         </div>
 
@@ -290,7 +181,7 @@
                                             <td class="ps-3">
                                                 <div class="{{ $det->position == 'KREDIT' ? 'ms-3' : '' }}">
                                                     <span class="fw-bold {{ $isCurrentAcc ? 'text-primary' : 'text-dark' }}">
-                                                        {{ $det->account->account_name ?? 'Akun Terhapus' }}
+                                                        {{ $det->account?->translatedName() ?? 'Akun Terhapus' }}
                                                     </span>
                                                     <span class="text-muted font-monospace small d-block" style="font-size: 0.75rem;">
                                                         {{ $det->account_code }} @if($det->helper_code) <span class="text-secondary fw-bold">({{ $det->helper_code }})</span> @endif
@@ -319,7 +210,7 @@
                     <div class="modal-footer bg-light py-2">
                         <a href="{{ $sourceLink['url'] }}" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>{{ $sourceLink['label'] }}</a>
                         @unless($sourceLink['is_journal'])
-                            <a href="{{ route('jurnal.edit', $modalId) }}" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-book me-1"></i>Edit Jurnal</a>
+                            <a href="{{ route('jurnal.edit', $modalId) }}" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-book me-1"></i>{{ __('accounting.text_e9c14a1d484b') }}</a>
                         @endunless
                         <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">{{ __('erp.close') }}</button>
                     </div>
@@ -337,7 +228,8 @@
         $('.select2-account').select2({
             theme: 'bootstrap-5',
             width: '100%',
-            placeholder: 'Ketik untuk mencari kode atau nama akun...'
+            placeholder: @json(__('erp.select_account_coa')),
+            closeOnSelect: false
         });
     });
 
@@ -345,7 +237,7 @@
         var element = document.getElementById('print-area');
         var opt = {
             margin: 0.3,
-            filename: 'Buku_Besar_{{ $accCode }}_{{ $startDate }}_sd_{{ $endDate }}.pdf',
+            filename: 'Buku_Besar_{{ count($accountCodes ?? [$accCode]) > 1 ? "Multi_Akun" : $accCode }}_{{ $startDate }}_sd_{{ $endDate }}.pdf',
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },

@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'multi_account_hint' => '可选择一个或多个科目，各科目余额分别显示。',
+    'journal_multi_account_hint' => '留空显示所有科目。显示包含任一所选科目的完整凭证及其对应分录。',
+    'journal_sync_background' => '同步正在服务器后台运行。您可以关闭此页面或继续工作。',
+    'journal_sync_failed' => '失败',
+    'journal_sync_error' => '启动同步时发生错误。',
     'payment_reapproval_label' => '独立重新审批已付款记录 — 请填写审核原因',
     'payment_reapproval_success' => '已付款记录已独立重新审批，付款状态保持不变。',
     'payment_maker_checker_guard' => '审批需要已验证的制单人及编辑人，且审批人必须为不同用户。',
@@ -1027,7 +1032,7 @@ return [
     'rows_per_page' => '每页行数',
     'normal_balance_caps' => '正常余额',
     'ending_balance_rp' => '期末余额 (Rp)',
-    'total_balance_this_page' => '本页余额合计',
+    'total_balance_this_page' => '本页发生额合计及期末余额',
     'general_journal_detail' => '总账凭证明细',
     'tx_date_caps' => '交易日期',
     'general_notes_caps' => '一般备注',

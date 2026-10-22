@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'multi_account_hint' => 'Select one or more accounts. Balances are shown separately for each account.',
+    'journal_multi_account_hint' => 'Leave empty for all accounts. Journals containing any selected account include all counterpart entries.',
+    'journal_sync_background' => 'Synchronization is running in the background. You may close this page or continue working.',
+    'journal_sync_failed' => 'Failed',
+    'journal_sync_error' => 'An error occurred while starting synchronization.',
     'payment_reapproval_label' => 'Independent reapproval of PAID payment — provide review reason',
     'payment_reapproval_success' => 'Paid payment independently reapproved. Paid status is unchanged.',
     'payment_maker_checker_guard' => 'Approval requires verified maker/editor provenance and a different approving user.',
@@ -1130,7 +1135,7 @@ return [
     'rows_per_page' => 'Rows per Page',
     'normal_balance_caps' => 'NORMAL BALANCE',
     'ending_balance_rp' => 'Ending Balance (Rp)',
-    'total_balance_this_page' => 'TOTAL BALANCE THIS PAGE',
+    'total_balance_this_page' => 'PAGE MOVEMENT TOTALS & CLOSING BALANCE',
     'general_journal_detail' => 'General Journal Detail',
     'tx_date_caps' => 'TRANSACTION DATE',
     'general_notes_caps' => 'GENERAL NOTES',

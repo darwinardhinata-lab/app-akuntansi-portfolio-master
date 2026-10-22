@@ -284,6 +284,32 @@
     .main-header-compact .avatar-circle { width: 30px !important; height: 30px !important; font-size: 0.9rem !important; }
     .main-header-compact .user-name { font-size: 0.8rem !important; }
     .main-header-compact .user-role { font-size: 0.65rem !important; }
+    .main-header-compact { gap: 12px; flex-wrap: wrap; }
+    .header-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+    .main-header-compact .language-toggle {
+        display: inline-flex; align-items: center; gap: 8px;
+        min-height: 38px; padding: 8px 12px !important;
+        background: var(--card); color: var(--text); border: 1px solid var(--border);
+        border-radius: 8px; white-space: nowrap; font-weight: 500;
+    }
+    .language-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .language-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .language-toggle .active-language { color: var(--accent); font-weight: 700; }
+    .language-toggle .language-divider { color: var(--muted); }
+    .language-menu {
+        min-width: 210px; padding: 6px; border: 1px solid var(--border);
+        border-radius: 10px; background: var(--card);
+    }
+    .language-menu .dropdown-item {
+        display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        min-height: 44px; padding: 10px 12px; border-radius: 6px; color: var(--text);
+    }
+    .language-menu .dropdown-item:hover, .language-menu .dropdown-item:focus-visible,
+    .language-menu .dropdown-item.active { background: var(--accent-light); color: var(--accent); }
+    @media (max-width: 575.98px) {
+        .header-actions { gap: 8px; }
+        .main-header-compact .language-toggle { gap: 6px; padding: 8px !important; }
+    }
 
     /* ================================================================
        BOTTOM NAVIGATION (HP only)
@@ -893,6 +919,30 @@
         <div class="d-flex align-items-center gap-2" style="font-size:0.85rem;">
             @yield('top_bar_left')
         </div>
+        <div class="header-actions">
+        <div class="dropdown language-switcher notranslate" translate="no">
+            <button class="btn language-toggle dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ __('erp.select_language') }}">
+                <i class="fa-solid fa-globe" aria-hidden="true"></i>
+                <span>
+                    <span lang="id" class="{{ app()->getLocale() === 'id' ? 'active-language' : '' }}">ID</span>
+                    <span class="language-divider" aria-hidden="true"> / </span>
+                    <span lang="en" class="{{ app()->getLocale() === 'en' ? 'active-language' : '' }}">EN</span>
+                    <span class="language-divider" aria-hidden="true"> / </span>
+                    <span lang="zh-CN" class="{{ app()->getLocale() === 'zh_CN' ? 'active-language' : '' }}">简体中文</span>
+                </span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end language-menu shadow-sm mt-2" aria-labelledby="languageDropdown">
+                <li><h6 class="dropdown-header">{{ __('erp.select_language') }}</h6></li>
+                @foreach (['id' => 'Indonesia', 'en' => 'English', 'zh_CN' => '简体中文'] as $locale => $label)
+                    <li>
+                        <a href="{{ route('lang.switch', $locale) }}" class="dropdown-item {{ app()->getLocale() === $locale ? 'active' : '' }}" lang="{{ str_replace('_', '-', $locale) }}" @if(app()->getLocale() === $locale) aria-current="true" @endif>
+                            <span>{{ $label }}</span>
+                            @if(app()->getLocale() === $locale)<i class="fa-solid fa-check" aria-hidden="true"></i>@endif
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
         <div class="dropdown">
             <button class="btn border-0 shadow-sm dropdown-toggle d-flex align-items-center gap-1 bg-white" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 10px; padding: 4px 10px 4px 4px; font-size:0.82rem;">
                 {{-- AMAN DARI ERROR NULL --}}
@@ -906,15 +956,6 @@
             </button>
             
             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2" style="width: 250px; border-radius: 12px;">
-                <li class="px-3 py-2">
-                    <small class="text-muted d-block mb-2 fw-bold"><i class="fa-solid fa-language me-2"></i>{{ __('erp.select_language') ?? 'Pilih Bahasa' }}</small>
-                    <div class="d-flex gap-2" role="group" aria-label="{{ __('erp.select_language') }}">
-                        <button type="button" class="btn btn-sm w-100 fw-bold google-translate-language" data-google-language="id">🇮🇩 ID</button>
-                        <button type="button" class="btn btn-sm w-100 fw-bold google-translate-language" data-google-language="en">🇬🇧 EN</button>
-                        <button type="button" class="btn btn-sm w-100 fw-bold google-translate-language" data-google-language="zh-CN">🇨🇳 中文</button>
-                    </div>
-                </li>
-                <li><hr class="dropdown-divider"></li>
                 <li>
                     <button type="button" class="dropdown-item d-flex align-items-center gap-3 py-2 fw-medium" id="theme-toggle">
                         <i class="fa-solid fa-moon text-secondary" id="theme-icon" style="width: 16px; text-align: center;"></i> 
@@ -932,6 +973,7 @@
                     </form>
                 </li>
             </ul>
+        </div>
         </div>
     </header>
 
@@ -951,83 +993,7 @@
 
 {{-- SCRIPTS --}}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    window.googleTranslateElementInit = function () {
-        new google.translate.TranslateElement({
-            pageLanguage: 'id',
-            includedLanguages: 'id,en,zh-CN',
-            autoDisplay: false,
-        }, 'google_translate_element');
-    };
 
-    document.addEventListener('DOMContentLoaded', function () {
-        var sourceLanguage = 'id';
-
-        // Google Translate injects its notification banner asynchronously and also
-        // sets body.style.top. Keep its translation engine, but permanently remove
-        // its injected UI so it never pushes the ERP page down.
-        function hideGoogleTranslateBanner() {
-            document.querySelectorAll('iframe').forEach(function (frame) {
-                var src = frame.getAttribute('src') || '';
-                var title = frame.getAttribute('title') || '';
-                var name = frame.getAttribute('name') || '';
-                var classes = frame.className || '';
-                var isGoogleTranslateUi = /goog-te|skiptranslate/i.test(classes)
-                    || /translate\.google\.com|translate_a\/element/i.test(src)
-                    || /google translate/i.test(title)
-                    || /google translate/i.test(name);
-
-                if (isGoogleTranslateUi) {
-                    // The translated page remains intact after only the banner frame is removed.
-                    frame.remove();
-                }
-            });
-
-            document.querySelectorAll('.goog-te-banner-frame, .goog-te-balloon-frame, #goog-gt-tt, .goog-te-spinner-pos').forEach(function (element) {
-                element.remove();
-            });
-
-            document.documentElement.style.setProperty('top', '0', 'important');
-            document.body.style.setProperty('top', '0', 'important');
-        }
-
-        hideGoogleTranslateBanner();
-        new MutationObserver(hideGoogleTranslateBanner).observe(document.documentElement, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['style', 'class'],
-        });
-        // Google can recreate the toolbar after its asynchronous translation finishes.
-        // Recheck briefly, then stop so this does not keep a permanent timer running.
-        var translateBannerCleanup = window.setInterval(hideGoogleTranslateBanner, 250);
-        window.setTimeout(function () { window.clearInterval(translateBannerCleanup); }, 10000);
-
-        function setGoogleTranslateCookie(value) {
-            var expires = new Date(Date.now() + 31536000000).toUTCString();
-            document.cookie = 'googtrans=' + value + '; expires=' + expires + '; path=/; SameSite=Lax';
-
-            if (location.hostname) {
-                document.cookie = 'googtrans=' + value + '; expires=' + expires + '; path=/; domain=' + location.hostname + '; SameSite=Lax';
-            }
-        }
-
-        document.querySelectorAll('.google-translate-language').forEach(function (button) {
-            button.addEventListener('click', function () {
-                var targetLanguage = button.dataset.googleLanguage;
-
-                if (targetLanguage === sourceLanguage) {
-                    setGoogleTranslateCookie('');
-                } else {
-                    setGoogleTranslateCookie('/' + sourceLanguage + '/' + targetLanguage);
-                }
-
-                window.location.reload();
-            });
-        });
-    });
-</script>
-<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 {{-- MODAL GLOBAL HISTORY LOG (AJAX) --}}
 <div class="modal fade" id="globalLogModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">

@@ -9,9 +9,10 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class LedgerExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSize
+class LedgerExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSize, WithTitle
 {
     protected $accCode;
     protected $startDate;
@@ -54,23 +55,28 @@ class LedgerExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSiz
 
     public function headings(): array
     {
-        $accTitle = 'KARTU AKUN: ' . ($this->account ? ($this->account->account_code . ' - ' . $this->account->account_name) : $this->accCode);
-        $periodTitle = 'Periode: ' . date('d M Y', strtotime($this->startDate)) . ' s/d ' . date('d M Y', strtotime($this->endDate));
-        $posisiTitle = 'Saldo Normal: ' . ($this->isDebetNormal ? 'DEBET' : 'KREDIT');
+        $accTitle = __('accounting.text_fee3d064ead0') . ($this->account ? ($this->account->account_code . ' - ' . $this->account->translatedName()) : $this->accCode);
+        $periodTitle = __('accounting.text_acfb45b8495a') . date('d M Y', strtotime($this->startDate)) . __('erp.to_abbr') . date('d M Y', strtotime($this->endDate));
+        $posisiTitle = __('accounting.text_2037a4309708') . ($this->isDebetNormal ? __('erp.debit_caps') : __('erp.credit_caps'));
 
         return [
             [$accTitle],
             [$periodTitle . ' | ' . $posisiTitle],
             [''],
             [
-                'Tanggal',
-                'No. Bukti / No. Transaksi',
-                'Keterangan Transaksi',
-                'Debet (Rp)',
-                'Kredit (Rp)',
-                'Saldo Akhir (Rp)',
+                __('erp.date'),
+                __('accounting.text_9c87d44f85d1'),
+                __('accounting.text_57d5fe80f49c'),
+                __('erp.debit_rp'),
+                __('erp.credit_rp'),
+                __('accounting.text_d629df3fcf34'),
             ],
         ];
+    }
+
+    public function title(): string
+    {
+        return substr(preg_replace('/[\\\\\/\?\*\[\]:]/', '_', $this->accCode), 0, 31);
     }
 
     public function array(): array
@@ -86,7 +92,7 @@ class LedgerExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSiz
         $rows[] = [
             date('d M Y', strtotime($this->startDate)),
             '-',
-            'SALDO AWAL (Sebelum ' . date('d/m/Y', strtotime($this->startDate)) . ')',
+            __('accounting.text_1b459d366cb8', ['date' => date('d/m/Y', strtotime($this->startDate))]),
             '-',
             '-',
             number_format($this->openingBalance, 2, ',', '.'),
@@ -95,7 +101,9 @@ class LedgerExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSiz
         $runningBalance = $this->openingBalance;
 
         // Ambil semua transaksi pada rentang periode
-        $transactions = JournalDetail::join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
+        $transactions = JournalDetail::query()
+            ->when(config('libretranslate.enabled'), fn ($query) => $query->with('header.noteTranslations'))
+            ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
             ->select(
                 'journal_details.*',
                 'journal_headers.transaction_date',
@@ -133,7 +141,7 @@ class LedgerExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSiz
             $rows[] = [
                 date('d M Y', strtotime($tx->transaction_date)),
                 $bukti,
-                $tx->notes ?? '-',
+                (config('libretranslate.enabled') ? $tx->header?->display_notes : $tx->notes) ?? '-',
                 $deb > 0 ? number_format($deb, 2, ',', '.') : '-',
                 $kre > 0 ? number_format($kre, 2, ',', '.') : '-',
                 number_format($runningBalance, 2, ',', '.'),
@@ -142,7 +150,7 @@ class LedgerExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSiz
 
         // Baris Total Mutasi & Saldo Akhir
         $rows[] = [
-            'TOTAL MUTASI',
+            __('accounting.text_646c504ba4a8'),
             '',
             '',
             number_format($totalDebet, 2, ',', '.'),

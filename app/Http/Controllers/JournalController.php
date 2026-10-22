@@ -32,12 +32,20 @@ class JournalController extends Controller
 
     public function index(Request $request)
     {
+        $accountCodes = \App\Support\AccountFilter::codes($request);
+        $accounts = Account::with('translations')->orderBy('account_code')->get();
         $perPage = $request->get('per_page', 50);
         $search = $request->get('search');
         $startDate = $request->get('start_date');
         $endDate = $request->get('end_date');
 
-        $query = JournalHeader::with(['details.account']);
+        $query = JournalHeader::with(['details.account.translations']);
+        if ($accountCodes) {
+            $query->whereHas('details', fn ($detail) => $detail->whereIn('account_code', $accountCodes));
+        }
+        if (config('libretranslate.enabled')) {
+            $query->with('noteTranslations');
+        }
 
         if (! empty($startDate)) {
             $query->whereDate('transaction_date', '>=', $startDate);
@@ -67,16 +75,17 @@ class JournalController extends Controller
                 'search' => $search,
                 'start_date' => $startDate,
                 'end_date' => $endDate,
+                'account_codes' => $accountCodes,
             ]);
 
         JournalDocumentLinkResolver::attach($journals->getCollection());
 
-        return view('journal.index', compact('journals', 'perPage', 'search', 'startDate', 'endDate'));
+        return view('journal.index', compact('journals', 'perPage', 'search', 'startDate', 'endDate', 'accounts', 'accountCodes'));
     }
 
     public function create()
     {
-        $accounts = Account::orderBy('account_code', 'asc')->get();
+        $accounts = Account::with('translations')->orderBy('account_code', 'asc')->get();
         $helpers = HelperCode::orderBy('helper_code', 'asc')->get();
 
         return view('journal.create', compact('accounts', 'helpers'));
@@ -188,7 +197,7 @@ class JournalController extends Controller
         } catch (\RuntimeException $e) {
             return redirect()->route('jurnal.index')->with('error', $e->getMessage());
         }
-        $accounts = Account::orderBy('account_code', 'asc')->get();
+        $accounts = Account::with('translations')->orderBy('account_code', 'asc')->get();
         $helpers = HelperCode::orderBy('helper_code', 'asc')->get();
 
         return view('journal.edit', compact('journal', 'accounts', 'helpers'));
@@ -516,6 +525,10 @@ class JournalController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Detail Jurnal tidak ditemukan.']);
         }
 
+        $names = Account::with('translations')->whereIn('account_code', $journals->pluck('account_code'))->get()->keyBy('account_code');
+        foreach ($journals as $row) {
+            $row->account_name = $names->get($row->account_code)?->translatedName() ?? $row->account_name;
+        }
         $header = JournalHeader::find($journalId);
         JournalDocumentLinkResolver::attach(collect([$header]));
         $html = view('journal.partials.ajax_detail', compact('journals', 'header'))->render();
@@ -534,6 +547,6 @@ class JournalController extends Controller
 
         $filename = 'Jurnal_Umum_'.date('Ymd_His').'.xlsx';
 
-        return Excel::download(new JournalExport($startDate, $endDate, $search), $filename);
+        return Excel::download(new JournalExport($startDate, $endDate, $search, \App\Support\AccountFilter::codes($request)), $filename);
     }
 }

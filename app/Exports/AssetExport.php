@@ -74,7 +74,7 @@ class AssetExport implements FromCollection, WithHeadings, WithStyles, ShouldAut
                 $accumulated,
                 $bookValue,
                 $asset->residual_value ?? 0,
-                $asset->is_active ? 'Aktif' : 'Tidak Aktif',
+                $asset->is_active ? __('accounting.active') : __('accounting.inactive'),
             ];
         });
     }
@@ -82,17 +82,17 @@ class AssetExport implements FromCollection, WithHeadings, WithStyles, ShouldAut
     public function headings(): array
     {
         return [
-            'No',
-            'Kode Aset',
-            'Nama Aset',
-            'Kategori',
-            'Qty',
-            'Tgl. Pemakaian',
-            'Nilai Perolehan',
-            'Akumulasi Penyusutan',
-            'Nilai Buku',
-            'Nilai Sisa',
-            'Status',
+            __('erp.no_abbr'),
+            __('erp.asset_code'),
+            __('erp.asset_name'),
+            __('erp.category'),
+            __('erp.qty_caps'),
+            __('accounting.text_b7a7edf903b7'),
+            __('erp.purchase_price'),
+            __('erp.accumulated_depreciation'),
+            __('erp.book_value'),
+            __('erp.residual_value'),
+            __('erp.status'),
         ];
     }
 

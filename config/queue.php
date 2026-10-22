@@ -31,6 +31,16 @@ return [
 
     'connections' => [
 
+        // Dedicated long-running local inference queue; leave accounting queues unchanged.
+        'translations' => [
+            'driver' => 'database',
+            'connection' => env('DB_QUEUE_CONNECTION'),
+            'table' => env('DB_QUEUE_TABLE', 'jobs'),
+            'queue' => 'translations',
+            'retry_after' => 240,
+            'after_commit' => true,
+        ],
+
         'sync' => [
             'driver' => 'sync',
         ],

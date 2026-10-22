@@ -2,12 +2,12 @@
     <div class="mb-3 d-flex justify-content-between align-items-center">
         <div>
             <h6 class="fw-bold mb-1 text-primary">{{ $header->evidence_number ?: $header->journal_id }}</h6>
-            <p class="text-muted small mb-0">{{ $journals->first()->header_desc }}</p>
+            <p class="text-muted small mb-0" title="{{ $header->notes }}">{{ $header->display_notes }}</p>
         </div>
         <div class="text-end d-flex gap-2 align-items-center">
             <a href="{{ $header->document_link['url'] }}" class="btn btn-sm btn-outline-primary" title="{{ $header->document_link['label'] }}"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>{{ $header->document_link['label'] }}</a>
             @unless($header->document_link['is_journal'])
-                <a href="{{ route('jurnal.edit', $header->journal_id) }}" class="btn btn-sm btn-outline-secondary" title="Edit Jurnal"><i class="fa-solid fa-book me-1"></i>Edit Jurnal</a>
+                <a href="{{ route('jurnal.edit', $header->journal_id) }}" class="btn btn-sm btn-outline-secondary" title="{{ __('accounting.text_e9c14a1d484b') }}"><i class="fa-solid fa-book me-1"></i>{{ __('accounting.text_e9c14a1d484b') }}</a>
             @endunless
             <span class="badge bg-light text-dark border"><i class="fa-regular fa-calendar me-1"></i> {{ date('d M Y', strtotime($journals->first()->transaction_date)) }}</span>
         </div>

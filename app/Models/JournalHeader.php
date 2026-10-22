@@ -193,6 +193,23 @@ class JournalHeader extends Model
         $this->attributes['notes'] = $value;
     }
 
+    public function noteTranslations()
+    {
+        return $this->hasMany(JournalNoteTranslation::class, 'journal_id', 'journal_id');
+    }
+
+    /** Display only. Never substitute translated content in edit forms or accounting logic. */
+    public function getDisplayNotesAttribute(): ?string
+    {
+        $original = $this->attributes['notes'] ?? null;
+        $locale = app()->getLocale();
+        if (!config('libretranslate.enabled') || !array_key_exists($locale, config('libretranslate.targets'))) {
+            return $original;
+        }
+        $hash = \App\Services\LibreTranslateService::fingerprint((string) $original);
+        return $this->noteTranslations->first(fn ($translation) => $translation->locale === $locale && $translation->source_hash === $hash)?->translated_text ?? $original;
+    }
+
     public function details()
     {
         return $this->hasMany(JournalDetail::class, 'journal_id', 'journal_id');

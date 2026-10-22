@@ -111,7 +111,7 @@
                         <label class="fw-bold text-muted small mb-0 text-nowrap">{{ __('erp.interval_colon') }}</label>
                         <select name="interval" class="form-select form-select-sm fw-bold" style="width: 140px;" onchange="this.form.submit()">
                             @foreach(\App\Support\ReportInterval::OPTIONS as $key => $label)
-                                <option value="{{ $key }}" {{ $interval == $key ? 'selected' : '' }}>{{ $label }}</option>
+                                <option value="{{ $key }}" {{ $interval == $key ? 'selected' : '' }}>{{ \App\Support\ReportInterval::label($key) }}</option>
                             @endforeach
                         </select>
 
@@ -158,7 +158,7 @@
                 @endif
                 <div style="text-align: center; width: 100%;">
                     <h4 style="margin: 0 0 4px 0; font-weight: 800; color: #4f46e5; text-transform: uppercase;">{{ $company?->company_name ?? 'BBW' }}</h4>
-                    <h5 style="margin: 0 0 4px 0; font-weight: 800; color: #0f172a; letter-spacing: 0.5px;">LAPORAN LABA RUGI MATRIKS ({{ \App\Support\ReportInterval::OPTIONS[$interval] ?? 'Bulanan' }})</h5>
+                    <h5 style="margin: 0 0 4px 0; font-weight: 800; color: #0f172a; letter-spacing: 0.5px;">{{ __('erp.profit_loss_report_title') }} ({{ \App\Support\ReportInterval::label($interval) }})</h5>
                     <p style="margin: 0; color: #64748b; font-size: 0.85rem; font-weight: 500;">{{ __('erp.period_colon') }} <span class="text-primary fw-bold">{{ \App\Support\ReportInterval::rangeLabel($interval, $year, $month) }}</span></p>
                     @if(isset($lastSync) && $lastSync)
                         @php

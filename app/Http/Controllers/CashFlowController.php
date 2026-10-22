@@ -80,8 +80,8 @@ class CashFlowController extends Controller
         if ($tab == 'direct') {
             $emptyTotals = array_fill_keys($periodKeys, 0);
             $report = [
-                'inflows'  => ['title' => 'Arus Kas Masuk (Penerimaan Kas)', 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
-                'outflows' => ['title' => 'Arus Kas Keluar (Pengeluaran Kas)', 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
+                'inflows'  => ['title' => __('accounting.cash_inflows'), 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
+                'outflows' => ['title' => __('accounting.cash_outflows'), 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
             ];
 
             $cashData = JournalDetail::join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
@@ -139,9 +139,9 @@ class CashFlowController extends Controller
         else {
             $emptyTotals = array_fill_keys($periodKeys, 0);
             $report = [
-                'operasi'   => ['title' => 'I. Arus Kas dari Aktivitas Operasi', 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
-                'investasi' => ['title' => 'II. Arus Kas dari Aktivitas Investasi', 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
-                'pendanaan' => ['title' => 'III. Arus Kas dari Aktivitas Pendanaan', 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
+                'operasi'   => ['title' => __('accounting.cash_operating'), 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
+                'investasi' => ['title' => __('accounting.cash_investing'), 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
+                'pendanaan' => ['title' => __('accounting.cash_financing'), 'items' => [], 'totals' => $emptyTotals, 'grand_total' => 0],
             ];
 
             $allData = JournalDetail::join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
@@ -188,7 +188,7 @@ class CashFlowController extends Controller
             }
 
             $report['operasi']['items'][] = [
-                'code' => '', 'name' => 'Laba (Rugi) Bersih Terkonsolidasi', 'periods' => $netIncomePeriods,
+                'code' => '', 'name' => __('accounting.consolidated_net_income'), 'periods' => $netIncomePeriods,
                 'total' => array_sum($netIncomePeriods), 'is_bold' => true
             ];
 

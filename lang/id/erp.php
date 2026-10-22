@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'multi_account_hint' => 'Pilih satu atau beberapa akun. Saldo ditampilkan terpisah per akun.',
+    'journal_multi_account_hint' => 'Kosongkan untuk semua akun. Jurnal yang memuat salah satu akun terpilih ditampilkan lengkap beserta akun pasangannya.',
+    'journal_sync_background' => 'Sinkronisasi sedang berjalan di latar belakang server. Anda bisa menutup halaman ini atau lanjut bekerja.',
+    'journal_sync_failed' => 'Gagal',
+    'journal_sync_error' => 'Terjadi kesalahan saat memulai sinkronisasi.',
     'payment_reapproval_label' => 'Pemeriksaan ulang independen pembayaran PAID — isi alasan pemeriksaan',
     'payment_reapproval_success' => 'Pembayaran PAID diperiksa ulang secara independen. Status PAID tetap dipertahankan.',
     'payment_maker_checker_guard' => 'Approval memerlukan pembuat/editor terverifikasi dan pengguna pemeriksa yang berbeda.',
@@ -1128,7 +1133,7 @@ return [
     'rows_per_page' => 'Baris per Halaman',
     'normal_balance_caps' => 'SALDO NORMAL',
     'ending_balance_rp' => 'Saldo Akhir (Rp)',
-    'total_balance_this_page' => 'TOTAL SALDO HALAMAN INI',
+    'total_balance_this_page' => 'TOTAL MUTASI & SALDO AKHIR HALAMAN INI',
     'general_journal_detail' => 'Rincian Jurnal Umum',
     'tx_date_caps' => 'TANGGAL TRANSAKSI',
     'general_notes_caps' => 'KETERANGAN UMUM',

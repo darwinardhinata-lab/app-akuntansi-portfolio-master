@@ -53,11 +53,11 @@ class AccountExport extends DefaultValueBinder implements FromQuery, WithHeading
     public function headings(): array
     {
         return [
-            ['DAFTAR AKUN (COA)'],
-            ['Data dimulai dari baris ke-6. Nilai master asli digunakan untuk impor ulang.'],
-            ['Kolom B: Kode, Kolom C: Nama, Kolom D: Tipe, Kolom E: Saldo, Kolom F: Laporan'],
+            [__('accounting.text_c664e4905b75')],
+            [__('accounting.text_696ea3a62b0d')],
+            [__('accounting.text_7355b1d11c45')],
             [''],
-            ['NO', 'KODE AKUN', 'NAMA AKUN', 'TIPE COA', 'POS SALDO', 'POS LAPORAN', 'Created At', 'Updated At'],
+            [__('erp.no_abbr'), __('erp.account_code_caps'), __('erp.account'), __('accounting.text_9cf29d8de451'), __('accounting.text_3cc3ca7c52c5'), __('accounting.text_a26f8fb52a0a'), __('accounting.text_5db1542e683b'), __('accounting.text_22714274a44d')],
         ];
     }
 

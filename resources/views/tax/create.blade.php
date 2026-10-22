@@ -22,8 +22,8 @@
             @endif
             <div class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label fw-bold small text-muted">Kode Pajak *</label>
-                    <input type="text" name="tax_code" class="form-control fw-bold @error('tax_code') is-invalid @enderror" value="{{ old('tax_code') }}" placeholder="Contoh: PPN-11" required>
+                    <label class="form-label fw-bold small text-muted">{{ __('accounting.text_4bbc74e0dd73') }}</label>
+                    <input type="text" name="tax_code" class="form-control fw-bold @error('tax_code') is-invalid @enderror" value="{{ old('tax_code') }}" placeholder="{{ __('accounting.text_b36a7af8a3d1') }}" required>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label fw-bold small text-muted">{{ __('erp.tax_name_required') }}</label>
@@ -41,11 +41,11 @@
                     <input type="number" name="rate" class="form-control fw-bold text-primary @error('rate') is-invalid @enderror" value="{{ old('rate', 0) }}" min="0" max="999.99" step="0.01" required>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label fw-bold small text-muted">Kode Akun</label>
+                    <label class="form-label fw-bold small text-muted">{{ __('erp.account_code_caps') }}</label>
                     <input type="text" name="account_code" class="form-control" value="{{ old('account_code') }}" maxlength="50">
                 </div>
                 <div class="col-md-8">
-                    <label class="form-label fw-bold small text-muted">Keterangan</label>
+                    <label class="form-label fw-bold small text-muted">{{ __('erp.description') }}</label>
                     <input type="text" name="description" class="form-control" value="{{ old('description') }}">
                 </div>
             </div>

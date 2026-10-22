@@ -30,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \App\Models\JournalHeader::observe(\App\Observers\JournalTranslationObserver::class);
         // Database MGI adalah data operasional. Perintah berikut dapat menghapus
         // schema/data dan tidak boleh berjalan tanpa opt-in operator yang eksplisit.
         // Test suite tetap diizinkan karena selalu menggunakan APP_ENV=testing.

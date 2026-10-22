@@ -15,25 +15,42 @@ class LedgerController extends Controller
 {
     public function export(Request $request)
     {
-        $accounts  = Account::orderBy('account_code', 'asc')->get();
-        $accCode   = $request->get('account_code', $accounts->first()->account_code ?? '');
+        $accounts  = Account::with('translations')->orderBy('account_code', 'asc')->get();
+        $accountCodes = \App\Support\AccountFilter::codes($request);
+        $accountCodes = $accountCodes ?: array_filter([$accounts->first()->account_code ?? '']);
+        $accCode = count($accountCodes) === 1 ? $accountCodes[0] : 'Multi_Akun';
         $startDate = $request->get('start_date', date('Y-m-01'));
         $endDate   = $request->get('end_date', date('Y-m-t'));
 
         $filename = 'Buku_Besar_' . ($accCode ?: 'Akun') . '_' . $startDate . '_sd_' . $endDate . '.xlsx';
 
-        return Excel::download(new LedgerExport($accCode, $startDate, $endDate), $filename);
+        $export = count($accountCodes) > 1
+            ? new \App\Exports\MultiAccountLedgerExport($accountCodes, $startDate, $endDate)
+            : new LedgerExport($accCode, $startDate, $endDate);
+
+        return Excel::download($export, $filename);
     }
 
     public function index(Request $request)
     {
-        $accounts  = Account::orderBy('account_code', 'asc')->get();
+        $accountCodes = \App\Support\AccountFilter::codes($request);
+        $accounts = Account::with('translations')->orderBy('account_code')->get();
+        $accountCodes = $accountCodes ?: array_filter([$accounts->first()->account_code ?? '']);
+        $sections = [];
+        foreach ($accountCodes ?: [''] as $code) {
+            $sections[] = $this->accountData($request, $accounts, $code, $accountCodes);
+        }
+
+        return view('ledger.index', array_merge($sections[0], compact('sections', 'accountCodes')));
+    }
         
-        $accCode   = $request->get('account_code', $accounts->first()->account_code ?? '');
+    private function accountData(Request $request, $accounts, string $accCode, array $accountCodes): array
+    {
         $startDate = $request->get('start_date', date('Y-m-01'));
         $endDate   = $request->get('end_date', date('Y-m-t'));
         $perPage   = $request->get('per_page', 50);
-        $page      = $request->get('page', 1);
+        $pageName = count($accountCodes) > 1 ? 'page_'.$accCode : 'page';
+        $page = max(1, (int) $request->get($pageName, 1));
 
         // 1. Hitung Saldo Awal Murni (Sebelum rentang start_date)
         $openingDebet  = JournalDetail::join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
@@ -100,27 +117,28 @@ class LedgerController extends Controller
         // =====================================================================================
         // 3. TARIK DATA DENGAN PAGINASI (Mencegah Fatal Error 512MB)
         // =====================================================================================
-        $transactions = JournalDetail::with(['header.details.account']) 
+        $transactions = JournalDetail::with(config('libretranslate.enabled')
+            ? ['header.details.account.translations', 'header.noteTranslations'] : ['header.details.account.translations'])
             ->join('journal_headers', 'journal_details.journal_id', '=', 'journal_headers.journal_id')
             ->select('journal_details.*', 'journal_headers.transaction_date', 'journal_headers.evidence_number', 'journal_headers.source_doc_no', 'journal_headers.notes', 'journal_headers.journal_type')
             ->where('account_code', $accCode)
             ->whereBetween('transaction_date', [$startDate, $endDate])
             ->orderBy('transaction_date', 'asc')
             ->orderBy('journal_details.id', 'asc')
-            ->paginate($perPage)
-            ->appends([
-                'account_code' => $accCode,
+            ->paginate($perPage, ['*'], $pageName, $page)
+            ->appends(array_merge($request->except($pageName), [
+                'account_codes' => $accountCodes,
                 'start_date'   => $startDate,
                 'end_date'     => $endDate,
                 'per_page'     => $perPage,
-            ]);
+            ]));
 
         JournalDocumentLinkResolver::attach($transactions->getCollection()->pluck('header')->filter());
 
-        return view('ledger.index', compact(
+        return compact(
             'accounts', 'accCode', 'startDate', 'endDate', 
             'pageOpeningBalance', 'transactions', 'selectedAccount', 
             'isDebetNormal', 'perPage', 'page'
-        ));
+        );
     }
 }

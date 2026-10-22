@@ -5,6 +5,12 @@
 @endsection
 
 @section('content')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<style>
+    .select2-container--bootstrap-5 .select2-selection--multiple { min-height: 38px; }
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice { white-space: normal; overflow-wrap: anywhere; }
+</style>
 <div class="container-fluid px-0">
     
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
@@ -16,7 +22,8 @@
             <a href="{{ route('jurnal.export', [
                 'start_date' => request('start_date'),
                 'end_date' => request('end_date'),
-                'search' => request('search')
+                'search' => request('search'),
+                'account_codes' => $accountCodes ?? [],
             ]) }}" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
                 <i class="fa-solid fa-file-excel me-1"></i> {{ __('erp.export_excel_btn') }}
             </a>
@@ -115,6 +122,15 @@
     <div class="card p-3 mb-4 shadow-sm border-0 bg-white" style="border-radius: 12px;">
         <div class="mb-2 text-primary fw-bold small"><i class="fa-solid fa-filter me-1"></i> {{ __('erp.filter_analytics_search') }}</div>
         <form action="{{ route('jurnal.index') }}" method="GET" id="filterForm" class="row g-2 align-items-end">
+            <div class="col-12">
+                <label for="journalAccounts" class="form-label small fw-bold text-muted mb-1">{{ __('erp.select_account_coa') }}</label>
+                <select id="journalAccounts" name="account_codes[]" multiple class="form-select form-select-sm">
+                    @foreach(($accounts ?? collect()) as $account)
+                        <option value="{{ $account->account_code }}" @selected(in_array($account->account_code, $accountCodes ?? []))>{{ $account->account_code }} - {{ $account->translatedName() }}</option>
+                    @endforeach
+                </select>
+                <div class="form-text small">{{ __('erp.journal_multi_account_hint') }}</div>
+            </div>
             <div class="col-12 col-sm-6 col-md-2">
                 <label class="form-label small fw-bold text-muted mb-1">{{ __('erp.start_date_short') }}</label>
                 <input type="date" name="start_date" class="form-control form-control-sm" value="{{ request('start_date') }}">
@@ -163,7 +179,7 @@
                                 <input type="checkbox" class="form-check-input" onclick="document.querySelectorAll('.journal-checkbox').forEach(cb => cb.checked = this.checked)">
                             </th>
                             <th width="11%" class="ps-2">{{ __('erp.date') }}</th>
-                            <th width="14%">No. Bukti / No. Transaksi</th>
+                            <th width="14%">{{ __('accounting.text_9c87d44f85d1') }}</th>
                             <th width="23%">{{ __('erp.description') }}</th>
                             <th width="24%">{{ __('erp.account_name_ref') }}</th>
                             <th width="11%" class="text-end">{{ __('erp.debit_rp') }}</th>
@@ -202,7 +218,7 @@
                                                 <small class="d-block text-muted font-monospace mt-1">Trx: {{ $header->source_doc_no }}</small>
                                             @endif
                                         </td>
-                                                <td class="align-middle fw-medium">@linkify($header->description)</td>
+                                                <td class="align-middle fw-medium" title="{{ $header->description }}">@linkify($header->display_notes)</td>
                                                 <td colspan="3" class="text-center text-danger fw-bold align-middle">
                                                     <i class="fa-solid fa-triangle-exclamation"></i> Rincian Kosong / Relasi Terputus
                                                 </td>
@@ -241,11 +257,11 @@
                                                         </small>
                                                     @endif
                                                 </td>
-                                                <td rowspan="{{ $detailsCount + 1 }}" class="align-top pt-3 fw-bold text-dark" style="background-color: #f8fafc;">@linkify($header->description)</td>
+                                                <td rowspan="{{ $detailsCount + 1 }}" class="align-top pt-3 fw-bold text-dark" style="background-color: #f8fafc;" title="{{ $header->description }}">@linkify($header->display_notes)</td>
                                             @endif
                                             <td>
                                                 <div class="{{ $det->position == 'KREDIT' ? 'ms-4' : '' }}">
-                                                    <span class="{{ $det->position == 'KREDIT' ? 'text-muted' : 'fw-bold text-dark' }}">{{ $det->account ? $det->account->account_name : 'AKUN TIDAK ADA' }}</span>
+                                                    <span class="{{ $det->position == 'KREDIT' ? 'text-muted' : 'fw-bold text-dark' }}">{{ $det->account ? $det->account->translatedName() : 'AKUN TIDAK ADA' }}</span>
                                                     <span class="text-muted small ms-1 font-monospace">[{{ $det->account_code }}]</span>
                                                 </div>
                                             </td>
@@ -258,7 +274,7 @@
                                                         <button type="button" onclick="showEntityLog('{{ $header->evidence_number }}')" class="btn btn-sm btn-outline-info shadow-sm" title="{{ __('erp.activity_log') }}"><i class="fa-solid fa-clock-rotate-left"></i></button>
                                                         <a href="{{ $sourceLink['url'] }}" class="btn btn-sm btn-outline-primary shadow-sm" title="{{ $sourceLink['label'] }}"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
                                                         @unless($sourceLink['is_journal'])
-                                                            <a href="{{ route('jurnal.edit', $primaryId) }}" class="btn btn-sm btn-outline-secondary shadow-sm" title="Edit Jurnal"><i class="fa-solid fa-book"></i></a>
+                                                            <a href="{{ route('jurnal.edit', $primaryId) }}" class="btn btn-sm btn-outline-secondary shadow-sm" title="{{ __('accounting.text_e9c14a1d484b') }}"><i class="fa-solid fa-book"></i></a>
                                                         @endunless
                                                         <button type="button" onclick="if(confirm('Hapus jurnal ini?')) document.getElementById('delete-form-{{ $primaryId }}').submit();" class="btn btn-sm btn-outline-danger shadow-sm"><i class="fa-solid fa-trash-can"></i></button>
                                                     </div>
@@ -298,9 +314,14 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function() {
+        $('#journalAccounts').select2({
+            theme: 'bootstrap-5', width: '100%', closeOnSelect: false,
+            placeholder: @json(__('erp.select_account_coa'))
+        });
         $('#btnSyncTemp').click(function() {
             var btn = $(this);
             btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin me-2"></i> {{ __('erp.syncing') }}');
@@ -314,8 +335,8 @@
                 success: function(response) {
                     Swal.fire({
                         icon: 'success',
-                        title: __('erp.alert_sync_started'),
-                        text: 'Sinkronisasi sedang berjalan di latar belakang server. Anda bisa menutup halaman ini atau lanjut bekerja.',
+                        title: @json(__('erp.alert_sync_started')),
+                        text: @json(__('erp.journal_sync_background')),
                         confirmButtonColor: '#3085d6'
                     });
                     btn.prop('disabled', false).html('<i class="fa-solid fa-rotate me-2"></i> {{ __('erp.btn_sync_temp') }} (Background)');
@@ -323,8 +344,8 @@
                 error: function() {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Gagal',
-                        text: 'Terjadi kesalahan saat memulai sinkronisasi.',
+                        title: @json(__('erp.journal_sync_failed')),
+                        text: @json(__('erp.journal_sync_error')),
                         confirmButtonColor: '#d33'
                     });
                     btn.prop('disabled', false).html('<i class="fa-solid fa-rotate me-2"></i> {{ __('erp.btn_sync_temp') }} (Background)');
