@@ -66,21 +66,21 @@ class ProtectedJournalQuery extends Builder
     {
         $this->checkRows($values);
 
-        return $this->periodWrite(fn () => parent::insert($values), $values, true);
+        return $this->periodWrite(fn () => $this->currencyWrite(fn () => parent::insert($values), $values, true), $values, true);
     }
 
     public function insertOrIgnore(array $values)
     {
         $this->checkRows($values);
 
-        return $this->periodWrite(fn () => parent::insertOrIgnore($values), $values, true);
+        return $this->periodWrite(fn () => $this->currencyWrite(fn () => parent::insertOrIgnore($values), $values, true), $values, true);
     }
 
     public function insertGetId(array $values, $sequence = null)
     {
         $this->checkRows($values);
 
-        return $this->periodWrite(fn () => parent::insertGetId($values, $sequence), $values, true);
+        return $this->periodWrite(fn () => $this->currencyWrite(fn () => parent::insertGetId($values, $sequence), $values, true), $values, true);
     }
 
     public function update(array $values)
@@ -93,7 +93,56 @@ class ProtectedJournalQuery extends Builder
             $this->checkRows([['journal_id' => $values['journal_id']]]);
         }
 
-        return $this->periodWrite(fn () => parent::update($values), $values);
+        return $this->periodWrite(fn () => $this->currencyWrite(
+            fn ($ids = null) => $ids === null ? parent::update($values) : $this->updateValidatedIds($ids, $values),
+            $values,
+            false
+        ), $values);
+    }
+
+    private function updateValidatedIds(array $ids, array $values)
+    {
+        $query = clone $this;
+        $query->whereIn('id', $ids);
+
+        return $query->updateWithoutCurrencyGuard($values);
+    }
+
+    private function updateWithoutCurrencyGuard(array $values)
+    {
+        return parent::update($values);
+    }
+
+    private function currencyWrite(callable $operation, array $values, bool $insert)
+    {
+        if ($this->from !== 'journal_details' || ! config('platform.multicurrency_enabled', false)) {
+            return $operation();
+        }
+        if (! $insert && ! array_intersect(array_keys($values), ['account_code', 'currency_code', 'amount_txn', 'exchange_rate'])) {
+            return $operation();
+        }
+
+        return $this->connection->transaction(function () use ($operation, $values, $insert) {
+            if ($insert) {
+                $rows = isset($values[0]) && is_array($values[0]) ? $values : ($values ? [$values] : []);
+                \App\Modules\Currency\Support\AccountCurrencyGuard::validate($rows, $this->connection);
+
+                return $operation();
+            }
+            foreach (['account_code', 'currency_code', 'amount_txn', 'exchange_rate'] as $column) {
+                if (isset($values[$column]) && ! is_scalar($values[$column])) {
+                    throw new RuntimeException('Perubahan mata uang jurnal memerlukan nilai eksplisit: '.$column.'.');
+                }
+            }
+            $targets = (clone $this)->lockForUpdate()->get(['id', 'account_code', 'currency_code', 'amount_txn', 'exchange_rate']);
+            $rows = [];
+            foreach ($targets as $target) {
+                $rows[] = array_merge((array) $target, $values);
+            }
+            \App\Modules\Currency\Support\AccountCurrencyGuard::validate($rows, $this->connection);
+
+            return $operation($targets->pluck('id')->all());
+        });
     }
 
     public function delete($id = null)
