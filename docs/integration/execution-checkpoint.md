@@ -1,3 +1,13 @@
+# Git publication checkpoint — 2026-10-27
+
+- User authorized focused commits and non-force pushes on `feat/marvel-dard-integration`; no merge to main or production deployment.
+- Reviewed local changes and committed accounting, panel/security, payment/AP development flow, sales schema compatibility, legacy-sync retirement and integration evidence separately.
+- Fetched origin and merged remote master-plan commit `ca6142d95faf893f4637330bd99e515eca378216` without conflicts. Local and remote v1.1 master-plan text matched; retained unchanged.
+- Fresh pre-publication regression: **719 tests / 14,646 assertions, exit 0**, SQLite in-memory. Composer validation passed, Composer audit reported no advisories, Vite build passed.
+- User deletion `template_saldo_awal.csv` remains unstaged/uncommitted. Generated public build/Filament assets remain local; regenerate with `npm ci`, `npm run build` and `php artisan filament:assets` in the appropriate isolated environment.
+- No migration against the user database, financial activation, production secret change, main merge or deployment. Publication does not promote any acceptance or menu status.
+- Next implementation priority remains master-plan section 18: reconcile all AP residual sources, coordinate legacy/manual writers, then v33 UI/print and isolated MySQL/browser acceptance. Existing documented gaps remain open.
+
 # Marvel–Dard integration execution checkpoint
 
 ## Working state
