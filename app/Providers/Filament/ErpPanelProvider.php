@@ -18,7 +18,7 @@ final class ErpPanelProvider extends PanelProvider
                     ->url(fn () => route('payment-plan-v33.workspace'))
                     ->visible(fn () => config('payment_plan_v33.enabled') && config('payment_plan_v33.bank_workflow')),
             ])
-            ->pages([\Filament\Pages\Dashboard::class])
+            ->pages([\Filament\Pages\Dashboard::class, \App\Filament\Pages\ApReconciliationQueue::class])
             ->middleware([
                 \Illuminate\Cookie\Middleware\EncryptCookies::class,
                 \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,

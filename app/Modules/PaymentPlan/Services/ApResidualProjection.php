@@ -14,6 +14,20 @@ final class ApResidualProjection
         $exceptions = [];
         $used = '0.00';
         $represented = [];
+        $resolved = [];
+        foreach (DB::table('ppl_ap_reconciliations')->where('purchase_bill_id', $bill->id)->where('status', 'approved')->get() as $resolution) {
+            $snapshot = json_decode($resolution->source_snapshot, true, 512, JSON_THROW_ON_ERROR);
+            $header = \App\Support\ProtectedJournalQuery::table('journal_headers')->where('journal_id', $resolution->journal_id)->first();
+            $lines = \App\Support\ProtectedJournalQuery::table('journal_details')->where('journal_id', $resolution->journal_id)->orderBy('id')->get()->map(fn ($l) => (array) $l)->all();
+            if (!$header || $snapshot['header'] !== (array) $header || $snapshot['lines'] !== $lines || $snapshot['account'] !== $account) {
+                $exceptions[] = ['source' => 'reconciliation:'.$resolution->id, 'reason' => 'approved_source_changed'];
+                $resolved[$resolution->journal_id] = true;
+                continue;
+            }
+            $events[] = ['source' => 'reconciliation:'.$resolution->id, 'journal_id' => $resolution->journal_id, 'status' => 'approved', 'reduction' => (string) $resolution->amount];
+            $used = bcadd($used, (string) $resolution->amount, 2);
+            $resolved[$resolution->journal_id] = true;
+        }
         foreach (DB::table('ppl_ap_allocations')->where('purchase_bill_id', $bill->id)->orderBy('request_id')->get() as $allocation) {
             $amount = in_array($allocation->status, ['active', 'consumed'], true) ? (string) $allocation->amount : '0.00';
             $events[] = ['source' => 'ppl_allocation:'.$allocation->request_id, 'status' => $allocation->status, 'reduction' => $amount];
@@ -31,6 +45,7 @@ final class ApResidualProjection
         })->orderBy('journal_id')->get();
         foreach ($journals as $journal) {
             if ($journal->journal_id === $bill->journal_id || isset($represented[$journal->journal_id])) continue;
+            if (isset($resolved[$journal->journal_id])) continue;
             $lines = \App\Support\ProtectedJournalQuery::table('journal_details')->where('journal_id', $journal->journal_id)->get();
             $reduction = '0.00';
             foreach ($lines->where('account_code', $account) as $line) {
