@@ -1,3 +1,14 @@
+# F04/F11 explainable residual increment — 2026-10-27
+
+- Added ApResidualProjection: source-keyed contributions from active/consumed Payment Plan allocations and balanced IDR journals with explicit bill_id; signed AP credits restore residual (reversal), AP debits reduce it. Payment-event journal/intent identities are excluded when already represented by an allocation, including missing ACK recovery.
+- Document-number-only journals are reconciliation candidates, not auto-attributed payments. PO-linked non-void returns become `return_invoice_allocation_required` exceptions, without reducing a specific invoice. Out-of-bounds residuals and unsupported currency block new reservations/approval.
+- API source results include events/exceptions/blocked; development workbench displays raw explainable breakdown with textContent, and blocked selector options remain disabled. This is NOT the final reference v33 UI or print acceptance.
+- Actual schema discovery: PurchaseBill declared purchase_order_id in model but no migration created it. Added nullable restrictive FK migration `2026_10_27_170000_add_explicit_purchase_bill_order_link.php`, with no inferred historical backfill and evidence-retaining rollback. Unknown legacy PO links remain unreconciled; not claimed comprehensive.
+- Purchase-return store and purchase-bill delete acquire existing financial context rows in company order before PO/bill locks when bank workflow enabled. Other manual journal, legacy PaymentPlan, import and source writers are NOT yet coordinated; no universal race-safety claim.
+- Regression covers PPL journal deduplication, explicit manual payment, signed reversal, ambiguous reference, and PO-only return blocking/no subtraction. Initial runs found stdClass validator conversion, missing declared schema column, and protected journal-query architecture test; fixed without bypassing tests.
+- Final full suite: **719 tests / 14,662 assertions, exit 0**, SQLite in-memory. Diff check passed. No MySQL concurrency/browser/restore proof, no user DB migration. F04/F11 remain IN_PROGRESS.
+- Next: explicit reconciled source-allocation records/API and legacy payment reference inventory (not merely bill_id), return reconciliation resolution, coordinate all remaining writers, implement v33 presentation, then isolated MySQL multi-process acceptance. Historical missing links and standalone credit-note lifecycle are not resolved by this projection.
+
 # Settlement approval accounting basis — 2026-10-27
 
 - WorkflowStore now captures server-owned accountingApproval after the Director settlement transition, in the same transaction/event payload: currency, settlement amounts, invoice/source journal/payable identity, source-bank identity, financial settings version, mapping rows and posting lines. Mapping has no explicit revision field; its persisted row/content/timestamp is the version fingerprint, not an invented business revision.

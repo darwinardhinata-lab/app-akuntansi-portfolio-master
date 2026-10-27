@@ -29,16 +29,17 @@ final class PurchaseBillAllocation
         $net = '0.00';
         foreach ($lines->where('account_code', $code) as $line) $net = $line->position === 'KREDIT' ? bcadd($net, (string) $line->amount, 2) : bcsub($net, (string) $line->amount, 2);
         if (bccomp($net, (string) $bill->grand_total, 2) !== 0 || bccomp($net, '0', 2) <= 0) throw new RuleViolation('purchase_bill_control_total_mismatch', 409);
-        $allocated = '0.00';
-        foreach (DB::table('ppl_ap_allocations')->where('purchase_bill_id', $billId)->whereIn('status', ['active', 'consumed'])->get() as $row) $allocated = bcadd($allocated, (string) $row->amount, 2);
+        $projection = (new ApResidualProjection())->project($bill, $code, $net);
         return ['id' => $billId, 'number' => $bill->bill_number, 'payee' => $bill->contact_name ?: $bill->vendor_name,
-            'total' => $net, 'residual' => bcsub($net, $allocated, 2), 'account_code' => $code, 'journal_id' => $journal->getKey()];
+            'total' => $net, 'account_code' => $code, 'journal_id' => $journal->getKey()] + $projection
+            + ($projection['exceptions'] ? ['blocked' => 'ap_reconciliation_required'] : []);
     }
 
     public function reserve(array $request, int $company): void
     {
         if (DB::transactionLevel() === 0) throw new RuleViolation('ap_transaction_required', 409);
         $source = $this->source((int) ($request['purchaseBillId'] ?? 0), $company);
+        if (isset($source['blocked'])) throw new RuleViolation('ap_reconciliation_required', 409);
         $amount = (string) $request['settlement']['gross'];
         if (bccomp($amount, $source['residual'], 2) > 0) throw new RuleViolation('overpayment');
         DB::table('ppl_ap_allocations')->updateOrInsert(['request_id' => $request['id']], ['company_id' => $company,

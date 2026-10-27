@@ -21,7 +21,8 @@ final class SettlementAccountingSnapshot
         $entries = [['expense', 'DEBET', $settlement['base']], ['vat', 'DEBET', $settlement['vat']]];
         if ($request['category'] === 'raw_ap') {
             $source = (new PurchaseBillAllocation())->source((int) $request['purchaseBillId'], $company);
-            unset($source['residual']); // Availability is checked again under lock, not approved as a constant.
+            if (isset($source['blocked'])) throw new RuleViolation('ap_reconciliation_required', 409);
+            unset($source['residual'], $source['events'], $source['exceptions']); // Availability is checked again under lock.
             $lines[] = ['account_code' => $source['account_code'], 'position' => 'DEBET', 'amount' => (string) $settlement['gross']];
             $entries = [];
         }

@@ -185,6 +185,7 @@ class PurchaseBillController extends Controller
     {
         DB::beginTransaction();
         try {
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
             $bill = PurchaseBill::lockForUpdate()->findOrFail($id);
             if (\Illuminate\Support\Facades\Schema::hasTable('ppl_ap_allocations')
                 && DB::table('ppl_ap_allocations')->where('purchase_bill_id', $bill->id)->exists()) {

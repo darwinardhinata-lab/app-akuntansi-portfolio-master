@@ -5,6 +5,7 @@
     <p class="text-muted">{{ __('bank_payment.scope') }}</p>
     <div role="alert" id="bankMessage" class="alert alert-info" aria-live="polite"></div>
     <div id="erpBankBalances" class="mb-3"></div>
+    <pre id="apReconciliationDetails" class="small border p-2" style="white-space:pre-wrap"></pre>
     <form id="newBankRequest" class="card card-body mb-3">
         <h2 class="h5">{{ __('bank_payment.new') }}</h2>
         <label>{{ __('bank_payment.ap_source') }}<select name="purchaseBillId" class="form-select"><option value="">{{ __('bank_payment.direct_service') }}</option></select></label>
@@ -64,6 +65,7 @@
    (p.attachments||[]).forEach(a=>{const link=document.createElement('a'); link.href=endpoints.download+'/'+encodeURIComponent(a.id); link.textContent=a.kind+': '+a.name; link.className='d-block'; links.append(link);});
  }
  async function refresh() {const data=await api(endpoints.data); const list=document.getElementById('bankRequests'); list.replaceChildren();
+   document.getElementById('apReconciliationDetails').textContent=JSON.stringify(data.purchaseBills||[],null,2);
    const source=document.getElementById('newBankRequest').elements.purchaseBillId, old=source.value;
    while(source.options.length>1)source.remove(1);
    (data.purchaseBills||[]).forEach(p=>{const option=new Option(p.number+' — '+(p.blocked||p.residual),p.id);option.disabled=!!p.blocked;source.add(option);});source.value=old;

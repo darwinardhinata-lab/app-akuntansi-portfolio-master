@@ -61,6 +61,41 @@ class PaymentPlanApAllocationTest extends TestCase
         $this->assertDatabaseHas('journal_details', ['journal_id' => $journalId, 'account_code' => '211001', 'position' => 'DEBET', 'amount' => '40.00']);
         $this->assertDatabaseMissing('journal_details', ['journal_id' => $journalId, 'account_code' => '610001']);
         $this->assertSame(2, DB::table('journal_details')->where('journal_id', $journalId)->count());
+        DB::table('purchase_bills')->where('id', $bill)->update(['payment_status' => 'PARTIAL', 'credit_account' => '211001']);
+        // The Payment Plan journal is already represented by its allocation: count it once.
+        DB::table('journal_headers')->where('journal_id', $journalId)->update(['bill_id' => $bill]);
+        $manual = PostingService::post(['bill_id' => $bill, 'source_doc_no' => 'AP-FIXTURE'], [
+            ['account_code' => '211001', 'position' => 'DEBET', 'amount' => '10.00'],
+            ['account_code' => '111003', 'position' => 'KREDIT', 'amount' => '10.00'],
+        ]);
+        $projection = DB::transaction(fn () => $allocator->source($bill, $company->id));
+        $this->assertSame('50.00', $projection['residual']);
+        $this->assertCount(2, $projection['events']);
+        PostingService::post(['bill_id' => $bill, 'source_doc_no' => 'AP-FIXTURE', 'journal_type' => 'REVERSAL'], [
+            ['account_code' => '211001', 'position' => 'KREDIT', 'amount' => '10.00'],
+            ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '10.00'],
+        ]);
+        $this->assertSame('60.00', DB::transaction(fn () => $allocator->source($bill, $company->id))['residual']);
+        // Matching text alone is not an authorized invoice allocation.
+        DB::table('journal_headers')->where('journal_id', $manual->getKey())->update(['bill_id' => null]);
+        $projection = DB::transaction(fn () => $allocator->source($bill, $company->id));
+        $this->assertSame('ap_reconciliation_required', $projection['blocked']);
+        $this->assertSame('invoice_identity_unverified', $projection['exceptions'][0]['reason']);
+        DB::table('journal_headers')->where('journal_id', $manual->getKey())->update(['bill_id' => $bill]);
+        $po = DB::table('purchase_orders')->insertGetId(['po_number' => 'PO-RECON', 'transaction_date' => '2026-01-01', 'contact_name' => 'Synthetic']);
+        DB::table('purchase_bills')->where('id', $bill)->update(['purchase_order_id' => $po]);
+        $returnId = DB::table('purchase_returns')->insertGetId(['return_number' => 'PR-RECON', 'purchase_order_id' => $po,
+            'return_date' => '2026-01-02', 'status' => 'COMPLETED', 'total_return_amount' => '5.00']);
+        $projection = DB::transaction(fn () => $allocator->source($bill, $company->id));
+        $this->assertSame('60.00', $projection['residual']);
+        $this->assertSame('return_invoice_allocation_required', $projection['exceptions'][0]['reason']);
+        $this->assertSame('purchase_return:'.$returnId, $projection['exceptions'][0]['source']);
+        try {
+            DB::transaction(fn () => $allocator->reserve($payload, $company->id));
+            $this->fail('Ambiguous return must block a new reservation.');
+        } catch (\App\Modules\PaymentPlan\Domain\RuleViolation $exception) {
+            $this->assertSame('ap_reconciliation_required', $exception->rule);
+        }
         $migration = require database_path('migrations/2026_10_27_160000_add_ap_allocation_source_snapshot.php');
         try {
             $migration->down();

@@ -54,6 +54,7 @@ class PurchaseReturnController extends Controller
 
         DB::beginTransaction();
         try {
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
             \App\Support\AccountingPeriodGuard::source([$request->return_date]);
             $prefix = 'PR-' . date('Ymd', strtotime($request->return_date)) . '-';
             $secureReturnNumber = DocumentSequence::generateSecure('purchase_returns', 'return_number', $prefix);
