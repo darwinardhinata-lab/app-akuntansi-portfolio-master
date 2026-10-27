@@ -1,0 +1,152 @@
+audit_id,pdf_page,source_menu,source_target,erp_route,implementation_status,evidence
+1,3,Pengaturan Perusahaan,company-setup,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+2,3,"Saldo Pembukaan ( Row, Barang Jadi )",data-master-item,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+3,3,Bank,bank,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+4,3,Data Master Item,data-master-item,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+5,3,Master Sub Grup,sub-group-master,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+6,3,Peta Akun Material,mapping-account-material,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+7,3,Kurs Rate,rate-currency,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+8,3,Master Pelanggan,master-supplier,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+9,3,Master Satuan,Jangkar (#),,not-assessed,Audit observation only; ERP implementation and acceptance not established
+10,3,Master Jangka Waktu Pembayaran,master-payment-term,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+11,3,Master Approve,master-approve,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+12,3,Tentang,about,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+13,3,Master CBD & BOM,cbd-bom-master,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+14,3,Pesanan Konsumen & MRP,master-order-bommrp,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+15,3,IPR (Permintaan Beli Internal),ipr-internal-purchase-request,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+16,3,Master Pelanggan,master-customer,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+17,3,Master Ukuran,master-size,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+18,3,Master Divisi,master-divison,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+19,3,Master Agent,master-agent,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+20,3,Master Koleksi,master-colletion,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+21,4,Pesanan Beli Umum,purchase-order-general,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+22,4,Nota Penerimaan Barang,goods-received-bbm,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+23,4,Pesanan Beli Menurut IPR,purchase-order-by-ipr,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+24,4,Status Material-PO Umum,general-material-po-status,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+25,4,Status BOM/MRP-Material,bommrp-material-status,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+26,4,Nota Pengiriman,delivery-notesurat-jalan,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+27,4,Permintaan Material,material-request,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+28,4,Pengiriman & Pengembalian Barang,goods-dispatch-bbk-return,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+29,4,Rekap Nota Penerimaan Barang,recap-goods-received,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+30,4,Tolak Komponen,recap-sales,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+31,4,Pembaruan Nota Penerimaan Barang,bbm-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+32,4,Pembaruan Pengiriman Barang,bbk-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+33,4,Pengiriman Barang Umum,bbk-general,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+34,4,SPK / Surat Perintah Kerja,spk-work-order-letter,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+35,4,Permintaan Material,material-request,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+36,4,Pengiriman & Pengembalian Barang,goods-dispatch-bbk-return,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+37,4,Persiapan Nota Penerimaan Barang,goods-received-bbm,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+38,4,Persiapan Inventaris,inventory-preparation,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+39,5,Potongan,process?tab=cutting,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+40,5,Menjahit,process?tab=sewing,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+41,5,Membalikan,process?tab=flipping,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+42,5,Mengisi,process?tab=stuffing,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+43,5,Jahit Tangan,process?tab=hand_stitching,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+44,5,Menyelesaikan,process?tab=finishing,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+45,5,Inspeksi,process?tab=inspect,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+46,5,Pembungkusan,process?tab=packing,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+47,5,Barang Jadi,process?tab=finish_good,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+48,5,Progres Produksi,progress-production,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+49,5,Nota Penerimaan Barang Mekanik,goods-received-note-mechanic,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+50,5,Pengiriman Barang Mekanik,goods-dispatch-mechanic,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+51,5,Surat Persetujuan/Kontrak Kerja Subkontrak,letter-of-agreementkontrak-kerja-subcont,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+52,5,Permintaan Material,material-request,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+53,5,Nota Pengiriman,delivery-notesurat-jalan,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+54,5,Nota Penerimaan Barang Subkontrak,goods-received-bbm,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+55,5,Inventaris Subkontrak,subcontract-reconciliation,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+56,5,Rekonsiliasi Subkontrak,subcontract-reconciliation,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+57,6,Penjualan Ekspor & Lokal,sales-export-30-local-25-more,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+58,6,Nota Pengiriman,delivery-notesurat-jalan,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+59,6,Laporan Pengiriman,recap-sales,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+60,6,Pengiriman Barang Jadi,dispatch-finishgood,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+61,6,Nota Penerimaan Barang Sampah,good-received-bbm-sampah-scrapt,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+62,6,Pengiriman Barang Sampah,good-dispatch-bbk-sampah-scrapt,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+63,6,Sampah Inventaris,inventory-sampah-scrap,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+64,6,Aplikasi Aliran Keuangan,chart-of-account,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+65,6,Daftar Akun,chart-of-account,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+66,6,Entri Umum,general-entry,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+67,6,Hutang Lainnya,other-paylable,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+68,6,Pengaturan COA & Akun,setup-coa-account,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+69,6,Permintaan Pembayaran,payment-request,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+70,6,Pembayaran Batch,batch-payment,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+71,6,Pembayaran Tunai Bank,payment-cashbank,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+72,6,Permintaan Uang Muka,advance-request,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+73,7,Nota Debit Invoice,debit-note-invoice,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+74,7,Penerimaan Tunai/Bank,received-cashbank,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+75,7,Buku Besar,general-ledger,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+76,7,Laba Rugi,profit-and-loss,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+77,7,Neraca,balance-sheet,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+78,7,Pencatatan,posting,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+79,7,Kas Harian,import-data-ceisa-40,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+80,7,Rekap Akun Hutang,import-data-ceisa-40,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+81,7,Rekap Akun Piutang,import-data-ceisa-40,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+82,7,Pembaruan Nota Penerimaan Barang Akun,bbm-account-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+83,7,Pembaruan Akun Pengiriman Barang,bbk-account-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+84,7,Laporan Harian Inventaris,daily-report-inventory,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+85,7,Inventaris Bahan Baku,inventory-raw-material,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+86,7,Inventaris WIP,inventory-wip,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+87,7,Inventaris Barang Jadi,inventory-wip,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+88,7,Penyesuaian Inventaris / Stock Opname,inventory-adjustment-stock-opname,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+89,7,Stok Yang Tersisa,stock-on-hand,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+90,8,Pembaruan Nota Penerimaan Barang,good-recieved-bbm-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+91,8,Pembaruan Pengiriman Barang,good-dispatch-bbk-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+92,8,Pembaruan Nota Penerimaan Barang Barang Tidak Laris,good-received-deadstock-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+93,8,Update Pengiriman Barang Stock Mati,good-dispatch-deadstock-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+94,8,Pembaruan Nota Penerimaan Barang Agpo,bbm-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+95,8,Pembaruan Pengiriman Agpo,bbk-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+96,8,Pembaruan Nota Penerimaan Barang Umum,bbm-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+97,8,Pembaruan Pengiriman Umum,bbk-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+98,8,Pembaruan Nota Penerimaan Barang Subkontrak,subcontract-reconciliation,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+99,8,Pembaruan Pengiriman Subkontrak,subcontract-reconciliation,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+100,8,Pembaruan Nota Penerimaan Barang Mekanik,good-recived-mechanic-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+101,8,Pembaruan Pengiriman Mekanik,good-disatch-mechanic-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+102,9,Pembaruan Nota Penerimaan Barang Sampah,good-recived-scrap-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+103,9,Update Pengiriman Sampah,good-dispatch-scrap-update,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+104,9,Pembaruan Nota Penerimaan Barang Update Stocklot (Masuk),good-received-update-stocklot-in,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+105,9,Update Pengiriman Stok Lot (Keluar),good-dispatch-update-stocklot-out,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+106,9,BC 2.3,barang-masuk/barang-import,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+107,9,BC 2.6.2,barang-masuk/barang-lokal,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+108,9,BC 2.7,barang-masuk/barang-lokal,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+109,9,BC 4.0,barang-masuk/barang-lokal,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+110,9,BC 3.0,barang-keluar/barang-export,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+111,9,BC 2.5,barang-keluar/barang-lokal,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+112,9,BC 2.6.1,barang-keluar/barang-lokal,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+113,9,BC 2.7,barang-keluar/barang-lokal,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+114,9,BC 4.1,barang-keluar/barang-lokal,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+115,10,Laporan Pemasukan Barang,laporan-pemasukan-barang,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+116,10,Laporan Pengeluaran Barang,laporan-pengeluaran-barang,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+117,10,Laporan Posisi Barang Dalam Proses,laporan-posisi-barang-dalam-proses,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+118,10,Laporan Mutasi Bahan Baku Dan Bahan Penolong,laporan-mutasi-bahan-baku-dan-bahan-penolong,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+119,10,Laporan Mutasi Barang Jadi,laporan-mutasi-barang-jadi,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+120,10,Laporan Mutasi Yang Ditolak (Reject) Dan Sisa Proses Produksi (Scrap/ Waste),laporan-mutasi-yang-ditolak-reject-dan-sisa-proses-produksi-scrap-waste,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+121,10,Laporan Mutasi Barang Modal Dan Barang Lain,laporan-mutasi-barang-modal-dan-barang-lain,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+122,10,Impor Data & Unggah,:: IMPORT DATA & UPLOAD ::,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+123,10,Impor Data Ceisa 4.0 & Lainnya.,import-data-ceisa-40,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+124,11,Laporan Progres Produksi,progress-production,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+125,11,Transaksi Inventaris (Saat Ini),inventory-raw-material,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+126,11,Transaksi Inventaris (Stock Mati),inventory-transaction-deadstock,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+127,11,Laporan Transaksi Lot Stok,transaction-stock-lot-report,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+128,11,Transaksi Inventaris (WIP),inventory-wip,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+129,11,Transaksi Inventaris (Subkontrak),inventory-transaction-subcont,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+130,11,Transaksi Inventaris (Agpo),inventory-transaction-agpo,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+131,11,Rekap Pembelian,purchase-recap,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+132,11,Pengiriman Lokal & Ekspor,dispatch-local-eksport,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+133,11,Penyesuaian & Stock Opname,adjustment-stock-opname,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+134,11,Buku Besar,general-ledger,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+135,11,Rekonsiliasi Periode,reconciliation-periode,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+136,11,Rekap Dokumen Beacukai,rekap-document-beacukai,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+137,11,Laporan Bea Cukai,beacukaicustom-report,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+138,11,Lap Pemasukan Barang Per Dokumen Pabean,laporan-pemasukan-barang,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+139,11,Lap Pengeluaran Barang Per Dokumen Pabean,laporan-pengeluaran-barang,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+140,11,Lap Posisi Barang Dalam Proses (WIP),laporan-posisi-barang-dalam-proses,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+141,11,Lap Mutasi Bahan Baku Dan Bahan Penolong,laporan-mutasi-bahan-baku-dan-bahan-penolong,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+142,11,Lap Mutasi Barang Jadi,laporan-mutasi-barang-jadi,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+143,11,Lap Mutasi Barang Sisa Dan Sampah,laporan-mutasi-yang-ditolak-reject-dan-sisa-proses-produksi-scrap-waste,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+144,11,Lap Mutasi Mesin,laporan-mutasi-barang-modal-dan-barang-lain,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+145,11,Approve,approve,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+146,11,Dok Rekonsiliasi Ceisa 4.0,recon-doc-ceisa-40,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+147,12,Daftar Karyawan,employee-register,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+148,12,Log Aplikasi,log-app,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+149,12,Opsi,Jangkar (#),,not-assessed,Audit observation only; ERP implementation and acceptance not established
+150,12,Aplikasi Addon Diagram Alir,flow-app-addon,,not-assessed,Audit observation only; ERP implementation and acceptance not established
+151,12,Options,options,,not-assessed,Audit observation only; ERP implementation and acceptance not established

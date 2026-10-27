@@ -1,0 +1,2319 @@
+PAGE 1
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+1
+AUDIT APLIKASI ADDONAN FINANCE
+PT. Magicase Group Indonesia (MGC) | 26 Oktober 2026
+Jenis pemeriksaan
+Cakupan
+Audit fungsional antarmuka
+Cloud Browser, akun darwin, tenant MGC. Pengamatan menu, formulir, tabel, tab, pop-up,
+laporan, dan alur bawaan aplikasi.
+Mode pemeriksaan
+Read-only terhadap data bisnis. Tidak mengisi atau menyimpan transaksi; tidak
+menjalankan hapus, approval, posting, import, atau pembaruan data.
+Hasil utama
+Struktur ERP manufaktur dan IT Inventory tersedia. Ditemukan ketidaksesuaian navigasi,
+tujuan yang kembali ke dasbor, label terjemahan mentah, dan risiko konsistensi master
+akun.
+Batas kesimpulan
+Audit ini bukan opini atas kewajaran laporan keuangan, audit source code, uji penetrasi,
+atau UAT seluruh aturan transaksi.
+Kesimpulan untuk manajemen
+Aplikasi mempunyai cakupan proses yang luas: BOM/MRP, purchasing, penerimaan dan pengeluaran
+material, produksi, penjualan, pembayaran, jurnal, persediaan, serta dokumen dan laporan bea cukai.
+Struktur menu belum sepenuhnya konsisten dengan halaman yang dibuka. Prioritas pertama adalah
+memastikan jalur navigasi dan master akuntansi benar sebelum memperluas otomasi transaksi.
+Pencarian PO dan pembuatan pratinjau laba rugi berhasil diperiksa secara langsung. File ekspor Excel
+persediaan dapat dibaca sebagai XLSX. Keberadaan tombol atau kolom status tidak membuktikan validasi,
+otorisasi, atau integrasi posting bekerja; bagian tersebut tetap memerlukan pengujian terkontrol di
+lingkungan uji.
+Isi laporan
+1. Metode, cakupan, dan tingkat bukti
+2. Struktur menu hierarkis
+3. Analisis modul dan fitur
+4. Flowchart yang ditemukan
+5. Temuan dan rekomendasi prioritas
+6. Rencana pengembangan dan pengujian lanjutan
+Lampiran A. Matriks halaman dan fitur
+Lampiran B. Daftar tujuan menu bermasalah
+
+PAGE 2
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+2
+1. Metode dan tingkat bukti
+Sumber primer adalah antarmuka Addonan yang diakses setelah login sah pada
+https://app.addonan.com/id/dashboard. Observasi dilakukan dengan membaca halaman, membuka
+formulir kosong, membaca detail transaksi yang sudah ada, membuka tab/pop-up, menggunakan
+pencarian, dan membuat keluaran laporan. Tidak ada API internal, database, atau source code yang
+diperiksa.
+Ukuran cakupan
+Hasil
+Tautan navigasi terdeteksi
+152 elemen tautan, termasuk logo dasbor; 151 tautan bernama. Tautan
+berulang tetap dicatat dalam hierarki.
+Tujuan navigasi unik
+114 URL berbeda, termasuk dasbor dan jangkar (#). Banyak alias menu
+menggunakan halaman yang sama.
+Menu yang didokumentasikan
+151 entri sidebar dari DOM, termasuk tautan tanpa halaman tersendiri.
+Catatan observasi
+207 rekaman halaman/view; mencakup pemeriksaan ulang, formulir, tab,
+pop-up, dan hasil pencarian. Jumlah ini bukan jumlah modul.
+Tujuan kembali ke dasbor
+17 tujuan menu. Pada akses awal beberapa kosong; pada pemeriksaan ulang
+tujuan akhirnya adalah dasbor. Penyebab belum ditentukan.
+Akses yang digunakan
+Hanya satu akun dan satu tenant. Menu yang tidak diberikan kepada akun ini
+tidak dapat disimpulkan tidak ada.
+Kode
+Makna
+TERAMATI
+Halaman, field, tombol, atau hubungan pada diagram bawaan terlihat langsung.
+TERUJI READ-ONLY
+Aksi baca dilakukan dan keluaran diamati, misalnya pencarian dan pratinjau PDF.
+INDIKASI
+Data/label menimbulkan risiko yang perlu konfirmasi; belum membuktikan bug backend.
+BELUM DIUJI
+Memerlukan perubahan data atau konteks/record yang belum tersedia; bukan dinyatakan lulus
+atau gagal.
+Batas khusus
+Tidak ada penyimpanan form baru/edit, penghapusan, perubahan hak akses, persetujuan, release,
+posting, sinkronisasi PWN, update stock, atau upload/import yang dijalankan. Membuka formulir kosong
+hanya memeriksa antarmukanya. Pengujian tersebut tidak mengubah data transaksi dengan sengaja.
+Aplikasi dapat membuat log akses otomatis saat halaman/laporan dibuka.
+Tabel kosong dibaca sesuai filter yang terlihat, bukan dianggap seluruh database kosong. Sejumlah
+snapshot awal masih berstatus memuat; untuk kesimpulan masalah halaman digunakan pemeriksaan
+ulang. Pop-up yang bergantung pada record, proses simpan/hapus, otorisasi, atau data pilihan tertentu
+tidak seluruhnya dapat dipicu dalam mode ini.
+
+PAGE 3
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+3
+2. Struktur menu hierarkis
+Nama berikut mengikuti label aplikasi. Pengulangan dipertahankan agar lokasi fungsi dalam menu tidak
+hilang. Tujuan/fitur setiap halaman dijelaskan pada Lampiran A. Jangkar berarti tautan belum membuka
+halaman tersendiri pada URL yang diperiksa.
+Data Master
+No.
+Menu / submenu
+Tujuan halaman
+1
+Pengaturan Perusahaan
+company-setup
+2
+Saldo Pembukaan ( Row, Barang Jadi )
+data-master-item
+3
+Bank
+bank
+4
+Data Master Item
+data-master-item
+5
+Master Sub Grup
+sub-group-master
+6
+Peta Akun Material
+mapping-account-material
+7
+Kurs Rate
+rate-currency
+8
+Master Pelanggan
+master-supplier
+9
+Master Satuan
+Jangkar (#)
+10
+Master Jangka Waktu Pembayaran
+master-payment-term
+11
+Master Approve
+master-approve
+12
+Tentang
+about
+Manajemen Pesanan
+No.
+Menu / submenu
+Tujuan halaman
+13
+Master CBD & BOM
+cbd-bom-master
+14
+Pesanan Konsumen & MRP
+master-order-bommrp
+15
+IPR (Permintaan Beli Internal)
+ipr-internal-purchase-request
+16
+Master Pelanggan
+master-customer
+17
+Master Ukuran
+master-size
+18
+Master Divisi
+master-divison
+19
+Master Agent
+master-agent
+20
+Master Koleksi
+master-colletion
+
+PAGE 4
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+4
+Manajemen Material
+No.
+Menu / submenu
+Tujuan halaman
+21
+Pesanan Beli Umum
+purchase-order-general
+22
+Nota Penerimaan Barang
+goods-received-bbm
+23
+Pesanan Beli Menurut IPR
+purchase-order-by-ipr
+24
+Status Material-PO Umum
+general-material-po-status
+25
+Status BOM/MRP-Material
+bommrp-material-status
+26
+Nota Pengiriman
+delivery-notesurat-jalan
+27
+Permintaan Material
+material-request
+28
+Pengiriman & Pengembalian Barang
+goods-dispatch-bbk-return
+29
+Rekap Nota Penerimaan Barang
+recap-goods-received
+30
+Tolak Komponen
+recap-sales
+31
+Pembaruan Nota Penerimaan Barang
+bbm-update
+32
+Pembaruan Pengiriman Barang
+bbk-update
+33
+Pengiriman Barang Umum
+bbk-general
+Persiapan
+No.
+Menu / submenu
+Tujuan halaman
+34
+SPK / Surat Perintah Kerja
+spk-work-order-letter
+35
+Permintaan Material
+material-request
+36
+Pengiriman & Pengembalian Barang
+goods-dispatch-bbk-return
+37
+Persiapan Nota Penerimaan Barang
+goods-received-bbm
+38
+Persiapan Inventaris
+inventory-preparation
+
+PAGE 5
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+5
+Produksi
+No.
+Menu / submenu
+Tujuan halaman
+39
+Potongan
+process?tab=cutting
+40
+Menjahit
+process?tab=sewing
+41
+Membalikan
+process?tab=flipping
+42
+Mengisi
+process?tab=stuffing
+43
+Jahit Tangan
+process?tab=hand_stitching
+44
+Menyelesaikan
+process?tab=finishing
+45
+Inspeksi
+process?tab=inspect
+46
+Pembungkusan
+process?tab=packing
+47
+Barang Jadi
+process?tab=finish_good
+48
+Progres Produksi
+progress-production
+Mekanik
+No.
+Menu / submenu
+Tujuan halaman
+49
+Nota Penerimaan Barang Mekanik
+goods-received-note-mechanic
+50
+Pengiriman Barang Mekanik
+goods-dispatch-mechanic
+Subkontrak
+No.
+Menu / submenu
+Tujuan halaman
+51
+Surat Persetujuan/Kontrak Kerja Subkontrak
+letter-of-agreementkontrak-kerja-subcont
+52
+Permintaan Material
+material-request
+53
+Nota Pengiriman
+delivery-notesurat-jalan
+54
+Nota Penerimaan Barang Subkontrak
+goods-received-bbm
+55
+Inventaris Subkontrak
+subcontract-reconciliation
+56
+Rekonsiliasi Subkontrak
+subcontract-reconciliation
+
+PAGE 6
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+6
+Penjualan Dan Distribusi
+No.
+Menu / submenu
+Tujuan halaman
+57
+Penjualan Ekspor & Lokal
+sales-export-30-local-25-more
+58
+Nota Pengiriman
+delivery-notesurat-jalan
+59
+Laporan Pengiriman
+recap-sales
+60
+Pengiriman Barang Jadi
+dispatch-finishgood
+Sampah
+No.
+Menu / submenu
+Tujuan halaman
+61
+Nota Penerimaan Barang Sampah
+good-received-bbm-sampah-scrapt
+62
+Pengiriman Barang Sampah
+good-dispatch-bbk-sampah-scrapt
+63
+Sampah Inventaris
+inventory-sampah-scrap
+Keuangan & Akuntansi
+No.
+Menu / submenu
+Tujuan halaman
+64
+Aplikasi Aliran Keuangan
+chart-of-account
+65
+Daftar Akun
+chart-of-account
+66
+Entri Umum
+general-entry
+67
+Hutang Lainnya
+other-paylable
+68
+Pengaturan COA & Akun
+setup-coa-account
+Keuangan & Akuntansi > Pembayaran Tunai/Bank
+No.
+Menu / submenu
+Tujuan halaman
+69
+Permintaan Pembayaran
+payment-request
+70
+Pembayaran Batch
+batch-payment
+71
+Pembayaran Tunai Bank
+payment-cashbank
+Keuangan & Akuntansi
+No.
+Menu / submenu
+Tujuan halaman
+72
+Permintaan Uang Muka
+advance-request
+
+PAGE 7
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+7
+Keuangan & Akuntansi > Penerimaan Tunai/Bank
+No.
+Menu / submenu
+Tujuan halaman
+73
+Nota Debit Invoice
+debit-note-invoice
+74
+Penerimaan Tunai/Bank
+received-cashbank
+Keuangan & Akuntansi > Laporan Keuangan
+No.
+Menu / submenu
+Tujuan halaman
+75
+Buku Besar
+general-ledger
+76
+Laba Rugi
+profit-and-loss
+77
+Neraca
+balance-sheet
+78
+Pencatatan
+posting
+79
+Kas Harian
+import-data-ceisa-40
+80
+Rekap Akun Hutang
+import-data-ceisa-40
+81
+Rekap Akun Piutang
+import-data-ceisa-40
+Status Penutupan WO > Perbarui Status Penutupan WO
+No.
+Menu / submenu
+Tujuan halaman
+82
+Pembaruan Nota Penerimaan Barang Akun
+bbm-account-update
+83
+Pembaruan Akun Pengiriman Barang
+bbk-account-update
+84
+Laporan Harian Inventaris
+daily-report-inventory
+Laporan Inventaris
+No.
+Menu / submenu
+Tujuan halaman
+85
+Inventaris Bahan Baku
+inventory-raw-material
+86
+Inventaris WIP
+inventory-wip
+87
+Inventaris Barang Jadi
+inventory-wip
+88
+Penyesuaian Inventaris / Stock Opname
+inventory-adjustment-stock-opname
+89
+Stok Yang Tersisa
+stock-on-hand
+
+PAGE 8
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+8
+Pembaruan Inventaris > Bahan Baku
+No.
+Menu / submenu
+Tujuan halaman
+90
+Pembaruan Nota Penerimaan Barang
+good-recieved-bbm-update
+91
+Pembaruan Pengiriman Barang
+good-dispatch-bbk-update
+Pembaruan Inventaris > Barang Tidak Laris
+No.
+Menu / submenu
+Tujuan halaman
+92
+Pembaruan Nota Penerimaan Barang Barang Tidak Laris
+good-received-deadstock-update
+93
+Update Pengiriman Barang Stock Mati
+good-dispatch-deadstock-update
+Pembaruan Inventaris > Agpo
+No.
+Menu / submenu
+Tujuan halaman
+94
+Pembaruan Nota Penerimaan Barang Agpo
+bbm-update
+95
+Pembaruan Pengiriman Agpo
+bbk-update
+Pembaruan Inventaris > Umum
+No.
+Menu / submenu
+Tujuan halaman
+96
+Pembaruan Nota Penerimaan Barang Umum
+bbm-update
+97
+Pembaruan Pengiriman Umum
+bbk-update
+Pembaruan Inventaris > Subkontrak
+No.
+Menu / submenu
+Tujuan halaman
+98
+Pembaruan Nota Penerimaan Barang Subkontrak
+subcontract-reconciliation
+99
+Pembaruan Pengiriman Subkontrak
+subcontract-reconciliation
+Pembaruan Inventaris > Mekanik
+No.
+Menu / submenu
+Tujuan halaman
+100
+Pembaruan Nota Penerimaan Barang Mekanik
+good-recived-mechanic-update
+101
+Pembaruan Pengiriman Mekanik
+good-disatch-mechanic-update
+
+PAGE 9
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+9
+Pembaruan Inventaris > Sampah
+No.
+Menu / submenu
+Tujuan halaman
+102
+Pembaruan Nota Penerimaan Barang Sampah
+good-recived-scrap-update
+103
+Update Pengiriman Sampah
+good-dispatch-scrap-update
+Pembaruan Inventaris > Lot Stok
+No.
+Menu / submenu
+Tujuan halaman
+104
+Pembaruan Nota Penerimaan Barang Update Stocklot
+(Masuk)
+good-received-update-stocklot-in
+105
+Update Pengiriman Stok Lot (Keluar)
+good-dispatch-update-stocklot-out
+Dok Ekspor & Impor > Barang Masuk
+No.
+Menu / submenu
+Tujuan halaman
+106
+BC 2.3
+barang-masuk/barang-import
+107
+BC 2.6.2
+barang-masuk/barang-lokal
+108
+BC 2.7
+barang-masuk/barang-lokal
+109
+BC 4.0
+barang-masuk/barang-lokal
+Dok Ekspor & Impor > Barang Keluar
+No.
+Menu / submenu
+Tujuan halaman
+110
+BC 3.0
+barang-keluar/barang-export
+111
+BC 2.5
+barang-keluar/barang-lokal
+112
+BC 2.6.1
+barang-keluar/barang-lokal
+113
+BC 2.7
+barang-keluar/barang-lokal
+114
+BC 4.1
+barang-keluar/barang-lokal
+
+PAGE 10
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+10
+Laporan Bea Cukai
+No.
+Menu / submenu
+Tujuan halaman
+115
+Laporan Pemasukan Barang
+laporan-pemasukan-barang
+116
+Laporan Pengeluaran Barang
+laporan-pengeluaran-barang
+117
+Laporan Posisi Barang Dalam Proses
+laporan-posisi-barang-dalam-proses
+118
+Laporan Mutasi Bahan Baku Dan Bahan Penolong
+laporan-mutasi-bahan-baku-dan-bahan-penolong
+119
+Laporan Mutasi Barang Jadi
+laporan-mutasi-barang-jadi
+120
+Laporan Mutasi Yang Ditolak (Reject) Dan Sisa Proses
+Produksi (Scrap/ Waste)
+laporan-mutasi-yang-ditolak-reject-dan-sisa-proses-produk
+si-scrap-waste
+121
+Laporan Mutasi Barang Modal Dan Barang Lain
+laporan-mutasi-barang-modal-dan-barang-lain
+122
+Impor Data & Unggah
+:: IMPORT DATA & UPLOAD ::
+123
+Impor Data Ceisa 4.0 & Lainnya.
+import-data-ceisa-40
+
+PAGE 11
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+11
+Laporan Mis
+No.
+Menu / submenu
+Tujuan halaman
+124
+Laporan Progres Produksi
+progress-production
+125
+Transaksi Inventaris (Saat Ini)
+inventory-raw-material
+126
+Transaksi Inventaris (Stock Mati)
+inventory-transaction-deadstock
+127
+Laporan Transaksi Lot Stok
+transaction-stock-lot-report
+128
+Transaksi Inventaris (WIP)
+inventory-wip
+129
+Transaksi Inventaris (Subkontrak)
+inventory-transaction-subcont
+130
+Transaksi Inventaris (Agpo)
+inventory-transaction-agpo
+131
+Rekap Pembelian
+purchase-recap
+132
+Pengiriman Lokal & Ekspor
+dispatch-local-eksport
+133
+Penyesuaian & Stock Opname
+adjustment-stock-opname
+134
+Buku Besar
+general-ledger
+135
+Rekonsiliasi Periode
+reconciliation-periode
+136
+Rekap Dokumen Beacukai
+rekap-document-beacukai
+137
+Laporan Bea Cukai
+beacukaicustom-report
+138
+Lap Pemasukan Barang Per Dokumen Pabean
+laporan-pemasukan-barang
+139
+Lap Pengeluaran Barang Per Dokumen Pabean
+laporan-pengeluaran-barang
+140
+Lap Posisi Barang Dalam Proses (WIP)
+laporan-posisi-barang-dalam-proses
+141
+Lap Mutasi Bahan Baku Dan Bahan Penolong
+laporan-mutasi-bahan-baku-dan-bahan-penolong
+142
+Lap Mutasi Barang Jadi
+laporan-mutasi-barang-jadi
+143
+Lap Mutasi Barang Sisa Dan Sampah
+laporan-mutasi-yang-ditolak-reject-dan-sisa-proses-produk
+si-scrap-waste
+144
+Lap Mutasi Mesin
+laporan-mutasi-barang-modal-dan-barang-lain
+Menu langsung
+No.
+Menu / submenu
+Tujuan halaman
+145
+Approve
+approve
+146
+Dok Rekonsiliasi Ceisa 4.0
+recon-doc-ceisa-40
+
+PAGE 12
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+12
+Admin Sistem
+No.
+Menu / submenu
+Tujuan halaman
+147
+Daftar Karyawan
+employee-register
+148
+Log Aplikasi
+log-app
+149
+Opsi
+Jangkar (#)
+150
+Aplikasi Addon Diagram Alir
+flow-app-addon
+Menu langsung
+No.
+Menu / submenu
+Tujuan halaman
+151
+Options
+options
+
+PAGE 13
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+13
+3. Analisis modul dan fitur
+3.1 Accounting
+Daftar Akun mengelompokkan Aset, Kewajiban, Ekuitas, Pendapatan, Harga Pokok Penjualan, Beban,
+Pendapatan Lainnya, Beban Lainnya, dan Persediaan. Daftar semua COA menunjukkan Record: 310,
+dengan pagination 100 baris per halaman. Ada struktur header/detail, kategori, grup, level, mata uang,
+saldo awal, tanggal saldo awal, serta status tidak aktif.
+Form COA menyediakan nomor/nama akun, kategori/subkategori, tipe header/detail, posisi debit/kredit,
+level, mata uang, saldo awal, pajak, grup, dan status aktif. Beberapa isian pada form kosong nonaktif;
+perilaku setelah pemilihan kategori/akun belum diuji.
+Entri Umum menyediakan pemasok/pembeli, tipe jurnal, tanggal, lokasi, referensi/voucher, status
+verifikasi dan posting. Detail berisi akun, uraian, mata uang/kurs, debit/kredit transaksi dan IDR. Total
+debit, total kredit, dan balance ditampilkan. Belum dibuktikan bahwa sistem menolak jurnal tidak
+seimbang atau perubahan jurnal yang telah diposting.
+Hutang Lainnya menyediakan pemasok, invoice, jatuh tempo, faktur pajak, departemen, mata uang/kurs,
+serta detail akun dan nilai IDR. Pengaturan COA & Akun menautkan pengaturan supplier/customer/master
+item, namun enam kartu Buka terlihat nonaktif: faktur supplier BC, hutang fabric, Master Item, hutang
+accessories, Master General, dan hutang proses/lainnya.
+Posting memiliki dua aksi: Posting Semua dan Posting Buku Besar Saja. Keduanya tidak dijalankan. Buku
+Besar menyediakan rentang tanggal dan akun, output PDF, nama laporan, serta referensi
+transaksi/WO/invoice. Laba Rugi menyediakan ringkasan dan pratinjau HPP; Neraca menyediakan periode
+dan tipe ringkasan.
+3.2 Finance dan Payment
+Permintaan Pembayaran mengambil sumber dari Daftar Hutang dengan status Unreleased/Released.
+Header mencakup supplier, bank, cabang, nomor/nama rekening, mata uang, metode, cash/transfer,
+departemen pemohon, tanggal, jatuh tempo, dan keterangan. Detail mempertahankan nomor transaksi,
+invoice, dokumen, nilai IDR, dan kurs.
+Pembayaran Batch memuat Daftar Permintaan dan Detail Pembayaran Batch. Field periode, bulan, tahun,
+tanggal, nomor batch, keterangan, dan Valid tersedia. Tabel memiliki Total, PPN, PPH 21/23, jumlah, mata
+uang, serta rekening penerima; terdapat tombol Add Account Bank. Jenis pajak yang terlihat bukan bukti
+tarif atau perhitungan pajak telah benar.
+Pembayaran Kas/Bank memiliki sumber Daftar Pembayaran Batch dan Daftar Hutang, rekening sumber,
+voucher, lokasi, tanggal, mata uang/kurs, serta detail laba/rugi selisih kurs. Ini adalah pencatatan
+pembayaran dalam ERP; audit tidak membuktikan adanya koneksi atau pencairan langsung ke bank.
+Permintaan Uang Muka menampilkan sumber PO & BBM, jatuh tempo DP, nilai uang muka, dan rincian.
+Nota Debit Invoice menampilkan sumber invoice dan akun AR, lalu Penerimaan Kas/Bank menampilkan
+daftar nota debit, rekening penerimaan, dan selisih kurs. Tidak ditemukan kontrol attachment dalam form
+finance yang diperiksa; keberadaan attachment pada konteks lain belum dapat dikesampingkan.
+3.3 Purchasing dan penerimaan
+IPR mempunyai header pengelompokan, pelanggan, lokasi, tanggal dan target kirim. Tabel IPR/material
+mencakup item, WO, artikel, konsumsi/kuantitas, ukuran, warna, supplier, PO, dan harga biaya. PO umum
+menggunakan supplier, GPR Reff, termin, kurs, ETD, syarat/mode pengiriman, dan status PO. PO
+berdasarkan IPR mempunyai Referensi IPR, Detail IPR, Detail Pesanan Pembelian,
+Penambahan/Pengurangan, MOQ, Tracking IPR, dan Rekap PO.
+Detail PO existing MGC/PO-0001/10/2026 berhasil dibuka melalui klik ganda. Empat baris material
+terhubung ke MGC/WO-0001/10/2026, dengan mata uang USD serta kuantitas desimal. Isian
+
+PAGE 14
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+14
+tanggal/catatan dan status Valid/Disetujui terlihat nonaktif pada tampilan yang dibuka. Perbarui/Simpan
+tidak ditekan; proteksi backend belum diuji.
+Nota Penerimaan Barang menyatukan dokumen pabean/AJU, pemasok, referensi PO, akun, gudang/rak,
+invoice, ukuran/warna, unit dokumen/pembelian/stok, kuantitas dan harga, pajak, Detail Jurnal, serta
+Referensi CEISA 4.0. Tombol Posting ada tetapi tidak dijalankan. Status PO dan BOM/MRP menggabungkan
+kuantitas dipesan, diterima, diminta, keluar dan saldo.
+3.4 Inventory, persiapan, dan produksi
+Master Item mempunyai kode HS, kategori BC, COA Persediaan/WIP, unit dan faktor konversi
+pembelian/stok, gramasi, konstruksi, subkategori, tanggal log, operator, dan status. Master Sub Grup dan
+Pemetaan Rekening Material tersedia. Stock On Hand mempunyai tabel stok total, penerimaan,
+pengeluaran, dan pengeluaran lainnya, dengan pelacakan BBM/BBK, PO, supplier, nilai, kurs dan dokumen.
+MR merujuk WO, SPK, departemen, komponen, konsumsi, saldo gudang dan kuantitas permintaan.
+BBK/Return merujuk MR dan stok penerimaan; terdapat Return To Supplier, nomor retur, akun, kuantitas,
+harga dan nilai. BBK General mengeluarkan stok tanpa bagian daftar MR yang terlihat pada form
+BBK/Return.
+Stock Opname menyediakan Buat Template SO, Export Excel, Upload Hasil Stock Opname, Laporan Stock
+Opname dan Update Penyesuaian. Upload diarahkan ke halaman import CEISA. Keberadaan tombol ini
+tidak membuktikan proses rekonsiliasi atau update saldo berjalan. Laporan bahan baku menyediakan
+Ringkasan, Detail dan Kartu Stok serta ekspor Excel/PDF. Laporan WIP dan inventaris scrap tersedia
+sebagai form pratinjau.
+Produksi memiliki sembilan menu proses: cutting, sewing, flipping, stuffing, hand stitching, finishing,
+inspect, packing, finish good. Kesembilannya menggunakan halaman Process dengan parameter tab
+berbeda. Form Process memiliki batch, proses default, proses aktual, WO, SPK, kode bagian, ukuran dan
+jumlah. Urutan wajib antarproses serta pembatasan kuantitas belum diuji.
+Progress Produksi menggabungkan WO, pelanggan, artikel, kuantitas order,
+cutting/sewing/finishing/packing/FG, penjualan, sisa WIP dan FG. Ada aksi pembaruan hari kerja, progres
+dan status WO yang sengaja tidak dijalankan. SPK mempunyai daftar tersendiri; form baru SPK sempat
+tidak menampilkan isi yang dapat dievaluasi sehingga pemeriksaan rinci form tersebut terbatas.
+3.5 Sales, subkontrak, mekanik, dan scrap
+Sales Export & Local menggunakan surat jalan, buyer, consignee, beneficiary, AWB, manifest,
+moda/pelabuhan pengiriman, LC, dokumen/AJU, mata uang/kurs, nilai dan tanggal invoice. Surat Jalan
+menyediakan referensi, pengiriman parsial/penuh, WO, barang, persetujuan, consignee, dan sinkronisasi
+PWN. Dispatch Finish Goods mempunyai form serupa dengan sejumlah label terjemahan mentah.
+Kontrak subkontrak menyediakan dua pihak, jenis/detail kontrak, jaminan, surat persetujuan, detail
+WO/barang/bahan baku, pasal, jatuh tempo dan perpanjangan. Rekonsiliasi subkontrak membandingkan
+kuantitas kontrak, masuk, keluar, retur, berat, saldo, tenggat dan status. Mekanik mempunyai penerimaan
+set/breakdown serta pengeluaran stok. Scrap mempunyai penerimaan, detail BOM dan bahan baku, stok,
+kuantitas keluar dan saldo.
+3.6 Customs, MIS, dan administrasi
+Barang masuk memiliki kelompok import dan lokal; barang keluar memiliki export dan lokal. Beberapa
+jenis BC memakai halaman bersama. Form dokumen menyediakan AJU, tipe BC, tanggal/nomor dokumen,
+invoice, CIF, kemasan, netto/bruto, supplier, kurs, mutasi dan detail HS/tarif/kuantitas. Jenis BC sebagai
+pilihan form belum dipastikan otomatis mengikuti label menu asal.
+Tujuh laporan bea cukai tersedia: pemasukan, pengeluaran, posisi WIP, mutasi bahan baku/penolong,
+barang jadi, reject/scrap dan barang modal/lain. Antarmuka memiliki periode, lokasi, layout, pencarian,
+grafik, ekspor Excel/PDF, agregasi, dan kolom Trace. Rekonsiliasi CEISA membandingkan header/detail
+dokumen, referensi IT Inventory dan saldo diterima.
+
+PAGE 15
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+15
+Import CEISA menyediakan CEISA, TPB, PEB, PLB, saldo awal, STO, ORDER dan CEISA 40. Import Master
+Data menyediakan Customer, Supplier, Item, Unit, Goods Receipt dan Chart of Account, pemilihan file
+Excel, template dan preview. Tidak ada file yang diunggah atau diimpor dalam audit ini.
+Registrasi Karyawan menampilkan peran grup, lokasi, modul, izin menu dan approval. Kolom izin
+mencakup Pilih, Buat, Cetak, Akses Pembaruan, Semua dan Pengingat. Log Aplikasi menampilkan riwayat
+akses laporan/aktivitas dan pagination. Belum diperiksa keutuhan log perubahan, penyimpanan password,
+isolasi tenant, maupun pencegahan akses langsung tanpa izin.
+
+PAGE 16
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+16
+3.7 Matriks pemeriksaan fitur
+Fitur
+Pemeriksaan yang dilakukan
+Kesimpulan dan batas
+Tambah
+Membuka formulir kosong utama finance,
+purchasing, material, produksi, penjualan,
+subkontrak, mekanik dan scrap.
+TERAMATI. Nomor otomatis/nonaktif dan struktur
+detail terlihat. Tidak menyimpan record.
+Edit
+Membuka detail PO existing; melihat field
+nonaktif serta tombol Perbarui. Master
+menggunakan sel input.
+TERAMATI. Tidak mengubah nilai. Validasi edit,
+autosave, versioning dan larangan edit sesudah
+posting belum diuji.
+Hapus
+Tombol Hapus terlihat di Pengaturan
+Perusahaan; kolom Aksi ada pada banyak
+master/detail.
+BELUM DIUJI. Tidak membuka konfirmasi hapus. Tidak
+menganggap semua kolom Aksi pasti berisi hapus.
+Import
+Membaca pilihan jenis, template, file chooser,
+preview dan tombol import.
+TERAMATI. Tidak upload/import. Validasi baris,
+duplikat, rollback dan error belum diuji.
+Export Excel
+Klik Ekspor Excel pada laporan persediaan bahan
+baku. File terbaca dengan openpyxl.
+TERUJI: XLSX valid, sheet Raw Material Details, 8 baris
+x 14 kolom. Uji menggunakan keadaan laporan tanpa
+data terpilih; bukan bukti kelengkapan ekspor
+transaksi.
+Export PDF
+persediaan
+Klik Ekspor PDF; menunggu unduhan 15 detik
+dan memeriksa tab.
+BELUM TERVERIFIKASI. Tidak ada unduhan/tab baru
+yang teramati pada percobaan itu; jangan disamakan
+dengan kegagalan seluruh ekspor PDF.
+Laporan laba rugi
+Periode 01-10-2026 s.d. 31-10-2026, Pratinjau,
+lalu Download.
+TERUJI: overlay PDF dan file 4 halaman dapat dibaca.
+Angka belum direkonsiliasi ke jurnal/subledger.
+Pencarian
+Cari MGC/PO-0001 lalu
+AUDIT-NONMATCH-20261026 pada daftar PO.
+TERUJI: masing-masing 1 baris dan 0 baris; kolom
+pencarian dikosongkan kembali.
+Filter/sort
+Membuka pop-up kolom Alias Nomor PO.
+TERAMATI: Asc/Desc, Copy Column, Values, Text
+Filter, pencarian nilai, Select All, OK/Cancel.
+Pembatasan nilai tidak diterapkan.
+Pengaturan tabel
+Membuka Settings Column visibility.
+TERAMATI: checklist Show/Hide dan Reset to Default.
+Preferensi kolom tidak diubah.
+Tanggal/paginati
+on
+Rentang tanggal dan pilihan 10/25/50/100
+terlihat; laporan memakai rentang tanggal uji.
+Kontrol teramati. Uji batas tanggal, seluruh halaman
+dan jumlah total lintas filter belum dilakukan.
+Approval/posting
+Membaca status dan tombol approval/posting.
+BELUM DIUJI: aksi dapat mengubah status transaksi
+dan pembukuan.
+Attachment
+Memeriksa field/kontrol form utama finance.
+Tidak terlihat pada form yang diperiksa; bukan bukti
+fitur tidak ada pada semua halaman.
+
+PAGE 17
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+17
+4. Flowchart berdasarkan temuan
+Diagram disusun ulang dari Flow Core Addon App dan field sumber pada formulir. Garis utuh menunjukkan
+urutan yang didokumentasikan oleh aplikasi atau hubungan field yang terlihat. Diagram ini tidak
+menyatakan bahwa posting otomatis antar-modul telah terbukti. Garis putus-putus menunjukkan aksi
+yang belum dijalankan.
+4.1 Finance: pembayaran, jurnal dan penerimaan
+COA / pemetaan akun
+Penerimaan barang
+Entri umum
+Penjualan / invoice
+Permintaan pembayaran
+Nota debit invoice
+Pembayaran batch
+Penerimaan kas/bank
+Pembayaran kas/bank
+Buku besar
+Laba rugi
+Neraca
+Sumber: menu Aplikasi Addon Diagram Alir > Finance Flow, diperiksa termasuk bagian akhir Buku Besar,
+Laba Rugi dan Neraca. Form payment request/batch/payment cash-bank mendukung hubungan sumber di
+sisi pembayaran.
+
+PAGE 18
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+18
+4.2 Order, purchasing dan produksi
+Urutan berikut mengikuti Production Flow bawaan. SPK dan permintaan material diperlihatkan sebagai
+jalur persiapan untuk pengeluaran bahan. Tahapan produksi dipadatkan dalam satu kotak; sembilan
+prosesnya tersedia pada menu.
+BOM / MRP pada work order
+IPR - permintaan beli internal
+PO berdasarkan IPR
+Penerimaan barang (BBM)
+SPK dan permintaan material (MR)
+Pengeluaran barang (BBK)
+Produksi: cutting sampai finish good
+Surat jalan
+Invoice penjualan
+
+PAGE 19
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+19
+4.3 Subkontrak, scrap dan import
+Subkontrak
+Surat perjanjian / kontrak
+Permintaan material
+Pengeluaran barang (BBK)
+Penerimaan barang (BBM)
+Surat jalan
+Invoice
+Sumber: Subcontract Flow. Rekonsiliasi subkontrak adalah layar tambahan yang membandingkan kontrak,
+kuantitas dan saldo; diagram bawaan tidak membuktikan bahwa seluruh kontrak melalui semua tahap.
+Scrap
+Urutan pada diagram bawaan
+Keterangan audit
+GOODS RECEIVED (BBM) > GOODS DISPATCH (BBK) >
+DELIVERY NOTE
+Label terakhir DELIVERY NOTE menaut ke
+good-dispatch-bbk-sampah-scrapt, sedangkan node GOODS
+DISPATCH menaut ke BBK/Return umum. Ini ketidakkonsistenan
+tautan/label yang perlu diperbaiki; bukan flow scrap yang telah
+tervalidasi.
+Import master: tahapan antarmuka
+Pilih jenis master > pilih Excel > periksa Preview Data > Import. Tahap terakhir belum dijalankan. Jenis
+yang terlihat: Customer, Supplier, Item, Unit, Goods Receipt, Chart of Account. Alur CEISA terpisah: Data
+Type / Doc. Type / Location > Load File > View Data > Import Data.
+
+PAGE 20
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+20
+4.4 Approval: kontrol yang terlihat
+Filter tanggal / status / jenis transaksi
+Daftar dan detail transaksi
+Periksa status: Setujui, Valid, Posting
+Setujui
+BELUM DIJALANKAN
+Kembalikan ke draf
+BELUM DIJALANKAN
+Sumber: halaman Approve. Status default Menunggu, jenis transaksi, nomor/tanggal transaksi,
+approved-by, tanggal persetujuan dan log terlihat. Diagram ini menjelaskan pilihan UI, bukan hasil uji
+pemisahan maker-checker atau persetujuan bertingkat.
+
+PAGE 21
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+21
+5. Temuan dan rekomendasi prioritas
+F01 | P1 - Tinggi | Laporan finance salah tujuan
+Bukti: Kas Harian, Rekap Akun Hutang dan Rekap Akun Piutang menggunakan URL import-data-ceisa-40.
+Kas Harian dibuka dan menampilkan Import Data CEISA 40.
+Dampak / batas: Pengguna tidak mencapai laporan yang dimaksud dari menu finance.
+Rekomendasi: Perbaiki registry menu; buat halaman laporan sesuai label. Uji tiap tautan sampai judul dan
+parameter laporan cocok.
+F02 | P1 - Tinggi | 17 tujuan menu kembali ke dasbor
+Bukti: Sepuluh tujuan Pembaruan Inventaris dan tujuh tujuan MIS/import tidak membuka halaman sasaran
+saat diuji ulang; rinciannya pada Lampiran B.
+Dampak / batas: Fungsi tidak dapat digunakan melalui jalur yang terlihat oleh akun ini. Penyebab dapat
+berupa route, izin atau implementasi, belum dipastikan.
+Rekomendasi: Telusuri route/permission guard; tampilkan pesan izin/tidak tersedia yang jelas. Jangan
+redirect diam-diam. Uji seluruh daftar sesudah perbaikan.
+F03 | P1 - Risiko perlu konfirmasi | Format pemetaan material berbeda dari COA aktif
+Bukti: Peta Akun Material menampilkan 140-11, 170-72, 170-30, 140-12/13/81. Daftar COA menunjukkan
+format 1-xxxxx dan grup persediaan 1-13xxx.
+Dampak / batas: Risiko mapping legacy/orphan atau salah klasifikasi saat posting; belum terbukti jurnal
+salah.
+Rekomendasi: Rekonsiliasi semua mapping terhadap primary key COA aktif dan akun detail. Cegah posting
+jika akun tidak ditemukan/tidak aktif/header.
+F04 | P2 - Sedang | Label pemasok dan reject tidak tepat
+Bukti: Master Pelanggan pada Data Master membuka Master Pemasok; Tolak Komponen membuka Rekap
+Invoice.
+Dampak / batas: Pengguna berpotensi memilih fungsi atau pihak transaksi yang salah.
+Rekomendasi: Ubah label Master Pemasok; periksa kebutuhan menu reject yang sebenarnya. Pisahkan
+label dan route secara terpusat.
+F05 | P2 - Sedang | Alias laporan dan saldo awal belum jelas
+Bukti: Saldo Pembukaan dan Data Master Item memakai halaman sama; Inventaris Barang Jadi menuju
+inventory-wip.
+Dampak / batas: Tujuan operasional ambigu. Bisa berupa penggunaan halaman bersama, belum terbukti
+logika perhitungan salah.
+Rekomendasi: Berikan mode/parameter eksplisit dan judul sesuai konteks. Uji bahwa laporan FG berbeda
+dari WIP, dan saldo awal punya kontrol tersendiri.
+F06 | P2 - Sedang | Setup akun belum seluruhnya tersedia
+Bukti: Enam kartu Buka pada Setup COA & Account nonaktif.
+Dampak / batas: Konfigurasi akun melalui layar tersebut terbatas.
+Rekomendasi: Tentukan fitur belum dibuat atau dibatasi izin. Hubungkan ke pengaturan nyata dan
+sediakan status yang jelas.
+
+PAGE 22
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+22
+F07 | P2 - Sedang | Terjemahan UI tidak lengkap
+Bukti: Label MaterialManagement.RecapSales.*, FinanceAndAccounting.ReceivedCashBank.* dan
+Sales.DispatchFinishGoods.* terlihat mentah. Placeholder bank/mata uang uang muka memakai Pilih
+Periode/Pilih Bulan.
+Dampak / batas: Makna field dan proses menjadi tidak jelas.
+Rekomendasi: Lengkapi kamus ID/EN dan label konteks. Tambahkan pemeriksaan build untuk key yang
+hilang serta review tampilan.
+F08 | P2 - Indikasi data | Baris contoh dan nilai default perlu ditinjau
+Bukti: Advance Request baru menampilkan Supplier 1/2 dan tanggal 2025; Master Koleksi memuat
+TEST/asd; sebagian item scrap bertanggal 1900-01-01 dan faktor unit 0.
+Dampak / batas: Risiko data contoh/default terbawa ke operasi atau laporan. Belum dapat dipastikan data
+fixture, legacy, atau input sah.
+Rekomendasi: Identifikasi asal data bersama pemilik modul. Validasi tanggal/faktor, tandai data uji, dan
+bersihkan melalui prosedur yang disetujui; jangan hapus otomatis.
+F09 | P2 - Sedang | Dokumentasi flow mengandung tautan tidak konsisten
+Bukti: Finance Flow memakai recived-cashbank, sedangkan menu memakai received-cashbank; GOODS
+RECEIVED adalah #. Scrap Flow menautkan node ke fungsi berbeda.
+Dampak / batas: Panduan bawaan dapat membawa pengguna ke halaman yang tidak sesuai.
+Rekomendasi: Gunakan referensi route yang sama dengan menu, perbaiki ejaan dan label; uji link
+diagram.
+F10 | P2 - Perlu uji lanjut | Hasil PDF persediaan belum terverifikasi
+Bukti: Klik Ekspor PDF tanpa data laporan terpilih tidak menghasilkan download selama 15 detik; tidak ada
+tab baru. Laba rugi PDF berhasil.
+Dampak / batas: Perilaku ekspor persediaan belum dapat disimpulkan lulus/gagal untuk laporan berisi
+data.
+Rekomendasi: Ulang dengan filter valid dan data uji, periksa overlay/toast/error, timeout dan browser
+download; sediakan pesan jika tidak ada data.
+F11 | P3 - Rendah | Navigasi placeholder dan pagination membingungkan
+Bukti: Master Satuan dan Opsi di Admin Sistem adalah #. Daftar kosong payment request/PO nonmatch
+masih menampilkan Next aktif; rekap BBM pernah menampilkan 1 sampai 0 dari 0 entri.
+Dampak / batas: Navigasi tidak memberi hasil dan status tabel tidak konsisten.
+Rekomendasi: Selesaikan/disable menu placeholder. Gunakan aturan pagination dan empty-state yang
+konsisten.
+F12 | P1 - Kontrol belum diuji | Keandalan transaksi dan pemisahan wewenang belum
+dibuktikan
+Bukti: UI menampilkan checkbox Valid/Approved/Posted, edit inline dan aksi Posting Semua. Audit sengaja
+tidak melakukan perubahan.
+Dampak / batas: Tidak ada dasar menyatakan kontrol backend, jurnal seimbang, idempotensi, period lock
+atau maker-checker telah efektif. Ini keterbatasan verifikasi, bukan temuan eksploitasi.
+Rekomendasi: Jalankan UAT terkontrol: akun pembuat/pemeriksa berbeda, transaksi seimbang/tidak
+seimbang, duplikasi posting, reversal, lock periode, import invalid dan rekonsiliasi subledger.
+
+PAGE 23
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+23
+6. Rencana pengembangan dan verifikasi
+Tahap
+Pekerjaan
+Kriteria selesai
+1. Perbaikan
+navigasi
+Benahi F01/F02/F04/F05/F09/F11; registry menu dan
+flow memakai sumber route yang sama.
+Seluruh tautan yang ditampilkan akun membawa
+ke layar tepat atau menjelaskan batas izin. Tidak
+ada redirect diam-diam atau placeholder
+menyesatkan.
+2. Fondasi
+accounting
+Audit pemetaan COA per item/kategori,
+supplier/customer, bank, saldo awal, mata uang dan
+faktor unit.
+Tidak ada mapping yatim; akun detail aktif
+digunakan; jurnal sampel BBM, BBK, invoice,
+pembayaran dan penerimaan bisa ditelusuri.
+3. Kontrol
+transaksi
+Status draft > review > approved > posted,
+pembatasan edit, reversal, lock periode dan
+idempotensi.
+Tidak dapat approve sendiri jika kebijakan
+melarang; posting ulang tidak menggandakan
+jurnal; transaksi terkunci tidak dapat diedit tanpa
+prosedur resmi.
+4. Payment
+operasional
+Attachment, kelengkapan invoice/pajak,
+pengecekan rekening penerima, rekening sumber,
+settlement dan bukti pembayaran.
+Permintaan > review finance > approval >
+pencatatan pembayaran dapat ditelusuri; lampiran
+punya versi dan hak akses. Ini rekomendasi
+pengembangan, bukan fitur terverifikasi.
+5. Reporting dan
+UX
+Perbaiki terjemahan, loading/empty/error, ekspor
+penuh vs per halaman, trace, dan navigasi balik.
+Angka serta jumlah baris layar sesuai file output;
+filter jelas; kegagalan ekspor memberi pesan yang
+bisa ditindaklanjuti.
+6. Rekonsiliasi
+menyeluruh
+Jurnal vs subledger AP/AR, kas/bank, inventory
+quantity/value, WIP/FG, dokumen BC dan saldo
+awal.
+Selisih dapat dijelaskan dan disetujui; GL, laba rugi
+dan neraca memakai periode serta sumber
+transaksi yang konsisten.
+Kasus UAT yang diperlukan pada lingkungan uji
+• Jurnal umum: uji seimbang/tidak seimbang, nilai nol/negatif, akun header/tidak aktif, kurs kosong dan
+periode tertutup.
+• Purchasing: IPR ke PO, perubahan harga/kuantitas, penerimaan parsial/lebih, retur dan pembatalan
+setelah penerimaan.
+• Payment: pembayaran parsial/lebih/duplikat, multi-invoice, multi-currency, pajak dan selisih kurs;
+pastikan tidak ada pencairan bank nyata dalam UAT.
+• Inventory: konversi satuan desimal, ukuran/warna, stok negatif, pembebanan WO, opname, penyesuaian
+dan histori mutasi.
+• Produksi: kuantitas antarproses, reject/scrap, retur bahan, penutupan WO dan kesesuaian WIP/FG.
+• Import: template tiap jenis, kolom wajib, format tanggal/angka, duplikat, baris invalid, rollback dan
+pesan per baris.
+• Otorisasi: akun read-only, maker, checker, admin, akses URL langsung dan tenant berbeda; jangan
+menguji tenant pihak lain tanpa otorisasi terpisah.
+• Audit trail: nilai sebelum/sesudah, pengguna, waktu, alasan reversal, persetujuan, dan ketidakmampuan
+pengguna biasa menghapus jejak.
+• Laporan: cocokkan debit/kredit, saldo awal/akhir, AP/AR aging dan cash/bank ke source; periksa ekspor
+seluruh baris dan pembulatan.
+Uji yang mengubah data memerlukan persetujuan tersendiri dan sebaiknya dilakukan pada salinan
+database/tenant uji. Tidak ada perubahan sistem yang diterapkan sebagai bagian laporan ini.
+
+PAGE 24
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+24
+Lampiran A. Matriks halaman dan fitur
+Setiap entri di bawah merangkum kontrol yang benar-benar terlihat. Fitur
+simpan/edit/hapus/import/posting hanya dinyatakan sebagai kontrol UI; hasil eksekusinya belum diuji
+kecuali tercantum pada matriks pengujian. Field/tabel dicatat untuk menjelaskan fungsi, tanpa menyalin
+rincian saldo atau data pihak secara penuh.
+A001 | Pengaturan Perusahaan
+Tujuan: /id/dashboard/company-setup
+Layar / bagian: Profil Perusahaan
+Isian / status: Nama Perusahaan, Alamat, Kota, No Telp, No Fax, Kodepos, Path/Nama File
+Kolom tabel utama: Seq Kode Deskripsi Alamat 1 Alamat 2 Kota Provinsi Negara No Telp No Fax Aksi
+Kontrol: Muat Gambar, Simpan Gambar, Simpan Baru, Perbarui, Hapus
+A002 | Saldo Pembukaan ( Row, Barang Jadi )
+Tujuan: /id/dashboard/data-master-item
+Layar / bagian: Master Item
+Kolom tabel utama: ID Kode HS Kategori Kategori BC COA Persediaan COA WIP Kode Barang Nama Barang Unit Stok Kurs Stok
+Unit Pembelian Kurs Pembelian Gramasi Satuan Gramasi Konstruksi Sub Kategori Sub Kategori 2 Tanggal Log Operator Status
+Kontrol: Kategori Barang
+A003 | Bank
+Tujuan: /id/dashboard/bank
+Layar / bagian: Master Bank
+Kolom tabel utama: ID Nama Bank Alamat Alamat 2 Kota Bank Bank 2 Aksi
+A004 | Master Sub Grup
+Tujuan: /id/dashboard/sub-group-master
+Layar / bagian: Master Grup Barang
+Kolom tabel utama: ID Kode Grup Nama Grup Deskripsi Aksi
+A005 | Peta Akun Material
+Tujuan: /id/dashboard/mapping-account-material
+Layar / bagian: Pemetaan Rekening Material
+Kolom tabel utama: ID No Rekening Kategori ID Barang Aksi
+A006 | Kurs Rate
+Tujuan: /id/dashboard/rate-currency
+Layar / bagian: Master Kurs
+Kolom tabel utama: ID Tanggal Mata Uang Kurs Pajak Beli Jual Tengah Kurs EURO Kurs HKD Sumber Komputer Terakhir Update
+Kontrol: Kirim, Cetak
+A007 | Master Pelanggan
+Tujuan: /id/dashboard/master-supplier
+Layar / bagian: Master Pemasok
+Kolom tabel utama: ID Rek Hutang ID Supplier Nama Supplier Alamat Provinsi Negara/Wilayah Kota NPWP Kategori Izin TPB
+Tanggal Izin Nama Depan Alamat Email Telepon Bisnis Kode Pos Jabatan Bank 1 Cabang 1 Rekening Bank 1 Bank 2 Cabang 2
+Rekening Bank 2 Aksi
+
+PAGE 25
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+25
+A008 | Master Jangka Waktu Pembayaran
+Tujuan: /id/dashboard/master-payment-term
+Layar / bagian: Master Syarat Pembayaran
+Kolom tabel utama: Urutan Kode Deskripsi Tipe Hari DP % Jatuh Tempo / DP No Rekening Aksi
+A009 | Master Approve
+Tujuan: /id/dashboard/master-approve
+Layar / bagian: Master Approve
+Kolom tabel utama: ID Nama Aksi
+A010 | Tentang
+Tujuan: /id/dashboard/about
+Layar / bagian: Sistem Manufaktur dan Akuntansi Addon
+Kontrol: TUTUP
+A011 | Master CBD & BOM
+Tujuan: /id/dashboard/cbd-bom-master
+Layar / bagian: Cost Breakdown
+Kolom tabel utama: Status Valid No CBD Alias No CBD Artikel Tanggal Dibuat Pelanggan Pengguna
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A012 | Pesanan Konsumen & MRP
+Tujuan: /id/dashboard/master-order-bommrp
+Layar / bagian: Work Orders
+Kolom tabel utama: Valid Tanggal PWN Dibuat No PWN Alias WO Artikel Nama Pelanggan Total Quantity Status Log Date Lokasi
+Mata Uang Username Keterangan
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A013 | IPR (Permintaan Beli Internal)
+Tujuan: /id/dashboard/ipr-internal-purchase-request
+Layar / bagian: Permintaan Pembelian Internal
+Kolom tabel utama: Alias No IPR Valid Tanggal IPR Kode Dok Nama Pengguna Status Pelanggan
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A014 | Master Pelanggan
+Tujuan: /id/dashboard/master-customer
+Layar / bagian: Master Pelanggan
+A015 | Master Ukuran
+Tujuan: /id/dashboard/master-size
+Layar / bagian: Master Ukuran
+Kolom tabel utama: Urutan Kode Deskripsi Aksi
+A016 | Master Divisi
+Tujuan: /id/dashboard/master-divison
+Layar / bagian: Master Divisi
+
+PAGE 26
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+26
+Kolom tabel utama: Urutan Kode Nama Pelanggan Deskripsi Kode HS Aksi
+A017 | Master Agent
+Tujuan: /id/dashboard/master-agent
+Layar / bagian: Master Agen
+Kolom tabel utama: Urutan Kode Nama Agen Alamat 1 Alamat 2 Kota Provinsi Nama Negara No Telp No Fax Aksi
+A018 | Master Koleksi
+Tujuan: /id/dashboard/master-colletion
+Layar / bagian: Master Koleksi
+Kolom tabel utama: Urutan Nama Pelanggan Kode Deskripsi Aksi
+A019 | Pesanan Beli Umum
+Tujuan: /id/dashboard/purchase-order-general
+Layar / bagian: Purchase Order General
+Kolom tabel utama: Kode Dokumen Lokasi Valid Status Alias No PO Referensi PO No PO Tanggal PO Pemasok ETD Tipe Payment
+Term Mata Uang Nama Pengguna Persetujuan
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A020 | Nota Penerimaan Barang
+Tujuan: /id/dashboard/goods-received-bbm
+Layar / bagian: Nota Penerimaan Barang
+Kolom tabel utama: Valid Posting No. BBM Tipe BBM Alias No. BBM Tanggal Diterima Kurs Kode Pemasok Pemasok No. AJU No.
+Dokumen No. AWB Username Tanggal Dibuat Keterangan Disetujui
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A021 | Pesanan Beli Menurut IPR
+Tujuan: /id/dashboard/purchase-order-by-ipr
+Layar / bagian: Purchase Order Berdasarkan IPR
+Kolom tabel utama: Valid Status PO Nomor PO Alias Nomor PO PO Reff Tanggal PO Pemasok ETD Tipe Termin Pembayaran Kode
+Dok Cancel PO Status Persetujuan Lokasi
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A022 | Status Material-PO Umum
+Tujuan: /id/dashboard/general-material-po-status
+Layar / bagian: Status PO
+Kolom tabel utama: PO ID PO Referensi Kategori ETA Tanggal PO Nama Perusahaan Pemasok Kode Barang Nama Barang Tipe
+Barang Pemasok Jumlah dari Pemasok PO Jumlah PO Jumlah Diterima Saldo Jumlah BBK Saldo Stock Satuan Harga Per Unit Mata
+Uang
+Kontrol: Lihat Data, Export, Previous, Next
+A023 | Status BOM/MRP-Material
+Tujuan: /id/dashboard/bommrp-material-status
+Layar / bagian: Status Material BOM / MRP
+Kolom tabel utama: Alias WO No PO Artikel Tanggal PO ETA ETD Tipe Main Penempatan Kode Barang nomor bagian Nama Barang
+konsumsi Persentase Tambahan% Jumlah BOM Unit Stock (BOM) Jumlah IPR Unit Stock (IPR) Jumlah PO Unit Stock (PO) Jumlah
+Diterima Unit Stock Jumlah MR Unit Stock (MR) Jumlah Keluar Unit Stock (Issue) Saldo Gudang Qty Pembelian Unit Pembelian Qty
+Penerimaan Pembelian Unit Pembelian
+
+PAGE 27
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+27
+Kontrol: Export, Previous, Next
+A024 | Nota Pengiriman
+Tujuan: /id/dashboard/delivery-notesurat-jalan
+Layar / bagian: Surat Jalan
+Kolom tabel utama: Valid Persetujuan No Surat Jalan No Surat Jalan Alias Tanggal Dibuat Kepada Agen No Polisi Keterangan Tipe
+Dokumen No Dokumen Tanggal Dokumen Tipe Pembayaran Tipe Pengeluaran Nama Pengguna
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A025 | Permintaan Material
+Tujuan: /id/dashboard/material-request
+Layar / bagian: Permintaan Material
+Kolom tabel utama: Valid Batal No MR Alias No MR Alias WO WO Internal No Artikel Tanggal Dibuat Dari Ke Nama Pengguna
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A026 | Pengiriman & Pengembalian Barang
+Tujuan: /id/dashboard/goods-dispatch-bbk-return
+Layar / bagian: Pengiriman Barang BBK Kembali
+Kolom tabel utama: Valid Posting Retur Pemasok No Pengiriman Barang Alias No Pengiriman Barang Tanggal Dibuat Alias No MR
+Artikel Ke Departemen Proses Total Kuantitas Total Jumlah Pemasok Catatan Operator Tanggal Log
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A027 | Rekap Nota Penerimaan Barang
+Tujuan: /id/dashboard/recap-goods-received
+Layar / bagian: Rekap BBM
+Kolom tabel utama: Valid Posted No GRN Tipe GRN Tanggal Dibuat No PO Supplier Kode Barang Nama Barang Warna Satuan
+Harga Mata Uang Qty Diterima Status PO Keterangan Lokasi Tipe Dokumen No Dokumen Tanggal Dokumen No AJU
+Kontrol: Tampilkan Data, Sebelumnya, Berikutnya
+A028 | Tolak Komponen
+Tujuan: /id/dashboard/recap-sales
+Layar / bagian: Rekap Invoice
+Kolom tabel utama: Tanggal Pengiriman No Invoice BC No PEB Tanggal PEB Buyer No WO Artikel No PO Warna
+MaterialManagement.RecapSales.division MaterialManagement.RecapSales.totalqty Qty Kirim
+MaterialManagement.RecapSales.fc MaterialManagement.RecapSales.short Harga Satuan
+MaterialManagement.RecapSales.amount Keterangan
+Kontrol: Tampilkan Data, Total Pengiriman, Ringkasan Pengiriman, Previous, Next
+A029 | Pembaruan Nota Penerimaan Barang
+Tujuan: /id/dashboard/bbm-update
+Layar / bagian: Pembaruan BBM
+Kolom tabel utama: Valid Closed Posted ID PO Tipe Order Alias No PO Nama Supplier Alias No BBM Tipe Dokumen No Dokumen No
+AJU Tanggal Penerimaan Tanggal Log User Tanggal Dokumen WO Nama Customer Gaya Kode Barang Nama Barang Kode Barang
+Pelanggan Warna Qty Diterima Satuan Mata Uang Harga Lokasi Nilai Kurs Nilai IDR Ukuran No Invoice Tanggal Invoice No. Seri BC
+Lot Keterangan
+Kontrol: Lihat Data, Export, Previous, Next
+
+PAGE 28
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+28
+A030 | Pembaruan Pengiriman Barang
+Tujuan: /id/dashboard/bbk-update
+Layar / bagian: Pembaruan BBK
+Kolom tabel utama: Valid Selesai Telah Posting Tipe Pengeluaran Departemen No Pengeluaran ID BBM Tanggal Pengeluaran
+Barang WO Actual Allocation WO Kode Barang Kode Barang Pelanggan Nama Barang Warna Ukuran Jumlah Pengeluaran Satuan
+Mata Uang Harga Nilai Tipe Pesanan Kurs Nilai IDR Gaya Tipe Dok. No Dok. Tgl Dok. No Aju Tanggal Log User No BBM Kode Seq
+Pengeluaran Barang Lokasi
+Kontrol: Lihat Data, Export, Previous, Next
+A031 | Pengiriman Barang Umum
+Tujuan: /id/dashboard/bbk-general
+Layar / bagian: BBK General
+Kolom tabel utama: Retur Valid Closed No Pengeluaran No Transaksi Tanggal Dibuat Attention Perusahaan Status Keterangan
+Tipe Pengeluaran Tanggal Log Operator
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A032 | SPK / Surat Perintah Kerja
+Tujuan: /id/dashboard/spk-work-order-letter
+Layar / bagian: Surat Perintah Kerja (SPK)
+Kolom tabel utama: Valid No. SPK Proses WO Tanggal SPK Tenggat SPK ID SPK Customer
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A033 | Persiapan Inventaris
+Tujuan: /id/dashboard/inventory-preparation
+Layar / bagian: Rekonsiliasi SPK
+Kolom tabel utama: ID SPK Alias No. IPR Tanggal IPR Tgl. Permintaan Kirim Level BOM Tipe Utama Kode Internal Penempatan
+Komponen Satuan Qty SPK Qty Masuk Qty Keluar Tanggal Sekarang Alias WO
+Kontrol: Lihat Data, Previous, Next
+A034 | Potongan
+Tujuan: /id/dashboard/process?tab=cutting
+Layar / bagian: Tabel Produksi
+Kolom tabel utama: Simpan ID Transaksi No Transaksi Proses Tanggal Keluar WO Style Pembeli PO Pembeli Qty Keterangan
+Penerimaan No disetujui
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A035 | Menjahit
+Tujuan: /id/dashboard/process?tab=sewing
+Layar / bagian: Tabel Produksi
+Kolom tabel utama: Simpan ID Transaksi No Transaksi Proses Tanggal Keluar WO Style Pembeli PO Pembeli Qty Keterangan
+Penerimaan No disetujui
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A036 | Membalikan
+Tujuan: /id/dashboard/process?tab=flipping
+Layar / bagian: Tabel Produksi
+
+PAGE 29
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+29
+Kolom tabel utama: Simpan ID Transaksi No Transaksi Proses Tanggal Keluar WO Style Pembeli PO Pembeli Qty Keterangan
+Penerimaan No disetujui
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A037 | Mengisi
+Tujuan: /id/dashboard/process?tab=stuffing
+Layar / bagian: Tabel Produksi
+Kolom tabel utama: Simpan ID Transaksi No Transaksi Proses Tanggal Keluar WO Style Pembeli PO Pembeli Qty Keterangan
+Penerimaan No disetujui
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A038 | Jahit Tangan
+Tujuan: /id/dashboard/process?tab=hand_stitching
+Layar / bagian: Tabel Produksi
+Kolom tabel utama: Simpan ID Transaksi No Transaksi Proses Tanggal Keluar WO Style Pembeli PO Pembeli Qty Keterangan
+Penerimaan No disetujui
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A039 | Menyelesaikan
+Tujuan: /id/dashboard/process?tab=finishing
+Layar / bagian: Tabel Produksi
+Kolom tabel utama: Simpan ID Transaksi No Transaksi Proses Tanggal Keluar WO Style Pembeli PO Pembeli Qty Keterangan
+Penerimaan No disetujui
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A040 | Inspeksi
+Tujuan: /id/dashboard/process?tab=inspect
+Layar / bagian: Tabel Produksi
+Kolom tabel utama: Simpan ID Transaksi No Transaksi Proses Tanggal Keluar WO Style Pembeli PO Pembeli Qty Keterangan
+Penerimaan No disetujui
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A041 | Pembungkusan
+Tujuan: /id/dashboard/process?tab=packing
+Layar / bagian: Tabel Produksi
+Kolom tabel utama: Simpan ID Transaksi No Transaksi Proses Tanggal Keluar WO Style Pembeli PO Pembeli Qty Keterangan
+Penerimaan No disetujui
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A042 | Barang Jadi
+Tujuan: /id/dashboard/process?tab=finish_good
+Layar / bagian: Tabel Produksi
+Kolom tabel utama: Simpan ID Transaksi No Transaksi Proses Tanggal Keluar WO Style Pembeli PO Pembeli Qty Keterangan
+Penerimaan No disetujui
+Kontrol: Lihat Data, Previous, Next
+
+PAGE 30
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+30
+Form baru: tersedia; tidak disimpan.
+A043 | Progres Produksi
+Tujuan: /id/dashboard/progress-production
+Layar / bagian: Progress Produksi
+Kolom tabel utama: No. WO Pelanggan Artikel Status Produksi Status WO Unit Jumlah Pesanan Jumlah Cutting Jumlah Sewing
+Jumlah Finishing Jumlah Packing Jumlah FG Jumlah Penjualan Sisa WIP Sisa FG Action
+Kontrol: Pratinjau, Perbarui Hari Kerja, Pembaruan Progress Produksi, Preview Components, Perbarui Status WO, KARTU STOK,
+Previous, Next
+A044 | Nota Penerimaan Barang Mekanik
+Tujuan: /id/dashboard/goods-received-note-mechanic
+Layar / bagian: Barang Masuk Mekanik
+Kolom tabel utama: Valid Tanggal No. Transaksi Tipe Lokasi Keterangan Operator Tanggal Log
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A045 | Pengiriman Barang Mekanik
+Tujuan: /id/dashboard/goods-dispatch-mechanic
+Layar / bagian: Barang Keluar Mekanik
+Kolom tabel utama: Valid No. Trans. Tanggal Keterangan Tanggal Log Pengguna Tipe Lokasi
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A046 | Surat Persetujuan/Kontrak Kerja Subkontrak
+Tujuan: /id/dashboard/letter-of-agreementkontrak-kerja-subcont
+Layar / bagian: Surat Perjanjian
+Kolom tabel utama: Valid No Kontrak No Izin Tanggal Dibuat Manajer Kontrak 1 Manajer Kontrak 2 Alamat Jabatan Telepon NPWP
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A047 | Inventaris Subkontrak
+Tujuan: /id/dashboard/subcontract-reconciliation
+Layar / bagian: Rekonsiliasi Subkontrak
+Kolom tabel utama: No Kontrak Jenis Kontrak Tanggal Buat Kuantitas Kontrak Kuantitas Masuk Kuantitas Keluar Kuantitas Retur
+Berat Bersih Keluar Berat Bersih Masuk Saldo Jatuh Tempo Tanggal Sekarang Status Tanggal Tutup
+Kontrol: Lihat Data, Previous, Next
+A048 | Penjualan Ekspor & Lokal
+Tujuan: /id/dashboard/sales-export-30-local-25-more
+Layar / bagian: Invoice
+Kolom tabel utama: Valid Posting Tutup No. Invoice Tanggal Pengiriman Tanggal Invoice Pembeli Mata Uang Total Qty Real Total
+Nilai Real Total Nilai CMT Total IDR Kategori No. Dokumen Tanggal Dokumen Kurs Total BC No. AJU Lokasi
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A049 | Pengiriman Barang Jadi
+Tujuan: /id/dashboard/dispatch-finishgood
+Layar / bagian: Pengiriman Barang Jadi
+
+PAGE 31
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+31
+Kolom tabel utama: Valid Posting Tutup Pilih ID No Invoice Tanggal Pengiriman Tanggal Invoice Pembeli Total Qty BC Total Nilai
+Total Qty Nilai 2 Nilai CMT Nama Kurs No PEB Jenis Dokumen Nomor BC Tanggal PEB Total Total CMT No Aju Lokasi Valas
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A050 | Nota Penerimaan Barang Sampah
+Tujuan: /id/dashboard/good-received-bbm-sampah-scrapt
+Layar / bagian: Penerimaan Barang Scrap
+Kolom tabel utama: ID Valid Nomor Scrap Tanggal Dibuat Limbah Dari
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A051 | Pengiriman Barang Sampah
+Tujuan: /id/dashboard/good-dispatch-bbk-sampah-scrapt
+Layar / bagian: Pengiriman Barang Scrap
+Kolom tabel utama: ID Valid Nomor Scrap Tanggal Dibuat Limbah Ke Kode Scrap
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A052 | Sampah Inventaris
+Tujuan: /id/dashboard/inventory-sampah-scrap
+Layar / bagian: Inventaris Scrap
+Kontrol: Pratinjau, TUTUP
+A053 | Aplikasi Aliran Keuangan
+Tujuan: /id/dashboard/chart-of-account
+Kolom tabel utama: No Akun Nama Akun Saldo Awal Kategori Sub Kategori Grup Akun Tipe COA Kategori COA Mata Uang Level
+COA Pajak Tanggal Saldo Awal Tipe JD COA COA Tidak Aktif
+Kontrol: Baru, Cetak
+A054 | Entri Umum
+Tujuan: /id/dashboard/general-entry
+Layar / bagian: Entri Umum
+Kolom tabel utama: ID Verifikasi Posting No Jurnal Tanggal Ref Debit Kredit Saldo Catatan User Komputer Pemasok Tanggal Log
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A055 | Hutang Lainnya
+Tujuan: /id/dashboard/other-paylable
+Layar / bagian: Hutang Lainnya
+Kolom tabel utama: ID Valid Terverifikasi ID Permintaan Tanggal Permintaan Jumlah Mata Uang No Faktur Tanggal Faktur Status
+Keterangan Departemen ID Pemasok
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A056 | Pengaturan COA & Akun
+Tujuan: /id/dashboard/setup-coa-account
+Layar / bagian: Pengaturan Bagan Akun; Detail Akun COA BANK Supplier; Akun Penjualan Pemasok Pelanggan / Pembeli; Akun
+Hutang Suppliers; Faktur Pemasok BC 25/262/27/30; Akun Hutang Supplier Fabric; Master Item; Akun Hutang Supplier
+Accessories; Master General; Akun Hutang Proses/Lainnya; Master Main Material & Support Material
+
+PAGE 32
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+32
+A057 | Permintaan Pembayaran
+Tujuan: /id/dashboard/payment-request
+Layar / bagian: Permintaan Pembayaran
+Kolom tabel utama: ID Valid No Pembayaran Pemasok Tanggal Permintaan Jatuh Tempo Jumlah Total Mata Uang Operator
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A058 | Pembayaran Batch
+Tujuan: /id/dashboard/batch-payment
+Layar / bagian: Pembayaran Batch
+Kolom tabel utama: Valid No Batch Tanggal Batch Pengguna Periode Bulan Tahun Terverifikasi Keterangan
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A059 | Pembayaran Tunai Bank
+Tujuan: /id/dashboard/payment-cashbank
+Layar / bagian: Pembayaran Kas/Bank
+Kolom tabel utama: Valid Diposting ID No Jurnal Pemasok Tanggal Permintaan Jatuh Tempo Tanggal Pembayaran Jumlah
+Keterangan Mata Uang Status No Transaksi No PO Lokasi User Tanggal Log
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A060 | Permintaan Uang Muka
+Tujuan: /id/dashboard/advance-request
+Layar / bagian: Permintaan Uang Muka
+Kolom tabel utama: ID Faktur Tanggal Faktur No PO Pemasok Jumlah Operator Log Tanggal
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A061 | Nota Debit Invoice
+Tujuan: /id/dashboard/debit-note-invoice
+Layar / bagian: Faktur Nota Debit
+Kolom tabel utama: Valid No Pembayaran Tanggal Buyer Messrs Attention Rekening Bank Keterangan
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A062 | Penerimaan Tunai/Bank
+Tujuan: /id/dashboard/received-cashbank
+Layar / bagian: Penerimaan Kas Bank
+Kolom tabel utama: Valid Terposting No Jurnal Tanggal Diterima No Rekening Kurs Mata Uang Keterangan Inv Id
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A063 | Buku Besar
+Tujuan: /id/dashboard/general-ledger
+Layar / bagian: Buku Besar
+Kontrol: TUTUP, Preview
+
+PAGE 33
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+33
+A064 | Laba Rugi
+Tujuan: /id/dashboard/profit-and-loss
+Layar / bagian: Laba Rugi
+Isian / status: Profit-and-loss-2026-10-01-2026-10-31.pdf
+Kontrol: Pratinjau, Pratinjau HPP, TUTUP, ✕ Close
+A065 | Neraca
+Tujuan: /id/dashboard/balance-sheet
+Layar / bagian: Neraca Keuangan
+Kontrol: Pratinjau, TUTUP
+A066 | Pencatatan
+Tujuan: /id/dashboard/posting
+Layar / bagian: Posting
+Kontrol: Posting Semua, Posting Buku Besar Saja
+A067 | Kas Harian
+Tujuan: /id/dashboard/import-data-ceisa-40
+Layar / bagian: Import Data CEISA 40
+Isian / status: File Path
+Kontrol: Import Master Data, Load File, View Data, Import Data, Template
+Catatan: digunakan pula oleh menu Kas Harian, Rekap Hutang dan Rekap Piutang; tujuan label tersebut tidak sesuai.
+A068 | Pembaruan Nota Penerimaan Barang Akun
+Tujuan: /id/dashboard/bbm-account-update
+Layar / bagian: Penerimaan Barang Utama; Detail Penerimaan Barang
+Kolom tabel utama: Sort by Valid Sort by Diposting Sort by Alias No Penerimaan Barang Sort by Tipe BBM Sort by Status Sort by
+Tanggal BBM Sort by Nama Pemasok Sort by Kurs USD Sort by Kurs EUR Sort by Kurs HKD Sort by Jenis BC Sort by No Dokumen
+Sort by Tanggal Dokumen Sort by No AJU Sort by Catatan Sort by Pengguna Sort by Tanggal Log
+A069 | Pembaruan Akun Pengiriman Barang
+Tujuan: /id/dashboard/bbk-account-update
+Layar / bagian: Pengiriman Barang Utama; Detail Pengiriman Barang
+Kolom tabel utama: Sort by Valid Sort by Posting Sort by Retur Supplier Sort by No Pengiriman Barang Sort by Alias No
+Pengiriman Barang Sort by Tanggal Dibuat Sort by Alias No MR Sort by Artikel Sort by Ke Departemen Sort by Proses Sort by Total
+Kuantitas Sort by Total Jumlah Sort by Pemasok Sort by Catatan Sort by Operator Sort by Tanggal Log
+A070 | Laporan Harian Inventaris
+Tujuan: /id/dashboard/daily-report-inventory
+Layar / bagian: Laporan Harian Persediaan
+Kontrol: Pratinjau, TUTUP
+A071 | Inventaris Bahan Baku
+Tujuan: /id/dashboard/inventory-raw-material
+Layar / bagian: Laporan Bahan Baku Persediaan; Detail Material Inventaris
+Kolom tabel utama: Tipe Barang Status Saldo Awal Kuantitas MASUK Saldo Akhir Jumlah Saldo Awal IDR Jumlah MASUK IDR Jumlah
+KELUAR IDR Jumlah Saldo Akhir IDR Jumlah Saldo Awal USD Jumlah MASUK USD Jumlah KELUAR USD Jumlah Saldo Akhir USD
+Lokasi
+Kontrol: Lihat Data, Ekspor PDF, Ekspor Excel, Tutup
+
+PAGE 34
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+34
+A072 | Inventaris WIP
+Tujuan: /id/dashboard/inventory-wip
+Layar / bagian: Laporan WIP Persediaan
+Kontrol: Pratinjau, TUTUP
+A073 | Penyesuaian Inventaris / Stock Opname
+Tujuan: /id/dashboard/inventory-adjustment-stock-opname
+Layar / bagian: Penyesuaian Persediaan / Stok Opname; Rincian Material Stok Opname Inventaris
+Isian / status: Begin Date, End Date, Lokasi Gudang
+Kolom tabel utama: ID Opname Posting No PO BA Opname BA Adjustment No PO ID BBM Status BBM Tanggal Opname Lokasi
+Gudang Kategori Pemasok Kode Barang Nama Barang Warna Ukuran Unit Kuantitas Diterima Kuantitas Dikirim Stok Akhir Stok
+Opname Selisih Keterangan ID Penyesuaian Status Tipe Dok. No Dok. Tanggal Dok.
+Kontrol: Buat Template SO, Export Excel, Laporan Stock Opname, Update Penyesuaian, Tutup
+A074 | Stok Yang Tersisa
+Tujuan: /id/dashboard/stock-on-hand
+Layar / bagian: Stok Di Tangan; Semua Stok Tersedia; Barang Diterima; Barang Keluar; Barang Keluar Lainnya
+Kolom tabel utama: Valid ID BBM FC Kategori Kuantitas BBM Kuantitas BBK Saldo Stok Alias No BBM Tanggal BBM Kode Barang
+Nama Barang Warna Unit Harga Jumlah Kode Barang Pelanggan Nilai Tukar Mata Uang Nama Pemasok Alias No PO No Dokumen
+Kontrol: Ekspor ke Excel, Di tangan tidak bergerak, BBM Tanpa BBK
+A075 | Pembaruan Nota Penerimaan Barang
+Tujuan: /id/dashboard/good-recieved-bbm-update
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A076 | Pembaruan Pengiriman Barang
+Tujuan: /id/dashboard/good-dispatch-bbk-update
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A077 | Pembaruan Nota Penerimaan Barang Barang Tidak Laris
+Tujuan: /id/dashboard/good-received-deadstock-update
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A078 | Update Pengiriman Barang Stock Mati
+Tujuan: /id/dashboard/good-dispatch-deadstock-update
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A079 | Pembaruan Nota Penerimaan Barang Mekanik
+Tujuan: /id/dashboard/good-recived-mechanic-update
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A080 | Pembaruan Pengiriman Mekanik
+Tujuan: /id/dashboard/good-disatch-mechanic-update
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A081 | Pembaruan Nota Penerimaan Barang Sampah
+Tujuan: /id/dashboard/good-recived-scrap-update
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A082 | Update Pengiriman Sampah
+Tujuan: /id/dashboard/good-dispatch-scrap-update
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+
+PAGE 35
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+35
+A083 | Pembaruan Nota Penerimaan Barang Update Stocklot (Masuk)
+Tujuan: /id/dashboard/good-received-update-stocklot-in
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A084 | Update Pengiriman Stok Lot (Keluar)
+Tujuan: /id/dashboard/good-dispatch-update-stocklot-out
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A085 | BC 2.3
+Tujuan: /id/dashboard/barang-masuk/barang-import
+Layar / bagian: Doc. Import
+Kolom tabel utama: Doc. Type Doc. No Doc. Date AJU No Supplier Rate
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A086 | BC 2.6.2
+Tujuan: /id/dashboard/barang-masuk/barang-lokal
+Layar / bagian: Doc. Local In
+Kolom tabel utama: Doc. Type Doc. No Doc. Date AJU No Supplier Rate
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A087 | BC 3.0
+Tujuan: /id/dashboard/barang-keluar/barang-export
+Layar / bagian: Doc. Export
+Kolom tabel utama: Doc. Type Doc. No Doc. Date AJU No Customer Rate
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A088 | BC 2.5
+Tujuan: /id/dashboard/barang-keluar/barang-lokal
+Layar / bagian: Doc. Local Out
+Kolom tabel utama: Doc. Type Doc. No Doc. Date AJU No Supplier Rate
+Kontrol: Lihat Data, Previous, Next
+Form baru: tersedia; tidak disimpan.
+A089 | Laporan Pemasukan Barang
+Tujuan: /id/dashboard/laporan-pemasukan-barang
+Layar / bagian: LAPORAN PEMASUKAN BARANG PER DOKUMEN PABEAN
+Isian / status: Show charts
+Kolom tabel utama: Data Dokumen Pabean Bukti Penerimaan Barang Pengirim Barang Kode Barang Nama Barang Satuan Barang
+Jumlah Barang Trace
+Kontrol: View Data, Export to Excel, Export to PDF, Previous, Next
+A090 | Laporan Pengeluaran Barang
+Tujuan: /id/dashboard/laporan-pengeluaran-barang
+Layar / bagian: LAPORAN PENGELUARAN BARANG PER DOKUMEN PABEAN
+Isian / status: Show charts
+Kolom tabel utama: Data Dokumen Pabean Bukti Pengeluaran Barang Penerima Barang Kode Barang Nama Barang Satuan
+Barang Jumlah Barang Trace
+
+PAGE 36
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+36
+Kontrol: View Data, Export to Excel, Export to PDF, Previous, Next
+A091 | Laporan Posisi Barang Dalam Proses
+Tujuan: /id/dashboard/laporan-posisi-barang-dalam-proses
+Layar / bagian: LAPORAN PERTANGGUNGJAWABAN POSISI BARANG DALAM PROSES (WIP)
+Isian / status: Show charts
+Kolom tabel utama: Kode Barang Nama Barang Satuan Jumlah Barang Keterangan Trace
+Kontrol: View Data, Export to Excel, Export to PDF, Previous, Next
+A092 | Laporan Mutasi Bahan Baku Dan Bahan Penolong
+Tujuan: /id/dashboard/laporan-mutasi-bahan-baku-dan-bahan-penolong
+Layar / bagian: LAPORAN PERTANGGUNGJAWABAN MUTASI BAHAN BAKU / BAHAN PENOLONG
+Isian / status: Show charts
+Kolom tabel utama: Kode Barang Nama Barang Satuan Jumlah Saldo Awal Jumlah Pemasukan Barang Jumlah Pengeluaran Barang
+Penyesuaian Saldo Akhir Pencacahan Selisih Keterangan Trace
+Kontrol: View Data, Export to Excel, Export to PDF, Previous, Next
+A093 | Laporan Mutasi Barang Jadi
+Tujuan: /id/dashboard/laporan-mutasi-barang-jadi
+Layar / bagian: LAPORAN PERTANGGUNGJAWABAN MUTASI BARANG JADI
+Isian / status: Show charts
+Kolom tabel utama: Kode Barang Nama Barang Satuan Saldo Awal Jumlah Pemasukan Jumlah Pengeluaran Penyesuaian Saldo
+Akhir Hasil Pencacahan Jumlah Barang Jumlah Selisih Keterangan Trace
+Kontrol: View Data, Export to Excel, Export to PDF, Previous, Next
+A094 | Laporan Mutasi Yang Ditolak (Reject) Dan Sisa Proses Produksi (Scrap/ Waste)
+Tujuan: /id/dashboard/laporan-mutasi-yang-ditolak-reject-dan-sisa-proses-produksi-scrap-waste
+Layar / bagian: LAPORAN PERTANGGUNGJAWABAN BARANG REJECT & SCRAP
+Isian / status: Show charts
+Kolom tabel utama: Kode Barang Nama Barang Satuan Jumlah Barang Saldo Awal Pemasukan Pengeluaran Penyesuaian Saldo
+Akhir Hasil Pencacahan Selisih Keterangan Trace
+Kontrol: View Data, Export to Excel, Export to PDF, Previous, Next
+A095 | Laporan Mutasi Barang Modal Dan Barang Lain
+Tujuan: /id/dashboard/laporan-mutasi-barang-modal-dan-barang-lain
+Layar / bagian: LAPORAN PERTANGGUNGJAWABAN BARANG MODAL & BARANG LAIN
+Isian / status: Show charts
+Kolom tabel utama: Kode Barang Nama Barang Satuan Jumlah Barang Saldo Awal Pemasukan Pengeluaran Penyesuaian Saldo
+Akhir Hasil Pencacahan Selisih Keterangan Trace
+Kontrol: View Data, Export to Excel, Export to PDF, Previous, Next
+A096 | Impor Data & Unggah
+Tujuan: /id/dashboard/::%20IMPORT%20DATA%20&%20UPLOAD%20%20::
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A097 | Transaksi Inventaris (Stock Mati)
+Tujuan: /id/dashboard/inventory-transaction-deadstock
+Layar / bagian: Deadstock Persediaan
+Kontrol: Pratinjau, TUTUP
+
+PAGE 37
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+37
+A098 | Laporan Transaksi Lot Stok
+Tujuan: /id/dashboard/transaction-stock-lot-report
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A099 | Transaksi Inventaris (Subkontrak)
+Tujuan: /id/dashboard/inventory-transaction-subcont
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A100 | Transaksi Inventaris (Agpo)
+Tujuan: /id/dashboard/inventory-transaction-agpo
+Layar / bagian: Inventory Transaction AGPO
+Kontrol: Preview, Aging Report, CLOSE
+A101 | Rekap Pembelian
+Tujuan: /id/dashboard/purchase-recap
+Layar / bagian: Purchase Order Recap
+Kolom tabel utama: Save Posting PO No Alias BBM No Alias Received Date Supplier Item Name Unit Received Quantity Currency
+Rate Price Amount Amount USD Amount IDR Status
+Kontrol: View Data, Excel PDF, Excel Export, Close
+A102 | Pengiriman Lokal & Ekspor
+Tujuan: /id/dashboard/dispatch-local-eksport
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A103 | Penyesuaian & Stock Opname
+Tujuan: /id/dashboard/adjustment-stock-opname
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A104 | Rekonsiliasi Periode
+Tujuan: /id/dashboard/reconciliation-periode
+Layar / bagian: Periode Rekonsiliasi; Menu Rekonsiliasi
+Isian / status: ID, Valid, Masukkan keterangan
+Kolom tabel utama: Urutan Sortir Menu Status Buat Tanggal Log Detail Keterangan Aksi
+Kontrol: Cari, Muat Templat, Buat Baru
+Form baru: tersedia; tidak disimpan.
+A105 | Rekap Dokumen Beacukai
+Tujuan: /id/dashboard/rekap-document-beacukai
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A106 | Laporan Bea Cukai
+Tujuan: /id/dashboard/beacukaicustom-report
+Status: tidak membuka halaman sasaran; pemeriksaan ulang kembali ke dasbor. Lihat Lampiran B.
+A107 | Approve
+Tujuan: /id/dashboard/approve
+Layar / bagian: Approval; Transaction; Detail Transaksi
+Isian / status: No Transaksi, Setujui, Valid, Posting
+Kolom tabel utama: ID Transaksi No Transaksi Jenis Transaksi Tanggal Transaksi Disetujui Valid Posting Tanggal Persetujuan
+Disetujui Oleh Log Trans
+Kontrol: Setujui, Kembalikan ke draf
+
+PAGE 38
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+38
+A108 | Dok Rekonsiliasi Ceisa 4.0
+Tujuan: /id/dashboard/recon-doc-ceisa-40
+Layar / bagian: Recon Ceisa 4.0; Recon Audit Document Beacukai; Header Dokumen; Rincian Dokumen; Rincian IT Inventory
+Kolom tabel utama: ID Dokumen Referensi Jenis Dok. No AJU No Dok. Tgl Dok. Total Qty Total Diterima Saldo
+Kontrol: Lihat Data
+A109 | Daftar Karyawan
+Tujuan: /id/dashboard/employee-register
+Layar / bagian: Registrasi Karyawan; Izin Menu
+Isian / status: mis. EMP-001, Nama / Dept. / Ruangan, Melapor ke, Username Login, Email, ••••••••
+Kolom tabel utama: Urutan Sortir Menu Pilih Buat Cetak Akses Pembaruan Semua Pengingat Aksi
+Kontrol: Cari, Profil Grup, Muat Modul, Terapkan Profil Grup, Perbarui Persetujuan, Pengguna Baru, Berikan semua akses, Hapus
+semua akses, Previous, Next
+A110 | Log Aplikasi
+Tujuan: /id/dashboard/log-app
+Layar / bagian: Log App
+Kolom tabel utama: Tanggal Dibuat Modul Status Nama Pengguna Ubah Detail Deskripsi
+Kontrol: Lihat Data, Previous, Next
+A111 | Aplikasi Addon Diagram Alir
+Tujuan: /id/dashboard/flow-app-addon
+Layar / bagian: Flow Core Addon App
+Kontrol: Close
+A112 | Options
+Tujuan: /id/dashboard/options
+Layar / bagian: Opsi Aplikasi
+Kontrol: Tutup
+
+PAGE 39
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+39
+Lampiran A2. Formulir dan view turunan
+V001 | Form Permintaan Pembayaran
+Alamat: /id/dashboard/payment-request/create
+Bagian: Daftar Hutang; Detail Permintaan Pembayaran
+Field: No Permintaan, Pemasok, Mata Uang, Tanggal Permintaan, Bank, Metode Pembayaran, Jatuh Tempo, Cabang, Keterangan,
+Request Dept, No Rekening, Cash / Transfer, Valid, Nama Rekening
+Tabel: Jenis Transaksi No Transaksi Nama Pemasok Tanggal Jatuh Tempo Reff Keterangan Jumlah Total Saldo Jumlah IDR Mata
+Uang Kurs Jenis Dokumen No Dokumen No Faktur Tanggal Faktur
+Tabel: ID Jenis Transaksi No Faktur* No Transaksi Tanggal Reff No Faktur Tanggal Faktur Jumlah Total Jumlah IDR (pembayaran)
+Kurs Jatuh Tempo No Dokumen Mata Uang Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V002 | Form Pembayaran Batch
+Alamat: /id/dashboard/batch-payment/create
+Bagian: Daftar Permintaan; Detail Pembayaran Batch
+Field: No Batch, Periode, Keterangan, Masukkan keterangan, Tanggal, Bulan, Valid, Tahun
+Tabel: No Permintaan Mata Uang Total PPN PPH 23 / 21 Jumlah Tanggal Permintaan Pelanggan Deskripsi Pemasok No Faktur
+Nama Rekening Bank No Rekening Tanggal Faktur
+Tabel: No Permintaan Tanggal Permintaan Pemasok No Faktur* Tanggal Faktur Deskripsi Pelanggan Total PPN PPH 21/ 23 Jumlah
+Mata Uang Nama Rekening No Rekening Bank Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V003 | Form Pembayaran Tunai Bank
+Alamat: /id/dashboard/payment-cashbank/create
+Bagian: Daftar Pembayaran Batch; Daftar Hutang; Detail Pembayaran
+Field: ID Transaksi, Metode Pembayaran, Pemasok, ID Pembayaran, Keterangan, Tanggal Pembayaran, Tanggal Permintaan, Dari
+Rekening, Jatuh Tempo, Lokasi, Kurs, Mata Uang, Valid, Terposting, Voucher
+Tabel: No Batch Tanggal Periode Bulan Tahun Jumlah Jumlah IDR Saldo
+Tabel: No Transaksi Nama Pemasok Tanggal Jenis Transaksi PO Addon Total Jumlah Jumlah IDR Mata Uang Akun Hutang
+Keterangan Posting Kurs Mata Uang No Faktur No Pembayaran Batch
+Tabel: No Faktur COA No Transaksi Tanggal Jenis Transaksi Nama Pemasok No PO PO Reff Jumlah Jumlah IDR Jatuh Tempo
+Riwayat Mata Uang Riwayat Kurs Riwayat Kurs Rugi Kurs Laba Kurs Requery IDR Riwayat IDR Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V004 | Form Permintaan Uang Muka
+Alamat: /id/dashboard/advance-request/create
+Bagian: Permintaan Uang Muka; Daftar Permintaan Uang Muka; Rincian Permintaan Uang Muka
+Field: ID Faktur, Catatan, Valid, Terverifikasi
+Tabel: No PO Referensi PO Tanggal Dibuat Tanggal Pengiriman Jatuh Tempo DP Pemasok Kuantitas PO Jumlah PO Jumlah Uang
+Muka Mata Uang Syarat Pembayaran Tipe Transaksi
+Tabel: No PO Referensi PO Tanggal Dibuat Tanggal Pengiriman Jatuh Tempo DP Kuantitas Harga Total Jumlah Jumlah PO Catatan
+Tipe Transaksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V005 | Form Entri Umum
+Alamat: /id/dashboard/general-entry/create
+Bagian: Detail Entri Umum
+Field: ID, Pemasok/Pembeli, Tipe Jurnal, Deskripsi, Masukkan Deskripsi, No Transaksi, Tanggal Transaksi, Lokasi, Ref/Voucher,
+Terverifikasi, Terposting
+Tabel: No Akun Nama Akun Keterangan Detail Mata Uang Kurs Debit Trans Kredit Trans Debit IDR Kredit IDR Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V006 | Form Hutang Lainnya
+Alamat: /id/dashboard/other-paylable/create
+
+PAGE 40
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+40
+Bagian: Detail Hutang Lainnya
+Tabel: No Akun Nama Akun Nama Barang Jumlah Total IDR Pengelompokan Keterangan Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V007 | Form Nota Debit Invoice
+Alamat: /id/dashboard/debit-note-invoice/create
+Bagian: Detail Faktur; Detail Transaksi
+Field: No Nota Debit, Tanggal, Tanggal Jatuh Tempo, Kategori, Messrs, Perhatian, Nama Rekening Bank, Keterangan, Valid, Cari
+faktur..., Diperiksa Oleh, Disetujui Oleh
+Tabel: Tanggal Nomor Tanggal Dok. Jenis Dok. No Dok. Buyer Jumlah Jumlah IDR Mata Uang Ref Account AR Kurs Terposting
+Tabel: No Rekening Nama Rekening No WO Gaya PO Ukuran Kuantitas Harga Jumlah Mata Uang No Faktur Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V008 | Form Penerimaan Tunai/Bank
+Alamat: /id/dashboard/received-cashbank/create
+Bagian: Detail Nota Debit; Detail Penerimaan Kas Bank
+Field: ID Transaksi, Mata Uang, ID Pembayaran, Kurs, Voucher, Keterangan, Tanggal Penerimaan, Lokasi, No Rekening, Valid,
+Posting, Cari faktur...
+Tabel: Tanggal Tanggal Jatuh Tempo No Tanggal Dok. Jenis Dok. No Dok.
+FinanceAndAccounting.ReceivedCashBank.debitNoteList.buyer Jumlah Jumlah IDR Mata Uang Referensi Rekening Penerima Kurs
+No Nota Debit Idx Terposting
+Tabel: Tanggal No Faktur No WO No Rekening Nama Rekening No Nota Debit Pelanggan Jumlah Jumlah IDR Riwayat Kurs Riwayat
+Mata Uang Referensi Tanggal Pembayaran No Dok. Jenis Dok. Rugi Kurs Laba Kurs Riwayat IDR Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V009 | Form IPR (Permintaan Beli Internal)
+Alamat: /id/dashboard/ipr-internal-purchase-request/create
+Bagian: Detail Tabel IPR; Detail Material
+Field: No IPR, Tanggal IPR, Pilih tanggal, Valid, Pengelompokan, Tgl Permintaan Pengiriman IPR, Nama Pelanggan, Lokasi
+Tabel: Salin Tipe Tipe Utama Penempatan Kode Item Internal Bagian / Komponen Alias WO Artikel / Gaya Nama Kain Total Qty
+Warna Kain Ukuran Kain Unit Komentar IPR
+Tabel: Kode Seq. Alias WO Kode Item Internal Nama Kain Kode Item Pelanggan Total Kuantitas Unit Pemasok PO Internal
+Komentar IPR Biaya Harga Artikel / Gaya Persen Ekstra % PO No Aksi Warna Kain Ukuran Kain
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V010 | Form Pesanan Beli Umum
+Alamat: /id/dashboard/purchase-order-general/create
+Tab / tombol turunan: Detail Pesanan Pembelian, Penambahan / Pengurangan, Rekap PO
+Field: Lokasi, Alias No PO, Referensi PO, Tanggal PO, Pemasok, GPR Reff, Tipe Material, Komentar Umum, Mata Uang, ETD, Valid,
+Pengelompokan, Catatan, Nilai Tukar, Close Date, Disetujui, Syarat Pembayaran, Mode Pengiriman, Syarat Pengiriman, Status PO
+Tabel: Kode Item Kode Alias Nama Item Warna Ukuran Nama Kategori Rate Stock Rate Pembelian Unit Stok Qty Ekstra % Total
+Qty Qty Pembelian Unit Pembelian Harga Pembelian Total Jumlah Catatan Nilai Tukar Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V011 | Form Pesanan Beli Menurut IPR
+Alamat: /id/dashboard/purchase-order-by-ipr/create
+Bagian: Referensi IPR; Detail IPR; Details
+Tab / tombol turunan: Tracking IPR, Detail Pesanan Pembelian, Penambahan / Pengurangan, Rekap PO
+Field: Lokasi, Alias Nomor PO, Tanggal PO, Jenis Material, Pengelompokan, Referensi PO, Catatan, Komentar Umum, Valid,
+Disetujui, Rilis, Pemasok, Syarat Pembayaran, Mode Pengiriman, Syarat Pengiriman, Mata Uang, Kurs, Status PO, Close Date, ETD
+Tabel: Pilih Nomor IPR Tanggal IPR Pelanggan Tanggal Permintaan Pengiriman
+Tabel: Pilih Kode Barang Nama Barang Total Kuantitas Warna Ukuran Total Kuantitas PO Unit Kategori Nomor IPR Alias WO Artikel
+/ Gaya Saldo Pemasok Harga Biaya PO Pelanggan
+Tabel: Kode Barang Alias WO Artikel / Gaya Nama Barang Nama Grup Nama Kategori Alokasi Qty PWN Lain Qty Qty Tambahan
+Total Qty Unit Stok Qty Pembelian Unit Pembelian Rate Stock Rate Pembelian Rate Harga per Unit Total Jumlah Catatan Warna
+Ukuran PO MRF Multiple Aksi
+
+PAGE 41
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+41
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V012 | Form Nota Penerimaan Barang
+Alamat: /id/dashboard/goods-received-bbm/create
+Bagian: Detail Purchase Order; Detail Penerimaan Barang; Pajak dan Pembayaran Lainnya; Detail Jurnal; Referensi CEISA 4.0
+Field: No. BBM, Tipe Dokumen, No. CAR / AJU, Tipe BBM, No. Dokumen, Tanggal Dokumen, Tipe Order, Lokasi, No. AWB, Pemasok,
+Tanggal Diterima, Manifest, Referensi PO, Keterangan, Akun
+Tabel: Alias WO No. PO Referensi PO Pemasok Nama Barang Kode Barang Ukuran Warna Unit Mata Uang Jumlah PO Jumlah PO
+Vendor Harga per Unit Unit Vendor Jumlah BBM Saldo Saldo Jumlah Vendor
+Tabel: BBM ID No. Akun Nama Akun Alias WO Status Diterima No. PO No. Rak No. Invoice Tanggal Invoice No Seri Kode Barang
+Nama Barang Warna Ukuran Qty Doc Unit Doc Unit Pembelian Qty Pembelian Diterima Harga Pembelian Mata Uang Kurs Qty
+Diterima Harga Satuan Unit Stok Jumlah Item Seq Code FC Aksi
+Tabel: Tipe Transaksi Tanggal Transaksi No. Akun Nama Akun Deskripsi Jumlah No. Faktur Tanggal Faktur Aksi
+Tabel: No. Transaksi Tanggal Transaksi No. Akun Nama Akun Referensi Debit Kredit Transaksi Debit Transaksi Kredit Mata Uang
+Kurs No. Jurnal No. Order
+Tabel: ID Nomor Serial Tipe Dokumen No. Dokumen Tanggal Dokumen No. AJU Kode HS Nomor Serial Nama Barang Jumlah Unit
+Pemasok No. AWB No. Invoice
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V013 | Form Master CBD & BOM
+Alamat: /id/dashboard/cbd-bom-master/create
+Tab / tombol turunan: Material Utama, Material Pendukung, Proses
+Field: No CBD, Biaya Material, Artikel / Style, Biaya Pengiriman, Tanggal CBD Dibuat, Biaya Tenaga Kerja, Nama Pelanggan, Biaya
+Bersih, Biaya Overhead, Biaya Margin, FOB, Valid
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V014 | Form Pesanan Konsumen & MRP
+Alamat: /id/dashboard/master-order-bommrp/create
+Tab / tombol turunan: Persiapan, Material Utama, Material Pendukung
+Field: No PWN, Nama Pelanggan, Tanggal Pengiriman Diminta Internal, User, Artikel / Style, Tanggal Pengiriman Diminta
+Pelanggan, CM, Lokasi, Tanggal PWN Dibuat, Unit Barang Jadi, Biaya Material, Keterangan, Nomor Pesanan, Status, Mata Uang,
+Divisi, Grup Produk, No. Referensi Order, Valid, Harga Pelanggan, Tanggal Pengiriman Diperpanjang, Harga Internal, Tanggal
+Worksheet Diterima, Total Quantity WO, Tanggal Permintaan Pengiriman Pelanggan
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V015 | Form SPK / Surat Perintah Kerja
+Alamat: /id/dashboard/spk-work-order-letter/create
+View belum menampilkan isi yang cukup untuk dianalisis pada observasi ini.
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V016 | Form Permintaan Material
+Alamat: /id/dashboard/material-request/create
+Bagian: Detail Material; Detail MR
+Tab / tombol turunan: MR Status, Stock Current/Allocation
+Field: No MR, Lokasi, Tanggal MR, Alias WO, Tanggal Jatuh Tempo MR, Artikel / Gaya, Departemen, Nama, Tujuan MR, SPK,
+Menggunakan Bagian?, Komponen, Kuantitas, Catatan, Valid
+Tabel: Kuantitas BOM Kuantitas MR Saldo Gudang Tipe Alias WO Style Kode Barang Nama Barang Warna Satuan Kuantitas
+Komponen Konsumsi
+Tabel: Alias WO Artikel / Gaya Kode Barang Nama Barang Warna Kuantitas Konsumsi Satuan Catatan Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V017 | Form Pengiriman & Pengembalian Barang
+Alamat: /id/dashboard/goods-dispatch-bbk-return/create
+Bagian: Daftar MR; Semua Stok Tersedia; Detail Pengiriman Barang
+Tab / tombol turunan: Stok di Tangan
+Field: No. Kirim Barang, Tanggal BBK, Total Kuantitas, Lokasi, Perhatian, Total Jumlah, Dikirim Ke, No. MR, No. Nota Retur,
+Catatan, Tipe Transaksi, No Faktur Pajak, Valid, Diposting, Return To Supplier, Tanggal Faktur Pajak, Cari stok..., Copy
+
+PAGE 42
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+42
+Tabel: No MR Tanggal MR Berangkat ke Tanggal Jatuh Tempo MR Tipe ORC Artikel Kode Barang Nama Barang Warna Satuan
+Kuantitas MR Kuantitas BBK Saldo Stok Catatan
+Tabel: FC Salin BBM Tgl BBM No. Dok Tgl. Dok Lokasi Pemasok No PO WO Artikel Tipe Barang Kode Barang Nama Barang Ukuran
+Warna Satuan Saldo Harga Mata Uang Qty BBM Info Tambahan Kode Urut Barang
+Tabel: ID BBM No BBM No PO No Akun Nama Akun No WO Actual Allocation WO Keterangan WO Artikel Tipe Barang Kode Barang
+Nama Barang Warna Kuantitas Info Tambahan Harga Jumlah Satuan Mata Uang Qty SA FC PO Customer Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V018 | Form Nota Pengiriman
+Alamat: /id/dashboard/delivery-notesurat-jalan/create
+Bagian: Detail Surat Jalan
+Field: Kepada, Delivery Note No, Tipe Dokumen, No AWB, Agen, Tanggal SJ, No Dokumen, Manifest, No Polisi, Tanggal Ex Factory,
+Penuh atau Parsial, Referensi, Keterangan, Masukkan keterangan, Sub Proses, Tipe Pembayaran, No Referensi, Tipe Transaksi, LC,
+Disetujui Oleh, WO Alias, SJ No Reff, Consignee, Seal No, No. Invoice, Tanggal Invoice, Valid, Scrap
+Tabel: Kode Barang Nama Barang Kuantitas Satuan Tipe Warna Keterangan No Faktur No Kontrak Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V019 | Form Pengiriman Barang Umum
+Alamat: /id/dashboard/bbk-general/create
+Bagian: Semua Stok Tersedia; Detail Pengiriman Barang
+Tab / tombol turunan: Stok di Tangan
+Field: No BBK, Tanggal BBK, Total Kuantitas, Lokasi, Perhatian, Total Jumlah, Dikirim Ke, Catatan, Valid, Diposting, Cari stok...
+Tabel: FC Salin BBM Tgl BBM No. Dok Tgl. Dok Lokasi Pemasok No PO WO Artikel Tipe Barang Kode Barang Nama Barang Ukuran
+Warna Satuan Saldo Harga Mata Uang Qty BBM Info Tambahan Kode Urut Barang
+Tabel: ID BBM No BBM No PO No Akun Nama Akun Tipe Barang Kode Barang Nama Barang Warna Kuantitas Info Tambahan Harga
+Jumlah Satuan Mata Uang Qty SA FC Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V020 | Form Potongan
+Alamat: /id/dashboard/process/create
+Bagian: 2. Lihat Data; 3. Muat Ukuran
+Tabel: Kode Bagian Deskripsi WO Artikel PO Pelanggan Total Jumlah
+Tabel: Pilih WO PO Pelanggan Kode Bagian Deskripsi Aksi
+Tabel: Jumlah Jumlah Pesanan Deskripsi Kode Bagian Ukuran Status Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V021 | Form Nota Penerimaan Barang Mekanik
+Alamat: /id/dashboard/goods-received-note-mechanic/create
+Bagian: On Set:; Breakdown Set:
+Field: ID, Nomor Transaksi, Keterangan, Valid
+Tabel: Kode Barang Nama Barang No Seri Kategori Saldo Qty Qty Satuan Aksi
+Tabel: Kode Barang Set Kode Barang Nama Barang Kategori Saldo Stock Qty Satuan Harga Mata Uang Tipe BC No BC Tgl BC Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V022 | Form Pengiriman Barang Mekanik
+Alamat: /id/dashboard/goods-dispatch-mechanic/create
+Bagian: Stok Tersedia; Detail
+Field: ID, Nomor Transaksi, Keterangan, Valid
+Tabel: ID BBM Kode Barang Nama Barang Saldo Kuantitas Satuan No BBM Tipe BBM Tanggal BBM
+Tabel: Kode Barang Nama Barang No Seri Kategori Saldo Kuantitas Kuantitas Satuan Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V023 | Form Surat Persetujuan/Kontrak Kerja Subkontrak
+Alamat: /id/dashboard/letter-of-agreementkontrak-kerja-subcont/create
+Bagian: Rincian Jaminan; Rincian Surat Persetujuan; Rincian Surat Perjanjian; Rincian Bahan Baku; Detail Pasal
+
+PAGE 43
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+43
+Field: No Surat Perjanjian, Tanggal Tutup, Pilih tanggal, Lokasi, Tanggal Surat Perjanjian, Jenis Kontrak, Valid, Jatuh Tempo, Detail
+Kontrak, Ditutup, Pihak Satu - Perusahaan, Nama, Alamat, Jabatan, Telepon, NPWP, Pihak Dua - Perusahaan, Item Select
+Tabel: Jenis Jaminan No Jaminan Tanggal Buat Jaminan Jumlah Jatuh Tempo Penjamin Bukti Jaminan Aksi
+Tabel: Surat Persetujuan Tanggal Buat Surat Persetujuan Jatuh Tempo Aksi
+Tabel: Item WO Gaya PO Cust Ukuran Warna Deskripsi Kuantitas Satuan Harga Mata Uang Jumlah No Kontrak Tanggal Mulai Jatuh
+Tempo Tanggal Perpanjangan Kode Seq. PWN Aksi
+Tabel: No Seri Kode Barang Nama Barang Kuantitas Satuan Harga Jumlah Mata Uang Keterangan Aksi
+Tabel: No Pasal Isi Pasal Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V024 | Form Penjualan Ekspor & Lokal
+Alamat: /id/dashboard/sales-export-30-local-25-more/create
+Bagian: Detail Invoice; Detail Pajak; Detail Ledger
+Field: Kategori, No. AWB, L/C (Letter of Credit), Moda Pengiriman, No. Invoice, Tanggal AWB, UPS, Jenis Dokumen, Tanggal
+Invoice, Manifest, Pelabuhan Muat, No. Dokumen, Tanggal Pengiriman, Penerima Manfaat, Tujuan Akhir, Tanggal Dokumen, SJ
+Lokal, Penerima, Pelabuhan Bongkar, No. AJU, SJ Ekspor, Notify, No. Rekening Bank, Tracking, Pembeli, Tipe, Keterangan, No.
+Segel
+Tabel: Pilih FOB / CMT Alias WO Artikel / Style Koleksi No. PO Warna Ukuran Satuan Jumlah Harga Satuan Tujuan Jumlah Karton
+Deskripsi NW GW Keterangan Total NW Total GW
+Tabel: Status Kode HS FOB / CMT Alias WO Artikel / Style Koleksi No. PO Warna Ukuran Jumlah Satuan Harga CMT Total CMT Harga
+FOB Total FOB GW (Gross Weight) NW (Net Weight) Jumlah Karton Deskripsi Deskripsi Tipe Potongan Total Potongan Tujuan Aksi
+Tabel: Jenis Transaksi Tanggal Transaksi No. Akun Nama Akun Deskripsi Jumlah No. Faktur Tanggal Faktur
+Tabel: No. Akun Nama Akun No. Ledger Tanggal Referensi Debit Kredit No. Transaksi Debit No. Transaksi Kredit Mata Uang Jenis
+Dokumen No. Dokumen No. Invoice Customer Keterangan Kurs
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V025 | Form Pengiriman Barang Jadi
+Alamat: /id/dashboard/dispatch-finishgood/create
+Bagian: Sales.DispatchFinishGoods.title; Sales.DispatchFinishGoods.sjDetails.title; Sales.DispatchFinishGoods.details.title;
+Sales.DispatchFinishGoods.ledger.title
+Field: Sales.DispatchFinishGoods.form.category, Sales.DispatchFinishGoods.form.awbNo, Sales.DispatchFinishGoods.form.lc,
+Sales.DispatchFinishGoods.form.modeOfShipment, Sales.DispatchFinishGoods.form.invoiceNo,
+Sales.DispatchFinishGoods.form.awbDate, Sales.DispatchFinishGoods.form.ups, Sales.DispatchFinishGoods.form.docType,
+Sales.DispatchFinishGoods.form.invoiceDate, Sales.DispatchFinishGoods.form.manifest,
+Sales.DispatchFinishGoods.form.loadingPort, Sales.DispatchFinishGoods.form.docNo, Reference,
+Sales.DispatchFinishGoods.form.beneficiary, Sales.DispatchFinishGoods.form.finalDestination,
+Sales.DispatchFinishGoods.form.docDate, Delivery No, Sales.DispatchFinishGoods.form.consignee,
+Sales.DispatchFinishGoods.form.portDischarge, Sales.DispatchFinishGoods.form.ajuNo, WO No,
+Sales.DispatchFinishGoods.form.notify, Sales.DispatchFinishGoods.form.bankAccountNo,
+Sales.DispatchFinishGoods.form.tracking, Sales.DispatchFinishGoods.form.buyer, Sales.DispatchFinishGoods.form.type,
+Sales.DispatchFinishGoods.form.remarks, Sales.DispatchFinishGoods.form.sealNo
+Tabel: Sales.DispatchFinishGoods.sjDetails.woAlias Sales.DispatchFinishGoods.sjDetails.articleStyle
+Sales.DispatchFinishGoods.sjDetails.poNo PO Eks Sales.DispatchFinishGoods.sjDetails.color
+Sales.DispatchFinishGoods.sjDetails.size Sales.DispatchFinishGoods.sjDetails.quantity Sales.DispatchFinishGoods.sjDetails.unit
+Sales.DispatchFinishGoods.sjDetails.fobCmt Sales.DispatchFinishGoods.sjDetails.remarks
+Tabel: Sales.DispatchFinishGoods.ledger.accountNo Sales.DispatchFinishGoods.ledger.accountName
+Sales.DispatchFinishGoods.ledger.ledgerNo Sales.DispatchFinishGoods.ledger.date Sales.DispatchFinishGoods.ledger.reference
+Sales.DispatchFinishGoods.ledger.debit Sales.DispatchFinishGoods.ledger.credit
+Sales.DispatchFinishGoods.ledger.debitTransactionNo Sales.DispatchFinishGoods.ledger.creditTransactionNo
+Sales.DispatchFinishGoods.ledger.currency Sales.DispatchFinishGoods.ledger.docType Sales.DispatchFinishGoods.ledger.docNo
+Sales.DispatchFinishGoods.ledger.invoiceNo Sales.DispatchFinishGoods.ledger.customer
+Sales.DispatchFinishGoods.ledger.remarks Sales.DispatchFinishGoods.ledger.rate
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V026 | Form Nota Penerimaan Barang Sampah
+Alamat: /id/dashboard/good-received-bbm-sampah-scrapt/create
+Bagian: Global Item; Detail BOM; Detail X-Raw Material
+Field: Nomor Transaksi, Limbah Dari, Tanggal Diterima, Pilih tanggal..., Lokasi, Catatan, Valid
+Tabel: ID Kode Paket Deskripsi Satuan Kuantitas No Scrap Aksi
+
+PAGE 44
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+44
+Tabel: ID ID Detail Scrap No WO Keterangan Artikel Persentase % Aksi
+Tabel: ID ID Detail WO No WO Tipe Kode Barang Nama Barang Warna Satuan Persentase % Kuantitas BBK Kuantitas Potong
+Kuantitas Potong Limbah NW Kg Tipe Dokumen No Dokumen Tanggal Dokumen Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V027 | Form Pengiriman Barang Sampah
+Alamat: /id/dashboard/good-dispatch-bbk-sampah-scrapt/create
+Bagian: Stok; Detail
+Tabel: Kode Scrap No Scrap Lokasi Deskripsi Paket Tanggal Diterima Kuantitas Kuantitas Keluar Saldo Satuan Buka WO
+Tabel: Deskripsi Kuantitas Masuk Kuantitas Keluar Satuan Paket No Scrap Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V028 | Import Master Data
+Alamat: /id/dashboard/import-data
+Bagian: Import Data; Preview Data Master Customer
+Tabel: CustomerCode* CustomerName* Address* City Province Country NPWP
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V029 | document-beacukai / form
+Alamat: /id/dashboard/document-beacukai/form
+Bagian: Document Beacukai; Detail Item Dokumen
+Field: NO. AJU, Referensi, BC type, Tanggal Document Pabean, No. Document Pabean, No. Doc Pabean, No. Faktur, Faktur Date,
+CIF, Jumlah Kemasan, Jml Kemasan, Netto, Broto, Supplier Name, Remark, Kurs USD:, Mutasi, Valid
+Tabel: No. Seri Nama Barang Kode HS Tarif Satuan Jumlah Koreksi CIF Valas Nilai Pabean Total BM Bayar Total BM Bebas
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V030 | employee-register / approval-permission
+Alamat: /id/dashboard/employee-register/approval-permission
+Bagian: Izin Persetujuan
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V031 | employee-register / master-approval
+Alamat: /id/dashboard/employee-register/master-approval
+Bagian: Master Persetujuan
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V032 | purchase-order-by-ipr / recap
+Alamat: /id/dashboard/purchase-order-by-ipr/recap
+Bagian: Rekap Purchase Order
+Tabel: No. PO Tanggal Dibuat Pemasok Jenis Pemasok Tanggal Pengiriman Terakhir Syarat Pembayaran Total Nilai Mata Uang
+Kode Dokumen
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V033 | purchase-order-by-ipr / tracking-ipr
+Alamat: /id/dashboard/purchase-order-by-ipr/tracking-ipr
+View belum menampilkan isi yang cukup untuk dianalisis pada observasi ini.
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V034 | material-request / status
+Alamat: /id/dashboard/material-request/status
+Bagian: Status Permintaan Material
+Tabel: Alias MR Tanggal Dibuat Qty BBK Qty MR Status Sisa User
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+
+PAGE 45
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+45
+V035 | Form Master CBD & BOM / Material Utama
+Alamat: /id/dashboard/cbd-bom-master/create
+Tab / tombol turunan: Material Utama, Material Pendukung, Proses
+Field: No CBD, Biaya Material, Artikel / Style, Biaya Pengiriman, Tanggal CBD Dibuat, Biaya Tenaga Kerja, Nama Pelanggan, Biaya
+Bersih, Biaya Overhead, Biaya Margin, FOB, Valid
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V036 | Form Master CBD & BOM / Material Pendukung
+Alamat: /id/dashboard/cbd-bom-master/create
+Tab / tombol turunan: Material Utama, Material Pendukung, Proses
+Field: No CBD, Biaya Material, Artikel / Style, Biaya Pengiriman, Tanggal CBD Dibuat, Biaya Tenaga Kerja, Nama Pelanggan, Biaya
+Bersih, Biaya Overhead, Biaya Margin, FOB, Valid
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V037 | Form Master CBD & BOM / Proses
+Alamat: /id/dashboard/cbd-bom-master/create
+Tab / tombol turunan: Material Utama, Material Pendukung, Proses
+Field: No CBD, Biaya Material, Artikel / Style, Biaya Pengiriman, Tanggal CBD Dibuat, Biaya Tenaga Kerja, Nama Pelanggan, Biaya
+Bersih, Biaya Overhead, Biaya Margin, FOB, Valid
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V038 | Form Pesanan Konsumen & MRP / Persiapan
+Alamat: /id/dashboard/master-order-bommrp/create
+Tab / tombol turunan: Persiapan, Material Utama, Material Pendukung
+Field: No PWN, Nama Pelanggan, Tanggal Pengiriman Diminta Internal, User, Artikel / Style, Tanggal Pengiriman Diminta
+Pelanggan, CM, Lokasi, Tanggal PWN Dibuat, Unit Barang Jadi, Biaya Material, Keterangan, Nomor Pesanan, Status, Mata Uang,
+Divisi, Grup Produk, No. Referensi Order, Valid, Harga Pelanggan, Tanggal Pengiriman Diperpanjang, Harga Internal, Tanggal
+Worksheet Diterima, Total Quantity WO, Tanggal Permintaan Pengiriman Pelanggan
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V039 | Form Pesanan Konsumen & MRP / Material Utama
+Alamat: /id/dashboard/master-order-bommrp/create
+Tab / tombol turunan: Persiapan, Material Utama, Material Pendukung
+Field: No PWN, Nama Pelanggan, Tanggal Pengiriman Diminta Internal, User, Artikel / Style, Tanggal Pengiriman Diminta
+Pelanggan, CM, Lokasi, Tanggal PWN Dibuat, Unit Barang Jadi, Biaya Material, Keterangan, Nomor Pesanan, Status, Mata Uang,
+Divisi, Grup Produk, No. Referensi Order, Valid
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V040 | Form Pesanan Konsumen & MRP / Material Pendukung
+Alamat: /id/dashboard/master-order-bommrp/create
+Tab / tombol turunan: Persiapan, Material Utama, Material Pendukung
+Field: No PWN, Nama Pelanggan, Tanggal Pengiriman Diminta Internal, User, Artikel / Style, Tanggal Pengiriman Diminta
+Pelanggan, CM, Lokasi, Tanggal PWN Dibuat, Unit Barang Jadi, Biaya Material, Keterangan, Nomor Pesanan, Status, Mata Uang,
+Divisi, Grup Produk, No. Referensi Order, Valid
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V041 | Pop-up Kategori Barang
+Alamat: /id/dashboard/data-master-item
+Bagian: Master Item; Kategori Barang
+Tabel: ID Nama Kategori Prefix Code No. Rekening Alias Aksi
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V042 | COA Baru (ulang)
+Alamat: /id/dashboard/chart-of-account/create
+Bagian: Chart of Account Form; Reference
+
+PAGE 46
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+46
+Field: Account No, Account Name, Category, Sub Category, Account Type, Debit or Credit, Account Level, Currency, Opening
+Balance, Balance, Tax, Account Group, Is Active
+Tabel: Account Description Account No Account Name Category COA Category Currency COA Type COA Level
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+V043 | Pratinjau Laba Rugi Oktober
+Alamat: /id/dashboard/profit-and-loss
+Bagian: Laba Rugi
+Field: Profit-and-loss-2026-10-01-2026-10-31.pdf
+Batas: inspeksi struktur saja; tidak menyimpan/mengubah data.
+
+PAGE 47
+MGI | Addonan Finance | Audit read-only | 26 Oktober 2026
+Internal - hasil observasi antarmuka, bukan opini audit keuangan
+47
+Lampiran B. Tujuan menu kembali ke dasbor
+Akses ulang terhadap 17 tujuan berikut menghasilkan URL akhir /id/dashboard dan isi dasbor, bukan
+halaman sasaran. Beberapa akses awal sempat hanya menampilkan halaman kosong. Temuan ini tidak
+menetapkan apakah penyebabnya route yang belum tersedia, pembatasan izin, atau mekanisme fallback
+aplikasi.
+Label menu
+Tujuan yang tidak membuka halaman sasaran
+Impor Data & Unggah
+::%20IMPORT%20DATA%20&%20UPLOAD%20%20::
+Penyesuaian & Stock Opname
+adjustment-stock-opname
+Laporan Bea Cukai
+beacukaicustom-report
+Pengiriman Lokal & Ekspor
+dispatch-local-eksport
+Pembaruan Pengiriman Mekanik
+good-disatch-mechanic-update
+Pembaruan Pengiriman Barang
+good-dispatch-bbk-update
+Update Pengiriman Barang Stock Mati
+good-dispatch-deadstock-update
+Update Pengiriman Sampah
+good-dispatch-scrap-update
+Update Pengiriman Stok Lot (Keluar)
+good-dispatch-update-stocklot-out
+Pembaruan Nota Penerimaan Barang Barang Tidak Laris
+good-received-deadstock-update
+Pembaruan Nota Penerimaan Barang Update Stocklot
+(Masuk)
+good-received-update-stocklot-in
+Pembaruan Nota Penerimaan Barang
+good-recieved-bbm-update
+Pembaruan Nota Penerimaan Barang Mekanik
+good-recived-mechanic-update
+Pembaruan Nota Penerimaan Barang Sampah
+good-recived-scrap-update
+Transaksi Inventaris (Subkontrak)
+inventory-transaction-subcont
+Rekap Dokumen Beacukai
+rekap-document-beacukai
+Laporan Transaksi Lot Stok
+transaction-stock-lot-report
+Catatan akhir cakupan
+Audit membahas seluruh struktur sidebar yang ditemukan untuk akun ini dan memeriksa halaman/fungsi
+yang dapat diakses secara read-only. Tidak semua kombinasi filter, tab dinamis, pop-up berbasis data,
+proses simpan/edit/hapus, import dan kontrol backend telah diuji. Laporan ini memberi dasar perbaikan
+dan UAT berikutnya; tidak menyatakan seluruh aplikasi telah lulus audit transaksi atau keamanan.

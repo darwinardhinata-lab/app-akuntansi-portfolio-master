@@ -1,0 +1,152 @@
+source_system,source_reference,source_id,source_group,source_menu,source_destination,alias_of,target_route,status,implementation,permission,test_evidence,presentation_driver,notes
+Addonan,Audit PDF section 2,1,Data Master,Pengaturan Perusahaan,company-setup,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,2,Data Master,"Saldo Pembukaan ( Row, Barang Jadi )",data-master-item,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,3,Data Master,Bank,bank,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,4,Data Master,Data Master Item,data-master-item,2,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,5,Data Master,Master Sub Grup,sub-group-master,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,6,Data Master,Peta Akun Material,mapping-account-material,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,7,Data Master,Kurs Rate,rate-currency,,currency.index,mapped-not-implemented,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,8,Data Master,Master Pelanggan,master-supplier,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,9,Data Master,Master Satuan,Jangkar (#),,,heading,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,10,Data Master,Master Jangka Waktu Pembayaran,master-payment-term,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,11,Data Master,Master Approve,master-approve,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,12,Data Master,Tentang,about,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,13,Manajemen Pesanan,Master CBD & BOM,cbd-bom-master,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,14,Manajemen Pesanan,Pesanan Konsumen & MRP,master-order-bommrp,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,15,Manajemen Pesanan,IPR (Permintaan Beli Internal),ipr-internal-purchase-request,,purchase-requisitions.index,mapped-not-implemented,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,16,Manajemen Pesanan,Master Pelanggan,master-customer,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,17,Manajemen Pesanan,Master Ukuran,master-size,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,18,Manajemen Pesanan,Master Divisi,master-divison,,filament.erp.resources.divisions.index,implemented-pending-acceptance,app/Filament/Resources/DivisionResource.php; app/Services/DivisionService.php,erp.panel.access; division.view/create/update; DivisionPolicy,tests/Feature/ErpPanelAccessTest.php; browser/reactive HTTP acceptance pending,filament,Existing shared single-MGI master reused; deletion disabled; legacy writer unchanged.
+Addonan,Audit PDF section 2,19,Manajemen Pesanan,Master Agent,master-agent,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,20,Manajemen Pesanan,Master Koleksi,master-colletion,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,21,Manajemen Material,Pesanan Beli Umum,purchase-order-general,,purchase-orders.index,mapped-not-implemented,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,22,Manajemen Material,Nota Penerimaan Barang,goods-received-bbm,,grn.index,reuse-candidate,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,23,Manajemen Material,Pesanan Beli Menurut IPR,purchase-order-by-ipr,,purchase-orders.index,mapped-not-implemented,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,24,Manajemen Material,Status Material-PO Umum,general-material-po-status,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,25,Manajemen Material,Status BOM/MRP-Material,bommrp-material-status,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,26,Manajemen Material,Nota Pengiriman,delivery-notesurat-jalan,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,27,Manajemen Material,Permintaan Material,material-request,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,28,Manajemen Material,Pengiriman & Pengembalian Barang,goods-dispatch-bbk-return,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,29,Manajemen Material,Rekap Nota Penerimaan Barang,recap-goods-received,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,30,Manajemen Material,Tolak Komponen,recap-sales,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,31,Manajemen Material,Pembaruan Nota Penerimaan Barang,bbm-update,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,32,Manajemen Material,Pembaruan Pengiriman Barang,bbk-update,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,33,Manajemen Material,Pengiriman Barang Umum,bbk-general,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,34,Persiapan,SPK / Surat Perintah Kerja,spk-work-order-letter,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,35,Persiapan,Permintaan Material,material-request,27,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,36,Persiapan,Pengiriman & Pengembalian Barang,goods-dispatch-bbk-return,28,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,37,Persiapan,Persiapan Nota Penerimaan Barang,goods-received-bbm,22,grn.index,reuse-candidate,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,38,Persiapan,Persiapan Inventaris,inventory-preparation,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,39,Produksi,Potongan,process?tab=cutting,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,40,Produksi,Menjahit,process?tab=sewing,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,41,Produksi,Membalikan,process?tab=flipping,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,42,Produksi,Mengisi,process?tab=stuffing,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,43,Produksi,Jahit Tangan,process?tab=hand_stitching,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,44,Produksi,Menyelesaikan,process?tab=finishing,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,45,Produksi,Inspeksi,process?tab=inspect,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,46,Produksi,Pembungkusan,process?tab=packing,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,47,Produksi,Barang Jadi,process?tab=finish_good,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,48,Produksi,Progres Produksi,progress-production,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,49,Mekanik,Nota Penerimaan Barang Mekanik,goods-received-note-mechanic,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,50,Mekanik,Pengiriman Barang Mekanik,goods-dispatch-mechanic,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,51,Subkontrak,Surat Persetujuan/Kontrak Kerja Subkontrak,letter-of-agreementkontrak-kerja-subcont,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,52,Subkontrak,Permintaan Material,material-request,27,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,53,Subkontrak,Nota Pengiriman,delivery-notesurat-jalan,26,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,54,Subkontrak,Nota Penerimaan Barang Subkontrak,goods-received-bbm,22,grn.index,reuse-candidate,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,55,Subkontrak,Inventaris Subkontrak,subcontract-reconciliation,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,56,Subkontrak,Rekonsiliasi Subkontrak,subcontract-reconciliation,55,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,57,Penjualan Dan Distribusi,Penjualan Ekspor & Lokal,sales-export-30-local-25-more,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,58,Penjualan Dan Distribusi,Nota Pengiriman,delivery-notesurat-jalan,26,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,59,Penjualan Dan Distribusi,Laporan Pengiriman,recap-sales,30,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,60,Penjualan Dan Distribusi,Pengiriman Barang Jadi,dispatch-finishgood,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,61,Sampah,Nota Penerimaan Barang Sampah,good-received-bbm-sampah-scrapt,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,62,Sampah,Pengiriman Barang Sampah,good-dispatch-bbk-sampah-scrapt,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,63,Sampah,Sampah Inventaris,inventory-sampah-scrap,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,64,Keuangan & Akuntansi,Aplikasi Aliran Keuangan,chart-of-account,,accounts.index,mapped-not-implemented,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,65,Keuangan & Akuntansi,Daftar Akun,chart-of-account,64,accounts.index,mapped-not-implemented,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,66,Keuangan & Akuntansi,Entri Umum,general-entry,,jurnal.create,reuse-candidate,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,67,Keuangan & Akuntansi,Hutang Lainnya,other-paylable,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,68,Keuangan & Akuntansi,Pengaturan COA & Akun,setup-coa-account,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,69,Keuangan & Akuntansi > Pembayaran Tunai/Bank,Permintaan Pembayaran,payment-request,,payment.index,reuse-candidate,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,70,Keuangan & Akuntansi > Pembayaran Tunai/Bank,Pembayaran Batch,batch-payment,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,71,Keuangan & Akuntansi > Pembayaran Tunai/Bank,Pembayaran Tunai Bank,payment-cashbank,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,72,Keuangan & Akuntansi,Permintaan Uang Muka,advance-request,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,73,Keuangan & Akuntansi > Penerimaan Tunai/Bank,Nota Debit Invoice,debit-note-invoice,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,74,Keuangan & Akuntansi > Penerimaan Tunai/Bank,Penerimaan Tunai/Bank,received-cashbank,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,75,Keuangan & Akuntansi > Laporan Keuangan,Buku Besar,general-ledger,,buku-besar.index,reuse-candidate,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,76,Keuangan & Akuntansi > Laporan Keuangan,Laba Rugi,profit-and-loss,,laba-rugi.index,reuse-candidate,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,77,Keuangan & Akuntansi > Laporan Keuangan,Neraca,balance-sheet,,neraca.index,reuse-candidate,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,78,Keuangan & Akuntansi > Laporan Keuangan,Pencatatan,posting,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,79,Keuangan & Akuntansi > Laporan Keuangan,Kas Harian,import-data-ceisa-40,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,80,Keuangan & Akuntansi > Laporan Keuangan,Rekap Akun Hutang,import-data-ceisa-40,79,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,81,Keuangan & Akuntansi > Laporan Keuangan,Rekap Akun Piutang,import-data-ceisa-40,79,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,82,Status Penutupan WO > Perbarui Status Penutupan WO,Pembaruan Nota Penerimaan Barang Akun,bbm-account-update,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,83,Status Penutupan WO > Perbarui Status Penutupan WO,Pembaruan Akun Pengiriman Barang,bbk-account-update,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,84,Status Penutupan WO > Perbarui Status Penutupan WO,Laporan Harian Inventaris,daily-report-inventory,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,85,Laporan Inventaris,Inventaris Bahan Baku,inventory-raw-material,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,86,Laporan Inventaris,Inventaris WIP,inventory-wip,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,87,Laporan Inventaris,Inventaris Barang Jadi,inventory-wip,86,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,88,Laporan Inventaris,Penyesuaian Inventaris / Stock Opname,inventory-adjustment-stock-opname,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,89,Laporan Inventaris,Stok Yang Tersisa,stock-on-hand,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,90,Pembaruan Inventaris > Bahan Baku,Pembaruan Nota Penerimaan Barang,good-recieved-bbm-update,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,91,Pembaruan Inventaris > Bahan Baku,Pembaruan Pengiriman Barang,good-dispatch-bbk-update,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,92,Pembaruan Inventaris > Barang Tidak Laris,Pembaruan Nota Penerimaan Barang Barang Tidak Laris,good-received-deadstock-update,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,93,Pembaruan Inventaris > Barang Tidak Laris,Update Pengiriman Barang Stock Mati,good-dispatch-deadstock-update,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,94,Pembaruan Inventaris > Agpo,Pembaruan Nota Penerimaan Barang Agpo,bbm-update,31,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,95,Pembaruan Inventaris > Agpo,Pembaruan Pengiriman Agpo,bbk-update,32,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,96,Pembaruan Inventaris > Umum,Pembaruan Nota Penerimaan Barang Umum,bbm-update,31,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,97,Pembaruan Inventaris > Umum,Pembaruan Pengiriman Umum,bbk-update,32,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,98,Pembaruan Inventaris > Subkontrak,Pembaruan Nota Penerimaan Barang Subkontrak,subcontract-reconciliation,55,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,99,Pembaruan Inventaris > Subkontrak,Pembaruan Pengiriman Subkontrak,subcontract-reconciliation,55,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,100,Pembaruan Inventaris > Mekanik,Pembaruan Nota Penerimaan Barang Mekanik,good-recived-mechanic-update,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,101,Pembaruan Inventaris > Mekanik,Pembaruan Pengiriman Mekanik,good-disatch-mechanic-update,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,102,Pembaruan Inventaris > Sampah,Pembaruan Nota Penerimaan Barang Sampah,good-recived-scrap-update,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,103,Pembaruan Inventaris > Sampah,Update Pengiriman Sampah,good-dispatch-scrap-update,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,104,Pembaruan Inventaris > Lot Stok,Pembaruan Nota Penerimaan Barang Update Stocklot (Masuk),good-received-update-stocklot-in,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,105,Pembaruan Inventaris > Lot Stok,Update Pengiriman Stok Lot (Keluar),good-dispatch-update-stocklot-out,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,106,Dok Ekspor & Impor > Barang Masuk,BC 2.3,barang-masuk/barang-import,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,107,Dok Ekspor & Impor > Barang Masuk,BC 2.6.2,barang-masuk/barang-lokal,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,108,Dok Ekspor & Impor > Barang Masuk,BC 2.7,barang-masuk/barang-lokal,107,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,109,Dok Ekspor & Impor > Barang Masuk,BC 4.0,barang-masuk/barang-lokal,107,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,110,Dok Ekspor & Impor > Barang Keluar,BC 3.0,barang-keluar/barang-export,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,111,Dok Ekspor & Impor > Barang Keluar,BC 2.5,barang-keluar/barang-lokal,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,112,Dok Ekspor & Impor > Barang Keluar,BC 2.6.1,barang-keluar/barang-lokal,111,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,113,Dok Ekspor & Impor > Barang Keluar,BC 2.7,barang-keluar/barang-lokal,111,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,114,Dok Ekspor & Impor > Barang Keluar,BC 4.1,barang-keluar/barang-lokal,111,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,115,Laporan Bea Cukai,Laporan Pemasukan Barang,laporan-pemasukan-barang,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,116,Laporan Bea Cukai,Laporan Pengeluaran Barang,laporan-pengeluaran-barang,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,117,Laporan Bea Cukai,Laporan Posisi Barang Dalam Proses,laporan-posisi-barang-dalam-proses,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,118,Laporan Bea Cukai,Laporan Mutasi Bahan Baku Dan Bahan Penolong,laporan-mutasi-bahan-baku-dan-bahan-penolong,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,119,Laporan Bea Cukai,Laporan Mutasi Barang Jadi,laporan-mutasi-barang-jadi,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,120,Laporan Bea Cukai,Laporan Mutasi Yang Ditolak (Reject) Dan Sisa Proses Produksi (Scrap/ Waste),laporan-mutasi-yang-ditolak-reject-dan-sisa-proses-produksi-scrap-waste,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,121,Laporan Bea Cukai,Laporan Mutasi Barang Modal Dan Barang Lain,laporan-mutasi-barang-modal-dan-barang-lain,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,122,Laporan Bea Cukai,Impor Data & Unggah,:: IMPORT DATA & UPLOAD ::,,,heading,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,123,Laporan Bea Cukai,Impor Data Ceisa 4.0 & Lainnya.,import-data-ceisa-40,79,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,124,Laporan Mis,Laporan Progres Produksi,progress-production,48,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,125,Laporan Mis,Transaksi Inventaris (Saat Ini),inventory-raw-material,85,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,126,Laporan Mis,Transaksi Inventaris (Stock Mati),inventory-transaction-deadstock,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,127,Laporan Mis,Laporan Transaksi Lot Stok,transaction-stock-lot-report,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,128,Laporan Mis,Transaksi Inventaris (WIP),inventory-wip,86,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,129,Laporan Mis,Transaksi Inventaris (Subkontrak),inventory-transaction-subcont,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,130,Laporan Mis,Transaksi Inventaris (Agpo),inventory-transaction-agpo,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,131,Laporan Mis,Rekap Pembelian,purchase-recap,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,132,Laporan Mis,Pengiriman Lokal & Ekspor,dispatch-local-eksport,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,133,Laporan Mis,Penyesuaian & Stock Opname,adjustment-stock-opname,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,134,Laporan Mis,Buku Besar,general-ledger,75,buku-besar.index,reuse-candidate,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,135,Laporan Mis,Rekonsiliasi Periode,reconciliation-periode,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,136,Laporan Mis,Rekap Dokumen Beacukai,rekap-document-beacukai,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,137,Laporan Mis,Laporan Bea Cukai,beacukaicustom-report,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,138,Laporan Mis,Lap Pemasukan Barang Per Dokumen Pabean,laporan-pemasukan-barang,115,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,139,Laporan Mis,Lap Pengeluaran Barang Per Dokumen Pabean,laporan-pengeluaran-barang,116,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,140,Laporan Mis,Lap Posisi Barang Dalam Proses (WIP),laporan-posisi-barang-dalam-proses,117,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,141,Laporan Mis,Lap Mutasi Bahan Baku Dan Bahan Penolong,laporan-mutasi-bahan-baku-dan-bahan-penolong,118,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,142,Laporan Mis,Lap Mutasi Barang Jadi,laporan-mutasi-barang-jadi,119,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,143,Laporan Mis,Lap Mutasi Barang Sisa Dan Sampah,laporan-mutasi-yang-ditolak-reject-dan-sisa-proses-produksi-scrap-waste,120,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,144,Laporan Mis,Lap Mutasi Mesin,laporan-mutasi-barang-modal-dan-barang-lain,121,,unmapped,,,,,Alias retained; no runtime redirect created. Functional acceptance pending.
+Addonan,Audit PDF section 2,145,Menu langsung,Approve,approve,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,146,Menu langsung,Dok Rekonsiliasi Ceisa 4.0,recon-doc-ceisa-40,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,147,Admin Sistem,Daftar Karyawan,employee-register,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,148,Admin Sistem,Log Aplikasi,log-app,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,149,Admin Sistem,Opsi,Jangkar (#),,,heading,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,150,Admin Sistem,Aplikasi Addon Diagram Alir,flow-app-addon,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
+Addonan,Audit PDF section 2,151,Menu langsung,Options,options,,,unmapped,,,,,Audit observation is not proof of ERP implementation.
