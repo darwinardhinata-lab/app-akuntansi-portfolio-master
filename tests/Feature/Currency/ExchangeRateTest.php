@@ -16,6 +16,7 @@ use Database\Seeders\CurrencySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ExchangeRateTest extends TestCase
@@ -36,6 +37,14 @@ class ExchangeRateTest extends TestCase
             Route::getRoutes()->refreshActionLookups();
         }
         $this->seed(CurrencySeeder::class);
+        // Posting scenarios require real account rows, not just ISO currencies.
+        // Do not reuse 111001: it represents base-currency cash in the MGI chart.
+        foreach (['FX-RECEIVABLE' => ['Piutang Dagang', 'DEBET'], 'FX-PAYABLE' => ['Hutang Dagang', 'KREDIT']] as $code => [$type, $normal]) {
+            DB::table('accounts')->insert([
+                'account_code' => $code, 'account_name' => $code, 'coa_type' => $type,
+                'normal_balance' => $normal, 'report_pos' => 'NERACA', 'currency_code' => 'USD',
+            ]);
+        }
     }
 
     private function payload(array $changes = []): array
@@ -58,8 +67,8 @@ class ExchangeRateTest extends TestCase
     private function postWithMaster(string $id, bool $fail = false): void
     {
         $lines = [
-            ['account_code' => '111001', 'position' => 'DEBET', 'amount_txn' => '1.00'],
-            ['account_code' => '211001', 'position' => 'KREDIT', 'amount_txn' => '1.00'],
+            ['account_code' => 'FX-RECEIVABLE', 'position' => 'DEBET', 'amount_txn' => '1.00'],
+            ['account_code' => 'FX-PAYABLE', 'position' => 'KREDIT', 'amount_txn' => '1.00'],
         ];
         if ($fail) {
             foreach ($lines as &$line) {
@@ -189,8 +198,8 @@ class ExchangeRateTest extends TestCase
             'quoted_rate' => '1580000', 'quoted_unit' => 100]);
         $rate = app(ExchangeRateService::class)->save($quote, null, $user->id);
         app(FxPostingService::class)->post(['journal_id' => 'QUOTED-USED'], [
-            ['account_code' => '111001', 'position' => 'DEBET', 'amount_txn' => '1'],
-            ['account_code' => '211001', 'position' => 'KREDIT', 'amount_txn' => '1'],
+            ['account_code' => 'FX-RECEIVABLE', 'position' => 'DEBET', 'amount_txn' => '1'],
+            ['account_code' => 'FX-PAYABLE', 'position' => 'KREDIT', 'amount_txn' => '1'],
         ], 'USD', Carbon::parse('2026-10-09'), 'TAX');
         $this->putJson(route('currency.rates.update', $rate->id), array_merge($quote, ['quoted_unit' => 10]))
             ->assertStatus(422)->assertJsonValidationErrors('rate');

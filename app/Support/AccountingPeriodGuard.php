@@ -8,7 +8,8 @@ class AccountingPeriodGuard
 {
     public static function enabled(): bool
     {
-        return config('platform.period_lifecycle_preview_enabled', false) && app()->environment('testing');
+        return (bool) config('platform.period_lock_enabled', false)
+            || (config('platform.period_lifecycle_preview_enabled', false) && app()->environment('testing'));
     }
 
     /** Coarse shared mutex: close and protected writes must hold it until commit. */

@@ -12,8 +12,8 @@ class AccountingPeriodService
 {
     public function change(string $month, bool $close, string $reason, User $actor): void
     {
-        // Lifecycle foundation only: keep inaccessible until mutation guards are completed.
-        abort_unless(config('platform.period_lifecycle_preview_enabled', false) && app()->environment('testing'), 409,
+        // Explicit runtime opt-in; existing role/actor allowlists still apply.
+        abort_unless(\App\Support\AccountingPeriodGuard::enabled(), 409,
             'Accounting period lifecycle is not operational until transaction guards are verified.');
         $action = $close ? 'close' : 'reopen';
         abort_unless($actor->role === 'FINANCE' && in_array((string) $actor->id,

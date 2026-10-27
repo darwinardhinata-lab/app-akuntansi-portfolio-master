@@ -26,6 +26,15 @@ class PostingFxTest extends TestCase
         // FIX: multicurrency — sumber mata uang dasar eksplisit dalam fixture.
         \App\Modules\Platform\Models\Company::query()->firstOrCreate(['code' => 'MGI'],
             ['name' => 'MGI', 'base_currency' => 'IDR', 'active' => true]);
+        // Explicit scenario accounts: never relabel MGI's IDR cash (111001) as USD.
+        foreach (['FX-RECEIVABLE' => ['Piutang Dagang', 'DEBET', 'USD', 'NERACA'],
+            'FX-PAYABLE' => ['Hutang Dagang', 'KREDIT', 'USD', 'NERACA'],
+            'FX-ROUNDING' => ['Expense', 'DEBET', null, 'LABA RUGI']] as $code => [$type, $normal, $currency, $report]) {
+            DB::table('accounts')->insert([
+                'account_code' => $code, 'account_name' => $code, 'coa_type' => $type,
+                'normal_balance' => $normal, 'report_pos' => $report, 'currency_code' => $currency,
+            ]);
+        }
     }
 
     private function header(): array
@@ -48,8 +57,8 @@ class PostingFxTest extends TestCase
     private function lines(): array
     {
         return [
-            ['account_code' => '111001', 'position' => 'DEBET', 'amount' => '15800000.00', 'amount_txn' => '1000.00'],
-            ['account_code' => '211001', 'position' => 'KREDIT', 'amount' => '15800000.00', 'amount_txn' => '1000.00'],
+            ['account_code' => 'FX-RECEIVABLE', 'position' => 'DEBET', 'amount' => '15800000.00', 'amount_txn' => '1000.00'],
+            ['account_code' => 'FX-PAYABLE', 'position' => 'KREDIT', 'amount' => '15800000.00', 'amount_txn' => '1000.00'],
         ];
     }
 
@@ -103,9 +112,9 @@ class PostingFxTest extends TestCase
     public function test_manual_preparation_preserves_snapshots_and_absorbs_one_cent_on_largest_short_side(): void
     {
         $prepared = FxPostingService::prepareManualJournal([
-            ['account_code' => '111001', 'position' => 'DEBET', 'amount_txn' => '0.02'],
-            ['account_code' => '211001', 'position' => 'KREDIT', 'amount_txn' => '0.01'],
-            ['account_code' => '211001', 'position' => 'KREDIT', 'amount_txn' => '0.01'],
+            ['account_code' => 'FX-RECEIVABLE', 'position' => 'DEBET', 'amount_txn' => '0.02'],
+            ['account_code' => 'FX-PAYABLE', 'position' => 'KREDIT', 'amount_txn' => '0.01'],
+            ['account_code' => 'FX-PAYABLE', 'position' => 'KREDIT', 'amount_txn' => '0.01'],
         ], 'USD', '0.5', Carbon::parse('2026-10-09'));
         $this->assertSame('USD', $prepared['currency_code']);
         $this->assertSame('0.50000000', $prepared['exchange_rate']);
@@ -121,9 +130,9 @@ class PostingFxTest extends TestCase
     public function test_manual_preparation_rejects_two_cent_rounding_txn_imbalance_and_foreign_assets(): void
     {
         $date = Carbon::parse('2026-10-09');
-        $split = [['account_code' => '111001', 'position' => 'DEBET', 'amount_txn' => '0.04']];
+        $split = [['account_code' => 'FX-RECEIVABLE', 'position' => 'DEBET', 'amount_txn' => '0.04']];
         for ($i = 0; $i < 4; $i++) {
-            $split[] = ['account_code' => '211001', 'position' => 'KREDIT', 'amount_txn' => '0.01'];
+            $split[] = ['account_code' => 'FX-PAYABLE', 'position' => 'KREDIT', 'amount_txn' => '0.01'];
         }
         $imbalanced = $this->lines();
         $imbalanced[1]['amount_txn'] = '999.99';
@@ -148,7 +157,7 @@ class PostingFxTest extends TestCase
     public function test_opening_preparation_allows_mixed_currency_without_transaction_balance(): void
     {
         $lines = FxPostingService::prepareOpeningLines([
-            ['account_code' => '111001', 'position' => 'DEBET', 'currency_code' => 'USD',
+            ['account_code' => 'FX-RECEIVABLE', 'position' => 'DEBET', 'currency_code' => 'USD',
                 'amount_txn' => '1000.00', 'exchange_rate' => '15800'],
             ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '15800000.00'],
         ], 'OPENING');
@@ -267,9 +276,9 @@ class PostingFxTest extends TestCase
     public function test_adjustment_rows_are_idr_and_one_cent_tolerance_is_balanced(): void
     {
         $lines = $this->lines(); $lines[0]['amount'] = '15800000.01';
-        $lines[] = ['account_code' => '910008', 'position' => 'KREDIT', 'amount' => '0.01', 'fx_adjustment' => true];
+        $lines[] = ['account_code' => 'FX-ROUNDING', 'position' => 'KREDIT', 'amount' => '0.01', 'fx_adjustment' => true];
         PostingService::post($this->header(), $lines, null, $this->fx());
-        $adjustment = DB::table('journal_details')->where('account_code', '910008')->first();
+        $adjustment = DB::table('journal_details')->where('account_code', 'FX-ROUNDING')->first();
         $this->assertSame('IDR', $adjustment->currency_code);
         $this->assertNull($adjustment->amount_txn);
         $this->assertSame(0, bccomp((string) $adjustment->exchange_rate, '1', 8));
@@ -303,6 +312,20 @@ class PostingFxTest extends TestCase
             $this->fail('Insert invalid harus gagal.');
         } catch (\Illuminate\Database\QueryException $exception) {
             $this->assertNotEmpty($exception->getMessage());
+        }
+        $this->assertDatabaseCount('journal_headers', 0);
+        $this->assertDatabaseCount('journal_details', 0);
+    }
+
+    public function test_missing_account_is_rejected_and_fx_header_is_rolled_back(): void
+    {
+        $lines = $this->lines();
+        $lines[0]['account_code'] = 'FX-MISSING';
+        try {
+            PostingService::post($this->header(), $lines, null, $this->fx());
+            $this->fail('Missing account must not bypass the currency guard.');
+        } catch (\RuntimeException $exception) {
+            $this->assertSame('Akun FX-MISSING tidak ditemukan untuk pemeriksaan mata uang.', $exception->getMessage());
         }
         $this->assertDatabaseCount('journal_headers', 0);
         $this->assertDatabaseCount('journal_details', 0);

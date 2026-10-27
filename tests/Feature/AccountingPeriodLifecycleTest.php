@@ -25,6 +25,29 @@ class AccountingPeriodLifecycleTest extends TestCase
         $this->assertDatabaseCount('accounting_periods', 0);
     }
 
+    public function test_runtime_opt_in_protects_closed_period_outside_testing_environment(): void
+    {
+        config(['platform.period_lifecycle_preview_enabled' => false, 'platform.period_lock_enabled' => true]);
+        $originalEnvironment = app()->environment();
+        app()->instance('env', 'staging');
+        try {
+            $actor = User::factory()->create(['role' => 'FINANCE']);
+            config(['platform.period_close_user_ids' => [$actor->id]]);
+            app(\App\Services\AccountingPeriodService::class)->change('2026-09', true, 'Staging reconciliation reviewed', $actor);
+            $this->assertDatabaseHas('accounting_periods', ['month' => '2026-09', 'closed' => true]);
+            try {
+                JournalHeader::create(['transaction_date' => '2026-09-15']);
+                $this->fail('Runtime lock must reject a closed period.');
+            } catch (\RuntimeException $exception) {
+                $this->assertStringContainsString('closed', $exception->getMessage());
+            }
+            $this->assertDatabaseCount('journal_headers', 0);
+            $this->assertDatabaseCount('accounting_period_events', 1);
+        } finally {
+            app()->instance('env', $originalEnvironment);
+        }
+    }
+
     public function test_close_reopen_require_separate_allowlists_and_preserve_events(): void
     {
         $closer = User::factory()->create(['role' => 'FINANCE']);

@@ -24,18 +24,25 @@ class AccountImportAuditTest extends TestCase
                 'report_pos' => $index % 2 ? 'LABA RUGI' : 'NERACA',
             ])->refresh();
         }
-        foreach (['id', 'en', 'zh_CN'] as $locale) {
+        $originalLocale = app()->getLocale();
+        // Presentation headers follow the selected locale; imported master values do not.
+        foreach (['id' => 'KODE AKUN', 'en' => 'ACCOUNT CODE', 'zh_CN' => '科目代码'] as $locale => $heading) {
             app()->setLocale($locale);
-            $bytes = \Maatwebsite\Excel\Facades\Excel::raw(
-                new \App\Exports\AccountExport(new \Illuminate\Http\Request()), \Maatwebsite\Excel\Excel::XLSX
-            );
             $path = tempnam(sys_get_temp_dir(), 'coa-roundtrip-');
             try {
+                $bytes = \Maatwebsite\Excel\Facades\Excel::raw(
+                    new \App\Exports\AccountExport(new \Illuminate\Http\Request()), \Maatwebsite\Excel\Excel::XLSX
+                );
                 file_put_contents($path, $bytes);
                 $sheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
-                $this->assertSame('KODE AKUN', $sheet->getActiveSheet()->getCell('B5')->getValue());
+                $this->assertSame($locale, app()->getLocale());
+                $this->assertSame($heading, $sheet->getActiveSheet()->getCell('B5')->getValue());
                 $this->assertSame('00123', $sheet->getActiveSheet()->getCell('B6')->getValue());
                 $this->assertSame('s', $sheet->getActiveSheet()->getCell('C6')->getDataType());
+                $this->assertSame('=Literal 00123', $sheet->getActiveSheet()->getCell('C6')->getValue());
+                $this->assertSame('Cash & Bank', $sheet->getActiveSheet()->getCell('D6')->getValue());
+                $this->assertSame('DEBET', $sheet->getActiveSheet()->getCell('E6')->getValue());
+                $this->assertSame('NERACA', $sheet->getActiveSheet()->getCell('F6')->getValue());
                 $sheet->disconnectWorksheets();
                 \Maatwebsite\Excel\Facades\Excel::import(new AccountImport(), $path, null, \Maatwebsite\Excel\Excel::XLSX);
                 $this->assertDatabaseCount('accounts', 6);
@@ -43,6 +50,7 @@ class AccountImportAuditTest extends TestCase
                     $this->assertSame($account->getAttributes(), $account->fresh()->getAttributes());
                 }
             } finally {
+                app()->setLocale($originalLocale);
                 unlink($path);
             }
         }

@@ -34,6 +34,25 @@ class ProtectedJournalQuery extends Builder
 
     private function periodWrite(callable $operation, array $values = [], bool $insert = false)
     {
+        if (\Illuminate\Support\Facades\Schema::hasTable('accounting_posting_intents')) {
+            return $this->connection->transaction(function () use ($operation, $values, $insert) {
+                $ids = $insert ? [] : (clone $this)->lockForUpdate()->pluck('journal_id')->all();
+                $rows = isset($values[0]) && is_array($values[0]) ? $values : ($values ? [$values] : []);
+                foreach ($rows as $row) {
+                    if (isset($row['journal_id'])) $ids[] = $row['journal_id'];
+                }
+                if ($ids && $this->connection->table('accounting_posting_intents')->whereIn('journal_id', $ids)
+                    ->whereNotNull('sealed_at')->lockForUpdate()->first()) {
+                    throw new RuntimeException('Posted journal is immutable; use linked reversal.');
+                }
+                return $this->guardPeriodWrite($operation, $values, $insert);
+            });
+        }
+        return $this->guardPeriodWrite($operation, $values, $insert);
+    }
+
+    private function guardPeriodWrite(callable $operation, array $values, bool $insert)
+    {
         if (!AccountingPeriodGuard::enabled()) return $operation();
         return $this->connection->transaction(function () use ($operation, $values, $insert) {
             AccountingPeriodGuard::lock();

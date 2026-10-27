@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'filament_enabled' => env('PLATFORM_FILAMENT_ENABLED', false),
+    'posting_intents_enabled' => env('PLATFORM_POSTING_INTENTS_ENABLED', false),
+    'journal_reversal_user_ids' => array_filter(array_map('trim', explode(',', (string) env('JOURNAL_REVERSAL_USER_IDS', '')))),
+    // Staging acceptance required; separate from the testing-only lifecycle preview.
+    'period_lock_enabled' => env('PLATFORM_PERIOD_LOCK_ENABLED', false),
     // FIX: multicurrency — modul baru tetap nonaktif sampai review staging selesai.
     'multicurrency_enabled' => env('PLATFORM_MULTICURRENCY_ENABLED', false),
     'period_close_user_ids' => array_filter(array_map('trim', explode(',', (string) env('PERIOD_CLOSE_USER_IDS', '')))),

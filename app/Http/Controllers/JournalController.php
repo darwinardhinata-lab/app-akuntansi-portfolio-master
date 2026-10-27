@@ -121,42 +121,24 @@ class JournalController extends Controller
         try {
             DB::beginTransaction();
 
-            $journal = JournalHeader::create([
+            $journal = \App\Support\PostingService::post([
                 'transaction_date' => $request->transaction_date,
                 'source_doc_no' => $request->input('source_doc_no', $request->input('evidence_number')),
                 'notes' => $request->description,
                 'journal_type' => 'MANUAL',
-            ]);
+            ], collect($request->details)->map(fn (array $detail) => [
+                'account_code' => $detail['account_code'],
+                'helper_code' => $detail['helper_code'] ?? null,
+                'position' => $detail['position'],
+                'amount' => $detail['amount'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])->all());
 
-            // B9 FIX: Gunakan empty() eksplisit — operator ?? tidak menangkap string kosong ''
-            // jika kolom journal_id ada di DB tapi isinya null/kosong, ?? tidak terpicu.
-            $primaryKeyId = ! empty($journal->journal_id) ? $journal->journal_id : $journal->id;
-            if (empty($primaryKeyId)) {
-                throw new \Exception('Gagal membuat jurnal: primary key tidak terbentuk. Cek model JournalHeader.');
-            }
-
-            // Pre-load semua akun yang dibutuhkan dalam satu query (whereIn)
-            $accountCodes = collect($request->details)
-                ->pluck('account_code')
-                ->filter()
-                ->unique()
-                ->values()
-                ->toArray();
-            $accountsMap = Account::whereIn('account_code', $accountCodes)
-                ->get(['account_code', 'coa_type', 'account_name'])
-                ->keyBy('account_code');
-
-            foreach ($request->details as $detail) {
+            // Keep asset creation in the same outer transaction and use persisted line IDs.
+            foreach ($journal->details()->orderBy('id')->get() as $savedDetail) {
+                $detail = $savedDetail;
                 if (isset($detail['amount']) && $detail['amount'] != 0) {
-
-                    $savedDetail = JournalDetail::create([
-                        'journal_id' => $primaryKeyId,
-                        'account_code' => $detail['account_code'],
-                        'helper_code' => $detail['helper_code'] ?? null,
-                        'position' => $detail['position'],
-                        'amount' => $detail['amount'],
-                    ]);
-
                     // DETEKSI AKUN ASET TETAP: Hanya akun kode 12000
                     $isFixedAsset = $detail['account_code'] === config('coa.aset_tetap');
                     if ($detail['position'] === 'DEBET' && $isFixedAsset) {
