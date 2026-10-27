@@ -43,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::policy(\App\Modules\Platform\Models\Party::class, \App\Modules\Platform\Policies\PartyPolicy::class);
+        Gate::policy(\App\Models\MasterDivisi::class, \App\Policies\DivisionPolicy::class);
 
         Event::listen(Login::class, LogUserLogin::class);
 

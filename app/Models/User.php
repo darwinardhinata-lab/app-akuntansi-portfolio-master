@@ -11,8 +11,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements \Filament\Models\Contracts\FilamentUser
 {
+    public function canAccessPanel(\Filament\Panel $panel): bool
+    {
+        return $panel->getId() === 'erp' && app(\App\Support\ErpPanelAccess::class)->allows(request(), $this);
+    }
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
