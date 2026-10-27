@@ -41,12 +41,32 @@ class PaymentPlanApAllocationTest extends TestCase
             $this->assertSame('overpayment', $exception->rule);
         }
         DB::table('ppl_ap_allocations')->where('request_id', $id)->update(['status' => 'consumed']);
+        // Mutable legacy source after actual payment must not change the frozen AP counterpart.
+        DB::table('purchase_bills')->where('id', $bill)->update(['payment_status' => 'PAID', 'credit_account' => '610001']);
         DB::table('ppl_payment_events')->insert(['id' => 'e1523b8f-a2d2-431a-a932-08da27d52a11', 'request_id' => $id, 'company_id' => $company->id, 'confirmed_by' => $user->id, 'snapshot' => json_encode($payload), 'created_at' => now()]);
         DB::table('company_coa_mappings')->insert(['company_id' => $company->id, 'semantic_key' => 'ppl.bank.idr3', 'account_code' => '111003', 'active' => true]);
+        $snapshot = DB::table('ppl_ap_allocations')->where('request_id', $id)->value('source_snapshot');
+        $this->assertSame('211001', json_decode($snapshot, true)['account_code']);
+        DB::table('ppl_ap_allocations')->where('request_id', $id)->update(['source_snapshot' => null]);
+        try {
+            DB::transaction(fn () => (new BankPaymentControl())->after($payload, $payload + ['journal' => []], 'post_external', ['company_id' => $company->id, 'id' => (string) $user->id]));
+            $this->fail('Historical allocation without approved source evidence must be reconciled.');
+        } catch (\App\Modules\PaymentPlan\Domain\RuleViolation $exception) {
+            $this->assertSame('ap_source_snapshot_reconciliation_required', $exception->rule);
+        }
+        $this->assertDatabaseCount('journal_headers', 1);
+        DB::table('ppl_ap_allocations')->where('request_id', $id)->update(['source_snapshot' => $snapshot]);
         $result = DB::transaction(fn () => (new BankPaymentControl())->after($payload, $payload + ['journal' => []], 'post_external', ['company_id' => $company->id, 'id' => (string) $user->id]));
         $journalId = $result['journal']['journalId'];
         $this->assertDatabaseHas('journal_details', ['journal_id' => $journalId, 'account_code' => '211001', 'position' => 'DEBET', 'amount' => '40.00']);
         $this->assertDatabaseMissing('journal_details', ['journal_id' => $journalId, 'account_code' => '610001']);
         $this->assertSame(2, DB::table('journal_details')->where('journal_id', $journalId)->count());
+        $migration = require database_path('migrations/2026_10_27_160000_add_ap_allocation_source_snapshot.php');
+        try {
+            $migration->down();
+            $this->fail('Used snapshots must not be discarded by rollback.');
+        } catch (\RuntimeException $exception) {
+            $this->assertSame('AP source snapshots must be retained.', $exception->getMessage());
+        }
     }
 }

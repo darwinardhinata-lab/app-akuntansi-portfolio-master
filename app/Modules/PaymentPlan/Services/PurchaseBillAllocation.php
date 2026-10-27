@@ -42,6 +42,7 @@ final class PurchaseBillAllocation
         $amount = (string) $request['settlement']['gross'];
         if (bccomp($amount, $source['residual'], 2) > 0) throw new RuleViolation('overpayment');
         DB::table('ppl_ap_allocations')->updateOrInsert(['request_id' => $request['id']], ['company_id' => $company,
-            'purchase_bill_id' => $source['id'], 'amount' => $amount, 'status' => 'active', 'created_at' => now(), 'updated_at' => now()]);
+            'purchase_bill_id' => $source['id'], 'amount' => $amount, 'status' => 'active',
+            'source_snapshot' => json_encode($source, JSON_THROW_ON_ERROR), 'created_at' => now(), 'updated_at' => now()]);
     }
 }

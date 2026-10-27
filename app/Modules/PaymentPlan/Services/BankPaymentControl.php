@@ -99,9 +99,15 @@ final class BankPaymentControl
             $ap = $frozen['category'] === 'raw_ap';
             $entries = [['expense', 'DEBET', $settlement['base']], ['vat', 'DEBET', $settlement['vat']]];
             if ($ap) {
-                $allocation = DB::table('ppl_ap_allocations')->where('request_id', $frozen['id'])->where('status', 'consumed')->first();
+                $allocation = DB::table('ppl_ap_allocations')->where('company_id', $actor['company_id'])->where('request_id', $frozen['id'])->where('status', 'consumed')->lockForUpdate()->first();
                 if (!$allocation || bccomp((string) $allocation->amount, (string) $settlement['gross'], 2) !== 0) throw new RuleViolation('consumed_ap_allocation_required', 409);
-                $source = (new PurchaseBillAllocation())->source((int) $allocation->purchase_bill_id, $actor['company_id']);
+                // Payment is already real. Do not re-resolve a mutable invoice/status for its counterpart.
+                $source = $allocation->source_snapshot ? json_decode($allocation->source_snapshot, true, 512, JSON_THROW_ON_ERROR) : null;
+                if (!is_array($source) || (int) ($source['id'] ?? 0) !== (int) $allocation->purchase_bill_id
+                    || (int) ($frozen['purchaseBillId'] ?? 0) !== (int) $allocation->purchase_bill_id
+                    || empty($source['account_code']) || empty($source['journal_id'])) {
+                    throw new RuleViolation('ap_source_snapshot_reconciliation_required', 409);
+                }
                 $lines[] = ['account_code' => $source['account_code'], 'position' => 'DEBET', 'amount' => (string) $allocation->amount];
                 $entries = []; // Invoice recognition already booked expense/VAT.
             }

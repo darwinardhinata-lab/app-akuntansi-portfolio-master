@@ -186,6 +186,10 @@ class PurchaseBillController extends Controller
         DB::beginTransaction();
         try {
             $bill = PurchaseBill::lockForUpdate()->findOrFail($id);
+            if (\Illuminate\Support\Facades\Schema::hasTable('ppl_ap_allocations')
+                && DB::table('ppl_ap_allocations')->where('purchase_bill_id', $bill->id)->exists()) {
+                throw new \RuntimeException('Tagihan memiliki bukti alokasi Payment Plan; gunakan rekonsiliasi dan koreksi tertaut, bukan hapus.');
+            }
             \App\Support\GrnProtection::bill((int) $bill->id);
 
             // 1. Reverse stock movements (BIL → IN) jika ada inventory ledger

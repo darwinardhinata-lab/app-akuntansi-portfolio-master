@@ -1,3 +1,12 @@
+# F04 source counterpart recovery increment — 2026-10-27
+
+- Allocation reservation now persists the validated AP source identity/account/journal as `source_snapshot`, via additive migration `2026_10_27_160000_add_ap_allocation_source_snapshot.php`. Existing rows remain null rather than manufacturing historical evidence.
+- AP posting uses this frozen allocation source, company-scoped and locked, not a fresh resolution of mutable invoice payment status/credit account. Regression changes the source to PAID and a different account after reservation and confirms posting still debits the original payable.
+- Missing historical snapshot returns `ap_source_snapshot_reconciliation_required` without a new journal; reconciliation is required, not an automatic backfill. Rollback refuses to discard used snapshots.
+- Purchase-bill destroy explicitly refuses bills with any Payment Plan allocation evidence before reversing inventory or deleting journals. This is a scoped business guard, not universal raw-SQL protection or full writer coordination.
+- Targeted initial run: 28 tests / 293 assertions passed. Final full suite after additional regression assertions: **719 tests / 14,650 assertions, exit 0**, SQLite in-memory. PHP syntax and diff checks passed.
+- Remaining F04/F11: manual/legacy payment source identities, returns/credit notes (current return links to PO, not a particular AP bill), shared writer locking, approval-time source freeze and full posting-account snapshot remain open. Bank/fee mapping still resolves at posting; do not claim all counterparts immutable. MySQL/browser acceptance not run. No production/user database migration.
+
 # Git publication checkpoint — 2026-10-27
 
 - User authorized focused commits and non-force pushes on `feat/marvel-dard-integration`; no merge to main or production deployment.
