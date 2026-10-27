@@ -1,0 +1,60 @@
+{
+  "provenance": {
+    "source_file": "golden_fixtures_v33.json",
+    "source_sha256": "1ad833467a6bbee13825216235a5680795ef6b5782c2a63dd1a1e86bb2473380",
+    "scope": "three legacy financial examples; hardened decimal input tests separate"
+  },
+  "cases": [
+    {
+      "input": {
+        "base": 1000000,
+        "vat": 100000,
+        "withholding": 20000,
+        "fees": 5000
+      },
+      "expect": {
+        "base": 1000000,
+        "vat": 100000,
+        "withholding": 20000,
+        "fees": 5000,
+        "gross": 1100000,
+        "net": 1080000,
+        "debit": 1085000
+      }
+    },
+    {
+      "input": {
+        "base": 2500000,
+        "vat": 275000,
+        "withholding": 50000,
+        "fees": 6500
+      },
+      "expect": {
+        "base": 2500000,
+        "vat": 275000,
+        "withholding": 50000,
+        "fees": 6500,
+        "gross": 2775000,
+        "net": 2725000,
+        "debit": 2731500
+      }
+    },
+    {
+      "input": {
+        "base": 1,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0
+      },
+      "expect": {
+        "base": 1,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1,
+        "net": 1,
+        "debit": 1
+      }
+    }
+  ]
+}

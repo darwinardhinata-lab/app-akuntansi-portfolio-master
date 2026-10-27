@@ -1,0 +1,236 @@
+{
+  "provenance": {
+    "source_sha256": "1ad833467a6bbee13825216235a5680795ef6b5782c2a63dd1a1e86bb2473380",
+    "scope": "weekly golden; explicit empty allRequests and first case settings, synthetic context selection"
+  },
+  "cases": [
+    {
+      "start": "2026-03-01",
+      "end": "2026-03-07",
+      "expect": {
+        "opening": 5000000,
+        "incoming": 0,
+        "outgoing": 0,
+        "closing": 5000000
+      },
+      "allRequests": [],
+      "settings": {
+        "version": 1,
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          }
+        ],
+        "receipts": [],
+        "cash": {
+          "opening": 5000000,
+          "asOf": "2026-01-01",
+          "reference": "OB-CASH"
+        },
+        "cashReceipts": []
+      }
+    },
+    {
+      "start": "2026-03-01",
+      "end": "2026-03-06",
+      "expect": {
+        "error": "weekly_period"
+      },
+      "allRequests": [],
+      "settings": {
+        "version": 1,
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          }
+        ],
+        "receipts": [],
+        "cash": {
+          "opening": 5000000,
+          "asOf": "2026-01-01",
+          "reference": "OB-CASH"
+        },
+        "cashReceipts": []
+      }
+    },
+    {
+      "start": "2025-12-25",
+      "end": "2025-12-31",
+      "expect": {
+        "error": "cash_opening"
+      },
+      "allRequests": [],
+      "settings": {
+        "version": 1,
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null
+          }
+        ],
+        "receipts": [],
+        "cash": {
+          "opening": 5000000,
+          "asOf": "2026-01-01",
+          "reference": "OB-CASH"
+        },
+        "cashReceipts": []
+      }
+    }
+  ]
+}

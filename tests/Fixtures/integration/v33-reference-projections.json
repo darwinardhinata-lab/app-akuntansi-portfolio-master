@@ -1,0 +1,7143 @@
+{
+  "provenance": {
+    "source_file": "golden_fixtures_v33.json",
+    "source_sha256": "1ad833467a6bbee13825216235a5680795ef6b5782c2a63dd1a1e86bb2473380",
+    "clock": "2026-10-27T12:00:00.000Z",
+    "scope": "legacy supported transitions; G042/G050 synthetic contexts explicitly annotated"
+  },
+  "projections": {
+    "G001": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "submitted",
+      "createdAt": "2026-10-27T01:58:07.286Z",
+      "attachments": [],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": []
+    },
+    "G002": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "request_approved",
+      "createdAt": "2026-10-27T01:58:07.286Z",
+      "attachments": [],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.287Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000
+    },
+    "G003": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "settlement_review",
+      "createdAt": "2026-10-27T01:58:07.286Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.287Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.287Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": "Penyesuaian faktur"
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.287Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 100000,
+        "withholding": 20000,
+        "fees": 5000,
+        "gross": 1100000,
+        "net": 1080000,
+        "debit": 1085000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": false,
+        "varianceReason": "Penyesuaian faktur",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T12:00:00.000Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T12:00:00.000Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1085000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      }
+    },
+    "G004": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "settlement_approved",
+      "createdAt": "2026-10-27T01:58:07.286Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.287Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.287Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.288Z",
+          "reference": "",
+          "reason": "Penyesuaian faktur"
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.287Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 100000,
+        "withholding": 20000,
+        "fees": 5000,
+        "gross": 1100000,
+        "net": 1080000,
+        "debit": 1085000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": false,
+        "varianceReason": "Penyesuaian faktur",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.288Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.288Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1085000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "",
+        "ceiling": 1100000,
+        "debitCeiling": 1085000
+      }
+    },
+    "G005": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "bank_prepared",
+      "createdAt": "2026-10-27T01:58:07.286Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.287Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.287Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.288Z",
+          "reference": "",
+          "reason": "Penyesuaian faktur"
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.288Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "KOPRA-001",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.287Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 100000,
+        "withholding": 20000,
+        "fees": 5000,
+        "gross": 1100000,
+        "net": 1080000,
+        "debit": 1085000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": false,
+        "varianceReason": "Penyesuaian faktur",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.288Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.288Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1085000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.288Z",
+        "reference": "",
+        "ceiling": 1100000,
+        "debitCeiling": 1085000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "KOPRA-001"
+      }
+    },
+    "G006": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "bank_released",
+      "createdAt": "2026-10-27T01:58:07.286Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.287Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.287Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.288Z",
+          "reference": "",
+          "reason": "Penyesuaian faktur"
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.288Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T01:58:07.289Z",
+          "reference": "KOPRA-001",
+          "reason": ""
+        },
+        {
+          "action": "release_gm",
+          "actorId": "u-gm",
+          "actor": "GM",
+          "email": "gm@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "KOPRA-001",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.287Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 100000,
+        "withholding": 20000,
+        "fees": 5000,
+        "gross": 1100000,
+        "net": 1080000,
+        "debit": 1085000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": false,
+        "varianceReason": "Penyesuaian faktur",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.288Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.288Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1085000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.288Z",
+        "reference": "",
+        "ceiling": 1100000,
+        "debitCeiling": 1085000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T01:58:07.289Z",
+        "reference": "KOPRA-001"
+      },
+      "bankRelease": {
+        "action": "release_gm",
+        "actorId": "u-gm",
+        "actor": "GM",
+        "email": "gm@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "KOPRA-001"
+      }
+    },
+    "G007": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "paid",
+      "createdAt": "2026-10-27T01:58:07.286Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        },
+        {
+          "id": "a1",
+          "kind": "payment",
+          "sha256": "h1",
+          "name": "payment.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.287Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.287Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.288Z",
+          "reference": "",
+          "reason": "Penyesuaian faktur"
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.288Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T01:58:07.289Z",
+          "reference": "KOPRA-001",
+          "reason": ""
+        },
+        {
+          "action": "release_gm",
+          "actorId": "u-gm",
+          "actor": "GM",
+          "email": "gm@mgi.test",
+          "at": "2026-10-27T01:58:07.289Z",
+          "reference": "KOPRA-001",
+          "reason": ""
+        },
+        {
+          "action": "confirm_paid",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "DEBIT-001",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.287Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 100000,
+        "withholding": 20000,
+        "fees": 5000,
+        "gross": 1100000,
+        "net": 1080000,
+        "debit": 1085000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": false,
+        "varianceReason": "Penyesuaian faktur",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.288Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.288Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1085000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.288Z",
+        "reference": "",
+        "ceiling": 1100000,
+        "debitCeiling": 1085000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T01:58:07.289Z",
+        "reference": "KOPRA-001"
+      },
+      "bankRelease": {
+        "action": "release_gm",
+        "actorId": "u-gm",
+        "actor": "GM",
+        "email": "gm@mgi.test",
+        "at": "2026-10-27T01:58:07.289Z",
+        "reference": "KOPRA-001"
+      },
+      "paidDate": "2026-10-27",
+      "paymentConfirmation": {
+        "action": "confirm_paid",
+        "actorId": "u-fs",
+        "actor": "Finance Staff",
+        "email": "fs@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "DEBIT-001"
+      }
+    },
+    "G008": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "posted",
+      "createdAt": "2026-10-27T01:58:07.286Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        },
+        {
+          "id": "a1",
+          "kind": "payment",
+          "sha256": "h1",
+          "name": "payment.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.287Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.287Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.288Z",
+          "reference": "",
+          "reason": "Penyesuaian faktur"
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.288Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T01:58:07.289Z",
+          "reference": "KOPRA-001",
+          "reason": ""
+        },
+        {
+          "action": "release_gm",
+          "actorId": "u-gm",
+          "actor": "GM",
+          "email": "gm@mgi.test",
+          "at": "2026-10-27T01:58:07.289Z",
+          "reference": "KOPRA-001",
+          "reason": ""
+        },
+        {
+          "action": "confirm_paid",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.290Z",
+          "reference": "DEBIT-001",
+          "reason": ""
+        },
+        {
+          "action": "post_external",
+          "actorId": "u-acc",
+          "actor": "Akuntan",
+          "email": "acc@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "JRN-0001",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.287Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 100000,
+        "withholding": 20000,
+        "fees": 5000,
+        "gross": 1100000,
+        "net": 1080000,
+        "debit": 1085000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": false,
+        "varianceReason": "Penyesuaian faktur",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.288Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.288Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1085000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.288Z",
+        "reference": "",
+        "ceiling": 1100000,
+        "debitCeiling": 1085000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T01:58:07.289Z",
+        "reference": "KOPRA-001"
+      },
+      "bankRelease": {
+        "action": "release_gm",
+        "actorId": "u-gm",
+        "actor": "GM",
+        "email": "gm@mgi.test",
+        "at": "2026-10-27T01:58:07.289Z",
+        "reference": "KOPRA-001"
+      },
+      "paidDate": "2026-10-27",
+      "paymentConfirmation": {
+        "action": "confirm_paid",
+        "actorId": "u-fs",
+        "actor": "Finance Staff",
+        "email": "fs@mgi.test",
+        "at": "2026-10-27T01:58:07.290Z",
+        "reference": "DEBIT-001"
+      },
+      "journal": {
+        "action": "post_external",
+        "actorId": "u-acc",
+        "actor": "Akuntan",
+        "email": "acc@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "JRN-0001"
+      }
+    },
+    "G010": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "submitted",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": []
+    },
+    "G015": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "request_approved",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000
+    },
+    "G021": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "settlement_review",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-reqfs",
+          "actor": "Pemohon Finance",
+          "email": "reqfs@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1000000,
+        "net": 1000000,
+        "debit": 1000000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": true,
+        "varianceReason": "",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-reqfs",
+        "preparedName": "Pemohon Finance",
+        "preparedAt": "2026-10-27T12:00:00.000Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T12:00:00.000Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1000000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      }
+    },
+    "G022": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "settlement_review",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1000000,
+        "net": 1000000,
+        "debit": 1000000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": true,
+        "varianceReason": "",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T12:00:00.000Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T12:00:00.000Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1000000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      }
+    },
+    "G023": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "settlement_review",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": "naik"
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1200000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1200000,
+        "net": 1200000,
+        "debit": 1200000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": false,
+        "varianceReason": "naik",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T12:00:00.000Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T12:00:00.000Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1200000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      }
+    },
+    "G025": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "settlement_approved",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1000000,
+        "net": 1000000,
+        "debit": 1000000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": true,
+        "varianceReason": "",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.293Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.293Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1000000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "",
+        "ceiling": 1000000,
+        "debitCeiling": 1000000
+      }
+    },
+    "G029": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "bank_prepared",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.294Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "K1",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1000000,
+        "net": 1000000,
+        "debit": 1000000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": true,
+        "varianceReason": "",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.293Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.293Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1000000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.294Z",
+        "reference": "",
+        "ceiling": 1000000,
+        "debitCeiling": 1000000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "K1"
+      }
+    },
+    "G031": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "bank_hold",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.294Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T01:58:07.296Z",
+          "reference": "K1",
+          "reason": ""
+        },
+        {
+          "action": "hold_bank",
+          "actorId": "u-gm",
+          "actor": "GM",
+          "email": "gm@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "H1",
+          "reason": "Rekening penerima salah"
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1000000,
+        "net": 1000000,
+        "debit": 1000000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": true,
+        "varianceReason": "",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.293Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.293Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1000000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.294Z",
+        "reference": "",
+        "ceiling": 1000000,
+        "debitCeiling": 1000000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T01:58:07.296Z",
+        "reference": "K1"
+      },
+      "bankHold": {
+        "action": "hold_bank",
+        "actorId": "u-gm",
+        "actor": "GM",
+        "email": "gm@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "H1",
+        "reason": "Rekening penerima salah"
+      }
+    },
+    "G032": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "bank_hold",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.294Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T01:58:07.296Z",
+          "reference": "K1",
+          "reason": ""
+        },
+        {
+          "action": "hold_bank",
+          "actorId": "u-gm",
+          "actor": "GM",
+          "email": "gm@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "H1",
+          "reason": "Rekening penerima salah"
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1000000,
+        "net": 1000000,
+        "debit": 1000000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": true,
+        "varianceReason": "",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.293Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.293Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1000000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.294Z",
+        "reference": "",
+        "ceiling": 1000000,
+        "debitCeiling": 1000000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T01:58:07.296Z",
+        "reference": "K1"
+      },
+      "bankHold": {
+        "action": "hold_bank",
+        "actorId": "u-gm",
+        "actor": "GM",
+        "email": "gm@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "H1",
+        "reason": "Rekening penerima salah"
+      }
+    },
+    "G034": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "draft",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "payment",
+          "sha256": "h0",
+          "name": "payment.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.294Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T01:58:07.296Z",
+          "reference": "K1",
+          "reason": ""
+        },
+        {
+          "action": "hold_bank",
+          "actorId": "u-gm",
+          "actor": "GM",
+          "email": "gm@mgi.test",
+          "at": "2026-10-27T01:58:07.297Z",
+          "reference": "H1",
+          "reason": "Rekening penerima salah"
+        },
+        {
+          "action": "restart_after_no_debit",
+          "actorId": "u-fm",
+          "actor": "Finance Manager",
+          "email": "fm@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "R1",
+          "reason": "Tidak terdebit"
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": null,
+      "requestCeiling": 1000000,
+      "settlement": null,
+      "balanceSnapshot": null,
+      "settlementApproval": null,
+      "bankMaker": null,
+      "bankHold": null,
+      "archivedVersions": [
+        {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "createdBy": "u-req",
+          "createdName": "Pemohon",
+          "department": "purchasing",
+          "subject": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "purpose": [
+            "Perbaikan",
+            "Repair",
+            "维修"
+          ],
+          "payee": "PT Contoh",
+          "currency": "IDR",
+          "route": "bank",
+          "category": "services",
+          "stage": "direct",
+          "requestDate": "2026-10-27",
+          "due": "2026-12-31",
+          "recipientBank": "Mandiri",
+          "recipientAccount": "1234567890",
+          "po": "",
+          "invoice": "",
+          "capex": "",
+          "referenceTotal": 0,
+          "priorPaid": 0,
+          "advanceReference": "",
+          "lines": [
+            {
+              "id": "l1",
+              "description": [
+                "Jasa",
+                "Service",
+                "服务"
+              ],
+              "qty": 1,
+              "unitPrice": 1000000,
+              "total": 1000000,
+              "evidence": ""
+            }
+          ],
+          "amount": 1000000,
+          "status": "bank_hold",
+          "createdAt": "2026-10-27T01:58:07.290Z",
+          "attachments": [
+            {
+              "id": "a0",
+              "kind": "payment",
+              "sha256": "h0",
+              "name": "payment.pdf",
+              "type": "application/pdf"
+            }
+          ],
+          "decisions": [
+            {
+              "action": "submit",
+              "actorId": "u-req",
+              "actor": "Pemohon",
+              "email": "req@mgi.test",
+              "at": "2026-10-27T01:58:07.292Z",
+              "reference": "",
+              "reason": ""
+            },
+            {
+              "action": "approve_request",
+              "actorId": "u-dir",
+              "actor": "Direktur",
+              "email": "dir@mgi.test",
+              "at": "2026-10-27T01:58:07.292Z",
+              "reference": "",
+              "reason": ""
+            },
+            {
+              "action": "prepare_settlement",
+              "actorId": "u-fs",
+              "actor": "Finance Staff",
+              "email": "fs@mgi.test",
+              "at": "2026-10-27T01:58:07.293Z",
+              "reference": "",
+              "reason": ""
+            },
+            {
+              "action": "approve_settlement",
+              "actorId": "u-dir",
+              "actor": "Direktur",
+              "email": "dir@mgi.test",
+              "at": "2026-10-27T01:58:07.294Z",
+              "reference": "",
+              "reason": ""
+            },
+            {
+              "action": "mark_maker",
+              "actorId": "u-mk",
+              "actor": "Maker",
+              "email": "mk@mgi.test",
+              "at": "2026-10-27T01:58:07.296Z",
+              "reference": "K1",
+              "reason": ""
+            },
+            {
+              "action": "hold_bank",
+              "actorId": "u-gm",
+              "actor": "GM",
+              "email": "gm@mgi.test",
+              "at": "2026-10-27T01:58:07.297Z",
+              "reference": "H1",
+              "reason": "Rekening penerima salah"
+            }
+          ],
+          "notes": "",
+          "cycle": "",
+          "history": [],
+          "requestApproval": {
+            "action": "approve_request",
+            "actorId": "u-dir",
+            "actor": "Direktur",
+            "email": "dir@mgi.test",
+            "at": "2026-10-27T01:58:07.292Z",
+            "reference": ""
+          },
+          "requestCeiling": 1000000,
+          "settlement": {
+            "base": 1000000,
+            "vat": 0,
+            "withholding": 0,
+            "fees": 0,
+            "gross": 1000000,
+            "net": 1000000,
+            "debit": 1000000,
+            "sourceId": "idr3",
+            "sourceName": "Mandiri IDR 3",
+            "sourceNumber": "1380 0009 8778 9",
+            "coa": "210001",
+            "invoiceMatch": true,
+            "varianceReason": "",
+            "invoiceNumber": "",
+            "taxNotes": "",
+            "stageEvidence": "",
+            "preparedBy": "u-fs",
+            "preparedName": "Finance Staff",
+            "preparedAt": "2026-10-27T01:58:07.293Z"
+          },
+          "balanceSnapshot": {
+            "at": "2026-10-27T01:58:07.293Z",
+            "accounts": [
+              {
+                "id": "idr1",
+                "name": "Mandiri IDR 1",
+                "number": "1350 0688 0699 9",
+                "currency": "IDR",
+                "payment": false,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              },
+              {
+                "id": "idr2",
+                "name": "Mandiri IDR 2",
+                "number": "1350 0699 6888 9",
+                "currency": "IDR",
+                "payment": false,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              },
+              {
+                "id": "idr3",
+                "name": "Mandiri IDR 3",
+                "number": "1380 0009 8778 9",
+                "currency": "IDR",
+                "payment": true,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              },
+              {
+                "id": "usd1",
+                "name": "Mandiri USD 1",
+                "number": "1350 0868 8699 9",
+                "currency": "USD",
+                "payment": true,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              },
+              {
+                "id": "usd2",
+                "name": "Mandiri USD 2",
+                "number": "1380 0799 6678 9",
+                "currency": "USD",
+                "payment": false,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              }
+            ],
+            "payments": [
+              {
+                "id": "req-fixed",
+                "doc": "PP-FIXED-0001",
+                "date": "2026-10-27",
+                "payee": "PT Contoh",
+                "purpose": [
+                  "Perbaikan",
+                  "Repair",
+                  "维修"
+                ],
+                "currency": "IDR",
+                "amount": 1000000,
+                "status": "request_approved",
+                "sourceId": "",
+                "paidDate": ""
+              }
+            ],
+            "thisPayment": {
+              "id": "req-fixed",
+              "doc": "PP-FIXED-0001",
+              "payee": "PT Contoh",
+              "amount": 1000000,
+              "currency": "IDR",
+              "sourceId": "idr3"
+            },
+            "settingsVersion": 1
+          },
+          "settlementApproval": {
+            "action": "approve_settlement",
+            "actorId": "u-dir",
+            "actor": "Direktur",
+            "email": "dir@mgi.test",
+            "at": "2026-10-27T01:58:07.294Z",
+            "reference": "",
+            "ceiling": 1000000,
+            "debitCeiling": 1000000
+          },
+          "bankMaker": {
+            "action": "mark_maker",
+            "actorId": "u-mk",
+            "actor": "Maker",
+            "email": "mk@mgi.test",
+            "at": "2026-10-27T01:58:07.296Z",
+            "reference": "K1"
+          },
+          "bankHold": {
+            "action": "hold_bank",
+            "actorId": "u-gm",
+            "actor": "GM",
+            "email": "gm@mgi.test",
+            "at": "2026-10-27T01:58:07.297Z",
+            "reference": "H1",
+            "reason": "Rekening penerima salah"
+          },
+          "archivedVersions": []
+        }
+      ],
+      "bankRelease": null
+    },
+    "G035": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "bank_released",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.294Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T01:58:07.296Z",
+          "reference": "K1",
+          "reason": ""
+        },
+        {
+          "action": "release_gm",
+          "actorId": "u-gm",
+          "actor": "GM",
+          "email": "gm@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "K1",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1000000,
+        "net": 1000000,
+        "debit": 1000000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": true,
+        "varianceReason": "",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.293Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.293Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1000000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.294Z",
+        "reference": "",
+        "ceiling": 1000000,
+        "debitCeiling": 1000000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T01:58:07.296Z",
+        "reference": "K1"
+      },
+      "bankRelease": {
+        "action": "release_gm",
+        "actorId": "u-gm",
+        "actor": "GM",
+        "email": "gm@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "K1"
+      }
+    },
+    "G038": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "paid",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "payment",
+          "sha256": "h0",
+          "name": "payment.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.294Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T01:58:07.296Z",
+          "reference": "K1",
+          "reason": ""
+        },
+        {
+          "action": "release_gm",
+          "actorId": "u-gm",
+          "actor": "GM",
+          "email": "gm@mgi.test",
+          "at": "2026-10-27T01:58:07.298Z",
+          "reference": "K1",
+          "reason": ""
+        },
+        {
+          "action": "confirm_paid",
+          "actorId": "u-reqfs",
+          "actor": "Pemohon Finance",
+          "email": "reqfs@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "D1",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1000000,
+        "net": 1000000,
+        "debit": 1000000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": true,
+        "varianceReason": "",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.293Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.293Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1000000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.294Z",
+        "reference": "",
+        "ceiling": 1000000,
+        "debitCeiling": 1000000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T01:58:07.296Z",
+        "reference": "K1"
+      },
+      "bankRelease": {
+        "action": "release_gm",
+        "actorId": "u-gm",
+        "actor": "GM",
+        "email": "gm@mgi.test",
+        "at": "2026-10-27T01:58:07.298Z",
+        "reference": "K1"
+      },
+      "paidDate": "2026-10-27",
+      "paymentConfirmation": {
+        "action": "confirm_paid",
+        "actorId": "u-reqfs",
+        "actor": "Pemohon Finance",
+        "email": "reqfs@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "D1"
+      }
+    },
+    "G040": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "paid",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "payment",
+          "sha256": "h0",
+          "name": "payment.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.294Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T01:58:07.296Z",
+          "reference": "K1",
+          "reason": ""
+        },
+        {
+          "action": "release_gm",
+          "actorId": "u-gm",
+          "actor": "GM",
+          "email": "gm@mgi.test",
+          "at": "2026-10-27T01:58:07.298Z",
+          "reference": "K1",
+          "reason": ""
+        },
+        {
+          "action": "confirm_paid",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "D1",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1000000,
+        "net": 1000000,
+        "debit": 1000000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": true,
+        "varianceReason": "",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.293Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.293Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1000000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.294Z",
+        "reference": "",
+        "ceiling": 1000000,
+        "debitCeiling": 1000000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T01:58:07.296Z",
+        "reference": "K1"
+      },
+      "bankRelease": {
+        "action": "release_gm",
+        "actorId": "u-gm",
+        "actor": "GM",
+        "email": "gm@mgi.test",
+        "at": "2026-10-27T01:58:07.298Z",
+        "reference": "K1"
+      },
+      "paidDate": "2026-10-27",
+      "paymentConfirmation": {
+        "action": "confirm_paid",
+        "actorId": "u-fs",
+        "actor": "Finance Staff",
+        "email": "fs@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "D1"
+      }
+    },
+    "G043": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "paid",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "payment",
+          "sha256": "h0",
+          "name": "payment.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.294Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T01:58:07.296Z",
+          "reference": "K1",
+          "reason": ""
+        },
+        {
+          "action": "release_gm",
+          "actorId": "u-gm",
+          "actor": "GM",
+          "email": "gm@mgi.test",
+          "at": "2026-10-27T01:58:07.298Z",
+          "reference": "K1",
+          "reason": ""
+        },
+        {
+          "action": "confirm_paid",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.301Z",
+          "reference": "D1",
+          "reason": ""
+        },
+        {
+          "action": "correction",
+          "actorId": "u-acc",
+          "actor": "Akuntan",
+          "email": "acc@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "C1",
+          "reason": "Tambah bukti"
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1000000,
+        "net": 1000000,
+        "debit": 1000000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": true,
+        "varianceReason": "",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.293Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.293Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1000000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.294Z",
+        "reference": "",
+        "ceiling": 1000000,
+        "debitCeiling": 1000000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T01:58:07.296Z",
+        "reference": "K1"
+      },
+      "bankRelease": {
+        "action": "release_gm",
+        "actorId": "u-gm",
+        "actor": "GM",
+        "email": "gm@mgi.test",
+        "at": "2026-10-27T01:58:07.298Z",
+        "reference": "K1"
+      },
+      "paidDate": "2026-10-27",
+      "paymentConfirmation": {
+        "action": "confirm_paid",
+        "actorId": "u-fs",
+        "actor": "Finance Staff",
+        "email": "fs@mgi.test",
+        "at": "2026-10-27T01:58:07.301Z",
+        "reference": "D1"
+      },
+      "corrections": [
+        {
+          "action": "correction",
+          "actorId": "u-acc",
+          "actor": "Akuntan",
+          "email": "acc@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "C1",
+          "reason": "Tambah bukti"
+        }
+      ]
+    },
+    "G044": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "request_approved",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "return",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": "Lampiran kurang"
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": null,
+      "balanceSnapshot": null,
+      "archivedVersions": [
+        {
+          "at": "2026-10-27T12:00:00.000Z",
+          "requestApproval": {
+            "action": "approve_request",
+            "actorId": "u-dir",
+            "actor": "Direktur",
+            "email": "dir@mgi.test",
+            "at": "2026-10-27T01:58:07.292Z",
+            "reference": ""
+          },
+          "settlement": {
+            "base": 1000000,
+            "vat": 0,
+            "withholding": 0,
+            "fees": 0,
+            "gross": 1000000,
+            "net": 1000000,
+            "debit": 1000000,
+            "sourceId": "idr3",
+            "sourceName": "Mandiri IDR 3",
+            "sourceNumber": "1380 0009 8778 9",
+            "coa": "210001",
+            "invoiceMatch": true,
+            "varianceReason": "",
+            "invoiceNumber": "",
+            "taxNotes": "",
+            "stageEvidence": "",
+            "preparedBy": "u-fs",
+            "preparedName": "Finance Staff",
+            "preparedAt": "2026-10-27T01:58:07.293Z"
+          },
+          "balanceSnapshot": {
+            "at": "2026-10-27T01:58:07.293Z",
+            "accounts": [
+              {
+                "id": "idr1",
+                "name": "Mandiri IDR 1",
+                "number": "1350 0688 0699 9",
+                "currency": "IDR",
+                "payment": false,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              },
+              {
+                "id": "idr2",
+                "name": "Mandiri IDR 2",
+                "number": "1350 0699 6888 9",
+                "currency": "IDR",
+                "payment": false,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              },
+              {
+                "id": "idr3",
+                "name": "Mandiri IDR 3",
+                "number": "1380 0009 8778 9",
+                "currency": "IDR",
+                "payment": true,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              },
+              {
+                "id": "usd1",
+                "name": "Mandiri USD 1",
+                "number": "1350 0868 8699 9",
+                "currency": "USD",
+                "payment": true,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              },
+              {
+                "id": "usd2",
+                "name": "Mandiri USD 2",
+                "number": "1380 0799 6678 9",
+                "currency": "USD",
+                "payment": false,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              }
+            ],
+            "payments": [
+              {
+                "id": "req-fixed",
+                "doc": "PP-FIXED-0001",
+                "date": "2026-10-27",
+                "payee": "PT Contoh",
+                "purpose": [
+                  "Perbaikan",
+                  "Repair",
+                  "维修"
+                ],
+                "currency": "IDR",
+                "amount": 1000000,
+                "status": "request_approved",
+                "sourceId": "",
+                "paidDate": ""
+              }
+            ],
+            "thisPayment": {
+              "id": "req-fixed",
+              "doc": "PP-FIXED-0001",
+              "payee": "PT Contoh",
+              "amount": 1000000,
+              "currency": "IDR",
+              "sourceId": "idr3"
+            },
+            "settingsVersion": 1
+          },
+          "attachments": [
+            {
+              "id": "a0",
+              "kind": "settlement",
+              "sha256": "h0",
+              "name": "settlement.pdf",
+              "type": "application/pdf"
+            }
+          ]
+        }
+      ],
+      "settlementApproval": null
+    },
+    "G046": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "draft",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.294Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "return",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": "Revisi"
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": null,
+      "requestCeiling": 1000000,
+      "settlement": null,
+      "balanceSnapshot": null,
+      "settlementApproval": null,
+      "archivedVersions": [
+        {
+          "at": "2026-10-27T12:00:00.000Z",
+          "requestApproval": {
+            "action": "approve_request",
+            "actorId": "u-dir",
+            "actor": "Direktur",
+            "email": "dir@mgi.test",
+            "at": "2026-10-27T01:58:07.292Z",
+            "reference": ""
+          },
+          "settlement": {
+            "base": 1000000,
+            "vat": 0,
+            "withholding": 0,
+            "fees": 0,
+            "gross": 1000000,
+            "net": 1000000,
+            "debit": 1000000,
+            "sourceId": "idr3",
+            "sourceName": "Mandiri IDR 3",
+            "sourceNumber": "1380 0009 8778 9",
+            "coa": "210001",
+            "invoiceMatch": true,
+            "varianceReason": "",
+            "invoiceNumber": "",
+            "taxNotes": "",
+            "stageEvidence": "",
+            "preparedBy": "u-fs",
+            "preparedName": "Finance Staff",
+            "preparedAt": "2026-10-27T01:58:07.293Z"
+          },
+          "balanceSnapshot": {
+            "at": "2026-10-27T01:58:07.293Z",
+            "accounts": [
+              {
+                "id": "idr1",
+                "name": "Mandiri IDR 1",
+                "number": "1350 0688 0699 9",
+                "currency": "IDR",
+                "payment": false,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              },
+              {
+                "id": "idr2",
+                "name": "Mandiri IDR 2",
+                "number": "1350 0699 6888 9",
+                "currency": "IDR",
+                "payment": false,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              },
+              {
+                "id": "idr3",
+                "name": "Mandiri IDR 3",
+                "number": "1380 0009 8778 9",
+                "currency": "IDR",
+                "payment": true,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              },
+              {
+                "id": "usd1",
+                "name": "Mandiri USD 1",
+                "number": "1350 0868 8699 9",
+                "currency": "USD",
+                "payment": true,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              },
+              {
+                "id": "usd2",
+                "name": "Mandiri USD 2",
+                "number": "1380 0799 6678 9",
+                "currency": "USD",
+                "payment": false,
+                "opening": 1500000,
+                "asOf": "2026-01-01",
+                "reference": "OB-1",
+                "fx": null,
+                "current": 1500000,
+                "totalPaid": 0,
+                "totalReceived": 0
+              }
+            ],
+            "payments": [
+              {
+                "id": "req-fixed",
+                "doc": "PP-FIXED-0001",
+                "date": "2026-10-27",
+                "payee": "PT Contoh",
+                "purpose": [
+                  "Perbaikan",
+                  "Repair",
+                  "维修"
+                ],
+                "currency": "IDR",
+                "amount": 1000000,
+                "status": "request_approved",
+                "sourceId": "",
+                "paidDate": ""
+              }
+            ],
+            "thisPayment": {
+              "id": "req-fixed",
+              "doc": "PP-FIXED-0001",
+              "payee": "PT Contoh",
+              "amount": 1000000,
+              "currency": "IDR",
+              "sourceId": "idr3"
+            },
+            "settingsVersion": 1
+          },
+          "settlementApproval": {
+            "action": "approve_settlement",
+            "actorId": "u-dir",
+            "actor": "Direktur",
+            "email": "dir@mgi.test",
+            "at": "2026-10-27T01:58:07.294Z",
+            "reference": "",
+            "ceiling": 1000000,
+            "debitCeiling": 1000000
+          },
+          "attachments": [
+            {
+              "id": "a0",
+              "kind": "settlement",
+              "sha256": "h0",
+              "name": "settlement.pdf",
+              "type": "application/pdf"
+            }
+          ]
+        }
+      ],
+      "managerAcknowledgement": null,
+      "gmAcknowledgement": null,
+      "pettyApproval": null
+    },
+    "G047": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "rejected",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "reject",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": "Tidak sesuai anggaran"
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": []
+    },
+    "G048": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "bank_prepared",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.294Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T01:58:07.296Z",
+          "reference": "K1",
+          "reason": ""
+        },
+        {
+          "action": "bank_attempt",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "ERR-1",
+          "reason": "Limit harian"
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1000000,
+        "net": 1000000,
+        "debit": 1000000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": true,
+        "varianceReason": "",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.293Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.293Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1000000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.294Z",
+        "reference": "",
+        "ceiling": 1000000,
+        "debitCeiling": 1000000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T01:58:07.296Z",
+        "reference": "K1"
+      },
+      "attempts": [
+        {
+          "action": "bank_attempt",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "ERR-1",
+          "result": "failed",
+          "reason": "Limit harian"
+        }
+      ]
+    },
+    "G049": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "bank_prepared",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.294Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "B1",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1000000,
+        "net": 1000000,
+        "debit": 1000000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": true,
+        "varianceReason": "",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.293Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.293Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1000000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.294Z",
+        "reference": "",
+        "ceiling": 1000000,
+        "debitCeiling": 1000000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "B1"
+      }
+    },
+    "G050": {
+      "id": "req-fixed-2",
+      "doc": "PP-FIXED-0002",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "PT Contoh",
+      "currency": "IDR",
+      "route": "bank",
+      "category": "services",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "1234567890",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "Jasa",
+            "Service",
+            "服务"
+          ],
+          "qty": 1,
+          "unitPrice": 1000000,
+          "total": 1000000,
+          "evidence": ""
+        }
+      ],
+      "amount": 1000000,
+      "status": "bank_prepared",
+      "createdAt": "2026-10-27T01:58:07.290Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "settlement",
+          "sha256": "h0",
+          "name": "settlement.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_request",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.292Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "prepare_settlement",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T01:58:07.293Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "approve_settlement",
+          "actorId": "u-dir",
+          "actor": "Direktur",
+          "email": "dir@mgi.test",
+          "at": "2026-10-27T01:58:07.294Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "mark_maker",
+          "actorId": "u-mk",
+          "actor": "Maker",
+          "email": "mk@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "B2",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "requestApproval": {
+        "action": "approve_request",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.292Z",
+        "reference": ""
+      },
+      "requestCeiling": 1000000,
+      "settlement": {
+        "base": 1000000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 1000000,
+        "net": 1000000,
+        "debit": 1000000,
+        "sourceId": "idr3",
+        "sourceName": "Mandiri IDR 3",
+        "sourceNumber": "1380 0009 8778 9",
+        "coa": "210001",
+        "invoiceMatch": true,
+        "varianceReason": "",
+        "invoiceNumber": "",
+        "taxNotes": "",
+        "stageEvidence": "",
+        "preparedBy": "u-fs",
+        "preparedName": "Finance Staff",
+        "preparedAt": "2026-10-27T01:58:07.293Z"
+      },
+      "balanceSnapshot": {
+        "at": "2026-10-27T01:58:07.293Z",
+        "accounts": [
+          {
+            "id": "idr1",
+            "name": "Mandiri IDR 1",
+            "number": "1350 0688 0699 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr2",
+            "name": "Mandiri IDR 2",
+            "number": "1350 0699 6888 9",
+            "currency": "IDR",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "idr3",
+            "name": "Mandiri IDR 3",
+            "number": "1380 0009 8778 9",
+            "currency": "IDR",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd1",
+            "name": "Mandiri USD 1",
+            "number": "1350 0868 8699 9",
+            "currency": "USD",
+            "payment": true,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          },
+          {
+            "id": "usd2",
+            "name": "Mandiri USD 2",
+            "number": "1380 0799 6678 9",
+            "currency": "USD",
+            "payment": false,
+            "opening": 1500000,
+            "asOf": "2026-01-01",
+            "reference": "OB-1",
+            "fx": null,
+            "current": 1500000,
+            "totalPaid": 0,
+            "totalReceived": 0
+          }
+        ],
+        "payments": [
+          {
+            "id": "req-fixed",
+            "doc": "PP-FIXED-0001",
+            "date": "2026-10-27",
+            "payee": "PT Contoh",
+            "purpose": [
+              "Perbaikan",
+              "Repair",
+              "维修"
+            ],
+            "currency": "IDR",
+            "amount": 1000000,
+            "status": "request_approved",
+            "sourceId": "",
+            "paidDate": ""
+          }
+        ],
+        "thisPayment": {
+          "id": "req-fixed",
+          "doc": "PP-FIXED-0001",
+          "payee": "PT Contoh",
+          "amount": 1000000,
+          "currency": "IDR",
+          "sourceId": "idr3"
+        },
+        "settingsVersion": 1
+      },
+      "settlementApproval": {
+        "action": "approve_settlement",
+        "actorId": "u-dir",
+        "actor": "Direktur",
+        "email": "dir@mgi.test",
+        "at": "2026-10-27T01:58:07.294Z",
+        "reference": "",
+        "ceiling": 1000000,
+        "debitCeiling": 1000000
+      },
+      "bankMaker": {
+        "action": "mark_maker",
+        "actorId": "u-mk",
+        "actor": "Maker",
+        "email": "mk@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "B2"
+      }
+    },
+    "G051": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "Toko ATK",
+      "currency": "IDR",
+      "route": "petty",
+      "category": "office",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "ATK",
+            "Stationery",
+            "文具"
+          ],
+          "qty": 1,
+          "unitPrice": 250000,
+          "total": 250000,
+          "evidence": ""
+        }
+      ],
+      "amount": 250000,
+      "status": "petty_review",
+      "createdAt": "2026-10-27T01:58:07.304Z",
+      "attachments": [],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": []
+    },
+    "G054": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "Toko ATK",
+      "currency": "IDR",
+      "route": "petty",
+      "category": "office",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "ATK",
+            "Stationery",
+            "文具"
+          ],
+          "qty": 1,
+          "unitPrice": 250000,
+          "total": 250000,
+          "evidence": ""
+        }
+      ],
+      "amount": 250000,
+      "status": "petty_review",
+      "createdAt": "2026-10-27T01:58:07.304Z",
+      "attachments": [],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.304Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "ack_manager",
+          "actorId": "u-mgr",
+          "actor": "Manajer Divisi",
+          "email": "mgr@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "ACK1",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "managerAcknowledgement": {
+        "action": "ack_manager",
+        "actorId": "u-mgr",
+        "actor": "Manajer Divisi",
+        "email": "mgr@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "ACK1"
+      }
+    },
+    "G055": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "Toko ATK",
+      "currency": "IDR",
+      "route": "petty",
+      "category": "office",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "ATK",
+            "Stationery",
+            "文具"
+          ],
+          "qty": 1,
+          "unitPrice": 250000,
+          "total": 250000,
+          "evidence": ""
+        }
+      ],
+      "amount": 250000,
+      "status": "petty_review",
+      "createdAt": "2026-10-27T01:58:07.304Z",
+      "attachments": [],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.304Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "ack_manager",
+          "actorId": "u-mgr",
+          "actor": "Manajer Divisi",
+          "email": "mgr@mgi.test",
+          "at": "2026-10-27T01:58:07.305Z",
+          "reference": "ACK1",
+          "reason": ""
+        },
+        {
+          "action": "ack_gm",
+          "actorId": "u-gm",
+          "actor": "GM",
+          "email": "gm@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "ACK2",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "managerAcknowledgement": {
+        "action": "ack_manager",
+        "actorId": "u-mgr",
+        "actor": "Manajer Divisi",
+        "email": "mgr@mgi.test",
+        "at": "2026-10-27T01:58:07.305Z",
+        "reference": "ACK1"
+      },
+      "gmAcknowledgement": {
+        "action": "ack_gm",
+        "actorId": "u-gm",
+        "actor": "GM",
+        "email": "gm@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "ACK2"
+      }
+    },
+    "G058": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "Toko ATK",
+      "currency": "IDR",
+      "route": "petty",
+      "category": "office",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "ATK",
+            "Stationery",
+            "文具"
+          ],
+          "qty": 1,
+          "unitPrice": 250000,
+          "total": 250000,
+          "evidence": ""
+        }
+      ],
+      "amount": 250000,
+      "status": "petty_approved",
+      "createdAt": "2026-10-27T01:58:07.304Z",
+      "attachments": [],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.304Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "ack_manager",
+          "actorId": "u-mgr",
+          "actor": "Manajer Divisi",
+          "email": "mgr@mgi.test",
+          "at": "2026-10-27T01:58:07.305Z",
+          "reference": "ACK1",
+          "reason": ""
+        },
+        {
+          "action": "ack_gm",
+          "actorId": "u-gm",
+          "actor": "GM",
+          "email": "gm@mgi.test",
+          "at": "2026-10-27T01:58:07.305Z",
+          "reference": "ACK2",
+          "reason": ""
+        },
+        {
+          "action": "approve_petty",
+          "actorId": "u-fm",
+          "actor": "Finance Manager",
+          "email": "fm@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "managerAcknowledgement": {
+        "action": "ack_manager",
+        "actorId": "u-mgr",
+        "actor": "Manajer Divisi",
+        "email": "mgr@mgi.test",
+        "at": "2026-10-27T01:58:07.305Z",
+        "reference": "ACK1"
+      },
+      "gmAcknowledgement": {
+        "action": "ack_gm",
+        "actorId": "u-gm",
+        "actor": "GM",
+        "email": "gm@mgi.test",
+        "at": "2026-10-27T01:58:07.305Z",
+        "reference": "ACK2"
+      },
+      "settlement": {
+        "base": 250000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 250000,
+        "net": 250000,
+        "debit": 250000,
+        "sourceId": "petty",
+        "coa": "610001",
+        "varianceReason": "",
+        "preparedBy": "u-fm",
+        "preparedName": "Finance Manager",
+        "preparedAt": "2026-10-27T12:00:00.000Z"
+      },
+      "pettyApproval": {
+        "action": "approve_petty",
+        "actorId": "u-fm",
+        "actor": "Finance Manager",
+        "email": "fm@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": ""
+      }
+    },
+    "G060": {
+      "id": "req-fixed",
+      "doc": "PP-FIXED-0001",
+      "createdBy": "u-req",
+      "createdName": "Pemohon",
+      "department": "purchasing",
+      "subject": [
+        "Jasa",
+        "Service",
+        "服务"
+      ],
+      "purpose": [
+        "Perbaikan",
+        "Repair",
+        "维修"
+      ],
+      "payee": "Toko ATK",
+      "currency": "IDR",
+      "route": "petty",
+      "category": "office",
+      "stage": "direct",
+      "requestDate": "2026-10-27",
+      "due": "2026-12-31",
+      "recipientBank": "Mandiri",
+      "recipientAccount": "",
+      "po": "",
+      "invoice": "",
+      "capex": "",
+      "referenceTotal": 0,
+      "priorPaid": 0,
+      "advanceReference": "",
+      "lines": [
+        {
+          "id": "l1",
+          "description": [
+            "ATK",
+            "Stationery",
+            "文具"
+          ],
+          "qty": 1,
+          "unitPrice": 250000,
+          "total": 250000,
+          "evidence": ""
+        }
+      ],
+      "amount": 250000,
+      "status": "paid",
+      "createdAt": "2026-10-27T01:58:07.304Z",
+      "attachments": [
+        {
+          "id": "a0",
+          "kind": "payment",
+          "sha256": "h0",
+          "name": "payment.pdf",
+          "type": "application/pdf"
+        }
+      ],
+      "decisions": [
+        {
+          "action": "submit",
+          "actorId": "u-req",
+          "actor": "Pemohon",
+          "email": "req@mgi.test",
+          "at": "2026-10-27T01:58:07.304Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "ack_manager",
+          "actorId": "u-mgr",
+          "actor": "Manajer Divisi",
+          "email": "mgr@mgi.test",
+          "at": "2026-10-27T01:58:07.305Z",
+          "reference": "ACK1",
+          "reason": ""
+        },
+        {
+          "action": "ack_gm",
+          "actorId": "u-gm",
+          "actor": "GM",
+          "email": "gm@mgi.test",
+          "at": "2026-10-27T01:58:07.305Z",
+          "reference": "ACK2",
+          "reason": ""
+        },
+        {
+          "action": "approve_petty",
+          "actorId": "u-fm",
+          "actor": "Finance Manager",
+          "email": "fm@mgi.test",
+          "at": "2026-10-27T01:58:07.305Z",
+          "reference": "",
+          "reason": ""
+        },
+        {
+          "action": "confirm_paid",
+          "actorId": "u-fs",
+          "actor": "Finance Staff",
+          "email": "fs@mgi.test",
+          "at": "2026-10-27T12:00:00.000Z",
+          "reference": "KAS1",
+          "reason": ""
+        }
+      ],
+      "notes": "",
+      "cycle": "",
+      "history": [],
+      "managerAcknowledgement": {
+        "action": "ack_manager",
+        "actorId": "u-mgr",
+        "actor": "Manajer Divisi",
+        "email": "mgr@mgi.test",
+        "at": "2026-10-27T01:58:07.305Z",
+        "reference": "ACK1"
+      },
+      "gmAcknowledgement": {
+        "action": "ack_gm",
+        "actorId": "u-gm",
+        "actor": "GM",
+        "email": "gm@mgi.test",
+        "at": "2026-10-27T01:58:07.305Z",
+        "reference": "ACK2"
+      },
+      "settlement": {
+        "base": 250000,
+        "vat": 0,
+        "withholding": 0,
+        "fees": 0,
+        "gross": 250000,
+        "net": 250000,
+        "debit": 250000,
+        "sourceId": "petty",
+        "coa": "610001",
+        "varianceReason": "",
+        "preparedBy": "u-fm",
+        "preparedName": "Finance Manager",
+        "preparedAt": "2026-10-27T01:58:07.305Z"
+      },
+      "pettyApproval": {
+        "action": "approve_petty",
+        "actorId": "u-fm",
+        "actor": "Finance Manager",
+        "email": "fm@mgi.test",
+        "at": "2026-10-27T01:58:07.305Z",
+        "reference": ""
+      },
+      "paidDate": "2026-10-27",
+      "paymentConfirmation": {
+        "action": "confirm_paid",
+        "actorId": "u-fs",
+        "actor": "Finance Staff",
+        "email": "fs@mgi.test",
+        "at": "2026-10-27T12:00:00.000Z",
+        "reference": "KAS1"
+      }
+    }
+  }
+}
