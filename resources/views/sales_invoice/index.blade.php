@@ -12,9 +12,6 @@
             <p class="text-muted small mb-0">{{ __('erp.invoice_archive_hint') }}</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
-            <button type="button" class="btn btn-warning fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" id="btnSyncTemp">
-                <i class="fa-solid fa-cloud-arrow-down me-1"></i> Sync ke Temp
-            </button>
             <button type="submit" form="filterForm" name="export" value="excel" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
                 <i class="fa-solid fa-file-excel me-1"></i> {{ __('erp.export_excel_btn') }}
             </button>
@@ -277,45 +274,5 @@
         }
     });
 
-    document.getElementById('btnSyncTemp').addEventListener('click', function() {
-        Swal.fire({
-            title: 'Tarik Data Faktur?',
-            text: "Data faktur dari Dashboard akan ditarik ke tabel inv_temp (Fase 1).",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, Tarik Sekarang!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({
-                    title: 'Memulai Proses...',
-                    text: 'Sedang memicu job di background...',
-                    allowOutsideClick: false,
-                    didOpen: () => { Swal.showLoading(); }
-                });
-
-                fetch("{{ route('invoice.sync_temp') }}", {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if(data.success) {
-                        Swal.fire('Berhasil!', data.message, 'success');
-                    } else {
-                        Swal.fire('Error!', data.message || 'Terjadi kesalahan.', 'error');
-                    }
-                })
-                .catch(err => {
-                    Swal.fire('Error!', 'Gagal menghubungi server.', 'error');
-                });
-            }
-        });
-    });
 </script>
 @endsection

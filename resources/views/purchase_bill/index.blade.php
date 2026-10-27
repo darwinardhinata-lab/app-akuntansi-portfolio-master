@@ -10,12 +10,6 @@
             <p class="text-muted small mb-0">{{ __('erp.record_supplier_bill_daily_cost_hint') }}</p>
         </div>
         <div class="d-flex gap-2">
-            <form action="{{ route('purchase-bills.sync_temp') }}" method="POST" class="d-inline">
-                @csrf
-                <button type="submit" class="btn btn-warning fw-bold shadow-sm" onclick="return confirm('Mulai sinkronisasi Bills dari Dashboard? Proses ini berjalan di background.')">
-                    <i class="fa-solid fa-sync me-1"></i> Sync Dashboard
-                </button>
-            </form>
             <a href="{{ route('purchase-bills.create') }}" class="btn btn-primary fw-bold shadow-sm">
                 <i class="fa-solid fa-plus me-1"></i> Buat Tagihan Baru
             </a>

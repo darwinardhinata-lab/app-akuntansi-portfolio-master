@@ -27,9 +27,6 @@
             ]) }}" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
                 <i class="fa-solid fa-file-excel me-1"></i> {{ __('erp.export_excel_btn') }}
             </a>
-            <button type="button" class="btn btn-warning fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0 text-dark" id="btnSyncTemp">
-                <i class="fa-solid fa-rotate me-2"></i> {{ __('erp.btn_sync_temp') }}
-            </button>
             <button type="button" class="btn btn-info text-white fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importModal">
                 <i class="fa-solid fa-file-import me-1"></i> {{ __('erp.import_csv_btn') }}
             </button>
@@ -321,36 +318,6 @@
         $('#journalAccounts').select2({
             theme: 'bootstrap-5', width: '100%', closeOnSelect: false,
             placeholder: @json(__('erp.select_account_coa'))
-        });
-        $('#btnSyncTemp').click(function() {
-            var btn = $(this);
-            btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin me-2"></i> {{ __('erp.syncing') }}');
-            
-            $.ajax({
-                url: "{{ route('jurnal.sync_temp') }}",
-                type: 'POST',
-                data: {
-                    _token: "{{ csrf_token() }}"
-                },
-                success: function(response) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: @json(__('erp.alert_sync_started')),
-                        text: @json(__('erp.journal_sync_background')),
-                        confirmButtonColor: '#3085d6'
-                    });
-                    btn.prop('disabled', false).html('<i class="fa-solid fa-rotate me-2"></i> {{ __('erp.btn_sync_temp') }} (Background)');
-                },
-                error: function() {
-                    Swal.fire({
-                        icon: 'error',
-                        title: @json(__('erp.journal_sync_failed')),
-                        text: @json(__('erp.journal_sync_error')),
-                        confirmButtonColor: '#d33'
-                    });
-                    btn.prop('disabled', false).html('<i class="fa-solid fa-rotate me-2"></i> {{ __('erp.btn_sync_temp') }} (Background)');
-                }
-            });
         });
     });
 </script>

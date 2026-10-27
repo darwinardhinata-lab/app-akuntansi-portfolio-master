@@ -27,12 +27,6 @@
                 <i class="fa-solid fa-plus me-1"></i> {{ __('erp.create_manual_btn') }}
             </a>
             
-            <form action="{{ route('po.sync_temp') }}" method="POST" class="d-inline">
-                @csrf
-                <button type="submit" class="btn btn-warning fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" onclick="return confirm('Mulai sinkronisasi PO dari Dashboard? Proses ini berjalan di background.')">
-                    <i class="fa-solid fa-sync me-1"></i> Sync Dashboard
-                </button>
-            </form>
         </div>
     </div>
 

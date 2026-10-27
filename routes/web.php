@@ -16,6 +16,7 @@ use App\Http\Controllers\PaymentCategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BudgetingController;
 use App\Http\Controllers\SalesInvoiceController;
+require __DIR__.'/payment_plan_v33.php';
 // ── Guest (login) ─────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -98,7 +99,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/jurnal', [JournalController::class, 'store'])->name('jurnal.store');
     Route::get('/jurnal/download-template', [JournalController::class, 'downloadTemplate'])->name('jurnal.download-template');
     Route::post('/jurnal/import', [JournalController::class, 'import'])->middleware('throttle:3,1')->name('jurnal.import');
-    Route::post('/jurnal/sync-temp', [JournalController::class, 'dispatchSyncJob'])->name('jurnal.sync_temp');
     Route::get('/jurnal/detail/ajax', [JournalController::class, 'getJournalDetailsAjax'])->name('jurnal.detail.ajax');
     Route::get('/jurnal/export', [JournalController::class, 'export'])->name('jurnal.export');
     // Route statis harus dideklarasikan sebelum parameter dinamis {journal_id}.
@@ -197,7 +197,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/master-barang/template', [App\Http\Controllers\ProductController::class, 'downloadTemplate'])->name('product.template');
     Route::get('/master-barang/create', [App\Http\Controllers\ProductController::class, 'create'])->name('product.create');
     Route::post('/master-barang', [App\Http\Controllers\ProductController::class, 'store'])->name('product.store');
-    Route::post('/master-barang/sync-dashboard', [App\Http\Controllers\ProductController::class, 'dispatchSyncJob'])->name('product.sync_dashboard');
     Route::get('/master-barang/{id}/edit', [App\Http\Controllers\ProductController::class, 'edit'])->name('product.edit');
     Route::put('/master-barang/{id}', [App\Http\Controllers\ProductController::class, 'update'])->name('product.update');
     Route::delete('/master-barang/{id}', [App\Http\Controllers\ProductController::class, 'destroy'])->name('product.destroy');
@@ -223,7 +222,6 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{id}',       'destroy')->name('destroy');
         Route::post('/{id}/receive', 'receiveItems')->name('receive');
         Route::post('/{id}/void',    'voidReceipt')->name('void');
-        Route::post('/sync-temp',    'dispatchSyncJob')->name('sync_temp');
     });
 
     // 👇 RUTE INBOUND GUDANG 👇
@@ -248,7 +246,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/sales-order/template', [App\Http\Controllers\SalesOrderController::class, 'downloadTemplate'])->name('so.template');
     Route::post('/sales-order/{id}/ship', [App\Http\Controllers\SalesOrderController::class, 'processShipment'])->name('so.ship');
     Route::post('/sales-order/{id}/rollback', [App\Http\Controllers\SalesOrderController::class, 'rollbackShipment'])->name('so.rollback');
-    Route::post('/sales-order/sync-temp', [App\Http\Controllers\SalesOrderController::class, 'dispatchSyncJob'])->name('so.sync_temp');
 
     // Route untuk Menu Faktur Penjualan & Analisa Pivot
     Route::get('/sales-invoices', [SalesInvoiceController::class, 'index'])->name('invoice.index');
@@ -260,7 +257,6 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/sales-invoices/{id}', [App\Http\Controllers\SalesInvoiceController::class, 'destroy'])->name('invoice.destroy');
     // 👆 ------------------ 👆
 
-    Route::post('/sales-invoices/sync-temp', [SalesInvoiceController::class, 'dispatchSyncJob'])->name('invoice.sync_temp');
 
     // --- RETUR PENJUALAN (PEMERIKSAAN GUDANG) ---
     Route::get('/sales-returns', [App\Http\Controllers\SalesReturnController::class, 'index'])->name('sales-returns.index');
@@ -283,7 +279,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/purchase-bills', [App\Http\Controllers\PurchaseBillController::class, 'store'])->name('purchase-bills.store');
     Route::get('/purchase-bills/{id}', [App\Http\Controllers\PurchaseBillController::class, 'show'])->name('purchase-bills.show');
     Route::delete('/purchase-bills/{id}', [App\Http\Controllers\PurchaseBillController::class, 'destroy'])->name('purchase-bills.destroy');
-    Route::post('/purchase-bills/sync-temp', [App\Http\Controllers\PurchaseBillController::class, 'dispatchSyncJob'])->name('purchase-bills.sync_temp');
 
     // --- WAREHOUSE / GUDANG ---
     Route::prefix('warehouse')->name('warehouse.')->controller(\App\Http\Controllers\WarehouseController::class)->group(function () {

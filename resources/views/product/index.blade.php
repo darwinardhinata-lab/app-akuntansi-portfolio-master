@@ -16,12 +16,6 @@
                 <i class="fa-solid fa-clipboard-list me-2"></i> Kartu Stok
             </a>
 
-            <form action="{{ route('product.sync_dashboard') }}" method="POST" class="d-inline" onsubmit="return confirm('Sinkronkan data produk dari Dashboard?')">
-                @csrf
-                <button type="submit" class="btn btn-warning text-dark fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0" title="{{ __('erp.sync_products_dashboard') }}">
-                    <i class="fa-solid fa-rotate me-1"></i> Sync Dashboard
-                </button>
-            </form>
 
             <button type="submit" form="filterForm" name="export" value="excel" class="btn btn-success fw-bold px-3 shadow-sm flex-grow-1 flex-md-grow-0">
                 <i class="fa-solid fa-file-excel me-1"></i> {{ __('erp.export_excel_btn') }}
