@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use App\Models\SalesInvoice;
 use App\Models\SalesInvoiceDetail;
 use App\Models\Product;
@@ -58,7 +59,9 @@ class SalesInvoiceController extends Controller
         // 2. BIG DATA PIVOT ENGINE (Aggregasi multidimensi langsung dari MySQL)
         // ======================================================================
         // Mengompres 200.000 baris menjadi ringkasan dimensi agar browser tidak hang
-        $pivotQuery = DB::table('sales_invoices as si')->whereNull('si.cancelled_at')
+        $pivotQuery = DB::table('sales_invoices as si')
+            // FIX: Database legacy belum tentu memiliki migration audit pembatalan.
+            ->when(Schema::hasColumn('sales_invoices', 'cancelled_at'), fn ($query) => $query->whereNull('si.cancelled_at'))
             ->join('sales_invoice_details as sid', 'si.id', '=', 'sid.sales_invoice_id')
             ->leftJoin('sales_orders as so', 'si.sales_order_id', '=', 'so.id')
             ->select([
