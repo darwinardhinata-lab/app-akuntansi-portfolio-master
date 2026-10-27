@@ -82,6 +82,11 @@ class PaymentPlanBankHttpTest extends TestCase
         $upload('settlement');
         $action('fs', 'prepare_settlement', ['checked' => true, 'base' => '100.25', 'coa' => '610001', 'sourceId' => 'idr3']);
         $action('dir', 'approve_settlement', ['checked' => true]);
+        DB::table('company_coa_mappings')->where('semantic_key', 'ppl.bank.idr3')->update(['active' => false]);
+        $this->actingAs($users['mk'])->postJson(route('payment-plan-v33.action'), ['id' => $id, 'version' => $version,
+            'mutationId' => 'changed-mapping-maker', 'action' => 'mark_maker', 'input' => ['reference' => 'INSTRUCTION']])->assertStatus(409);
+        $this->assertDatabaseCount('ppl_reservations', 0);
+        DB::table('company_coa_mappings')->where('semantic_key', 'ppl.bank.idr3')->update(['active' => true]);
         $action('mk', 'mark_maker', ['reference' => 'INSTRUCTION']);
         $this->assertDatabaseHas('ppl_reservations', ['request_id' => $id, 'status' => 'active', 'amount' => '100.25']);
         $action('gm', 'release_gm', ['checked' => true, 'reference' => 'RELEASE']);
@@ -91,13 +96,10 @@ class PaymentPlanBankHttpTest extends TestCase
         $action('fs', 'confirm_paid', ['checked' => true, 'reference' => 'ACTUAL-DEBIT', 'paidDate' => now('Asia/Jakarta')->toDateString()]);
         $this->assertDatabaseCount('journal_headers', $baselineJournals);
         DB::table('company_coa_mappings')->where('semantic_key', 'ppl.bank.idr3')->update(['active' => false]);
-        $this->actingAs($users['acc'])->postJson(route('payment-plan-v33.action'), ['id' => $id, 'version' => $version,
-            'mutationId' => 'http-bank-post_external', 'action' => 'post_external', 'input' => ['checked' => true, 'reference' => 'ERP']])
-            ->assertStatus(409)->assertJsonPath('error', 'approved_coa_mapping_required');
         $this->assertDatabaseHas('ppl_requests', ['id' => $id, 'status' => 'paid', 'version' => $version]);
         $this->assertDatabaseCount('journal_headers', $baselineJournals);
-        DB::table('company_coa_mappings')->where('semantic_key', 'ppl.bank.idr3')->update(['active' => true]);
         $result = $action('acc', 'post_external', ['checked' => true, 'reference' => 'ERP']);
+        DB::table('company_coa_mappings')->where('semantic_key', 'ppl.bank.idr3')->update(['active' => true]);
         $this->assertSame('posted', $result['request']['status']);
         $this->assertDatabaseHas('ppl_payment_events', ['request_id' => $id, 'journal_id' => $result['request']['journal']['journalId']]);
         $this->assertDatabaseCount('journal_headers', $baselineJournals + 1);

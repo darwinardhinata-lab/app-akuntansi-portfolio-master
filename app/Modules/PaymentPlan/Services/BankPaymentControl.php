@@ -13,12 +13,12 @@ final class BankPaymentControl
 {
     public const ACTIONS = ['prepare_settlement', 'approve_settlement', 'mark_maker', 'release_gm', 'hold_bank', 'bank_attempt', 'restart_after_no_debit', 'confirm_paid', 'post_external'];
 
-    public function lockContext(int $company): array
+    public function lockContext(int $company, bool $projectBalance = true): array
     {
         $row = DB::table('ppl_financial_contexts')->where('company_id', $company)->lockForUpdate()->first();
         if (!$row) throw new RuleViolation('financial_configuration_required', 409);
         $settings = json_decode($row->settings, true, 512, JSON_THROW_ON_ERROR);
-        if (config('payment_plan_v33.erp_bank_balance', false)) {
+        if ($projectBalance && config('payment_plan_v33.erp_bank_balance', false)) {
             $settings['_erp_projection'] = [];
             foreach ($settings['accounts'] as &$account) {
                 if (!isset(config('payment_plan_v33.payment_accounts')[$account['id']])) continue;
@@ -95,6 +95,7 @@ final class BankPaymentControl
             if (!$event) throw new RuleViolation('confirmed_event_required', 409);
             $frozen = json_decode($event->snapshot, true, 512, JSON_THROW_ON_ERROR);
             $settlement = $frozen['settlement'];
+            if (!isset($frozen['accountingApproval']['basis'])) {
             $lines = [];
             $ap = $frozen['category'] === 'raw_ap';
             $entries = [['expense', 'DEBET', $settlement['base']], ['vat', 'DEBET', $settlement['vat']]];
@@ -119,6 +120,9 @@ final class BankPaymentControl
                 if ($semantic === 'expense' && $code !== $settlement['coa']) throw new RuleViolation('settlement_coa_mapping_conflict', 409);
                 $lines[] = ['account_code' => $code, 'position' => $side, 'amount' => (string) $amount];
             }
+            }
+            // Approved counterpart wins after actual debit, including mapping changes before ACK.
+            if (isset($frozen['accountingApproval']['basis'])) $lines = $frozen['accountingApproval']['basis']['lines'];
             $journal = PostingService::post([
                 'transaction_date' => $frozen['paidDate'], 'journal_type' => 'PAYMENT', 'source_doc_no' => $frozen['doc'],
                 'notes' => 'Payment event '.$event->id,

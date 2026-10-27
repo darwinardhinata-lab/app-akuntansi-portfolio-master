@@ -1,3 +1,12 @@
+# Settlement approval accounting basis — 2026-10-27
+
+- WorkflowStore now captures server-owned accountingApproval after the Director settlement transition, in the same transaction/event payload: currency, settlement amounts, invoice/source journal/payable identity, source-bank identity, financial settings version, mapping rows and posting lines. Mapping has no explicit revision field; its persisted row/content/timestamp is the version fingerprint, not an invented business revision.
+- Maker validates the current source/mappings against the approved basis; any mismatch or missing basis prevents reservation and requires reapproval. Preparing a new settlement clears previous evidence. Reservation source snapshots from `1782c829` remain distinct from approval evidence.
+- Confirmed payment events retain approval basis; posting uses approved lines even if active bank mapping changes afterwards. Context fence remains held; posting skips mutable balance reprojection, which initially blocked AP recovery despite frozen lines. No new balance check is appropriate after an actual debit solely to acknowledge its journal.
+- HTTP regression covers both direct and AP flows: mapping invalidation before maker rejects without reservation; mapping invalidation after payment still posts frozen counterparts. Existing parity domain is unchanged. Legacy events lacking approval basis retain the explicitly limited prior reconciliation path; not backfilled automatically.
+- Initial targeted run exposed AP posting's balance-projection dependency (1 failure); fixed the cause. Final full suite **719 tests / 14,651 assertions, exit 0**, SQLite in-memory. Syntax/diff checks passed. No MySQL concurrency/browser acceptance or user DB mutation performed.
+- F04/F11 remain incomplete: comprehensive residual source reconciliation, ambiguous PO-only return queue/allocation, coordinated old writers, and MySQL verification. UI v33/print still open. Approval snapshot does not claim universal database immutability or external mapping-writer fencing.
+
 # F04 source counterpart recovery increment — 2026-10-27
 
 - Allocation reservation now persists the validated AP source identity/account/journal as `source_snapshot`, via additive migration `2026_10_27_160000_add_ap_allocation_source_snapshot.php`. Existing rows remain null rather than manufacturing historical evidence.

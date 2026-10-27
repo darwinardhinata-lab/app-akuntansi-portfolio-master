@@ -27,7 +27,7 @@ final class WorkflowStore
         return DB::transaction(function () use ($id, $expectedVersion, $mutationId, $action, $input, $actor, $financial) {
             // Global company fence precedes request locks for every enabled bank mutation.
             $control = new BankPaymentControl();
-            $settings = config('payment_plan_v33.bank_workflow', false) ? $control->lockContext($actor['company_id']) : [];
+            $settings = config('payment_plan_v33.bank_workflow', false) ? $control->lockContext($actor['company_id'], $action !== 'post_external') : [];
             $row = DB::table('ppl_requests')->where('company_id', $actor['company_id'])->where('id', $id)->lockForUpdate()->first();
             if (!$row) throw new RuleViolation('not_found', 404);
             $payload = json_decode($row->payload, true, 512, JSON_THROW_ON_ERROR);
@@ -50,6 +50,12 @@ final class WorkflowStore
             if (in_array($payload['category'], ['asset', 'raw_dp'], true) || ($payload['category'] === 'raw_ap' && !config('payment_plan_v33.ap_allocations', false))) throw new RuleViolation('allocation_adapter_required', 409);
             if ($financial) $control->before($payload + ['_company_id' => $actor['company_id']], $action, $all, $settings);
             $result = $domain->transition($payload, $action, $input, $actor, $all, $settings);
+            if ($action === 'prepare_settlement') unset($result['accountingApproval']);
+            if ($action === 'approve_settlement') {
+                $result['accountingApproval'] = ['actor_id' => $actor['id'], 'approved_at' => now()->toIso8601String(),
+                    'basis' => (new SettlementAccountingSnapshot())->capture($result, $actor['company_id'])];
+            }
+            if ($action === 'mark_maker') (new SettlementAccountingSnapshot())->validateReservation($payload, $actor['company_id']);
             if ($financial) $result = $control->after($payload, $result, $action, $actor);
             $version = $row->version + 1;
             $response = ['request' => $result, 'version' => $version];
