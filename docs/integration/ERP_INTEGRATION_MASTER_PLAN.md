@@ -1,11 +1,72 @@
 # ERP Marvel-Dard - Master Plan dan Kendali Eksekusi
 
-Versi: 1.1 | Tanggal acuan: 27 Oktober 2026, WIB  
+Versi: 1.2 | Tanggal acuan: 28 Oktober 2026, WIB  
 Perusahaan: PT. Magicase Group Indonesia (MGI)  
 Branch kerja yang dilaporkan: `feat/marvel-dard-integration`  
 Status keseluruhan: **implementasi berjalan; belum siap aktivasi produksi**.
 
 > Dokumen ini adalah panduan utama untuk Cline dan peninjau. Jalankan pekerjaan secara berkelanjutan, dengan checkpoint internal. Ukuran kemajuan adalah alur bisnis yang berfungsi dan bukti acceptance. Jangan meminta pengguna mengetik “lanjut” setelah setiap tugas kecil.
+
+## 0. Prioritas aktif: paket pertama yang dapat dipakai Finance (R1)
+
+**Keputusan pengguna, 28 Oktober 2026:** percepat pekerjaan dengan menyelesaikan satu paket operasional. Rencana seluruh ERP tetap berlaku, tetapi bukan syarat bahwa semua M1-M6 harus selesai sebelum paket pertama dapat dipakai. R1 adalah target delivery saat ini, bukan klaim sudah siap produksi.
+
+### Scope R1 yang wajib selesai
+
+- Single-company MGI; pembayaran bank IDR untuk jasa langsung dan AP invoice parsial yang telah direkonsiliasi.
+- UI Payment Plan yang mengambil layout/form relevan v33, navigasi Filament, request/detail, dua approval Direktur, settlement, maker/reservation, GM release, bukti debit, paid dan ACK jurnal ERP.
+- Selector invoice dan data terkait searchable/paginated dengan sisa kapasitas, exception dan hak akses server-side; tidak meminta user mengetik primary key database.
+- Private attachment untuk bukti request/settlement/payment dan bukti rekonsiliasi sesuai policy; preview/download sah serta cetak permohonan/settlement/daftar pembayaran-saldo.
+- Antrean rekonsiliasi Filament yang sudah ada diselesaikan secukupnya untuk sumber IDR dalam scope: bukti, atribusi jurnal/retur, cancellation/replacement trace dan residual.
+- Saldo GL, reservation/AP allocation, approved posting lines, stable-event recovery dan audit menggunakan service existing. Tidak ada rewrite domain atau ledger.
+- Acceptance bank/AP pada MySQL, browser/mobile/cetak, private storage staging, rekonsiliasi dan restore wajib dibuktikan sebelum go-live.
+
+Invoice atau sumber ambigu tetap diblokir sampai diselesaikan. Jangan menyembunyikan exception atau menandai seluruh legacy reconciled agar R1 tampak selesai.
+
+### Scope setelah R1
+
+DP/progress/final/retention, USD/FX, petty/top-up, seluruh perluasan purchasing/inventory/produksi/sales/EXIM, dan fitur historis/report lain yang belum diperlukan R1 tetap backlog R2+. Tidak wajib menulis ulang sebelas menu v33 sebelum R1 diterima. Menu/aksi di luar dukungan tidak boleh memberi kesan sudah bisa digunakan. Kebutuhan prasyarat keselamatan R1 tidak boleh ditunda dengan label R2.
+
+### Cara mengerjakan lebih cepat
+
+1. Kerjakan satu vertical slice R1 sampai layar dan acceptance, memakai domain/API/Filament yang telah ada. Jangan terus menambah workbench sementara atau UI kedua.
+2. Gunakan empat paket kerja di bawah; semuanya dijalankan berkelanjutan. Ini checkpoint internal, bukan empat permintaan izin.
+3. Jalankan test relevan setiap perubahan; full suite pada perubahan core/dependency dan akhir kandidat R1. Jangan ulang audit/discovery penuh tanpa indikasi baru.
+4. Freeze penambahan fitur di luar R1. Catat ide di backlog, lanjutkan delivery aktif. Jika satu akses staging terblokir, lanjutkan UI/implementation/test independen; tandai evidence yang belum dijalankan.
+5. Commit dan push perubahan terarah yang telah diuji pada feat/marvel-dard-integration. Tidak merge main/deploy/transfer bank otomatis.
+6. Akhiri laporan dengan matriks acceptance R1 dan demo route, bukan hanya jumlah test. Hindari laporan puluhan gap yang tidak menunjukkan aksi selanjutnya.
+
+### Empat paket kerja R1
+
+| Paket | Hasil konkret | Kriteria keluar |
+|---|---|---|
+| R1-A: layar kerja Finance | Dashboard/inbox Filament + UI v33 untuk flow bank/AP; selectors/pagination; private bukti; print | User dapat menyelesaikan flow tanpa input ID mentah; permission/validation/API sama dengan backend existing |
+| R1-B: penutupan kontrol transaksi | Residual/provenance, attribution/return, approved lines, writer coverage dan stable event; minimal extension, bukan rewrite | Semua writer aktif yang dapat merusak saldo/residual dalam scope dikoordinasikan atau diblokir secara eksplisit; race/retry tidak menggandakan |
+| R1-C: acceptance terintegrasi | MySQL multi-process, browser/mobile/print, storage fisik staging dan reconciliation/restore | Seluruh R1-AC berikut lulus dengan evidence dan source ref; failed/skip tetap terlihat |
+| R1-D: paket penggunaan | Panduan role, konfigurasi/migration order, build/asset, UAT Finance, rollback dan release candidate | Paket review konkret, keputusan sisa dinyatakan; aktivasi hanya setelah otorisasi operasional |
+
+R1-A dan pekerjaan independen R1-B dapat dikerjakan tanpa saling menunggu semua detail. R1-C disiapkan bersama implementasi, tidak ditinggalkan sampai scope terus membesar.
+
+### Acceptance minimum R1
+
+| ID | Skenario | Hasil wajib |
+|---|---|---|
+| R1-AC01 | Jasa langsung IDR dari request sampai journal melalui browser | Role terpisah, dua approval, evidence, satu event/satu journal, audit dan jumlah benar |
+| R1-AC02 | AP parsial di UI: invoice 200,50, bank 500,00, bayar 100,25 | Bank 399,75, residual 100,25; tidak expense/VAT ulang; angka layar/cetak/GL cocok |
+| R1-AC03 | Sumber manual/legacy/retur/credit yang relevan dalam scope | Kontribusi dipetakan secara eksplisit atau diblokir; tidak atribusi ganda; retur tidak membuat jurnal kedua |
+| R1-AC04 | Dua proses maker/payments berebut dana dan residual pada MySQL | Tidak overspend/overpay; invoice lintas rekening dan writer aktif terkait tercakup, bukan hanya race approval rekonsiliasi |
+| R1-AC05 | Post commit sebelum ACK, lalu process termination/restart | Journal yang sama ditemukan; tidak double debit/allocation; simulasi state saja dilabeli terpisah |
+| R1-AC06 | Permission/revoked membership/ID tamper/session/CSRF/flag | Mount/action/lookup/export/download ditolak sesuai policy; ADMIN bukan otomatis approver |
+| R1-AC07 | Upload/preview/download/archive/retry pada storage staging nyata | Private, stage/role/hash/limit tepat; tidak orphan yang tak ditangani; disk fake tidak dianggap evidence staging |
+| R1-AC08 | Mobile 360/390/768, desktop dan cetak banyak item/foto | Form dan aksi terbaca, tidak submit dobel, data lengkap; tiga bahasa untuk layar dalam scope |
+| R1-AC09 | Rekonsiliasi dan restore DB+objects | Source/cutoff, bank/AP/GL, hashes dan audit cocok; no unexplained differences |
+| R1-AC10 | Penggunaan Finance dan release pack | Semua role nyata/dev UAT, panduan singkat, no-data/error states, migration/build/flags/rollback dan sign-off tercatat |
+
+**Status awal seluruh R1-AC: NOT VERIFIED.** Evidence terdahulu dapat dipakai untuk bagian yang benar-benar sama; jangan mengulang pekerjaan tanpa alasan, tetapi jangan menaikkan hasil SQLite/API ke browser/MySQL acceptance.
+
+### Bukti terakhir yang tersedia (dibaca dari checkpoint remote)
+
+Pada pembaruan checkpoint 28 Oktober 2026: alokasi retur berbasis detail/qty/value, partial beberapa invoice, source drift/cancellation dan fence pada manual journal/import/legacy telah dilaporkan. Full suite 721 tests/14.699 assertions; terarah rekonsiliasi 2 tests/35 assertions; MySQL terisolasi 3 tests/68 assertions untuk approval pesaing yang menunggu fence lalu gagal kapasitas. Ini **belum** membuktikan seluruh bank/AP writer races, UI v33/cetak, browser/mobile atau restore. Versi baseline historis pada bagian 3 dipertahankan sebagai riwayat, bukan hasil terbaru.
 
 ## 1. Cara menggunakan dokumen
 
@@ -468,23 +529,27 @@ Next action yang langsung dikerjakan:
 ## 18. Instruksi mulai untuk Cline
 
 ```text
-Baca master plan v1.1, checkpoint terbaru dan erp-bank-ap-extension.md.
-Pertahankan branch feat/marvel-dard-integration dan perubahan pengguna.
-Jangan mengulang implementasi saldo GL atau partial purchaseBillId yang sudah ada.
+Fetch origin dan gabungkan master plan v1.2 sebelum mengubah dokumen ini.
+Pertahankan perubahan lokal pengguna dan implementasi existing.
 
-Lanjutkan M1 sampai lengkap: audit source residual manual/legacy/retur/credit note,
-satukan seluruh writer dana/AP ke kontrol terkoordinasi, adaptasikan UI/cetak v33
-serta dashboard/inbox Filament, dan buktikan MySQL concurrency serta storage/browser.
+Target aktif sekarang adalah R1 pada bagian 0: paket pembayaran bank IDR
+jasa langsung/AP parsial yang dapat digunakan Finance, bukan seluruh ERP
+sekaligus. Kerjakan R1-A sampai R1-D secara berkelanjutan dari checkpoint
+aktual. Jangan menunggu pengguna mengetik lanjut dan jangan ulang discovery.
 
-Kerjakan acceptance AP-R01 sampai AP-R10 sebagai bukti objektif.
-Jangan menyebut simulasi ACK kosong sebagai crash test proses nyata.
-Lanjutkan DP/progress/final/retention dan milestone berikutnya sesuai dependensi;
-pekerjaan independen tetap berjalan bila staging atau keputusan spesifik terblokir.
+Prioritaskan layar v33/Filament, selectors, bukti privat dan print bersama
+penutupan kontrol residual/writer yang diperlukan. Reuse domain/API/service.
+Hentikan perluasan fitur R2 yang tidak menjadi prasyarat keselamatan R1.
+DP/USD/petty/modul lain tetap backlog; tidak dihapus dari rencana.
 
-Use case/domain/PostingService existing tetap otoritas. UI matriks tetap.
-Catat source ref, file, test, actual result, gap dan next action tiap task.
-Checkpoint bukan alasan berhenti atau meminta pengguna mengetik lanjut.
-Jangan klaim VERIFIED tanpa bukti. Tidak ada tindakan produksi/transfer bank.
+Jalankan acceptance R1-AC01 sampai R1-AC10; tautkan evidence lama yang sah.
+Siapkan MySQL/browser/storage/restore bersama coding. Jika akses spesifik
+terblokir, lanjutkan pekerjaan independen dan catat blocker dengan tepat.
+
+Commit dan push checkpoint terarah yang sudah diuji tanpa force.
+Laporan harus menunjukkan route yang bisa dicoba, alur bisnis selesai,
+acceptance pass/fail/not-run, blocker dan next action. Jangan menyatakan
+siap dipakai hanya karena suite hijau. Tidak merge main/deploy produksi.
 ```
 
 ### Acceptance lanjutan AP dan saldo (spesifikasi, belum dijalankan)
@@ -508,6 +573,7 @@ Semua AP-R masih NOT RUN pada saat update dokumen ini. Kasus AP-R01-R03 mempunya
 
 | Versi | Tanggal | Perubahan |
 |---|---|---|
+| 1.2 | 28 Oktober 2026 | Prioritas delivery R1 bank IDR jasa/AP parsial; empat paket kerja berkelanjutan, sepuluh acceptance R1, scope R2 terpisah; checkpoint remote 721 tests dan MySQL rekonsiliasi terbatas dicatat |
 | 1.0 | 27 Oktober 2026 | Konsolidasi flow, 37 task, enam milestone, evidence, ukuran kemajuan dan instruksi berkelanjutan; baseline dilaporkan 716 tests dan bank jasa IDR HTTP end-to-end |
 | 1.1 | 27 Oktober 2026 | Update dilaporkan: saldo GL/cutoff dan partial AP purchaseBillId; 719 tests / 14.646 assertions; F01 IMPLEMENTED, F04 IN_PROGRESS; M1 belum lengkap; tambah 10 acceptance AP dan prioritas residual/fence/UI/MySQL |
 
