@@ -1,0 +1,9 @@
+<?php
+
+return [
+    'instructions' => 'Rekonsiliasi jurnal IDR. Untuk retur, pilih ID detail retur serta kuantitas secara eksplisit. Blokir tetap aktif sampai seluruh kuantitas dan nilai retur dialokasikan sah. Bukti wajib merujuk dokumen internal yang dapat diverifikasi, bukan kredensial atau URL publik.',
+    'purchase_bill_id' => 'ID invoice pembelian', 'journal_id' => 'ID jurnal sumber', 'amount' => 'Nilai alokasi',
+    'reason' => 'Alasan', 'evidence' => 'Referensi bukti internal', 'purchase_return_detail_id' => 'ID detail retur (opsional)',
+    'quantity' => 'Kuantitas retur', 'propose' => 'Usulkan alokasi', 'decision_reason' => 'Alasan keputusan',
+    'approve' => 'Setujui', 'cancel' => 'Batalkan alokasi tertaut',
+];

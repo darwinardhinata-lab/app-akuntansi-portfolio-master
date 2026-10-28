@@ -12,7 +12,7 @@ final class ApReconciliationQueue extends \Filament\Pages\Page
 {
     protected string $view = 'filament.pages.ap-reconciliation-queue';
     protected static ?string $slug = 'ap-reconciliation';
-    public array $proposal = ['purchase_bill_id' => '', 'journal_id' => '', 'amount' => '', 'reason' => '', 'evidence' => ''];
+    public array $proposal = ['purchase_bill_id' => '', 'journal_id' => '', 'amount' => '', 'reason' => '', 'evidence' => '', 'purchase_return_detail_id' => null, 'quantity' => null];
     public string $decisionReason = '';
 
     public static function canAccess(): bool

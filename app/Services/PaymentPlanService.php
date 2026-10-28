@@ -72,6 +72,7 @@ class PaymentPlanService
     {
         DB::beginTransaction();
         try {
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
             $tgl_pengajuan = $data['tgl_pengajuan'] ?? now()->format('Y-m-d');
             $no_transaksi = $this->generateNoTransaksi($data['id_divisi'], $tgl_pengajuan, $data['jenis_transaksi']);
 
@@ -143,6 +144,7 @@ class PaymentPlanService
     {
         DB::beginTransaction();
         try {
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
             DB::table('transaksi_payment_plan')
                 ->where('no_transaksi', $no_transaksi)
                 ->update([
@@ -206,6 +208,7 @@ class PaymentPlanService
     {
         DB::beginTransaction();
         try {
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
             // FIX C4: Gunakan kolom description bukan keterangan
             $journals = \App\Support\ProtectedJournalQuery::table('journal_headers')
                 ->whereExists(function ($query) use ($no_transaksi) {
@@ -256,6 +259,7 @@ class PaymentPlanService
         foreach ($no_transaksis as $no_transaksi) {
             DB::beginTransaction();
             try {
+                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
                 // N4 FIX: Ambil dari map in-memory, bukan query baru per iterasi
                 $pp = $ppMap->get($no_transaksi);
                 if (!$pp) throw new \Exception("Transaksi {$no_transaksi} tidak ditemukan.");

@@ -202,6 +202,7 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
         DB::beginTransaction();
 
         try {
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
             // --- FASE AUTO-WIPE ---
             \App\Support\AccountingPeriodGuard::source(array_values(array_unique($datesInChunk)));
             $minDate = min($datesInChunk);

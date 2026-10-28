@@ -48,7 +48,7 @@ return new class extends Migration
             $table->string('sha256', 64);
             $table->string('storage_key');
             $table->timestamp('archived_at')->nullable();
-            $table->timestamp('created_at');
+            $table->timestamp('created_at')->useCurrent();
             $table->unique(['request_id', 'kind', 'sha256']);
         });
     }

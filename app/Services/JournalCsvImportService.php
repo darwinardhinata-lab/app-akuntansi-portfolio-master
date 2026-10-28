@@ -234,6 +234,7 @@ class JournalCsvImportService
             DB::beginTransaction();
 
             try {
+                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
                 \App\Support\AccountingPeriodGuard::source(array_values(array_unique($datesInChunk)));
                 // FIX #1390: Delete existing headers in chunks
                 $sourceDocumentNumbersToImport = array_unique(array_column($parsedRows, 'evidence'));

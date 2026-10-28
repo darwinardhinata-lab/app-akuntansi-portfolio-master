@@ -120,7 +120,7 @@ class JournalController extends Controller
 
         try {
             DB::beginTransaction();
-
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
             $journal = \App\Support\PostingService::post([
                 'transaction_date' => $request->transaction_date,
                 'source_doc_no' => $request->input('source_doc_no', $request->input('evidence_number')),
@@ -226,6 +226,7 @@ class JournalController extends Controller
 
         try {
             DB::beginTransaction();
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
             $journal = JournalHeader::lockForUpdate()->findOrFail($id);
             if ($this->hasForeignCurrencySnapshot($journal)) {
                 throw new \RuntimeException('Jurnal valas tidak dapat diedit; hapus lalu buat ulang.');
@@ -302,6 +303,7 @@ class JournalController extends Controller
         ]);
         try {
             DB::transaction(function () use ($data) {
+                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
                 \App\Support\AccountingPeriodGuard::source([$data['transaction_date']]);
                 $service = app(\App\Modules\Currency\Services\FxPostingService::class);
                 $date = \Carbon\Carbon::parse($data['transaction_date']);
@@ -362,6 +364,7 @@ class JournalController extends Controller
     {
         try {
             DB::beginTransaction();
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
             $journal = JournalHeader::lockForUpdate()->findOrFail($id);
             \App\Support\SourceJournalProtection::check($journal);
 
@@ -394,7 +397,7 @@ class JournalController extends Controller
 
         try {
             DB::beginTransaction();
-
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
             $journals = JournalHeader::whereIn('journal_id', $ids)->lockForUpdate()->get();
             foreach ($journals as $journal) {
                 \App\Support\SourceJournalProtection::check($journal);

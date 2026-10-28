@@ -19,7 +19,10 @@ final class ApResidualProjection
             $snapshot = json_decode($resolution->source_snapshot, true, 512, JSON_THROW_ON_ERROR);
             $header = \App\Support\ProtectedJournalQuery::table('journal_headers')->where('journal_id', $resolution->journal_id)->first();
             $lines = \App\Support\ProtectedJournalQuery::table('journal_details')->where('journal_id', $resolution->journal_id)->orderBy('id')->get()->map(fn ($l) => (array) $l)->all();
-            if (!$header || $snapshot['header'] !== (array) $header || $snapshot['lines'] !== $lines || $snapshot['account'] !== $account) {
+            $returnChanged = isset($snapshot['return_detail']) && (
+                $snapshot['return_detail'] !== (array) DB::table('purchase_return_details')->where('id', $resolution->purchase_return_detail_id)->first()
+                || $snapshot['return'] !== (array) DB::table('purchase_returns')->where('id', $snapshot['return']['id'])->first());
+            if (!$header || $snapshot['header'] !== (array) $header || $snapshot['lines'] !== $lines || $snapshot['account'] !== $account || $returnChanged) {
                 $exceptions[] = ['source' => 'reconciliation:'.$resolution->id, 'reason' => 'approved_source_changed'];
                 $resolved[$resolution->journal_id] = true;
                 continue;
@@ -65,7 +68,28 @@ final class ApResidualProjection
         }
         if ($bill->purchase_order_id) {
             foreach (DB::table('purchase_returns')->where('purchase_order_id', $bill->purchase_order_id)->whereNotIn('status', ['VOID', 'REJECT', 'REJECTED'])->get() as $return) {
-                $exceptions[] = ['source' => 'purchase_return:'.$return->id, 'reason' => 'return_invoice_allocation_required', 'candidate_reduction' => (string) $return->total_return_amount];
+                $details = DB::table('purchase_return_details')->where('purchase_return_id', $return->id)->get();
+                $complete = $details->isNotEmpty();
+                $allocated = '0.00';
+                foreach ($details as $detail) {
+                    $amount = '0.00';
+                    $quantity = '0.000000';
+                    foreach (DB::table('ppl_ap_reconciliations')->where('purchase_return_detail_id', $detail->id)->where('status', 'approved')->get() as $allocation) {
+                        $basis = json_decode($allocation->source_snapshot, true, 512, JSON_THROW_ON_ERROR);
+                        $sourceHeader = \App\Support\ProtectedJournalQuery::table('journal_headers')->where('journal_id', $allocation->journal_id)->first();
+                        $sourceLines = \App\Support\ProtectedJournalQuery::table('journal_details')->where('journal_id', $allocation->journal_id)->orderBy('id')->get()->map(fn ($l) => (array) $l)->all();
+                        if (($basis['return_detail'] ?? null) !== (array) $detail || ($basis['return'] ?? null) !== (array) $return
+                            || !$sourceHeader || $basis['header'] !== (array) $sourceHeader || $basis['lines'] !== $sourceLines) { $complete = false; continue; }
+                        $amount = bcadd($amount, (string) $allocation->amount, 2);
+                        $quantity = bcadd($quantity, (string) $allocation->quantity, 6);
+                    }
+                    if (bccomp($amount, (string) $detail->subtotal, 2) !== 0 || bccomp($quantity, (string) $detail->qty_returned, 6) !== 0) $complete = false;
+                    $allocated = bcadd($allocated, $amount, 2);
+                }
+                if (!$complete || bccomp($allocated, (string) $return->total_return_amount, 2) !== 0) {
+                    $exceptions[] = ['source' => 'purchase_return:'.$return->id, 'reason' => 'return_invoice_allocation_required',
+                        'candidate_reduction' => (string) $return->total_return_amount, 'allocated' => $allocated, 'details' => $details->toArray()];
+                }
             }
         }
         $residual = bcsub($total, $used, 2);

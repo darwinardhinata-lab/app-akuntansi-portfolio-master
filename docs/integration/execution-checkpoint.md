@@ -1,3 +1,9 @@
+# 2026-10-28 — Return-to-invoice reconciliation and writer fence extension
+
+Continue from `ap-return-reconciliation.md`. Explicit return-detail quantity/value allocations now use the existing Finance proposal/independent approval flow and residual projection, including partial allocation across invoices, shared capacity, cancellation and source-drift blocking. No return journal is reissued. Manual journal, CSV/spreadsheet import and legacy PaymentPlanService transaction entry points now acquire the existing financial fence before document locks.
+
+Actual validation: SQLite full configured suite **721 tests / 14,699 assertions**; targeted reconciliation **2 / 35**; separately opted-in isolated MySQL integration **3 / 68**, including a competing approval PHP worker waiting for the financial fence then failing capacity revalidation. Signed page-derived Livewire HTTP proposal/approval is exercised. This is not browser acceptance or proof for every bank/AP writer race. F04/F11 remain open; no menu is promoted to verified. User database and default-off flags were not changed. See the detailed evidence/limits in `ap-return-reconciliation.md`.
+
 # F04 reconciliation panel first operational slice — 2026-10-27
 
 - Added Filament `/erp-panel/ap-reconciliation`: invoice projections/exceptions, proposal inputs, approve/cancel commands; same ApReconciliation use case authorizes every mutation with fresh company membership and explicit `ap.reconcile.propose/approve/cancel` permissions. View requires `ap.reconcile.view` plus existing panel gate. Catalog only; no role grants.
