@@ -55,18 +55,26 @@ final class PrivateAttachmentStore
         return (int) app(\App\Modules\Platform\Support\CompanyContext::class)->requireCompany(request())->id;
     }
 
+    /** Archived evidence is retained and may be read only by a separately granted audit reviewer. */
+    public function archivedReconciliationCompany(): int
+    {
+        return $this->reconciliationCompany('audit');
+    }
+
     public function audit(string $id, string $action): void
     {
         DB::table('ppl_attachment_audits')->insert(['attachment_id' => $id, 'actor_id' => auth()->id(), 'action' => $action, 'created_at' => now()]);
     }
 
-    public function response(object $attachment, bool $preview = false)
+    public function response(object $attachment, bool $preview = false, bool $archivedReview = false)
     {
-        abort_if($attachment->archived_at, 404);
+        // Defense in depth for callers other than the two attachment workflows.
+        abort_unless(($attachment->request_id === null) xor ($attachment->reconciliation_id === null), 409);
+        abort_if($attachment->archived_at && !$archivedReview, 404);
         $disk = Storage::disk('local');
         abort_unless($disk->exists($attachment->storage_key), 404);
         abort_unless(hash_equals($attachment->sha256, hash_file('sha256', $disk->path($attachment->storage_key))), 409);
-        $this->audit($attachment->id, $preview ? 'preview' : 'download');
+        $this->audit($attachment->id, $archivedReview ? ($preview ? 'archived_preview' : 'archived_download') : ($preview ? 'preview' : 'download'));
         $headers = ['Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff', 'Content-Type' => $attachment->mime,
             'Content-Security-Policy' => "sandbox; default-src 'none'"];
         return $preview ? $disk->response($attachment->storage_key, $attachment->name, $headers) : $disk->download($attachment->storage_key, $attachment->name, $headers);
@@ -100,7 +108,7 @@ final class PrivateAttachmentStore
                 $key = 'payment-plan/'.$actor['company_id'].'/'.$requestId.'/'.$id;
                 if (!Storage::disk('local')->put($key, file_get_contents($file->getRealPath()))) throw new \RuntimeException('Private attachment write failed.');
                 $attachment = ['id' => $id, 'kind' => $kind, 'sha256' => $hash, 'name' => basename($file->getClientOriginalName()), 'type' => $file->getMimeType()];
-                DB::table('ppl_attachments')->insert(['id' => $id, 'request_id' => $requestId, 'company_id' => $actor['company_id'], 'uploader_id' => $actor['id'],
+                DB::table('ppl_attachments')->insert(['id' => $id, 'request_id' => $requestId, 'reconciliation_id' => null, 'company_id' => $actor['company_id'], 'uploader_id' => $actor['id'],
                     'kind' => $kind, 'name' => $attachment['name'], 'mime' => $attachment['type'], 'sha256' => $hash, 'storage_key' => $key, 'created_at' => now()]);
                 $payload['attachments'][] = $attachment;
                 $response = ['request' => $payload, 'version' => $row->version + 1];

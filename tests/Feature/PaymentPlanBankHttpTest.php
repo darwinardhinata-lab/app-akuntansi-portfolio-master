@@ -72,6 +72,8 @@ class PaymentPlanBankHttpTest extends TestCase
         ];
         $bad = $requestInput; $bad['amount'] = '100.24';
         $this->postJson(route('payment-plan-v33.request'), $bad)->assertStatus(422)->assertJsonPath('error', 'line_total_mismatch');
+        $tooMany = $requestInput; $tooMany['lines'] = array_fill(0, 51, $requestInput['lines'][0]);
+        $this->postJson(route('payment-plan-v33.request'), $tooMany)->assertUnprocessable()->assertJsonValidationErrors('lines');
         $created = $this->postJson(route('payment-plan-v33.request'), $requestInput)->assertCreated()->json();
         $version = $created['version'];
         $this->get(route('payment-plan-v33.print', $id))->assertOk()

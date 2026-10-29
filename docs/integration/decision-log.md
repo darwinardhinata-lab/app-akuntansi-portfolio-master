@@ -1,5 +1,14 @@
 # Keputusan integrasi
 
+## 2026-10-29 — R1 attachment integrity and segregation-of-duties follow-up
+
+- Attachment reconciliation must have exactly one context. The additive migration applies MySQL `CHECK ((request_id IS NULL) <> (reconciliation_id IS NULL))`; the existing request/kind/hash unique index remains for request evidence and the reconciliation/hash unique index covers reconciliation evidence. Application response code also rejects an invalid context defensively.
+- Archive is only possible while reconciliation is `proposed` and by its proposer, therefore it is already blocked after approval/cancellation/posting. Archived bytes are retained. Normal read remains denied; a separately catalogued, non-granted `ap.reconcile.audit` permission authorizes audited preview/download and writes distinct archived-read audit actions. No Finance/manager/auditor role receives an implicit grant.
+- R1 request item maximum is 50 to retain v33 `cleanRequest` parity. This replaces the accidental 100-item UI/service limit; no intentional deviation remains.
+- Payment attachment preview/download uses `Cache-Control: private, no-store`, `X-Content-Type-Options: nosniff` and `Content-Security-Policy: sandbox; default-src 'none'` for PDF and images.
+- Legacy workspace redirect is GET-only (`/payment-plan/bank`); API POST routes remain unchanged under `/payment-plan/api/*`.
+- **Owner decision required (N02):** current `V33ApprovalDomain` prevents maker=creator, settlement approver=preparer, paid confirmer=maker/GM, and journal poster=maker/confirmer. It does **not** prevent creator=request settlement preparer or creator=request paid confirmer when roles overlap. Do not represent this as resolved; business owner must decide whether to harden beyond v33 parity before enabling R1 flags.
+
 ## Filament / Livewire adoption
 
 - User-approved presentation adapter: Filament panel for standard screens; Livewire custom interactions; existing journal UI and dedicated v33 vanilla/Blade remain canonical.

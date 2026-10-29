@@ -19,7 +19,8 @@ final class BankRequestStore
             'amount' => 'required|decimal:0,2|min:0.01|max:1000000000000', 'recipientBank' => 'required|string|max:100',
             'recipientAccount' => 'required|string|max:100', 'due' => 'required|date_format:Y-m-d',
             'purchaseBillId' => 'sometimes|integer|min:1',
-            'lines' => 'sometimes|array|min:1|max:100', 'lines.*.description' => 'required|array|size:3',
+            // v33 cleanRequest parity: an R1 request has at most 50 accountable item rows.
+            'lines' => 'sometimes|array|min:1|max:50', 'lines.*.description' => 'required|array|size:3',
             'lines.*.description.*' => 'required|string|max:1000', 'lines.*.qty' => 'required|decimal:0,4|min:0.0001|max:1000000',
             'lines.*.unitPrice' => 'required|decimal:0,2|min:0.01|max:1000000000000',
         ])->validate();

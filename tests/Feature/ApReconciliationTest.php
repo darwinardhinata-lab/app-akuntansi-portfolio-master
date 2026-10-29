@@ -170,7 +170,8 @@ class ApReconciliationTest extends TestCase
         $this->assertNull($attachment->request_id);
         $this->assertDatabaseHas('ppl_attachment_audits', ['attachment_id' => $attachment->id, 'action' => 'upload']);
         $this->get(route('payment-plan-v33.download', ['id' => $attachment->id, 'preview' => 1]))->assertOk()
-            ->assertHeader('Cache-Control', 'no-store, private')->assertHeader('X-Content-Type-Options', 'nosniff');
+            ->assertHeader('Cache-Control', 'no-store, private')->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('Content-Security-Policy', "sandbox; default-src 'none'");
         $this->get(route('payment-plan-v33.download', $attachment->id))->assertOk();
         $this->assertDatabaseHas('ppl_attachment_audits', ['attachment_id' => $attachment->id, 'action' => 'preview']);
         $this->assertDatabaseHas('ppl_attachment_audits', ['attachment_id' => $attachment->id, 'action' => 'download']);
@@ -187,9 +188,15 @@ class ApReconciliationTest extends TestCase
         catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) { $this->assertSame(403, $e->getStatusCode()); }
         $this->actingAs($users[0]);
         $private->reconciliation($second, 2, archive: $attachment->id);
-        $this->get(route('payment-plan-v33.download', $attachment->id))->assertNotFound();
+        $this->get(route('payment-plan-v33.download', $attachment->id))->assertForbidden();
         $this->assertDatabaseHas('ppl_attachment_audits', ['attachment_id' => $attachment->id, 'action' => 'archive']);
         \Illuminate\Support\Facades\Storage::disk('local')->assertExists($attachment->storage_key);
+        \Illuminate\Support\Facades\Storage::disk('local')->put($attachment->storage_key, "%PDF-1.4\nsynthetic receipt");
+        $role->permissions()->attach(Permission::where('code', 'ap.reconcile.audit')->value('id'));
+        $this->actingAs($users[1]);
+        $this->get(route('payment-plan-v33.download', ['id' => $attachment->id, 'preview' => 1]))->assertOk()
+            ->assertHeader('Content-Security-Policy', "sandbox; default-src 'none'");
+        $this->assertDatabaseHas('ppl_attachment_audits', ['attachment_id' => $attachment->id, 'action' => 'archived_preview']);
         $this->actingAs($users[1]);
         $service->decide($id, 2, 'cancel', 'Correct mistaken attribution');
         $source = DB::transaction(fn () => (new PurchaseBillAllocation())->source($bill, $company->id));

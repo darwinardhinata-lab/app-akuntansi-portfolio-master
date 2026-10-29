@@ -116,9 +116,11 @@ final class WorkflowController extends Controller
         $evidence = \Illuminate\Support\Facades\DB::table('ppl_attachments')->where('id', $id)->whereNotNull('reconciliation_id')->first();
         if ($evidence) {
             $service = app(\App\Modules\PaymentPlan\Services\PrivateAttachmentStore::class);
-            abort_unless((int) $evidence->company_id === $service->reconciliationCompany(), 404);
+            $archivedReview = (bool) $evidence->archived_at;
+            $company = $archivedReview ? $service->archivedReconciliationCompany() : $service->reconciliationCompany();
+            abort_unless((int) $evidence->company_id === $company, 404);
             abort_unless(\Illuminate\Support\Facades\DB::table('ppl_ap_reconciliations')->where('id', $evidence->reconciliation_id)->where('company_id', $evidence->company_id)->exists(), 404);
-            return $service->response($evidence, $request->boolean('preview'));
+            return $service->response($evidence, $request->boolean('preview'), $archivedReview);
         }
         $actor = app(ErpActor::class)->resolve($request);
         $db = \Illuminate\Support\Facades\DB::class;

@@ -18,6 +18,8 @@ class PaymentPlanMakerMysqlTest extends \Tests\Feature\PaymentPlanBankFlowTest
     public function test_ap_makers_and_killed_transaction_recover(string $secondAccount): void
     {
         if ($secondAccount === 'idr4') $this->markTestSkipped('Cross-bank IDR race blocked: PaymentBalances::source permits idr3 only for IDR. A second approved IDR mandate/domain contract is required; test-only config cannot authorize it.');
+        $constraint = DB::connection('maker_test')->selectOne("SELECT CONSTRAINT_NAME FROM information_schema.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'ppl_attachments' AND CONSTRAINT_NAME = 'ppl_attachments_one_context'");
+        $this->assertNotNull($constraint, 'MySQL attachment context XOR constraint was not installed.');
         parent::test_bank_decisions_reserve_consume_and_post_exactly_once();
         $company = DB::table('companies')->value('id');
         config(['payment_plan_v33.ap_allocations' => true]);

@@ -1,10 +1,17 @@
-# 2026-10-29 � R1 canonical Finance payment UI and private evidence
+# 2026-10-29 � R1 canonical Finance payment UI and private evidence
 
 - Active task completed from `d950174`: canonical Filament payment page `/erp-panel/bank-payments`; legacy `/payment-plan/bank` redirects there. Existing workflow/application services, reservation, fence and ledger reused.
 - Added role inbox/detail/error states, multi-item direct/AP request input, private reconciliation attachments with hash/uploader/time/archive/audit and authorized preview/download, and multi-item/photo/decision/accounting-basis print. Internal references remain metadata only.
 - Actual validation: full PHPUnit **721 tests / 14,795 assertions PASS**; targeted bank/reconciliation **4 / 178 PASS**; disposable MySQL maker/AP **6 / 146 PASS, 1 skipped**; PHP lint/diff check PASS; Edge replay visual **1440px + 390px PASS**, no overflow, print 5 items/1 photo.
 - NOT RUN: live authenticated browser, physical staging storage/restore, production migration/deployment. Details: `docs/integration/r1-finance-payment-ui-2026-10-29.md`.
 - Next action: review staged diff, commit and push focused R1 slice. Preserve user CSV deletion and generated assets as uncommitted local changes.
+
+# 2026-10-29 — R1 pre-staging migration hardening
+
+- Follow-up audit from report review: attachment migration now has MySQL exact-one-context CHECK plus response guard; request attachment uniqueness remains `(request_id, kind, sha256)` and reconciliation uniqueness `(reconciliation_id, sha256)`. Archived reconciliation bytes are retained but normal reads remain denied; separately granted `ap.reconcile.audit` enables audited archived read without implicit role grants.
+- Corrected R1 item limit from 100 to v33-parity 50. Legacy `/payment-plan/bank` redirect is GET-only; `/payment-plan/api/*` POST routes remain unchanged. Preview/download CSP/nosniff/private-cache headers are covered.
+- Actual validation after hardening: targeted SQLite **4 tests / 204 assertions PASS**; disposable MySQL **6 tests / 152 assertions PASS, 1 skipped**, including an `information_schema` assertion for the MySQL context CHECK. No staging/user migration, flag activation, live browser, storage restore or deploy performed.
+- Open owner decision N02: source permits creator to prepare settlement or confirm paid if role assignments overlap. Existing separations are maker≠creator, settlement approver≠preparer, paid confirmer≠maker/GM and poster≠maker/confirmer. See `decision-log.md` before any flag enablement.
 
 # 2026-10-29 — R1 Finance selectors and payment print continuation
 
