@@ -13,12 +13,7 @@ final class ErpPanelProvider extends PanelProvider
         return $panel->id('erp')->path('erp-panel')->authGuard('web')
             ->resources([\App\Filament\Resources\DivisionResource::class])
             ->widgets([\App\Filament\Widgets\DivisionOverview::class])
-            ->navigationItems([
-                \Filament\Navigation\NavigationItem::make('bank-payments')->label(fn () => __('bank_payment.title'))
-                    ->url(fn () => route('payment-plan-v33.workspace'))
-                    ->visible(fn () => config('payment_plan_v33.enabled') && config('payment_plan_v33.bank_workflow')),
-            ])
-            ->pages([\Filament\Pages\Dashboard::class, \App\Filament\Pages\ApReconciliationQueue::class])
+            ->pages([\Filament\Pages\Dashboard::class, \App\Filament\Pages\ApReconciliationQueue::class, \App\Filament\Pages\BankPayments::class])
             ->middleware([
                 \Illuminate\Cookie\Middleware\EncryptCookies::class,
                 \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,

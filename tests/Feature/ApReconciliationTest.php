@@ -160,6 +160,37 @@ class ApReconciliationTest extends TestCase
         $this->actingAs($users[1]);
         try { $service->decide($second, 1, 'approve', 'Reject excess allocation'); $this->fail('Source capacity exceeded'); }
         catch (\Illuminate\Validation\ValidationException $e) { $this->assertSame('source_overallocated', $e->errors()['reconciliation'][0]); }
+        $this->actingAs($users[0]);
+        \Illuminate\Support\Facades\Storage::fake('local');
+        $private = app(\App\Modules\PaymentPlan\Services\PrivateAttachmentStore::class);
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('receipt.pdf', "%PDF-1.4\nsynthetic receipt");
+        $private->reconciliation($second, 1, $file);
+        $attachment = DB::table('ppl_attachments')->where('reconciliation_id', $second)->first();
+        $this->assertSame(hash_file('sha256', $file->getRealPath()), $attachment->sha256);
+        $this->assertNull($attachment->request_id);
+        $this->assertDatabaseHas('ppl_attachment_audits', ['attachment_id' => $attachment->id, 'action' => 'upload']);
+        $this->get(route('payment-plan-v33.download', ['id' => $attachment->id, 'preview' => 1]))->assertOk()
+            ->assertHeader('Cache-Control', 'no-store, private')->assertHeader('X-Content-Type-Options', 'nosniff');
+        $this->get(route('payment-plan-v33.download', $attachment->id))->assertOk();
+        $this->assertDatabaseHas('ppl_attachment_audits', ['attachment_id' => $attachment->id, 'action' => 'preview']);
+        $this->assertDatabaseHas('ppl_attachment_audits', ['attachment_id' => $attachment->id, 'action' => 'download']);
+        \Illuminate\Support\Facades\Storage::disk('local')->put($attachment->storage_key, 'tampered');
+        $this->get(route('payment-plan-v33.download', $attachment->id))->assertStatus(409);
+        try { $private->reconciliation($second, 1, $file); $this->fail('Stale attachment version accepted'); }
+        catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) { $this->assertSame(409, $e->getStatusCode()); }
+        try { $private->reconciliation($second, 2, $file); $this->fail('Duplicate attachment accepted'); }
+        catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) { $this->assertSame(409, $e->getStatusCode()); }
+        try { $private->reconciliation($second, 2, \Illuminate\Http\UploadedFile::fake()->createWithContent('script.html', '<html>untrusted</html>')); $this->fail('HTML upload accepted'); }
+        catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) { $this->assertSame(422, $e->getStatusCode()); }
+        $this->actingAs($users[1]);
+        try { $private->reconciliation($second, 2, archive: $attachment->id); $this->fail('Non-uploader archive accepted'); }
+        catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) { $this->assertSame(403, $e->getStatusCode()); }
+        $this->actingAs($users[0]);
+        $private->reconciliation($second, 2, archive: $attachment->id);
+        $this->get(route('payment-plan-v33.download', $attachment->id))->assertNotFound();
+        $this->assertDatabaseHas('ppl_attachment_audits', ['attachment_id' => $attachment->id, 'action' => 'archive']);
+        \Illuminate\Support\Facades\Storage::disk('local')->assertExists($attachment->storage_key);
+        $this->actingAs($users[1]);
         $service->decide($id, 2, 'cancel', 'Correct mistaken attribution');
         $source = DB::transaction(fn () => (new PurchaseBillAllocation())->source($bill, $company->id));
         $this->assertSame('200.00', $source['residual']);

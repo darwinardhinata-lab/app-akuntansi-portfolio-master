@@ -11,6 +11,20 @@ use Illuminate\Support\Facades\DB;
 final class ApReconciliationQueue extends \Filament\Pages\Page
 {
     use \Livewire\WithPagination;
+    use \Livewire\WithFileUploads;
+    public $evidenceFile;
+
+    public function uploadEvidence(int $id, int $version): void
+    {
+        $this->validate(['evidenceFile' => 'required|file|max:10240']);
+        app(\App\Modules\PaymentPlan\Services\PrivateAttachmentStore::class)->reconciliation($id, $version, $this->evidenceFile);
+        $this->reset('evidenceFile');
+    }
+
+    public function archiveEvidence(int $id, int $version, string $attachment): void
+    {
+        app(\App\Modules\PaymentPlan\Services\PrivateAttachmentStore::class)->reconciliation($id, $version, archive: $attachment);
+    }
 
     protected string $view = 'filament.pages.ap-reconciliation-queue';
     protected static ?string $slug = 'ap-reconciliation';
@@ -100,8 +114,9 @@ final class ApReconciliationQueue extends \Filament\Pages\Page
                     $journal->preview = ['blocked' => $e->errors()['reconciliation'][0]];
                 }
             }
-            return compact('queue', 'invoices', 'returns', 'journals') + ['resolutions' => DB::table('ppl_ap_reconciliations')
-                ->where('company_id', $company)->orderByDesc('id')->paginate(20, ['*'], 'resolutions')];
+            $resolutions = DB::table('ppl_ap_reconciliations')->where('company_id', $company)->orderByDesc('id')->paginate(20, ['*'], 'resolutions');
+            $attachments = DB::table('ppl_attachments')->where('company_id', $company)->whereIn('reconciliation_id', $resolutions->pluck('id'))->get()->groupBy('reconciliation_id');
+            return compact('queue', 'invoices', 'returns', 'journals', 'resolutions', 'attachments');
         });
     }
 }

@@ -12,12 +12,9 @@ final class WorkflowController extends Controller
 {
     public function workspace(Request $request)
     {
-        $actor = app(ErpActor::class)->resolve($request);
+        app(ErpActor::class)->resolve($request);
         abort_unless(config('payment_plan_v33.bank_workflow'), 404);
-        $endpoints = ['data' => route('payment-plan-v33.data'), 'request' => route('payment-plan-v33.request'),
-            'action' => route('payment-plan-v33.action'), 'attachment' => route('payment-plan-v33.attachment'), 'download' => url('/payment-plan/api/attachment'),
-            'purchaseBills' => route('payment-plan-v33.purchase-bills'), 'print' => url('/payment-plan/bank')];
-        return view('payment_plan.bank_workspace', compact('actor', 'endpoints'));
+        return redirect()->to(\App\Filament\Pages\BankPayments::getUrl(panel: 'erp'));
     }
 
     public function data(Request $request)
@@ -87,7 +84,9 @@ final class WorkflowController extends Controller
         abort_unless((new \App\Modules\PaymentPlan\Domain\V33ApprovalDomain(fn () => new \DateTimeImmutable()))->canSee($actor, $payload), 403);
         $events = \Illuminate\Support\Facades\DB::table('ppl_events')->where('company_id', $actor['company_id'])
             ->where('request_id', $id)->orderBy('version')->get(['event', 'actor_user_id', 'version', 'created_at']);
-        return response()->view('payment_plan.bank_print', compact('payload', 'row', 'events'))
+        $photos = \Illuminate\Support\Facades\DB::table('ppl_attachments')->where('company_id', $actor['company_id'])
+            ->where('request_id', $id)->whereNull('archived_at')->whereIn('mime', ['image/png', 'image/jpeg', 'image/webp'])->get();
+        return response()->view('payment_plan.bank_print', compact('payload', 'row', 'events', 'photos'))
             ->header('Cache-Control', 'private, no-store')->header('X-Content-Type-Options', 'nosniff');
     }
 
@@ -114,6 +113,13 @@ final class WorkflowController extends Controller
 
     public function download(Request $request, string $id)
     {
+        $evidence = \Illuminate\Support\Facades\DB::table('ppl_attachments')->where('id', $id)->whereNotNull('reconciliation_id')->first();
+        if ($evidence) {
+            $service = app(\App\Modules\PaymentPlan\Services\PrivateAttachmentStore::class);
+            abort_unless((int) $evidence->company_id === $service->reconciliationCompany(), 404);
+            abort_unless(\Illuminate\Support\Facades\DB::table('ppl_ap_reconciliations')->where('id', $evidence->reconciliation_id)->where('company_id', $evidence->company_id)->exists(), 404);
+            return $service->response($evidence, $request->boolean('preview'));
+        }
         $actor = app(ErpActor::class)->resolve($request);
         $db = \Illuminate\Support\Facades\DB::class;
         $attachment = $db::table('ppl_attachments')->where('company_id', $actor['company_id'])->where('id', $id)->first();
@@ -122,10 +128,7 @@ final class WorkflowController extends Controller
         abort_unless($row, 404);
         $payload = json_decode($row->payload, true, 512, JSON_THROW_ON_ERROR);
         abort_unless((new \App\Modules\PaymentPlan\Domain\V33ApprovalDomain(fn () => new \DateTimeImmutable()))->canSee($actor, $payload), 403);
-        $disk = \Illuminate\Support\Facades\Storage::disk('local');
-        abort_unless($disk->exists($attachment->storage_key), 404);
-        abort_unless(hash_equals($attachment->sha256, hash_file('sha256', $disk->path($attachment->storage_key))), 409);
-        return $disk->download($attachment->storage_key, $attachment->name, ['X-Content-Type-Options' => 'nosniff', 'Content-Security-Policy' => "sandbox; default-src 'none'"]);
+        return app(\App\Modules\PaymentPlan\Services\PrivateAttachmentStore::class)->response($attachment, $request->boolean('preview'));
     }
 
     public function action(Request $request)

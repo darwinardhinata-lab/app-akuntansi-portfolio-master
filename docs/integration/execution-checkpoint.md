@@ -1,3 +1,11 @@
+# 2026-10-29 — R1 canonical Finance payment UI and private evidence
+
+- Active task completed from `d950174`: canonical Filament payment page `/erp-panel/bank-payments`; legacy `/payment-plan/bank` redirects there. Existing workflow/application services, reservation, fence and ledger reused.
+- Added role inbox/detail/error states, multi-item direct/AP request input, private reconciliation attachments with hash/uploader/time/archive/audit and authorized preview/download, and multi-item/photo/decision/accounting-basis print. Internal references remain metadata only.
+- Actual validation: full PHPUnit **721 tests / 14,795 assertions PASS**; targeted bank/reconciliation **4 / 178 PASS**; disposable MySQL maker/AP **6 / 146 PASS, 1 skipped**; PHP lint/diff check PASS; Edge replay visual **1440px + 390px PASS**, no overflow, print 5 items/1 photo.
+- NOT RUN: live authenticated browser, physical staging storage/restore, production migration/deployment. Details: `docs/integration/r1-finance-payment-ui-2026-10-29.md`.
+- Next action: review staged diff, commit and push focused R1 slice. Preserve user CSV deletion and generated assets as uncommitted local changes.
+
 # 2026-10-29 â€” R1 Finance selectors and payment print continuation
 
 - Active task: R1 usable Finance flow. Base `3542163`; continued existing local bank selector/print edits. Existing Filament reconciliation now has searchable/paginated invoice, journal and PO return-detail selectors, service-derived capacity, and paginated decisions. No ledger/domain rewrite or new dependencies. Bank AP options include supplier/date/status/residual/block. Print now reads actual company-scoped `ppl_events` audit metadata instead of nonexistent table.

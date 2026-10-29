@@ -54,16 +54,28 @@ class PaymentPlanBankHttpTest extends TestCase
             DB::table('ppl_financial_contexts')->where('company_id', $company->id)->update(['settings' => json_encode($settings)]);
             $baselineJournals = 2;
         }
-        $this->actingAs($users['req'])->get(route('payment-plan-v33.workspace'))->assertOk()->assertSee('newBankRequest');
+        config(['platform.filament_enabled' => true]);
+        $this->seed(\Database\Seeders\PlatformPermissionSeeder::class);
+        Role::where('code', 'PPL_REQUESTER')->firstOrFail()->permissions()->syncWithoutDetaching(
+            \App\Modules\Platform\Models\Permission::where('code', 'erp.panel.access')->pluck('id'));
+        $this->actingAs($users['req'])->get(route('payment-plan-v33.workspace'))->assertRedirect('/erp-panel/bank-payments');
+        $screen = $this->get('/erp-panel/bank-payments')->assertOk()->assertSee('newBankRequest')->assertSee('bankInbox');
+        if (getenv('R1_UI_CAPTURE') && !$ap) file_put_contents(getenv('R1_UI_CAPTURE').'/screen.html', $screen->getContent());
         $id = '404533da-f658-4f80-afc9-7e438ed4a529';
         $requestInput = ['id' => $id, 'payee' => 'Synthetic supplier',
             'subject' => ['Jasa', 'Service', '服务'], 'purpose' => ['Uji', 'Test', '测试'], 'amount' => '100.25',
             'recipientBank' => 'Fixture', 'recipientAccount' => 'TEST', 'due' => now()->addDay()->toDateString()];
         if ($ap) $requestInput['purchaseBillId'] = $billId;
+        $requestInput['lines'] = [
+            ['description' => ['Item satu', 'First service', '服务一'], 'qty' => '2', 'unitPrice' => '25.00'],
+            ['description' => ['Item dua', 'Second service', '服务二'], 'qty' => '1', 'unitPrice' => '50.25'],
+        ];
+        $bad = $requestInput; $bad['amount'] = '100.24';
+        $this->postJson(route('payment-plan-v33.request'), $bad)->assertStatus(422)->assertJsonPath('error', 'line_total_mismatch');
         $created = $this->postJson(route('payment-plan-v33.request'), $requestInput)->assertCreated()->json();
         $version = $created['version'];
         $this->get(route('payment-plan-v33.print', $id))->assertOk()
-            ->assertSee($ap ? 'AP supplier' : 'Synthetic supplier')->assertHeader('X-Content-Type-Options', 'nosniff');
+            ->assertSee($ap ? 'AP supplier' : 'Synthetic supplier')->assertSee('First service')->assertSee('Second service')->assertHeader('X-Content-Type-Options', 'nosniff');
         $this->get(route('payment-plan-v33.print', 'missing'))->assertNotFound();
         $outsider = User::factory()->create();
         $outsider->companies()->attach($company->id, ['is_default' => true]);
@@ -91,6 +103,12 @@ class PaymentPlanBankHttpTest extends TestCase
             $version = $response['version'];
             return $response;
         };
+        $photo = $this->actingAs($users['req'])->post(route('payment-plan-v33.attachment'), [
+            'id' => $id, 'version' => $version, 'kind' => 'request',
+            'file' => UploadedFile::fake()->createWithContent('receipt.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jS9kAAAAASUVORK5CYII=')),
+        ])->assertOk()->json();
+        $version = $photo['version'];
+        if (getenv('R1_UI_CAPTURE') && !$ap) file_put_contents(getenv('R1_UI_CAPTURE').'/photo.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jS9kAAAAASUVORK5CYII='));
         $action('req', 'submit', []);
         $action('dir', 'approve_request', ['checked' => true]);
         $upload = function ($kind) use (&$version, $id, $users) {
@@ -123,8 +141,12 @@ class PaymentPlanBankHttpTest extends TestCase
         $result = $action('acc', 'post_external', ['checked' => true, 'reference' => 'ERP']);
         DB::table('company_coa_mappings')->where('semantic_key', 'ppl.bank.idr3')->update(['active' => true]);
         $this->assertSame('posted', $result['request']['status']);
+        if (getenv('R1_UI_CAPTURE') && !$ap) {
+            file_put_contents(getenv('R1_UI_CAPTURE').'/print.html', $this->get(route('payment-plan-v33.print', $id))->assertOk()->getContent());
+            file_put_contents(getenv('R1_UI_CAPTURE').'/data.json', json_encode(['requests'=>[$result], 'bankBalances'=>[], 'apReconciliation'=>[]]));
+        }
         $this->get(route('payment-plan-v33.print', $id))->assertOk()
-            ->assertSee('111003')->assertSee('100.25')->assertSee($result['request']['journal']['journalId']);
+            ->assertSee('111003')->assertSee('100.25')->assertSee('receipt.png')->assertSee('<img', false)->assertSee($result['request']['journal']['journalId']);
         $this->assertDatabaseHas('ppl_payment_events', ['request_id' => $id, 'journal_id' => $result['request']['journal']['journalId']]);
         $this->assertDatabaseCount('journal_headers', $baselineJournals + 1);
         $this->assertSame(2, DB::table('journal_details')->where('journal_id', $result['request']['journal']['journalId'])->count());

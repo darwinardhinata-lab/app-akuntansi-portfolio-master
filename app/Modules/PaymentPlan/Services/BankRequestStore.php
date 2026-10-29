@@ -19,8 +19,22 @@ final class BankRequestStore
             'amount' => 'required|decimal:0,2|min:0.01|max:1000000000000', 'recipientBank' => 'required|string|max:100',
             'recipientAccount' => 'required|string|max:100', 'due' => 'required|date_format:Y-m-d',
             'purchaseBillId' => 'sometimes|integer|min:1',
+            'lines' => 'sometimes|array|min:1|max:100', 'lines.*.description' => 'required|array|size:3',
+            'lines.*.description.*' => 'required|string|max:1000', 'lines.*.qty' => 'required|decimal:0,4|min:0.0001|max:1000000',
+            'lines.*.unitPrice' => 'required|decimal:0,2|min:0.01|max:1000000000000',
         ])->validate();
-        return DB::transaction(function () use ($data, $actor) {
+        $lines = [];
+        $total = '0.00';
+        foreach ($data['lines'] ?? [] as $line) {
+            $exact = bcmul((string) $line['qty'], (string) $line['unitPrice'], 6);
+            $amount = bcadd($exact, '0', 2);
+            if (bccomp($exact, $amount, 6) !== 0 || bccomp($amount, '0', 2) <= 0) throw new RuleViolation('invalid_line_amount');
+            $lines[] = ['id' => (string) Str::uuid(), 'description' => $line['description'], 'qty' => $line['qty'], 'unitPrice' => $line['unitPrice'], 'total' => $amount, 'evidence' => ''];
+            $total = bcadd($total, $amount, 2);
+        }
+        if ($lines && bccomp($total, (string) $data['amount'], 2) !== 0) throw new RuleViolation('line_total_mismatch');
+        unset($data['lines']);
+        return DB::transaction(function () use ($data, $actor, $lines) {
             (new BankPaymentControl())->lockContext($actor['company_id']);
             $existing = DB::table('ppl_requests')->where('id', $data['id'])->first();
             if ($existing) throw new RuleViolation('request_exists', 409);
@@ -32,6 +46,7 @@ final class BankRequestStore
                 'po' => '', 'invoice' => '', 'capex' => '', 'referenceTotal' => '0.00', 'priorPaid' => '0.00', 'advanceReference' => '', 'notes' => '', 'cycle' => '',
                 'lines' => [['id' => (string) Str::uuid(), 'description' => $data['subject'], 'qty' => 1, 'unitPrice' => $data['amount'], 'total' => $data['amount'], 'evidence' => '']],
             ];
+            if ($lines) $payload['lines'] = $lines;
             if (isset($data['purchaseBillId'])) {
                 if (!config('payment_plan_v33.ap_allocations', false)) throw new RuleViolation('allocation_adapter_required', 409);
                 $source = (new PurchaseBillAllocation())->source((int) $data['purchaseBillId'], $actor['company_id']);
