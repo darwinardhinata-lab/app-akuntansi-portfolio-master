@@ -39,6 +39,19 @@ final class ApReconciliation
         });
     }
 
+    /** Read-only advisory capacity; propose/approve always revalidate under the fence. */
+    public function previewSource(string $journalId, PurchaseBill $bill, ?int $returnDetailId = null): array
+    {
+        $this->company('view');
+        $source = $this->source($journalId, $bill, $returnDetailId);
+        $used = '0.00';
+        foreach (DB::table('ppl_ap_reconciliations')->where('journal_id', $journalId)->where('status', 'approved')->get() as $row) {
+            $snapshot = json_decode($row->source_snapshot, true, 512, JSON_THROW_ON_ERROR);
+            if ($snapshot['account'] === $source['account']) $used = bcadd($used, (string) $row->amount, 2);
+        }
+        return ['remaining' => bcsub($source['capacity'], $used, 2)];
+    }
+
     public function decide(int $id, int $version, string $action, string $reason): void
     {
         abort_unless(in_array($action, ['approve', 'cancel'], true), 422);

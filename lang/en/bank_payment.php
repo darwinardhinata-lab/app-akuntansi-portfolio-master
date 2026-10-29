@@ -1,6 +1,8 @@
 <?php
 return [    'title' => 'Bank payments', 'ap_source' => 'AP invoice source (optional)', 'direct_service' => 'Direct service — no AP invoice',
-    'scope' => 'Development: direct IDR services; AP/DP not available.',
+    'scope' => 'R1 development: direct IDR services and partial AP invoice payments. Advances and foreign currency are not supported.',
+    'search_ap' => 'Search AP invoice or supplier', 'print' => 'Print payment', 'approved_basis' => 'Approved accounting basis',
+    'status' => 'Status', 'version' => 'Version', 'currency' => 'Currency', 'journal' => 'ERP journal', 'history' => 'Decision history',
     'new' => 'New request',
     'payee' => 'Payee',
     'subject' => 'Subject',

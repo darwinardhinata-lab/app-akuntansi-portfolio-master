@@ -1,3 +1,10 @@
+# 2026-10-29 — R1 Finance selectors and payment print continuation
+
+- Active task: R1 usable Finance flow. Base `3542163`; continued existing local bank selector/print edits. Existing Filament reconciliation now has searchable/paginated invoice, journal and PO return-detail selectors, service-derived capacity, and paginated decisions. No ledger/domain rewrite or new dependencies. Bank AP options include supplier/date/status/residual/block. Print now reads actual company-scoped `ppl_events` audit metadata instead of nonexistent table.
+- Actual validation after fixes: configured SQLite suite **721 tests / 14,754 assertions**; opt-in isolated MySQL reconciliation **3 / 85** (includes competing approval worker, not maker/bank races); Vite build PASS; changed PHP syntax and diff checks PASS. See `r1-finance-selectors-2026-10-29.md` for commands, routes, demo and AC01–AC10 evidence boundaries.
+- Still open: final Filament/v33 payment screen (existing bank workspace is development UI), reconciliation private attachment context, preview/audit completion, multi-photo print, bank/AP writer races, true process-crash, browser/mobile and staging storage/restore acceptance. R1 remains incomplete; no go-live claim. No user database migration or flag activation. User CSV deletion and generated assets excluded from publication.
+- Next concrete action: finish final panel payment screen and attachment-backed reconciliation evidence, then isolated authenticated browser and bank/AP race acceptance. Preserve current services/fence and source-drift blocking.
+
 # 2026-10-28 — Return-to-invoice reconciliation and writer fence extension
 
 Continue from `ap-return-reconciliation.md`. Explicit return-detail quantity/value allocations now use the existing Finance proposal/independent approval flow and residual projection, including partial allocation across invoices, shared capacity, cancellation and source-drift blocking. No return journal is reissued. Manual journal, CSV/spreadsheet import and legacy PaymentPlanService transaction entry points now acquire the existing financial fence before document locks.

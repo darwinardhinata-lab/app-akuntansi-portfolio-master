@@ -1,6 +1,8 @@
 <?php
 return [    'title' => 'Pembayaran bank', 'ap_source' => 'Sumber invoice AP (opsional)', 'direct_service' => 'Jasa langsung — tanpa invoice AP',
-    'scope' => 'Pengembangan: jasa langsung IDR; AP/DP belum tersedia.',
+    'scope' => 'Pengembangan R1: jasa langsung IDR dan pembayaran parsial invoice AP. DP dan valuta asing belum didukung.',
+    'search_ap' => 'Cari invoice AP atau pemasok', 'print' => 'Cetak pembayaran', 'approved_basis' => 'Dasar akuntansi yang disetujui',
+    'status' => 'Status', 'version' => 'Versi', 'currency' => 'Mata uang', 'journal' => 'Jurnal ERP', 'history' => 'Riwayat keputusan',
     'new' => 'Pengajuan baru',
     'payee' => 'Penerima',
     'subject' => 'Judul',

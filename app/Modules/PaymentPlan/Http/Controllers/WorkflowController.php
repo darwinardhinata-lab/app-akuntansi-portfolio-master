@@ -15,7 +15,8 @@ final class WorkflowController extends Controller
         $actor = app(ErpActor::class)->resolve($request);
         abort_unless(config('payment_plan_v33.bank_workflow'), 404);
         $endpoints = ['data' => route('payment-plan-v33.data'), 'request' => route('payment-plan-v33.request'),
-            'action' => route('payment-plan-v33.action'), 'attachment' => route('payment-plan-v33.attachment'), 'download' => url('/payment-plan/api/attachment')];
+            'action' => route('payment-plan-v33.action'), 'attachment' => route('payment-plan-v33.attachment'), 'download' => url('/payment-plan/api/attachment'),
+            'purchaseBills' => route('payment-plan-v33.purchase-bills'), 'print' => url('/payment-plan/bank')];
         return view('payment_plan.bank_workspace', compact('actor', 'endpoints'));
     }
 
@@ -47,6 +48,47 @@ final class WorkflowController extends Controller
             });
         }
         return response()->json(compact('actor', 'requests', 'purchaseBills', 'bankBalances'));
+    }
+
+    public function purchaseBills(Request $request)
+    {
+        $actor = app(ErpActor::class)->resolve($request);
+        abort_unless(config('payment_plan_v33.bank_workflow') && config('payment_plan_v33.ap_allocations'), 404);
+        abort_unless(array_intersect($actor['roles'], ['finance_staff', 'finance_manager', 'accountant', 'director', 'maker', 'general_manager']), 403);
+        $input = $request->validate(['q' => 'nullable|string|max:100', 'page' => 'sometimes|integer|min:1']);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($actor, $input) {
+            (new \App\Modules\PaymentPlan\Services\BankPaymentControl())->lockContext($actor['company_id']);
+            $query = \App\Models\PurchaseBill::whereIn('payment_status', ['UNPAID', 'PARTIAL']);
+            if (($input['q'] ?? '') !== '') {
+                $term = $input['q'];
+                $query->where(fn ($q) => $q->where('bill_number', 'like', '%'.$term.'%')->orWhere('vendor_name', 'like', '%'.$term.'%'));
+            }
+            $page = $query->orderBy('id')->paginate(20, ['*'], 'page', $input['page'] ?? 1);
+            $items = [];
+            foreach ($page as $bill) {
+                try {
+                    $item = (new \App\Modules\PaymentPlan\Services\PurchaseBillAllocation())->source($bill->id, $actor['company_id']);
+                } catch (RuleViolation $exception) {
+                    $item = ['id' => $bill->id, 'number' => $bill->bill_number, 'blocked' => $exception->rule];
+                }
+                $items[] = $item + ['vendor' => $bill->vendor_name, 'date' => (string) $bill->bill_date, 'status' => $bill->payment_status];
+            }
+            return response()->json(['items' => $items, 'page' => $page->currentPage(), 'lastPage' => $page->lastPage(), 'total' => $page->total()]);
+        });
+    }
+
+    public function printRequest(Request $request, string $id)
+    {
+        $actor = app(ErpActor::class)->resolve($request);
+        abort_unless(config('payment_plan_v33.bank_workflow'), 404);
+        $row = \Illuminate\Support\Facades\DB::table('ppl_requests')->where('company_id', $actor['company_id'])->where('id', $id)->first();
+        abort_unless($row, 404);
+        $payload = json_decode($row->payload, true, 512, JSON_THROW_ON_ERROR);
+        abort_unless((new \App\Modules\PaymentPlan\Domain\V33ApprovalDomain(fn () => new \DateTimeImmutable()))->canSee($actor, $payload), 403);
+        $events = \Illuminate\Support\Facades\DB::table('ppl_events')->where('company_id', $actor['company_id'])
+            ->where('request_id', $id)->orderBy('version')->get(['event', 'actor_user_id', 'version', 'created_at']);
+        return response()->view('payment_plan.bank_print', compact('payload', 'row', 'events'))
+            ->header('Cache-Control', 'private, no-store')->header('X-Content-Type-Options', 'nosniff');
     }
 
     public function create(Request $request)

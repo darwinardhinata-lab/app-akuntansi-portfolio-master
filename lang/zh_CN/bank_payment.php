@@ -1,6 +1,8 @@
 <?php
 return [    'title' => '银行付款', 'ap_source' => '应付发票来源（可选）', 'direct_service' => '直接服务 — 无应付发票',
-    'scope' => '开发：印尼盾直接服务付款；应付和预付款暂不可用。',
+    'scope' => 'R1开发：印尼盾直接服务及应付发票部分付款。暂不支持预付款和外币。',
+    'search_ap' => '搜索应付发票或供应商', 'print' => '打印付款', 'approved_basis' => '已批准的会计依据',
+    'status' => '状态', 'version' => '版本', 'currency' => '币种', 'journal' => 'ERP日记账', 'history' => '决策记录',
     'new' => '新申请',
     'payee' => '收款人',
     'subject' => '主题',

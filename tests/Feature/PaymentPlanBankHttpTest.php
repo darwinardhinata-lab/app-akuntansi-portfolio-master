@@ -62,6 +62,28 @@ class PaymentPlanBankHttpTest extends TestCase
         if ($ap) $requestInput['purchaseBillId'] = $billId;
         $created = $this->postJson(route('payment-plan-v33.request'), $requestInput)->assertCreated()->json();
         $version = $created['version'];
+        $this->get(route('payment-plan-v33.print', $id))->assertOk()
+            ->assertSee($ap ? 'AP supplier' : 'Synthetic supplier')->assertHeader('X-Content-Type-Options', 'nosniff');
+        $this->get(route('payment-plan-v33.print', 'missing'))->assertNotFound();
+        $outsider = User::factory()->create();
+        $outsider->companies()->attach($company->id, ['is_default' => true]);
+        $requesterRole = Role::where('code', 'PPL_REQUESTER')->firstOrFail();
+        $outsider->platformRoles()->attach($requesterRole->id, ['company_id' => $company->id]);
+        $this->actingAs($outsider)->get(route('payment-plan-v33.print', $id))->assertForbidden();
+        $this->actingAs($users['req']);
+        $this->getJson(route('payment-plan-v33.purchase-bills'))->assertStatus($ap ? 403 : 404);
+        if ($ap) {
+            $this->actingAs($users['fs'])->getJson(route('payment-plan-v33.purchase-bills', ['q' => 'HTTP-AP']))
+                ->assertOk()->assertJsonPath('total', 1)->assertJsonPath('items.0.residual', '200.50');
+            $this->getJson(route('payment-plan-v33.purchase-bills', ['q' => 'not-present']))->assertOk()->assertJsonPath('total', 0);
+            $this->getJson(route('payment-plan-v33.purchase-bills', ['page' => 0]))->assertUnprocessable();
+            foreach (range(1, 21) as $index) {
+                DB::table('purchase_bills')->insert(['bill_number' => 'LOOKUP-'.$index, 'bill_date' => '2026-01-01', 'vendor_name' => 'Pagination supplier',
+                    'credit_account' => '211001', 'grand_total' => '200.50', 'journal_id' => $source->getKey(), 'payment_status' => 'UNPAID']);
+            }
+            $this->getJson(route('payment-plan-v33.purchase-bills', ['q' => 'Pagination supplier', 'page' => 2]))
+                ->assertOk()->assertJsonPath('total', 21)->assertJsonPath('lastPage', 2)->assertJsonCount(1, 'items');
+        }
         $action = function ($who, $name, $input) use (&$version, $users, $id) {
             $response = $this->actingAs($users[$who])->postJson(route('payment-plan-v33.action'), [
                 'id' => $id, 'version' => $version, 'mutationId' => 'http-bank-'.$name, 'action' => $name, 'input' => $input,
@@ -101,6 +123,8 @@ class PaymentPlanBankHttpTest extends TestCase
         $result = $action('acc', 'post_external', ['checked' => true, 'reference' => 'ERP']);
         DB::table('company_coa_mappings')->where('semantic_key', 'ppl.bank.idr3')->update(['active' => true]);
         $this->assertSame('posted', $result['request']['status']);
+        $this->get(route('payment-plan-v33.print', $id))->assertOk()
+            ->assertSee('111003')->assertSee('100.25')->assertSee($result['request']['journal']['journalId']);
         $this->assertDatabaseHas('ppl_payment_events', ['request_id' => $id, 'journal_id' => $result['request']['journal']['journalId']]);
         $this->assertDatabaseCount('journal_headers', $baselineJournals + 1);
         $this->assertSame(2, DB::table('journal_details')->where('journal_id', $result['request']['journal']['journalId'])->count());
@@ -114,5 +138,9 @@ class PaymentPlanBankHttpTest extends TestCase
         }
         $this->assertDatabaseHas('journal_details', ['position' => 'DEBET', 'amount' => '100.25']);
         $this->assertDatabaseHas('journal_details', ['position' => 'KREDIT', 'amount' => '100.25']);
+        $this->get(route('payment-plan-v33.print', $id))->assertOk()
+            ->assertSee($result['request']['journal']['journalId'])->assertSee('111003')->assertSee('payment.pdf')->assertDontSee('bank_payment.sourceId');
+        config(['payment_plan_v33.bank_workflow' => false]);
+        $this->get(route('payment-plan-v33.print', $id))->assertNotFound();
     }
 }

@@ -73,6 +73,10 @@ class ApReconciliationTest extends TestCase
         \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('erp'));
         $service = new ApReconciliation();
         $input = ['purchase_bill_id' => $bills[0], 'journal_id' => $journal->getKey(), 'amount' => '30.00', 'reason' => 'Verified return receipt', 'evidence' => 'INTERNAL-RETURN-1'];
+        $this->reconciliationAction(['proposal.purchase_bill_id' => (string) $bills[0], 'invoiceSearch' => 'BILL-A',
+            'journalSearch' => 'PR-TEST', 'returnSearch' => 'SYNTHETIC'], '$refresh', []);
+        $preview = DB::transaction(fn () => $service->previewSource($journal->getKey(), \App\Models\PurchaseBill::findOrFail($bills[0]), $detail));
+        $this->assertSame('50.00', $preview['remaining']);
         try { $service->propose($input); $this->fail('Return bypass'); }
         catch (\Illuminate\Validation\ValidationException $e) { $this->assertSame('return_detail_allocation_required', $e->errors()['reconciliation'][0]); }
         $input += ['purchase_return_detail_id' => $detail, 'quantity' => '3'];
@@ -88,6 +92,8 @@ class ApReconciliationTest extends TestCase
         $second = $service->propose(array_replace($input, ['purchase_bill_id' => $bills[1], 'quantity' => '2', 'amount' => '20.00']));
         $this->actingAs($users[1]);
         $service->decide($second, 1, 'approve', 'Second invoice allocation');
+        $preview = DB::transaction(fn () => $service->previewSource($journal->getKey(), \App\Models\PurchaseBill::findOrFail($bills[0]), $detail));
+        $this->assertSame('0.00', $preview['remaining']);
         foreach ([$bills[0] => '170.00', $bills[1] => '180.00'] as $bill => $residual) {
             $projection = DB::transaction(fn () => (new PurchaseBillAllocation())->source($bill, $company->id));
             $this->assertSame($residual, $projection['residual']);
@@ -161,5 +167,17 @@ class ApReconciliationTest extends TestCase
         $role->permissions()->detach(Permission::where('code','ap.reconcile.propose')->value('id'));
         try { $service->propose([]); $this->fail('Revoked permission'); }
         catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) { $this->assertSame(403, $e->getStatusCode()); }
+        foreach (range(1, 21) as $index) {
+            DB::table('purchase_bills')->insert(['bill_number' => 'PAGE-'.str_pad((string) $index, 2, '0', STR_PAD_LEFT),
+                'bill_date' => '2026-01-01', 'vendor_name' => 'Search supplier', 'credit_account' => '211001',
+                'grand_total' => '200.00', 'journal_id' => $journal->getKey()]);
+        }
+        $this->get('/erp-panel/ap-reconciliation?invoices=2')->assertOk()->assertSee('PAGE-21')->assertDontSee('PAGE-01');
+        $role->permissions()->detach(Permission::where('code','ap.reconcile.view')->value('id'));
+        try {
+            DB::transaction(fn () => $service->previewSource($payment->getKey(), \App\Models\PurchaseBill::findOrFail($bill)));
+            $this->fail('Revoked lookup permission');
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) { $this->assertSame(403, $e->getStatusCode()); }
+        $this->get('/erp-panel/ap-reconciliation')->assertForbidden();
     }
 }
