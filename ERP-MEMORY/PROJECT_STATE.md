@@ -1,8 +1,9 @@
 # PROJECT_STATE.md — Status Terkini ERP Marvel-Dard
 
-> Last Updated: 2026-10-30
+> Last Updated: 2026-11-02
 > Branch: `feat/marvel-dard-integration`
-> Commit: `3bbb54e` (R1 acceptance hardening artifacts)
+> Commit: `df0f22b` (docs: fill ERP-MEMORY placeholders + CHANGE_DECISIONS + PAYMENT_PLAN_V33)
+> Commit sebelumnya: `55e59b2` (feat: add AP three-way match and payment allocation)
 
 ---
 
@@ -15,11 +16,39 @@
 | F04 AP Residual | 🔄 IN_PROGRESS | Discovery selesai, coding belum |
 | F05 DP/Progress/Retention | ⏸️ DEFERRED | Setelah R1 accepted |
 | F06 Pajak/Fee/Multi-account | ⏳ TODO | Setelah F04 |
-| R2 Three-way match | ⏳ TODO | Discovery dulu |
+| R2 Three-way match | ✅ IMPLEMENTED | Migration + ApAllocationService dibuat |
 | USD Payment | ⏸️ DEFERRED | Setelah R1 |
 | Petty Cash | ⏸️ DEFERRED | Setelah R1 |
 | Filament Panel | 🔄 IN_PROGRESS | Canonical pages dibuat |
 | Manufacturing (MFG) | ✅ SELESAI | Native Laravel port |
+| ERP-MEMORY Documentation | ✅ LENGKAP | Semua dokumen AI sudah terisi |
+
+---
+
+## DOKUMENTASI LENGKAP (ERP-MEMORY/)
+
+Berikut dokumen yang sudah tersedia sebagai source-of-truth untuk AI model yang akan melanjutkan:
+
+| Dokumen | Isi | Status |
+|---|---|---|
+| `AGENTS.md` | Panduan onboarding AI, aturan #1, struktur dokumen | ✅ Lengkap |
+| `PROJECT_STATE.md` | Status terkini, blocker, next actions, bug log | ✅ Lengkap |
+| `INVARIANTS.md` | Aturan mutlak yang tidak boleh dilanggar | ✅ Lengkap |
+| `docs/ARCHITECTURE.md` | Struktur sistem, layer, modul, alur posting | ✅ Lengkap |
+| `docs/DATABASE_RELATIONSHIPS.md` | Tabel, FK, indeks, migrasi | ✅ Lengkap |
+| `docs/ACCOUNTING_RULES.md` | Matrix input, posting pipeline, COA, reversal | ✅ Lengkap |
+| `docs/PAYMENT_PLAN_V33.md` | Kontrak payment plan, workflow, API, rules | ✅ Lengkap |
+| `docs/PURCHASING_AP_RULES.md` | Purchasing, AP, 3-way match, outstanding | ✅ Lengkap |
+| `docs/INVENTORY_RULES.md` | Inventory, warehouse, stok | ✅ Lengkap |
+| `docs/MANUFACTURING_RULES.md` | BOM, MRP, WO, costing | ✅ Lengkap |
+| `docs/FILAMENT_UI_RULES.md` | UI Filament, halaman, otorisasi server | ✅ Lengkap |
+| `docs/TESTING_PROTOCOL.md` | Protokol test, baseline, perintah | ✅ Lengkap |
+| `docs/BUG_LOG.md` | Bug dan blocker dikenal | ✅ Lengkap |
+| `docs/GIT_WORKFLOW.md` | Branch, commit konvensi, alur kerja | ✅ Lengkap |
+| `docs/SETUP_INSTALLATION.md` | Setup lokal, .env, troubleshooting | ✅ Lengkap |
+| `docs/API_CONTRACTS.md` | Endpoint API PPL dan AP | ✅ Lengkap |
+| `docs/DIRECTORY_STRUCTURE.md` | Layout project, file di-gitignore | ✅ Lengkap |
+| `docs/CHANGE_DECISIONS.md` | Log keputusan arsitektur | ✅ Lengkap |
 
 ---
 

@@ -1,11 +1,13 @@
 # AGENTS.md — ERP Marvel-Dard: Panduan Onboarding AI
 
-> **Tujuan file ini:** Setiap AI model yang melanjutkan proyek ini harus
-> membaca file ini PERTAMA. Waktu baca target: 5 menit.
+> **Tujuan file ini:** Setiap AI model yang melanjutkan proyek ini **WAJIB** membaca
+> file ini PERTAMA. Waktu baca target: 10 menit. Jangan menebak — baca semua file
+> referensi yang disebutkan di bawah sebelum menulis kode.
 >
-> Last Updated: 2026-10-30
+> Last Updated: 2026-11-02
 > Branch aktif: `feat/marvel-dard-integration`
-> Commit terakhir terverifikasi: `3bbb54e` (atau setelahnya)
+> Commit terakhir terverifikasi: `df0f22b` (HEAD terbaru, synced dengan origin)
+> Repo: `D:\xampp\htdocs\app-akuntansi-portfolio-master`
 
 ---
 
@@ -14,21 +16,33 @@
 | Aspek | Nilai |
 |---|---|
 | Nama | ERP Marvel-Dard (PT. Magicase Group Indonesia) |
-| Jenis | ERP Akuntansi + Manufaktur + Finance |
-| Stack | Laravel 12.61.1, PHP 8.2.12, MySQL, Blade + Filament 5 + Livewire 4 |
-| Test | PHPUnit 11.5.55 (721 tests / 14.795 assertions baseline) |
-| Repo | `D:\xampp\htdocs\app-akuntansi-portfolio-master` |
+| Jenis | ERP Akuntansi + Manufaktur + Finance (monolit Laravel) |
+| Stack | Laravel 12.61.1, PHP 8.2.12, MySQL 8.x, Blade + Filament 5 + Livewire 4 |
+| Test Runner | PHPUnit 11.5.55 |
+| Baseline Test | 721 tests / 14.795 assertions (R1) |
+| Root Folder | `D:\xampp\htdocs\app-akuntansi-portfolio-master` |
 | Branch | `feat/marvel-dard-integration` (JANGAN merge ke main tanpa approval) |
+| Remote | `https://github.com/darwinardhinata-lab/app-akuntansi-portfolio-master.git` |
 
 ---
 
 ## ATURAN #1: BACA SEBELUM MELAKUKAN APAPUN
 
 1. **Baca `INVARIANTS.md`** — aturan yang TIDAK BOLEH dilanggar
-2. **Baca `PROJECT_STATE.md`** — status terkini, apa yang sudah/belum
+2. **Baca `PROJECT_STATE.md`** — status terkini, bloker, next actions, bug log
 3. **Baca `docs/CHANGE_DECISIONS.md`** — keputusan arsitektur dan alasannya
-4. **Baca `docs/ACCOUNTING_RULES.md`** — jika menyentuh jurnal/ledger
-5. **Baca `docs/PAYMENT_PLAN_V33.md`** — jika menyentuh payment/finance
+4. **Baca `docs/ARCHITECTURE.md`** — struktur sistem, layer, modul
+5. **Baca `docs/DATABASE_RELATIONSHIPS.md`** — tabel, FK, indeks, migrasi
+6. **Baca `docs/ACCOUNTING_RULES.md`** — jika menyentuh jurnal/ledger
+7. **Baca `docs/PAYMENT_PLAN_V33.md`** — jika menyentuh payment/finance
+8. **Baca `docs/PURCHASING_AP_RULES.md`** — jika menyentuh purchasing/AP
+9. **Baca `docs/INVENTORY_RULES.md`** — jika menyentuh inventory/warehouse
+10. **Baca `docs/MANUFACTURING_RULES.md`** — jika menyentuh BOM/MRP/WO
+11. **Baca `docs/FILAMENT_UI_RULES.md`** — jika menyentuh UI Filament
+12. **Baca `docs/TESTING_PROTOCOL.md`** — sebelum menulis atau menjalankan test
+13. **Baca `docs/BUG_LOG.md`** — bug dan blocker yang sudah dikenal
+14. **Baca `docs/GIT_WORKFLOW.md`** — branch, commit, push, PR
+15. **Baca `docs/SETUP_INSTALLATION.md`** — cara menjalankan project lokal
 
 ---
 
@@ -42,26 +56,34 @@
 5. **BCMath untuk semua perhitungan finansial** — JANGAN float
 6. **Migration additive & backward-compatible** — feature flag default OFF
 7. **Discovery SEBELUM coding** — jangan asumsikan struktur tabel/route
+8. **Server-side authorization** — hidden button bukan otorisasi
+9. **Private attachment** — SHA-256 hash server-side, download via authorized endpoint
+10. **Audit trail append-only** — tidak boleh dihapus
 
 ---
 
 ## STRUKTUR DOKUMEN
 
-| File | Kapan Baca |
-|---|---|
-| `AGENTS.md` | SELALU — entry point |
-| `PROJECT_STATE.md` | SELALU — status terkini |
-| `INVARIANTS.md` | SELALU — aturan mutlak |
-| `docs/ARCHITECTURE.md` | Saat menyentuh struktur sistem |
-| `docs/DATABASE_RELATIONSHIPS.md` | Saat menyentuh tabel/migrasi |
-| `docs/ACCOUNTING_RULES.md` | Saat menyentuh jurnal/posting |
-| `docs/PAYMENT_PLAN_V33.md` | Saat menyentuh payment/finance |
-| `docs/PURCHASING_AP_RULES.md` | Saat menyentuh purchasing/AP |
-| `docs/INVENTORY_RULES.md` | Saat menyentuh inventory/warehouse |
-| `docs/MANUFACTURING_RULES.md` | Saat menyentuh BOM/MRP/WO |
-| `docs/FILAMENT_UI_RULES.md` | Saat menyentuh UI Filament |
-| `docs/TESTING_PROTOCOL.md` | Saat menulis test |
-| `docs/CHANGE_DECISIONS.md` | Sebelum membuat keputusan baru |
+| File | Kapan Baca | Status |
+|---|---|---|
+| `AGENTS.md` | SELALU — entry point | ✅ Lengkap |
+| `PROJECT_STATE.md` | SELALU — status terkini + bug log | ✅ Lengkap |
+| `INVARIANTS.md` | SELALU — aturan mutlak binding | ✅ Lengkap |
+| `docs/ARCHITECTURE.md` | Struktur sistem, layer, modul | ✅ Lengkap |
+| `docs/DATABASE_RELATIONSHIPS.md` | Tabel, FK, indeks, migrasi | ✅ Lengkap |
+| `docs/ACCOUNTING_RULES.md` | Jurnal, posting, COA, period lock | ✅ Lengkap |
+| `docs/PAYMENT_PLAN_V33.md` | Kontrak payment plan, workflow, API | ✅ Lengkap |
+| `docs/PURCHASING_AP_RULES.md` | Purchasing, AP, 3-way match | ✅ Lengkap |
+| `docs/INVENTORY_RULES.md` | Inventory, warehouse, stok | ✅ Lengkap |
+| `docs/MANUFACTURING_RULES.md` | BOM, MRP, WO, costing | ✅ Lengkap |
+| `docs/FILAMENT_UI_RULES.md` | UI Filament, otorisasi server | ✅ Lengkap |
+| `docs/TESTING_PROTOCOL.md` | Menulis & menjalankan test | ✅ Lengkap |
+| `docs/BUG_LOG.md` | Bug dan blocker dikenal | ✅ Lengkap |
+| `docs/GIT_WORKFLOW.md` | Branch, commit, push, PR | ✅ Lengkap |
+| `docs/SETUP_INSTALLATION.md` | Setup lokal, .env, troubleshooting | ✅ Lengkap |
+| `docs/API_CONTRACTS.md` | Endpoint API PPL dan AP | ✅ Lengkap |
+| `docs/DIRECTORY_STRUCTURE.md` | Layout project, file di-gitignore | ✅ Lengkap |
+| `docs/CHANGE_DECISIONS.md` | Sebelum membuat keputusan baru | ✅ Lengkap |
 
 ---
 
