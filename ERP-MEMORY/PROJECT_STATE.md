@@ -4,6 +4,7 @@
 > Branch: `feat/marvel-dard-integration`
 > Commit: `df0f22b` (docs: fill ERP-MEMORY placeholders + CHANGE_DECISIONS + PAYMENT_PLAN_V33)
 > Commit sebelumnya: `55e59b2` (feat: add AP three-way match and payment allocation)
+> Dokumen sumber rencana: `d:/Project ERP/Prompt_Cline_Integrasi_Filament_Livewire_20261027.txt` dan `d:/Project ERP/Audit_Penggabungan_ERP_Marvel_Dard_Addonan_Payment_Plan_v33.txt`
 
 ---
 
@@ -19,9 +20,10 @@
 | R2 Three-way match | ✅ IMPLEMENTED | Migration + ApAllocationService dibuat |
 | USD Payment | ⏸️ DEFERRED | Setelah R1 |
 | Petty Cash | ⏸️ DEFERRED | Setelah R1 |
-| Filament Panel | 🔄 IN_PROGRESS | Canonical pages dibuat |
+| Filament Panel | 🔄 IN_PROGRESS | Canonical pages dibuat, Panel di `/erp-panel`, feature flag `PLATFORM_FILAMENT_ENABLED` default OFF |
 | Manufacturing (MFG) | ✅ SELESAI | Native Laravel port |
-| ERP-MEMORY Documentation | ✅ LENGKAP | Semua dokumen AI sudah terisi |
+| ERP-MEMORY Documentation | ✅ LENGKAP | Semua dokumen AI sudah terisi, termasuk B01-B12 roadmap, menu map, crosswalk |
+| Filament + Livewire Adoption | 📋 PLANNED | Per `docs/FILAMENT_LIVEWIRE_ADOPTION.md`, belum diinstal di composer.json |
 
 ---
 
@@ -94,6 +96,36 @@ Berikut dokumen yang sudah tersedia sebagai source-of-truth untuk AI model yang 
 | U04 | UI referensi v33 & cetak | ⏳ TODO |
 | U05 | Comments & notifications | ⏳ TODO |
 | U06 | Dashboard/inbox Filament | 🔄 IN_PROGRESS |
+
+---
+
+## ROADMAP IMPLEMENTASI B01–B12 (dari Audit Lampiran B)
+
+| Fase | ID | Tahapan | Tujuan Utama | Status |
+|------|-----|---------|--------------|--------|
+| Foundation | B01 | S0 - Discovery dan baseline matriks | Buktikan baseline sebelum modifikasi. Inventaris route, controller, model, migration, policy, service, UI dan test. | ✅ SELESAI |
+| Foundation | B02 | S1 - Foundation, master dan menu registry | Satu sumber master/permission. Crosswalk source_system/entity/source_id → target_id. Menu registry tunggal 151 entri. | 🔄 IN_PROGRESS |
+| Foundation | B03 | S2 - Posting adapter dan matriks | Semua modul memakai mesin jurnal ERP yang sama. AccountingIntent, idempotency key, journal_links, period lock, reversal. | 🔄 IN_PROGRESS |
+| Foundation | B04 | S3 - Payment Plan parity dan adapter | Integrasi domain v33 secara setara. Identity Sites → sesi ERP. Map DB/R2 via adapter. Expected version + financial mutation fence. | 🔄 IN_PROGRESS |
+| Foundation | B05 | S4 - Saldo, allocation dan posting payment | Tutup gap finansial v33. Payment account policy effective date. Reservation atomik per account/currency. | 🔄 IN_PROGRESS |
+| Operations | B06 | S5A - IPR, PO, GRN, invoice dan AP | Adopsi PO umum/IPR, tracking, MOQ, perubahan, receipt dan retur. Three-way match exception. | ⏳ TODO |
+| Operations | B07 | S5B - Inventory ledger dan opname | Satu mutation ledger untuk receipt/issue/return/transfer/opname. Opening stock wizard, stock card, opname freeze/count/recount. | ⏳ TODO |
+| Operations | B08 | S6 - BOM, MRP, WO, routing dan costing | Adopsi CBD/BOM, MRP, SPK, preparation, sembilan process template. Routing configurable. | ⏳ TODO |
+| Operations | B09 | S7 - Sales, AR, subkontrak, mekanik, scrap | Sales lokal/ekspor, delivery, FG dispatch, invoice, receipt allocation, AR aging. | ⏳ TODO |
+| Operations | B10 | S8 - EXIM, reports dan import/export | Realisasikan seluruh jenis BC dan tujuh laporan. Document type+direction canonical. | ⏳ TODO |
+| Release | B11 | S9A - UAT, migrasi dan restore rehearsal | Migration runbook reproduktif. Dry run staging dari backup. UAT operasional, UX dan keamanan. | ⏳ TODO |
+| Release | B12 | S9B - Paket cutover yang reviewable | Paket final untuk aktivasi. Release notes, migration order, feature flags, smoke commands, rollback decision tree. | ⏳ TODO |
+
+**Prioritas P0 (sebelum transaksi nyata):**
+- Inventoris repository Marvel-Dard dan kunci kontrak jurnal matriks melalui regression test
+- Satu identitas perusahaan, user, COA, supplier/customer, material dan bank; tidak mengimpor master tanpa crosswalk
+- Port adapter identitas dan penyimpanan v33; jangan percaya header Sites pada server umum
+- Cegah jurnal ganda, pembayaran ganda, perubahan transaksi posted dan kebocoran lintas perusahaan
+- Sahkan mandat rekening: source v33 memakai IDR 3 dan USD 1; rencana lama berbeda
+
+**Prioritas P1 dan P2:**
+- P1: purchasing sampai GRN, invoice/AP, Payment Plan, inventory ledger, rekonsiliasi dan laporan
+- P2: BOM/MRP, WO/routing produksi, sales/AR, subkontrak, mekanik, scrap, serta dokumen customs
 
 ---
 

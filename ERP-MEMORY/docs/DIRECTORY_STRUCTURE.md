@@ -68,7 +68,15 @@ app-akuntansi-portfolio-master/
 │       ├── SETUP_INSTALLATION.md
 │       ├── API_CONTRACTS.md
 │       ├── DIRECTORY_STRUCTURE.md
-│       └── CHANGE_DECISIONS.md
+│       ├── CHANGE_DECISIONS.md
+│       ├── IMPLEMENTATION_ROADMAP.md
+│       ├── MENU_MAP.md
+│       ├── MASTER_DATA_CROSSWALK.md
+│       ├── FILAMENT_LIVEWIRE_ADOPTION.md
+│       ├── CUTOVER_ROLLBACK.md
+│       ├── TEST_EVIDENCE.md
+│       ├── SALES_AR_RULES.md
+│       └── EXIM_CUSTOMS_RULES.md
 ├── .gitignore
 ├── composer.json
 ├── artisan

@@ -8,6 +8,7 @@
 > Branch aktif: `feat/marvel-dard-integration`
 > Commit terakhir terverifikasi: `df0f22b` (HEAD terbaru, synced dengan origin)
 > Repo: `D:\xampp\htdocs\app-akuntansi-portfolio-master`
+> Dokumen sumber rencana: `d:/Project ERP/Prompt_Cline_Integrasi_Filament_Livewire_20261027.txt` dan `d:/Project ERP/Audit_Penggabungan_ERP_Marvel_Dard_Addonan_Payment_Plan_v33.txt`
 
 ---
 
@@ -43,6 +44,12 @@
 13. **Baca `docs/BUG_LOG.md`** — bug dan blocker yang sudah dikenal
 14. **Baca `docs/GIT_WORKFLOW.md`** — branch, commit, push, PR
 15. **Baca `docs/SETUP_INSTALLATION.md`** — cara menjalankan project lokal
+16. **Baca `docs/IMPLEMENTATION_ROADMAP.md`** — tahap B01–B12 yang sedang/akan dikerjakan
+17. **Baca `docs/FILAMENT_LIVEWIRE_ADOPTION.md`** — jika menyentuh UI Filament/Livewire
+18. **Baca `docs/MENU_MAP.md`** — jika menyentuh menu/navigasi
+19. **Baca `docs/MASTER_DATA_CROSSWALK.md`** — jika menyentuh master data (COA, party, material, bank)
+20. **Baca `docs/CUTOVER_ROLLBACK.md`** — sebelum UAT, migrasi, cutover, atau rollback
+21. **Baca `docs/TEST_EVIDENCE.md`** — sebelum klaim acceptance
 
 ---
 
@@ -84,6 +91,14 @@
 | `docs/API_CONTRACTS.md` | Endpoint API PPL dan AP | ✅ Lengkap |
 | `docs/DIRECTORY_STRUCTURE.md` | Layout project, file di-gitignore | ✅ Lengkap |
 | `docs/CHANGE_DECISIONS.md` | Sebelum membuat keputusan baru | ✅ Lengkap |
+| `docs/IMPLEMENTATION_ROADMAP.md` | Roadmap implementasi B01–B12 (dari audit Lampiran B) | ✅ Lengkap |
+| `docs/MENU_MAP.md` | Pemetaan 151 menu Addonan ke target ERP (dari audit Lampiran A) | ✅ Lengkap |
+| `docs/MASTER_DATA_CROSSWALK.md` | Crosswalk master data lintas sistem | ✅ Lengkap |
+| `docs/FILAMENT_LIVEWIRE_ADOPTION.md` | Panduan adopsi Filament + Livewire (dari Prompt Cline 27 Okt 2026) | ✅ Lengkap |
+| `docs/CUTOVER_ROLLBACK.md` | UAT, migrasi, cutover dan rollback (dari audit bab 21–24) | ✅ Lengkap |
+| `docs/TEST_EVIDENCE.md` | Bukti pengujian dan acceptance criteria | ✅ Lengkap |
+| `docs/SALES_AR_RULES.md` | Aturan Sales, AR, penerimaan kas/bank | ✅ Lengkap |
+| `docs/EXIM_CUSTOMS_RULES.md` | Aturan EXIM, BC, dokumen pabean | ✅ Lengkap |
 
 ---
 
