@@ -111,6 +111,11 @@ class PaymentPlanBankHttpTest extends TestCase
         ])->assertOk()->json();
         $version = $photo['version'];
         if (getenv('R1_UI_CAPTURE') && !$ap) file_put_contents(getenv('R1_UI_CAPTURE').'/photo.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jS9kAAAAASUVORK5CYII='));
+        $draftPrint = $this->actingAs($users['req'])->get(route('payment-plan-v33.print', $id))->assertOk()
+            ->assertSee(__('bank_payment.manual_signature_note'))->assertSee(__('bank_payment.signature_states.missing'))
+            ->assertSee('data-signature-slot="request_director" data-workflow-recorded="false"', false)
+            ->assertSee('data-signature-slot="general_manager" data-workflow-recorded="false"', false);
+        $this->assertSame(6, substr_count($draftPrint->getContent(), 'class="manual-space"'));
         $action('req', 'submit', []);
         $action('dir', 'approve_request', ['checked' => true]);
         $upload = function ($kind) use (&$version, $id, $users) {
@@ -123,7 +128,24 @@ class PaymentPlanBankHttpTest extends TestCase
         };
         $upload('settlement');
         $action('fs', 'prepare_settlement', ['checked' => true, 'base' => '100.25', 'coa' => '610001', 'sourceId' => 'idr3']);
-        $action('dir', 'approve_settlement', ['checked' => true]);
+        $approved = $action('dir', 'approve_settlement', ['checked' => true]);
+        foreach (['id', 'en', 'zh_CN'] as $locale) {
+            $this->withSession(['locale' => $locale])->get(route('payment-plan-v33.print', $id))->assertOk()
+                ->assertSee(__('bank_payment.request_signatures', [], $locale))
+                ->assertSee(__('bank_payment.settlement_signatures', [], $locale))
+                ->assertSee(__('bank_payment.manual_signature_note', [], $locale))
+                ->assertSee('data-signature-slot="request_director" data-workflow-recorded="true"', false)
+                ->assertSee('data-signature-slot="finance_preparer" data-workflow-recorded="true"', false)
+                ->assertSee('data-signature-slot="department_head" data-workflow-recorded="false"', false)
+                ->assertSee('data-signature-slot="general_manager" data-workflow-recorded="false"', false)
+                ->assertSee($approved['request']['requestApproval']['actor'])
+                ->assertSee($approved['request']['requestApproval']['at'])
+                ->assertSee($approved['request']['settlement']['preparedName'])
+                ->assertSee($approved['request']['settlementApproval']['at'])
+                ->assertDontSee('bank_payment.signature_');
+        }
+        $this->withSession(['locale' => 'id']);
+
         DB::table('company_coa_mappings')->where('semantic_key', 'ppl.bank.idr3')->update(['active' => false]);
         $this->actingAs($users['mk'])->postJson(route('payment-plan-v33.action'), ['id' => $id, 'version' => $version,
             'mutationId' => 'changed-mapping-maker', 'action' => 'mark_maker', 'input' => ['reference' => 'INSTRUCTION']])->assertStatus(409);
@@ -131,7 +153,10 @@ class PaymentPlanBankHttpTest extends TestCase
         DB::table('company_coa_mappings')->where('semantic_key', 'ppl.bank.idr3')->update(['active' => true]);
         $action('mk', 'mark_maker', ['reference' => 'INSTRUCTION']);
         $this->assertDatabaseHas('ppl_reservations', ['request_id' => $id, 'status' => 'active', 'amount' => '100.25']);
-        $action('gm', 'release_gm', ['checked' => true, 'reference' => 'RELEASE']);
+        $released = $action('gm', 'release_gm', ['checked' => true, 'reference' => 'RELEASE']);
+        $this->get(route('payment-plan-v33.print', $id))->assertOk()
+            ->assertSee('data-signature-slot="general_manager" data-workflow-recorded="true"', false)
+            ->assertSee($released['request']['bankRelease']['actor'])->assertSee($released['request']['bankRelease']['at']);
         $uploaded = $upload('payment');
         $attachment = end($uploaded['request']['attachments']);
         $this->get(route('payment-plan-v33.download', $attachment['id']))->assertOk()->assertHeader('X-Content-Type-Options', 'nosniff');

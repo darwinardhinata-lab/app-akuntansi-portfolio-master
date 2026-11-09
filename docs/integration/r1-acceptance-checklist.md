@@ -1,3 +1,7 @@
+## 9 November 2026 — signature delta supersedes earlier OPEN signature row
+
+Details: `D:\xampp\htdocs\app-akuntansi-portfolio-master\docs\integration\u04-signature-delta-20261109.md`; evidence `D:\ERP-Recovery\R1-apache-return-20261109-162024`. Existing v33 manual-signature contract recovered (not a new policy); six truthful blank spaces with separate workflow data/pending markers **PASS scoped**. HTTP 3 tests/292 assertions; initial browser 64 PASS, final replay 62 PASS; nine print responsive cases; print parity 79 PASS. ID final 18-page PDF signature groups pages 9–10 and photos 15–18 visually inspected; Mandarin/draft affected pages inspected. All 49 URL references reconciled into grouped review, **not** globally adapted. U04/R1-AC08 remains PARTIAL; broader all-form URL/responsive scope and separate human UAT remain. AC07 staging/archive decision unchanged.
+
 # R1 Acceptance Checklist — Finance Payment UI
 
 **Branch:** `feat/marvel-dard-integration`  

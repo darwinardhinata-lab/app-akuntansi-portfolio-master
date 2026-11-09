@@ -1,0 +1,41 @@
+// Delta-only authenticated disposable check. Never mutate an operational deployment.
+const fs=require('fs'),path=require('path'),assert=require('node:assert/strict'),crypto=require('crypto');
+const {chromium}=require(process.env.R1_PLAYWRIGHT_MODULE);
+const [root,base]=process.argv.slice(2),out=path.dirname(root);
+assert.equal(new URL(base).hostname,'127.0.0.1');
+assert.equal(fs.readFileSync(path.join(root,'marker'),'utf8'),'R1 disposable web v1');
+const expected=JSON.parse(fs.readFileSync(path.join(root,'mysql.json')));
+const users=JSON.parse(fs.readFileSync(path.join(root,'financial-users.json')));
+const approved=JSON.parse(fs.readFileSync(path.join(out,'u04-approved-response.json'))).request;
+const report={status:'RUNNING',checks:[],scope:'signature delta; disposable, not human UAT'};
+function check(name,a,b){assert.deepEqual(a,b,name);report.checks.push({name,actual:a});}
+async function login(browser,key){const page=await browser.newPage({viewport:{width:1440,height:1000}});await page.goto(base+'/login');await page.locator('[name=email]').fill(users[key].email);await page.locator('[name=password]').fill(users[key].password);await page.locator('button[type=submit]').click();await page.waitForURL('**/dashboard');return page;}
+async function api(page,endpoint,body){const result=await page.evaluate(async({endpoint,body})=>{const r=await fetch(endpoint,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content},body:JSON.stringify(body)});return {status:r.status,value:await r.json()};},{endpoint,body});check(endpoint+' response '+JSON.stringify(result.value.error||''),result.status,endpoint.endsWith('/request')?201:200);return result.value;}
+async function locale(page,value){await page.goto(base+'/erp-panel/bank-payments');await page.waitForFunction(()=>document.querySelector('#bankWorkspace')?.getAttribute('aria-busy')==='false');await page.evaluate(async value=>{await fetch('/lang/'+value,{credentials:'same-origin'});},value);}
+async function capture(page,id,name,lang){await locale(page,lang);check(name+' print response',(await page.goto(base+'/payment-plan/bank/'+id+'/print?u04='+crypto.randomUUID())).status(),200);check(name+' actual locale',await page.locator('html').getAttribute('lang'),lang.replace('_','-'));await page.waitForFunction(()=>[...document.images].every(i=>i.complete&&i.naturalWidth>0));
+ check(name+' six blank manual spaces',await page.locator('.manual-space:empty').count(),6);
+ check(name+' two grouped forms',await page.locator('[data-signature-group]').count(),2);
+ check(name+' no signature images',await page.locator('.signature-group img').count(),0);
+ const metadata=await page.locator('.signature-group').evaluateAll(xs=>xs.map(x=>({text:x.innerText,breakInside:getComputedStyle(x).breakInside,height:x.getBoundingClientRect().height})));
+ check(name+' keep-together CSS',metadata.every(x=>x.breakInside==='avoid'),true);
+ for(const key of ['request_signatures','settlement_signatures'])await page.locator('[data-signature-group='+key+']').screenshot({path:path.join(out,name+'-'+key+'.png')});
+ const client=await page.context().newCDPSession(page);await client.send('Page.enable');const pdf=await client.send('Page.printToPDF',{printBackground:true,preferCSSPageSize:true,displayHeaderFooter:false});fs.writeFileSync(path.join(out,name+'.pdf'),Buffer.from(pdf.data,'base64'));
+ fs.writeFileSync(path.join(out,name+'-metadata.json'),JSON.stringify(metadata,null,2));
+}
+(async()=>{const browser=await chromium.launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});try{
+ const probe=await browser.newContext();const identity=await (await probe.request.get(base+'/__r1_identity',{headers:{'X-R1-Probe':fs.readFileSync(path.join(root,'probe.key'),'utf8').trim()}})).json();
+ check('database identity before writes',identity.database,expected.database);check('account identity',identity.account,expected.username+'@127.0.0.1');check('storage identity',identity.storage.replaceAll('\\','/'),root.replaceAll('\\','/')+'/storage/app/private');
+ const req=await login(browser,'req'),finance=await login(browser,'fs');await req.goto(base+'/erp-panel/bank-payments');
+ const draft=await api(req,'/payment-plan/api/request',{id:crypto.randomUUID(),payee:'Signature pending synthetic',amount:'1.00',subject:['Belum disetujui','Unapproved','尚未批准'],purpose:['Uji tanda tangan','Signature test','签名测试'],recipientBank:'Synthetic',recipientAccount:'TEST',due:'2026-11-10',lines:[{description:['Item','Item','项目'],qty:'1',unitPrice:'1.00'}]});
+ fs.writeFileSync(path.join(out,'signature-draft-response.json'),JSON.stringify(draft,null,2));
+ await capture(req,draft.request.id,'signature-draft-id','id');check('draft director missing',await req.locator('[data-signature-slot=request_director]').getAttribute('data-workflow-recorded'),'false');
+ for(const lang of ['id','en','zh_CN']){await capture(finance,approved.id,'signature-approved-'+lang,lang);check(lang+' request director recorded',await finance.locator('[data-signature-slot=request_director]').getAttribute('data-workflow-recorded'),'true');check(lang+' finance preparer recorded',await finance.locator('[data-signature-slot=finance_preparer]').getAttribute('data-workflow-recorded'),'true');check(lang+' manager remains unrecorded',await finance.locator('[data-signature-slot=department_head]').getAttribute('data-workflow-recorded'),'false');check(lang+' GM matches persisted phase',await finance.locator('[data-signature-slot=general_manager]').getAttribute('data-workflow-recorded'),fs.existsSync(path.join(out,'signature-released-response.json'))?'true':'false');check(lang+' director identity and timestamp',(await finance.locator('[data-signature-slot=request_director]').innerText()).includes(approved.requestApproval.actor)&&(await finance.locator('[data-signature-slot=request_director]').innerText()).includes(approved.requestApproval.at),true);
+  for(const width of [390,768,1440]){await finance.setViewportSize({width,height:1000});const geometry=await finance.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth}));check(lang+' print responsive '+width,geometry.scroll<=width,true);}
+  await finance.setViewportSize({width:1440,height:1000});
+ }
+ let released; if(fs.existsSync(path.join(out,'signature-released-response.json'))){released=JSON.parse(fs.readFileSync(path.join(out,'signature-released-response.json')));}else{ const maker=await login(browser,'mk');await maker.goto(base+'/erp-panel/bank-payments');const made=await api(maker,'/payment-plan/api/action',{id:approved.id,version:JSON.parse(fs.readFileSync(path.join(out,'u04-approved-response.json'))).version,mutationId:crypto.randomUUID(),action:'mark_maker',input:{reference:'U04-SIGNATURE-INSTRUCTION'}});
+ const gm=await login(browser,'gm');await gm.goto(base+'/erp-panel/bank-payments');released=await api(gm,'/payment-plan/api/action',{id:approved.id,version:made.version,mutationId:crypto.randomUUID(),action:'release_gm',input:{checked:true,reference:'U04-SIGNATURE-RELEASE'}});
+ fs.writeFileSync(path.join(out,'signature-released-response.json'),JSON.stringify(released,null,2));}await capture(finance,approved.id,'signature-released-id','id');check('GM release recorded',await finance.locator('[data-signature-slot=general_manager]').getAttribute('data-workflow-recorded'),'true');check('GM actual name',(await finance.locator('[data-signature-slot=general_manager]').innerText()).includes(released.request.bankRelease.actor),true);
+ const guest=await browser.newPage();check('guest print redirects to login',(await guest.goto(base+'/payment-plan/bank/'+approved.id+'/print')).url().endsWith('/login'),true);
+ report.status='PASS';
+}catch(e){report.status='FAIL';report.error=e.stack;process.exitCode=1;}finally{fs.writeFileSync(path.join(out,'u04-signature-browser.json'),JSON.stringify(report,null,2));await browser.close();}console.log(report.status+' '+report.checks.length+' checks');})();

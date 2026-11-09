@@ -1,3 +1,11 @@
+# 2026-11-09 — U04 signature contract recovered and implemented
+
+- Latest delta: `D:\xampp\htdocs\app-akuntansi-portfolio-master\docs\integration\u04-signature-delta-20261109.md`; evidence `D:\ERP-Recovery\R1-apache-return-20261109-162024`, prior 101934 unchanged. Original v33 ZIP provides the manual signature contract: request Applicant/Head of Department/Director; settlement Reimbursement Department/Finance preparer/GM. Six blank spaces + blank manual dates; persisted actor/time/status separated from signature claims. Missing acknowledgements stay missing. Separate Director settlement workflow and frozen accounting metadata.
+- Product scoped signature criterion **PASS**: ID/EN/zh_CN, draft/approved/released GM; **3 tests / 292 assertions PASS**, initial browser **64 PASS**, final replay **62 PASS**, print parity **79 PASS**. Print responsive nine locale/390/768/1440 cases PASS. Final ID PDF 18 pages, groups intact pages 9–10, four photos intact 15–18 inspected; zh PDF groups on page 9, draft groups page 2. Delta visual scope explicitly recorded, not all-final-page acceptance.
+- Ready independent increment: all 49 original URL inventory references grouped in `D:\xampp\htdocs\app-akuntansi-portfolio-master\docs\integration\u04-url-review-20261109.csv`, existing evidence and concrete unsupported feature dependencies reconciled. **Not 49 runtime passes. U04/R1-AC08 overall remains IN_PROGRESS/PARTIAL** for broader all-form URL/responsive coverage; human UAT is separate. AC07 unchanged (staging identity and owner archive scope/retention/access).
+- **Next:** take first unsupported URL group with confirmed U02/F readiness; do not expose unsupported v33 actions. Owner staging/archive inputs and human UAT remain external prerequisites. No commit/push; unrelated changes preserved.
+- Cleanup verified: disposable PID/config/listener matched before stop; schema/account absent, port 8898 free (`cleanup-verification.json`); synthetic evidence retained. PHP/Node lint and scoped diff PASS.
+
 # 2026-10-29 � R1 canonical Finance payment UI and private evidence
 
 - Active task completed from `d950174`: canonical Filament payment page `/erp-panel/bank-payments`; legacy `/payment-plan/bank` redirects there. Existing workflow/application services, reservation, fence and ledger reused.
