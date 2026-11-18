@@ -90,6 +90,126 @@ class MaterialProcurementMysqlTest extends TestCase
         $this->assertSame(0, DB::table('mfg_material_ledgers')->count());
     }
 
+    public function test_supplier_identity_authorization_and_failed_second_line_preserve_mysql_state(): void
+    {
+        $service = app(MaterialProcurementService::class);
+        $creator = User::factory()->create();
+        $approver = User::factory()->create();
+        config([
+            'platform.pr_create_user_ids' => [(string) $creator->id],
+            'platform.pr_approve_user_ids' => [(string) $approver->id],
+            'platform.po_create_user_ids' => [(string) $creator->id],
+        ]);
+        $material = \App\Modules\Manufacturing\Models\AuxiliaryMaterial::create([
+            'material_code' => '000017', 'material_name' => 'Label', 'unit' => 'PCS',
+            'meters_per_roll' => '12.75', 'stock_quantity' => '5.25', 'average_cost' => '1.50',
+        ]);
+        $supplier = Supplier::create(['supplier_code' => '000017', 'supplier_name' => 'Same name', 'supplier_type' => 'RAW_MATERIAL', 'is_active' => true]);
+        $wrong = Supplier::create(['supplier_code' => 'OTHER', 'supplier_name' => 'Same name', 'supplier_type' => 'KNITTER', 'is_active' => true]);
+        $item = ['item_type' => 'AUXILIARY', 'auxiliary_material_id' => $material->id,
+            'item_name' => 'Label', 'qty' => '2.00', 'unit' => 'PCS', 'rate' => '12.75'];
+        $pr = $service->createRequest(['request_date' => '2026-11-17', 'created_by' => $creator->id], [$item]);
+        $service->submitRequest($pr->id, $creator->id);
+        $service->approveRequest($pr->id, $approver->id);
+        $detail = $pr->fresh('details')->details->sole();
+        $line = $item + ['source_request_detail_id' => $detail->id];
+        $header = ['po_date' => '2026-11-17', 'created_by' => $creator->id];
+        $snapshot = function (): array {
+            $state = [];
+            foreach (DB::select('SHOW TABLES') as $table) {
+                $name = array_values((array) $table)[0];
+                $rows = DB::table($name)->get()->map(fn ($row) => json_encode($row))->all();
+                sort($rows);
+                $state[$name] = $rows;
+            }
+            ksort($state);
+            return $state;
+        };
+        foreach (['wrong_type', 'inactive', 'revoked_permission', 'second_line'] as $case) {
+            $supplier->update(['is_active' => $case !== 'inactive']);
+            config(['platform.po_create_user_ids' => $case === 'revoked_permission' ? [] : [(string) $creator->id]]);
+            $before = $snapshot();
+            try {
+                $service->createOrderFromRequest($pr->id, $case === 'wrong_type' ? $wrong->id : $supplier->id,
+                    $case === 'second_line' ? [$line, $line] : [$line], $header);
+                $this->fail('Invalid supplier, revoked permission or exhausted PR must reject the entire PO.');
+            } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+                $this->assertSame('revoked_permission', $case);
+            } catch (\RuntimeException $e) {
+                $this->assertStringContainsString($case === 'second_line' ? 'sisa detail PR' : 'Supplier Material PO', $e->getMessage());
+            }
+            $this->assertSame($before, $snapshot(), $case.' must not mutate table rows');
+        }
+        $po = $service->createOrderFromRequest($pr->id, $supplier->id, [$line], $header);
+        $this->assertSame($supplier->id, $po->supplier_id);
+        $this->assertDatabaseHas('mfg_material_purchase_order_details', ['po_id' => $po->id,
+            'auxiliary_material_id' => $material->id, 'source_request_detail_id' => $detail->id, 'unit' => 'PCS', 'amount' => '25.50']);
+        $this->assertSame('2.00', $detail->fresh()->qty_ordered);
+        $before = $snapshot();
+        try {
+            $service->createOrderFromRequest($pr->id, $supplier->id, [$line], $header);
+            $this->fail('Retry must not over-order an exhausted source line.');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('sisa detail PR', $e->getMessage());
+        }
+        $this->assertSame($before, $snapshot());
+        $service->submitOrder($po->id, $creator->id);
+        foreach (['revoked_approver', 'self_approval'] as $case) {
+            // Even an explicitly listed creator must not approve their own submitted PO.
+            config(['platform.po_approve_user_ids' => $case === 'self_approval' ? [(string) $creator->id] : []]);
+            $before = $snapshot();
+            try {
+                $service->approveOrder($po->id, $case === 'self_approval' ? $creator->id : $approver->id);
+                $this->fail('Revocation and separation of duties must reject PO approval.');
+            } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+                $this->assertStringContainsString('Material PO', $e->getMessage());
+            }
+            $this->assertSame($before, $snapshot(), $case.' must not mutate table rows');
+        }
+        config(['platform.po_approve_user_ids' => [(string) $approver->id]]);
+        // Inject a real MariaDB persistence failure after the header update, not a mocked transaction.
+        DB::unprepared("CREATE TRIGGER m3_fail_approval_history BEFORE INSERT ON mfg_material_purchase_order_histories
+            FOR EACH ROW BEGIN IF NEW.action = 'APPROVED' THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'M3 synthetic approval history failure'; END IF; END");
+        $before = $snapshot();
+        try {
+            try {
+                $service->approveOrder($po->id, $approver->id);
+                $this->fail('Failed history persistence must roll back the approval header.');
+            } catch (\Illuminate\Database\QueryException $e) {
+                $this->assertStringContainsString('M3 synthetic approval history failure', $e->getMessage());
+            }
+            $this->assertSame($before, $snapshot(), 'History failure must restore every table row');
+            $this->assertSame('SUBMITTED', $po->fresh()->approval_status);
+            $this->assertNull($po->fresh()->approved_by);
+            $this->assertNull($po->fresh()->approved_at);
+        } finally {
+            DB::unprepared('DROP TRIGGER m3_fail_approval_history');
+        }
+        $approved = $service->approveOrder($po->id, $approver->id);
+        $this->assertSame('APPROVED', $approved->approval_status);
+        $this->assertSame('APPROVED', $approved->status);
+        $this->assertSame($approver->id, $approved->approved_by);
+        $this->assertNotNull($approved->approved_at);
+        $this->assertSame(['CREATED', 'SUBMITTED', 'APPROVED'], $approved->histories()->pluck('action')->all());
+        $this->assertSame('2.00', $detail->fresh()->qty_ordered);
+        $before = $snapshot();
+        try {
+            $service->approveOrder($po->id, $approver->id);
+            $this->fail('Approval retry must not append another history or mutate the approved PO.');
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            $this->assertStringContainsString('Material PO', $e->getMessage());
+        }
+        $this->assertSame($before, $snapshot());
+        $this->assertSame('000017', $material->fresh()->material_code);
+        $this->assertSame('12.75', $material->fresh()->meters_per_roll);
+        $this->assertSame('5.25', $material->fresh()->stock_quantity);
+        $this->assertSame('1.50', $material->fresh()->average_cost);
+        foreach (['journal_headers', 'journal_details', 'inventory_ledgers', 'mfg_material_ledgers'] as $table) {
+            $this->assertSame(0, DB::table($table)->count(), $table);
+        }
+    }
+
     private function cleanupFixture(): void
     {
         if ($this->created && preg_match('/\Amgi_fresh_m2test_[a-f0-9]{16}\z/', (string) $this->fixture)) {
