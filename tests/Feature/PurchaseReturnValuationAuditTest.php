@@ -97,4 +97,45 @@ class PurchaseReturnValuationAuditTest extends TestCase
             $this->assertDatabaseCount($table, 0);
         }
     }
+
+    public function test_unattributed_return_reversal_restores_stock_and_quota_once(): void
+    {
+        $this->authorizedReturnActor();
+        $this->accounts();
+        $actor = auth()->user();
+        $actor->update(['role' => 'FINANCE']);
+        config(['platform.payment_reverse_user_ids' => [$actor->id], 'platform.posting_intents_enabled' => true,
+            'payment_plan_v33.bank_workflow' => true]);
+        $company = \App\Modules\Platform\Models\Company::sole();
+        DB::table('ppl_financial_contexts')->insert(['company_id' => $company->id, 'settings' => '{}']);
+        [$product, $payload] = $this->receipt();
+        $product->update(['average_cost' => 100]);
+        $account = config('coa.hutang_usaha');
+        DB::table('accounts')->where('account_code', $account)->update(['normal_balance' => 'KREDIT']);
+        $journal = \App\Support\PostingService::post(['transaction_date' => '2026-10-06', 'source_doc_no' => 'REV-TEST-BILL'], [
+            ['account_code' => config('coa.persediaan'), 'position' => 'DEBET', 'amount' => '250.00'],
+            ['account_code' => $account, 'position' => 'KREDIT', 'amount' => '250.00'],
+        ]);
+        $bill = DB::table('purchase_bills')->insertGetId(['bill_number' => 'REV-TEST-BILL', 'bill_date' => '2026-10-06',
+            'purchase_order_id' => $payload['purchase_order_id'], 'vendor_name' => 'Fixture', 'credit_account' => $account,
+            'journal_id' => $journal->getKey(), 'grand_total' => '250.00', 'payment_status' => 'UNPAID']);
+        $this->post(route('purchase-returns.store'), $payload)->assertSessionHas('success');
+        $id = DB::table('purchase_returns')->sole()->id;
+        $url = route('purchase-returns.reverse', $id);
+        $body = ['posting_date' => '2026-10-07', 'reason' => 'Synthetic reversal reason'];
+        $source = fn () => DB::transaction(fn () => app(\App\Modules\PaymentPlan\Services\PurchaseBillAllocation::class)->source($bill, $company->id));
+        $this->assertSame('ap_reconciliation_required', $source()['blocked']);
+        $this->postJson($url, $body)->assertOk()->assertJsonPath('actor_id', $actor->id);
+        $this->assertEquals(10, $product->fresh()->stock_quantity);
+        $this->assertSame('250.00', $source()['residual']);
+        $this->assertArrayNotHasKey('blocked', $source());
+        $this->postJson($url, $body)->assertOk();
+        $this->postJson($url, [...$body, 'reason' => 'Another reversal reason'])->assertConflict();
+        $this->assertDatabaseCount('purchase_return_reversals', 1);
+        $this->assertDatabaseCount('inventory_ledgers', 2);
+        $this->assertDatabaseCount('journal_headers', 3);
+        $payload['items'][array_key_first($payload['items'])] = 10;
+        $this->post(route('purchase-returns.store'), $payload)->assertSessionHas('success');
+        $this->assertEquals(0, $product->fresh()->stock_quantity);
+    }
 }

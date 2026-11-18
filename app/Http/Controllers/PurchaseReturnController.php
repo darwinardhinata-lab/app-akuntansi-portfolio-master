@@ -29,6 +29,15 @@ class PurchaseReturnController extends Controller
         return view('purchase_return.index', compact('returns'));
     }
 
+    public function reverse(Request $request, \App\Services\PurchaseReturnReversal $service, int $id)
+    {
+        $data = $request->validate(['posting_date' => 'nullable|date_format:Y-m-d', 'reason' => 'required|string|min:10|max:255']);
+        abort_if(strlen($data['reason']) > 255, 422, 'Reversal reason exceeds 255 bytes.');
+        $result = $service->reverse($request, $id, $data['posting_date'] ?? null, $data['reason']);
+        return $request->expectsJson() ? response()->json($result)
+            : redirect()->route('purchase-returns.show', $id)->with('success', 'Reversal '.$result->evidence_number.' recorded.');
+    }
+
     public function create(Request $request, PurchaseReturnCreateAccess $access)
     {
         $companyId = $access->companyId($request);

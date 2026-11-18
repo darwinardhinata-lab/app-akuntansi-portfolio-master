@@ -9,6 +9,21 @@
         <p>{{ __('erp.status') }}: {{ $return->status }}</p>
         <p>{{ $return->notes ?? '-' }}</p>
     </div></div>
+    @if(session('success'))
+        <p role="status">{{ session('success') }}</p>
+    @endif
+    @if(config('platform.order_company_scope_enabled') && config('platform.posting_intents_enabled')
+        && auth()->user()?->role === 'FINANCE' && in_array((string) auth()->id(), array_map('strval', config('platform.payment_reverse_user_ids', [])), true)
+        && $return->status === 'COMPLETED')
+        <form method="POST" action="{{ route('purchase-returns.reverse', $return->id) }}" class="mb-3">
+            @csrf
+            <label for="reversal-date">Tanggal pembalikan (kosong: tanggal bisnis MGI)</label>
+            <input type="date" id="reversal-date" name="posting_date" value="{{ old('posting_date') }}">
+            <label for="reversal-reason">Alasan pembalikan</label>
+            <input id="reversal-reason" name="reason" minlength="10" maxlength="255" required>
+            <button type="submit" class="btn btn-warning">Balikkan retur</button>
+        </form>
+    @endif
     <div class="table-responsive"><table class="table table-bordered">
         <thead><tr><th>{{ __('erp.product_code') }}</th><th>{{ __('erp.description_label') }}</th>
             <th>{{ __('erp.qty') }}</th><th>{{ __('erp.price_label') }}</th><th>{{ __('erp.subtotal_label') }}</th></tr></thead>

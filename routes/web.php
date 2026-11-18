@@ -272,6 +272,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/purchase-returns/create', [App\Http\Controllers\PurchaseReturnController::class, 'create'])->name('purchase-returns.create');
     Route::post('/purchase-returns', [App\Http\Controllers\PurchaseReturnController::class, 'store'])->name('purchase-returns.store');
     Route::get('/purchase-returns/get-po-items/{id}', [App\Http\Controllers\PurchaseReturnController::class, 'getPoItems'])->name('purchase-returns.get-po-items');
+    Route::post('/purchase-returns/{id}/reverse', [App\Http\Controllers\PurchaseReturnController::class, 'reverse'])->name('purchase-returns.reverse');
     Route::get('/purchase-returns/{id}', [App\Http\Controllers\PurchaseReturnController::class, 'show'])->name('purchase-returns.show');
 
     // --- TAGIHAN PEMBELIAN (PURCHASE BILLS) ---

@@ -87,6 +87,7 @@ final class ApResidualProjection
         }
         if ($bill->purchase_order_id) {
             foreach (DB::table('purchase_returns')->where('purchase_order_id', $bill->purchase_order_id)->whereNotIn('status', ['VOID', 'REJECT', 'REJECTED'])->get() as $return) {
+                if ($return->status === 'REVERSED' && DB::table('purchase_return_reversals')->where('purchase_return_id', $return->id)->exists()) continue;
                 $details = DB::table('purchase_return_details')->where('purchase_return_id', $return->id)->get();
                 $complete = $details->isNotEmpty();
                 $allocated = '0.00';

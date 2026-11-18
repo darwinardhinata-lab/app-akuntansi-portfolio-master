@@ -24,9 +24,13 @@ final class PurchaseReturnEligibility
     /** Caller must hold the PO lock obtained by lockOrder until commit. */
     public function assertLine(PurchaseOrder $po, PurchaseOrderDetail $line, int $quantity): void
     {
-        $used = DB::table('purchase_return_details as d')->join('purchase_returns as r', 'r.id', '=', 'd.purchase_return_id')
+        $prior = DB::table('purchase_return_details as d')->join('purchase_returns as r', 'r.id', '=', 'd.purchase_return_id')
             ->where('r.purchase_order_id', $po->id)->where('d.item_code', $line->item_code)
-            ->where('r.status', 'COMPLETED')->lockForUpdate()->get(['d.qty_returned'])->sum('qty_returned');
+            ->whereIn('r.status', ['COMPLETED', 'REVERSED'])->lockForUpdate()->get(['r.id', 'r.status', 'd.qty_returned']);
+        // MariaDB does not propagate FOR UPDATE into a nested proof subquery.
+        $reversed = DB::table('purchase_return_reversals')->whereIn('purchase_return_id', $prior->where('status', 'REVERSED')->pluck('id'))
+            ->lockForUpdate()->pluck('purchase_return_id')->flip();
+        $used = $prior->reject(fn ($row) => $row->status === 'REVERSED' && $reversed->has($row->id))->sum('qty_returned');
         if ((int) $line->purchase_order_id !== (int) $po->id || $quantity < 1
             || $po->details()->where('item_code', $line->item_code)->limit(2)->lockForUpdate()->get(['id'])->count() !== 1
             || bccomp(bcadd((string) $quantity, (string) $used, 6), (string) $line->qty_received, 6) > 0) {
