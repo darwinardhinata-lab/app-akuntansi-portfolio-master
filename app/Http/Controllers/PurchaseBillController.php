@@ -18,9 +18,11 @@ use App\Services\InventorySyncService;
 
 class PurchaseBillController extends Controller
 {
-    public function show($id)
+    public function show(Request $request, \App\Modules\Platform\Support\PurchaseBillReadAccess $access, $id)
     {
-        $bill = PurchaseBill::with(['details.account', 'purchaseOrder'])->findOrFail($id);
+        $bill = PurchaseBill::findOrFail($id);
+        $access->authorize($request, $bill);
+        $bill->load(['details.account', 'purchaseOrder']);
         return view('purchase_bill.show', compact('bill'));
     }
 

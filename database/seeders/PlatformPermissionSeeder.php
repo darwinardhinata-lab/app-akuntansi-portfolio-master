@@ -10,6 +10,9 @@ class PlatformPermissionSeeder extends Seeder
     public function run(): void
     {
         // Catalog only: no implied grants to ADMIN, FINANCE or STAFF.
+        Permission::firstOrCreate(['code' => 'purchase_bill.view'], [
+            'resource' => 'purchase_bill', 'action' => 'view', 'description' => 'Read purchase bills with proven purchase-order ownership',
+        ]);
         foreach (['view', 'propose', 'approve', 'cancel', 'audit'] as $action) {
             Permission::firstOrCreate(['code' => 'ap.reconcile.'.$action], ['resource' => 'ap.reconcile', 'action' => $action, 'description' => 'AP reconciliation: '.$action]);
         }
