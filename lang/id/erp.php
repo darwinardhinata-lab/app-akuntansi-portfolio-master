@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'party_master' => 'Master Party',
     'auxiliary_material_master' => 'Master Bahan Penolong',
     'multi_account_hint' => 'Pilih satu atau beberapa akun. Saldo ditampilkan terpisah per akun.',
     'journal_multi_account_hint' => 'Kosongkan untuk semua akun. Jurnal yang memuat salah satu akun terpilih ditampilkan lengkap beserta akun pasangannya.',

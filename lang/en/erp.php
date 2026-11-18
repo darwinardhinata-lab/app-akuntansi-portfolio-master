@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'party_master' => 'Party master',
     'auxiliary_material_master' => 'Auxiliary Material Master',
     'multi_account_hint' => 'Select one or more accounts. Balances are shown separately for each account.',
     'journal_multi_account_hint' => 'Leave empty for all accounts. Journals containing any selected account include all counterpart entries.',

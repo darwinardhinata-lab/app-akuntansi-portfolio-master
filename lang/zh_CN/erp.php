@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'party_master' => '往来单位主数据',
     'auxiliary_material_master' => '辅料主数据',
     'multi_account_hint' => '可选择一个或多个科目，各科目余额分别显示。',
     'journal_multi_account_hint' => '留空显示所有科目。显示包含任一所选科目的完整凭证及其对应分录。',
