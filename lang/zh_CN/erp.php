@@ -1079,7 +1079,7 @@ return [
     'select_original_po_required' => '选择原始采购订单 *',
     'select_returned_items' => '选择退货商品',
     'qty_in_po' => '采购订单数量',
-    'save_return_draft' => '保存退货草稿',
+    'save_return_draft' => '登记退货并过账库存和日记账',
     'loading_items_lower' => '正在加载商品...',
     'no_items_on_po' => '此采购订单没有商品。',
     'failed_fetch_po_data' => '获取采购订单数据失败。',

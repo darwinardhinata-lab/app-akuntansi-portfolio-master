@@ -1180,7 +1180,7 @@ return [
     'select_original_po_required' => 'Pilih PO Asli *',
     'select_returned_items' => 'Pilih Barang yang Diretur',
     'qty_in_po' => 'Qty di PO',
-    'save_return_draft' => 'Simpan Draft Retur',
+    'save_return_draft' => 'Catat Retur & Posting Stok/Jurnal',
     'loading_items_lower' => 'Memuat barang...',
     'no_items_on_po' => 'Tidak ada barang pada PO ini.',
     'failed_fetch_po_data' => 'Gagal menarik data PO.',

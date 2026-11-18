@@ -20,9 +20,15 @@ class PlatformPermissionSeeder extends Seeder
         Permission::firstOrCreate(['code' => 'erp.panel.access'], ['resource' => 'erp.panel', 'action' => 'access', 'description' => 'ERP panel access']);
         Permission::firstOrCreate(['code' => 'material.view'], ['resource' => 'material', 'action' => 'view', 'description' => 'Read-only material master lookup']);
         Permission::firstOrCreate(['code' => 'material.create'], ['resource' => 'material', 'action' => 'create', 'description' => 'Create material masters; does not enable unapproved import mappings']);
+        Permission::firstOrCreate(['code' => 'purchase_return.create'], [
+            'resource' => 'purchase_return', 'action' => 'create', 'description' => 'Create and immediately post a purchase return',
+        ]);
         foreach (['view', 'create', 'update'] as $action) {
             Permission::firstOrCreate(['code' => 'division.'.$action], ['resource' => 'division', 'action' => $action, 'description' => 'Divisi: '.$action]);
         }
+        Permission::firstOrCreate(['code' => 'purchase_return.create'], [
+            'resource' => 'purchase_return', 'action' => 'create', 'description' => 'Create and immediately post a purchase return',
+        ]);
         foreach (['view', 'create', 'update'] as $action) {
             Permission::firstOrCreate(['code' => 'party.'.$action], [
                 'resource' => 'party', 'action' => $action,

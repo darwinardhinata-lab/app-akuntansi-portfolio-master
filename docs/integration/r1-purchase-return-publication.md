@@ -1,0 +1,7 @@
+# R1 purchase return and AP attribution
+
+The existing synchronous purchase return writer now requires enabled A2 and explicit `purchase_return.create` access for create, PO lookup and store. Only POs owned by the selected active MGI company qualify. The server rejects submitted company IDs and positive quantities from foreign PO lines. Catalog seeding does not grant access; the operator command was tested only with synthetic identities. The form label states that recording immediately posts inventory and journal changes.
+
+On an isolated candidate based on `6c52c39`, an authenticated Apache/MariaDB POST produced a completed return, one inventory OUT (stock 5 to 3), and one balanced return journal (AP debit 20.00, inventory credit 20.00). A separate MariaDB probe called the same controller and used the existing AP reconciliation service: an unattributed return left residual 200.50 and blocked reservation without financial mutation; approval by a different actor reduced the residual to 180.50 with the journal count unchanged. This is not a browser approval, race, or process-kill test.
+
+Focused regression: 34 tests / 286 assertions. Default suite: 788 tests / 16,015 assertions. AC03/F11 remain open for broader active-writer and concurrency coverage. `FastImportPR` changes are excluded pending explicit PO ownership and remaining-return-quantity validation equivalent to the controller. Void/reversal and credit notes are not included. Human UAT DEFERRED; production NO-GO.

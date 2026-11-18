@@ -1182,7 +1182,7 @@ return [
     'select_original_po_required' => 'Select Original PO *',
     'select_returned_items' => 'Select Returned Items',
     'qty_in_po' => 'Qty in PO',
-    'save_return_draft' => 'Save Return Draft',
+    'save_return_draft' => 'Record Return & Post Stock/Journal',
     'loading_items_lower' => 'Loading items...',
     'no_items_on_po' => 'No items on this PO.',
     'failed_fetch_po_data' => 'Failed to fetch PO data.',

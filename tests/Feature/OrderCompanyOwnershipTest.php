@@ -285,9 +285,22 @@ class OrderCompanyOwnershipTest extends TestCase
         $oldId = $this->unowned('po');
         $detailId = DB::table('purchase_order_details')->insertGetId(['purchase_order_id' => $oldId,
             'item_code' => 'OLD-SKU', 'qty' => 1, 'price' => 125, 'amount' => 125]);
-        $this->post(route('purchase-returns.store'), ['purchase_order_id' => $mine->id,
-            'return_date' => '2026-09-24', 'items' => [$detailId => 1]])->assertRedirect()
-            ->assertSessionHas('error', fn ($message) => str_contains($message, 'Detail PO #'.$detailId.' tidak ditemukan.'));
+        $payload = ['purchase_order_id' => $mine->id, 'return_date' => '2026-09-24', 'items' => [$detailId => 1]];
+        $snapshot = function (): array {
+            $rows = [];
+            foreach (['purchase_returns', 'purchase_return_details', 'products', 'inventory_ledgers', 'journal_headers', 'journal_details'] as $table) {
+                $rows[$table] = DB::table($table)->get()->toJson();
+            }
+            return $rows;
+        };
+        $before = $snapshot();
+        // Legacy ADMIN does not imply purchase_return.create.
+        $this->post(route('purchase-returns.store'), $payload)->assertForbidden();
+        $this->assertSame($before, $snapshot());
+        $this->artisan('platform:purchase-return-access', ['company' => $this->company->id, '--user' => $this->member->id])->assertSuccessful();
+        // Authorized actor still cannot submit a line belonging to an unowned PO.
+        $this->post(route('purchase-returns.store'), $payload)->assertNotFound();
+        $this->assertSame($before, $snapshot());
         $this->assertDatabaseCount('purchase_returns', 0);
         $this->assertDatabaseCount('purchase_return_details', 0);
         $this->assertNoPosting();

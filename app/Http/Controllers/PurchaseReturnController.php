@@ -13,6 +13,7 @@ use App\Models\JournalDetail;
 use Illuminate\Support\Facades\DB;
 use App\Support\DocumentSequence;
 use App\Services\InventorySyncService;
+use App\Modules\Platform\Support\PurchaseReturnCreateAccess;
 
 class PurchaseReturnController extends Controller
 {
@@ -28,29 +29,39 @@ class PurchaseReturnController extends Controller
         return view('purchase_return.index', compact('returns'));
     }
 
-    public function create()
+    public function create(Request $request, PurchaseReturnCreateAccess $access)
     {
-        $pos = PurchaseOrder::whereIn('status', ['PARTIAL', 'RECEIVED'])->orderBy('transaction_date', 'desc')->get();
+        $companyId = $access->companyId($request);
+        $pos = PurchaseOrder::where('company_id', $companyId)->whereIn('status', ['PARTIAL', 'RECEIVED'])->orderBy('transaction_date', 'desc')->get();
         $prefix = 'PR-' . date('Ymd') . '-';
         $autoNumber = DocumentSequence::preview('purchase_returns', 'return_number', $prefix);
         return view('purchase_return.create', compact('pos', 'autoNumber'));
     }
 
     // Endpoint AJAX untuk menarik rincian barang dari PO yang dipilih
-    public function getPoItems($id)
+    public function getPoItems(Request $request, PurchaseReturnCreateAccess $access, $id)
     {
-        $po = PurchaseOrder::with('details')->findOrFail($id);
+        $companyId = $access->companyId($request);
+        $po = PurchaseOrder::where('company_id', $companyId)->with('details')->findOrFail($id);
         return response()->json(['items' => $po->details]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, PurchaseReturnCreateAccess $access)
     {
+        $companyId = $access->companyId($request);
+        abort_if($request->exists('company_id'), 422, 'company_id ditentukan server, bukan formulir.');
         $request->validate([
-            'purchase_order_id' => 'required|exists:purchase_orders,id',
+            'purchase_order_id' => 'required|integer',
             'return_date' => 'required|date',
             'items' => 'required|array|min:1',
             'items.*' => 'required|integer|min:0',
         ]);
+        $source = PurchaseOrder::where('company_id', $companyId)->findOrFail($request->purchase_order_id);
+        $itemIds = array_keys($request->items);
+        $matched = PurchaseOrderDetail::where('purchase_order_id', $source->id)->whereIn('id', $itemIds)->pluck('id')->map('strval')->all();
+        foreach ($request->items as $itemId => $quantity) {
+            abort_unless((int) $quantity <= 0 || in_array((string) $itemId, $matched, true), 404);
+        }
 
         DB::beginTransaction();
         try {
@@ -59,7 +70,7 @@ class PurchaseReturnController extends Controller
             $prefix = 'PR-' . date('Ymd', strtotime($request->return_date)) . '-';
             $secureReturnNumber = DocumentSequence::generateSecure('purchase_returns', 'return_number', $prefix);
 
-            $po = PurchaseOrder::lockForUpdate()->findOrFail($request->purchase_order_id);
+            $po = PurchaseOrder::where('company_id', $companyId)->lockForUpdate()->findOrFail($request->purchase_order_id);
             $return = PurchaseReturn::create([
                 'return_number' => $secureReturnNumber,
                 'purchase_order_id' => $po->id,
