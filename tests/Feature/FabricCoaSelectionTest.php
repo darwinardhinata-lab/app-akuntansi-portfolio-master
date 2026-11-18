@@ -29,6 +29,7 @@ class FabricCoaSelectionTest extends TestCase
 
     public function test_import_preserves_stock_account_and_rolls_back_previous_rows(): void
     {
+        app()->setLocale('id');
         Account::create(['account_code' => '114008', 'account_name' => 'Setengah jadi', 'normal_balance' => 'DEBET', 'report_pos' => 'NERACA', 'coa_type' => 'Persediaan']);
         Fabric::create(['fabric_code' => 'OLD', 'fabric_type' => 'Fabric', 'state' => 'GREY', 'unit' => 'KGS', 'inventory_account_code' => '114003', 'stock_quantity' => 2]);
         try {
@@ -37,7 +38,7 @@ class FabricCoaSelectionTest extends TestCase
             ]));
             $this->fail('Stock account changed');
         } catch (\RuntimeException $e) {
-            $this->assertStringContainsString('reklasifikasi', $e->getMessage());
+            $this->assertSame('Akun fabric dengan stok tidak boleh diubah tanpa reklasifikasi persediaan berotorisasi.', $e->getMessage());
         }
         $this->assertDatabaseMissing('mfg_fabrics', ['fabric_code' => 'NEW']);
         $this->assertDatabaseHas('mfg_fabrics', ['fabric_code' => 'OLD', 'inventory_account_code' => '114003', 'stock_quantity' => 2]);
