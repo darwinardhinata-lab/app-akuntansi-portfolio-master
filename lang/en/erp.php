@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'payment_legacy_reversal_unsupported' => 'Reversal of legacy POSTED payments is not supported. No financial changes were saved.',
     'fabric_master' => 'Fabric master',
     'yarn_master' => 'Yarn master',
     'party_master' => 'Party master',

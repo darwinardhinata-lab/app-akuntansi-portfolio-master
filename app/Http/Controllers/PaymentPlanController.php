@@ -454,6 +454,22 @@ class PaymentPlanController extends Controller
         return redirect()->back()->with('success', __('erp.payment_unpaid_deleted'));
     }
 
+    public function reverseLegacyPayment(Request $request, $id)
+    {
+        $request->validate(['reason' => 'required|string|min:10|max:1000']);
+        $actor = $request->user();
+        abort_unless($actor->exists && $actor->role === 'FINANCE', 403, 'Only FINANCE actors can reverse legacy payments.');
+        abort_unless(
+            in_array((string) $actor->getKey(), array_map('strval', config('platform.payment_reverse_user_ids', [])), true),
+            403,
+            'Actor not in PAYMENT_REVERSAL_USER_IDS allowlist.'
+        );
+
+        // R1-D09: a manual journal reversal is not a payment-domain reversal.
+        // Deny even allowlisted callers before transaction, locks or financial writes.
+        abort(409, __('erp.payment_legacy_reversal_unsupported'));
+    }
+
     public function setCoa(Request $request, $id)
     {
         $request->validate(['id_akun' => 'required']);

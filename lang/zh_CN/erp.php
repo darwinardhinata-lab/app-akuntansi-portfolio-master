@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'payment_legacy_reversal_unsupported' => '暂不支持冲销旧版已过账付款。未保存任何财务变更。',
     'fabric_master' => '面料主数据',
     'yarn_master' => '纱线主数据',
     'party_master' => '往来单位主数据',

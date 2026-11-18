@@ -168,6 +168,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/payment-plan/{id}/delete', [PaymentPlanController::class, 'destroy'])->name('payment.destroy');
     Route::post('/payment-plan/{id}/set-coa', [PaymentPlanController::class, 'setCoa'])->middleware(\App\Http\Middleware\AuthorizePaymentAction::class.':account')->name('payment.set_coa');
     Route::post('/payment-plan/{id}/set-rekening', [PaymentPlanController::class, 'setRekening'])->middleware(\App\Http\Middleware\AuthorizePaymentAction::class.':account')->name('payment.set_rekening');
+    Route::post('/payment-plan/{id}/reverse-legacy', [PaymentPlanController::class, 'reverseLegacyPayment'])->middleware(\App\Http\Middleware\AuthorizePaymentAction::class.':post')->name('payment.reverse_legacy');
     Route::post('/payment-plan/{id}/update-status', [PaymentPlanController::class, 'updateStatus'])->middleware(\App\Http\Middleware\AuthorizePaymentAction::class.':status')->name('payment.update_status');
     Route::get('/payment-plan/export/worklist', [PaymentPlanController::class, 'exportManualWorklist'])->name('payment.export.worklist');
     Route::get('/payment-plan/export/kasbank', [PaymentPlanController::class, 'exportKasBank'])->name('payment.export.kasbank');

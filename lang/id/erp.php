@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'payment_legacy_reversal_unsupported' => 'Reversal pembayaran legacy POSTED belum didukung. Tidak ada perubahan finansial yang disimpan.',
     'fabric_master' => 'Master Kain',
     'yarn_master' => 'Master Benang',
     'party_master' => 'Master Party',
