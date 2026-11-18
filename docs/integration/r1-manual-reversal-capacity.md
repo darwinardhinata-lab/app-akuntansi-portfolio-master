@@ -1,0 +1,5 @@
+# R1 manual journal reversal capacity
+
+When R1 bank workflow and ERP bank balance are enabled, a new sealed manual-journal reversal takes the existing financial fence before journal locks and checks the net IDR bank outflow against the approved bank account's projected available funds, after active reservations. An already sealed retry still goes through payload verification but does not debit capacity again. This is a service guard, not a payment-domain reversal or a new route.
+
+On disposable MariaDB 10.4.32 the candidate rejected reversal above available funds without row or balance deltas, accepted an affordable reversal, preserved a 400.00 reservation with 0.00 available after posting, and returned the same journal on retry without further changes. The existing disabled-workflow behavior and fence-before-journal query order also passed. No overlapping transaction or race result is claimed. No application caller of `PostingService::reverse()` was identified in the candidate.

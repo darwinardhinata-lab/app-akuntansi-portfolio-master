@@ -118,6 +118,8 @@ class PostingService
             && in_array((string) $actor->getKey(), array_map('strval', config('platform.journal_reversal_user_ids', [])), true), 403);
         if (trim($reason) === '' || strlen($reason) > 255) throw new \InvalidArgumentException('Reversal reason required (maximum 255 bytes).');
         return DB::transaction(function () use ($journalId, $date, $reason, $actor) {
+            // Coordinate with bank decisions before taking journal/intent locks.
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
             $original = JournalHeader::whereKey($journalId)->lockForUpdate()->firstOrFail();
             $intent = DB::table('accounting_posting_intents')->where('journal_id', $journalId)->whereNotNull('sealed_at')->lockForUpdate()->first();
             if (!$intent || $intent->reversal_of !== null || $original->journal_type !== 'MANUAL') {
@@ -137,6 +139,13 @@ class PostingService
                 $line['position'] = $line['position'] === 'DEBET' ? 'KREDIT' : 'DEBET';
                 return $line;
             })->all();
+            // A sealed retry is already reflected in GL; PostingService still verifies
+            // its payload hash below. Only a new reversal consumes bank capacity.
+            $existingReversal = DB::table('accounting_posting_intents')
+                ->where('idempotency_key', 'reversal:'.$journalId)->lockForUpdate()->first();
+            if (!$existingReversal || $existingReversal->journal_id === null || $existingReversal->sealed_at === null) {
+                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCapacity($lines);
+            }
             $reversal = self::post([
                 'transaction_date' => $date, 'journal_type' => 'REVERSAL',
                 'source_doc_no' => $journalId, 'notes' => $reason,
