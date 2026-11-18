@@ -1,0 +1,7 @@
+# R1 Payment Plan request attachment upload audit
+
+Request attachment uploads now append an `upload` audit for the authenticated actor using the existing audit table. The insert is in the same database transaction as attachment metadata, request payload and version, and the workflow event. If audit persistence fails, the transaction is rolled back and the existing exception handler removes the newly written private file. A duplicate upload adds neither evidence nor audit.
+
+This does not change routes, permissions, UI, existing attachment history, or financial posting. It covers handled failures, not a process crash between file creation and database commit. No migration or historical audit backfill is required beyond the existing attachment audit schema.
+
+On the isolated candidate based on `1cb3a37`, the injected audit failure regression fails before the fix and passes after it. Focused lifecycle and HTTP regressions pass (3 tests, 258 assertions) with real temporary local storage for the lifecycle test. MariaDB 10.4.32 with a disposable schema and real local storage confirms rollback after metadata insertion, file cleanup, clean retry, actor attribution and duplicate rejection. The default full suite passes (749 tests, 15,653 assertions). Human UAT remains DEFERRED; production remains NO-GO.

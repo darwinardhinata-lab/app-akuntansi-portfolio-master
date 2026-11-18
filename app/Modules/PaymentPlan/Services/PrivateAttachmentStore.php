@@ -110,6 +110,7 @@ final class PrivateAttachmentStore
                 $attachment = ['id' => $id, 'kind' => $kind, 'sha256' => $hash, 'name' => basename($file->getClientOriginalName()), 'type' => $file->getMimeType()];
                 DB::table('ppl_attachments')->insert(['id' => $id, 'request_id' => $requestId, 'reconciliation_id' => null, 'company_id' => $actor['company_id'], 'uploader_id' => $actor['id'],
                     'kind' => $kind, 'name' => $attachment['name'], 'mime' => $attachment['type'], 'sha256' => $hash, 'storage_key' => $key, 'created_at' => now()]);
+                $this->audit($id, 'upload');
                 $payload['attachments'][] = $attachment;
                 $response = ['request' => $payload, 'version' => $row->version + 1];
                 DB::table('ppl_requests')->where('id', $requestId)->update(['payload' => json_encode($payload, JSON_THROW_ON_ERROR), 'version' => $response['version'], 'updated_at' => now()]);
