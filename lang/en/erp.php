@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'yarn_master' => 'Yarn master',
     'party_master' => 'Party master',
     'auxiliary_material_master' => 'Auxiliary Material Master',
     'multi_account_hint' => 'Select one or more accounts. Balances are shown separately for each account.',

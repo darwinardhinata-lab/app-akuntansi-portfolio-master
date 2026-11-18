@@ -14,7 +14,7 @@ final class ErpPanelProvider extends PanelProvider
             // Legacy layouts disable global injection; reactive ERP pages still need Livewire.
             ->renderHook(\Filament\View\PanelsRenderHook::SCRIPTS_AFTER,
                 fn () => new \Illuminate\Support\HtmlString(\Illuminate\Support\Facades\Blade::render('@livewireScripts')))
-            ->resources([\App\Filament\Resources\DivisionResource::class, \App\Filament\Resources\AuxiliaryMaterialResource::class, \App\Filament\Resources\PartyResource::class])
+            ->resources([\App\Filament\Resources\DivisionResource::class, \App\Filament\Resources\AuxiliaryMaterialResource::class, \App\Filament\Resources\PartyResource::class, \App\Filament\Resources\YarnResource::class])
             ->widgets([\App\Filament\Widgets\DivisionOverview::class])
             ->pages([\Filament\Pages\Dashboard::class, \App\Filament\Pages\ApReconciliationQueue::class, \App\Filament\Pages\BankPayments::class])
             ->middleware([

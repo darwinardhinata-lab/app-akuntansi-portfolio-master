@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'yarn_master' => 'Master Benang',
     'party_master' => 'Master Party',
     'auxiliary_material_master' => 'Master Bahan Penolong',
     'multi_account_hint' => 'Pilih satu atau beberapa akun. Saldo ditampilkan terpisah per akun.',

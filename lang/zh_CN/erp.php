@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'yarn_master' => '纱线主数据',
     'party_master' => '往来单位主数据',
     'auxiliary_material_master' => '辅料主数据',
     'multi_account_hint' => '可选择一个或多个科目，各科目余额分别显示。',
