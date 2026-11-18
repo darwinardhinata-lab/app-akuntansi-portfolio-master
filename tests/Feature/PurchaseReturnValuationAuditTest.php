@@ -98,7 +98,13 @@ class PurchaseReturnValuationAuditTest extends TestCase
         }
     }
 
-    public function test_unattributed_return_reversal_restores_stock_and_quota_once(): void
+    public static function attributionCases(): array
+    {
+        return ['unattributed' => [false], 'fully attributed' => [true]];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('attributionCases')]
+    public function test_return_reversal_restores_stock_and_quota_once(bool $attributed): void
     {
         $this->authorizedReturnActor();
         $this->accounts();
@@ -124,7 +130,30 @@ class PurchaseReturnValuationAuditTest extends TestCase
         $url = route('purchase-returns.reverse', $id);
         $body = ['posting_date' => '2026-10-07', 'reason' => 'Synthetic reversal reason'];
         $source = fn () => DB::transaction(fn () => app(\App\Modules\PaymentPlan\Services\PurchaseBillAllocation::class)->source($bill, $company->id));
-        $this->assertSame('ap_reconciliation_required', $source()['blocked']);
+        if ($attributed) {
+            config(['platform.filament_enabled' => true]);
+            $role = $actor->platformRoles()->sole();
+            $role->permissions()->syncWithoutDetaching(\App\Modules\Platform\Models\Permission::whereIn('code',
+                ['erp.panel.access', 'ap.reconcile.propose', 'ap.reconcile.approve', 'ap.reconcile.cancel'])->pluck('id'));
+            $approver = \App\Models\User::factory()->create();
+            $approver->companies()->attach($company->id, ['is_default' => true]);
+            $approver->platformRoles()->attach($role->id, ['company_id' => $company->id]);
+            $request = request();
+            $request->setLaravelSession(app('session')->driver());
+            $ap = app(\App\Modules\PaymentPlan\Services\ApReconciliation::class);
+            $detail = DB::table('purchase_return_details')->sole();
+            $number = DB::table('purchase_returns')->sole()->return_number;
+            $approval = $ap->propose(['purchase_bill_id' => $bill, 'journal_id' => \App\Models\JournalHeader::where('source_doc_no', $number)->sole()->getKey(),
+                'purchase_return_detail_id' => $detail->id, 'quantity' => '2', 'amount' => '200.00', 'reason' => 'Synthetic attribution', 'evidence' => $number]);
+            $this->actingAs($approver);
+            $ap->decide($approval, 1, 'approve', 'Independent synthetic approval');
+            $this->actingAs($actor);
+            $history = DB::table('ppl_ap_reconciliations')->get()->toJson();
+            $decisions = DB::table('ppl_ap_reconciliation_decisions')->get()->toJson();
+            $this->assertSame('50.00', $source()['residual']);
+        } else {
+            $this->assertSame('ap_reconciliation_required', $source()['blocked']);
+        }
         $this->postJson($url, $body)->assertOk()->assertJsonPath('actor_id', $actor->id);
         $this->assertEquals(10, $product->fresh()->stock_quantity);
         $this->assertSame('250.00', $source()['residual']);
@@ -134,6 +163,17 @@ class PurchaseReturnValuationAuditTest extends TestCase
         $this->assertDatabaseCount('purchase_return_reversals', 1);
         $this->assertDatabaseCount('inventory_ledgers', 2);
         $this->assertDatabaseCount('journal_headers', 3);
+        $this->assertDatabaseCount('purchase_return_ap_corrections', (int) $attributed);
+        if ($attributed) {
+            try {
+                $ap->decide($approval, 2, 'cancel', 'Do not rewrite approval history');
+                $this->fail('Corrected approval must not be cancelled.');
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                $this->assertSame(['attribution_already_compensated'], $e->errors()['reconciliation']);
+            }
+            $this->assertSame($history, DB::table('ppl_ap_reconciliations')->get()->toJson());
+            $this->assertSame($decisions, DB::table('ppl_ap_reconciliation_decisions')->get()->toJson());
+        }
         $payload['items'][array_key_first($payload['items'])] = 10;
         $this->post(route('purchase-returns.store'), $payload)->assertSessionHas('success');
         $this->assertEquals(0, $product->fresh()->stock_quantity);

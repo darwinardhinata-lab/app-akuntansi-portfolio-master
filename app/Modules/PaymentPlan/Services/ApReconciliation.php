@@ -84,6 +84,9 @@ final class ApReconciliation
                 $projection = (new PurchaseBillAllocation())->source($bill->id, $company);
                 if (bccomp((string) $row->amount, $projection['residual'], 2) > 0) $this->fail('invoice_overallocated');
             } else {
+                if (DB::table('purchase_return_ap_corrections')->where('reconciliation_id', $row->id)->lockForUpdate()->first()) {
+                    $this->fail('attribution_already_compensated');
+                }
                 $affected = $row->purchase_return_detail_id
                     ? PurchaseBill::where('purchase_order_id', $bill->purchase_order_id)->pluck('id')->all() : [$bill->id];
                 if ($row->status !== 'approved' || DB::table('ppl_ap_allocations')->whereIn('purchase_bill_id', $affected)->where('status', 'active')->exists()) $this->fail('active_payment_reservation');

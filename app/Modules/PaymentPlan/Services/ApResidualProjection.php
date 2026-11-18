@@ -38,9 +38,25 @@ final class ApResidualProjection
             $snapshot = json_decode($resolution->source_snapshot, true, 512, JSON_THROW_ON_ERROR);
             $header = \App\Support\ProtectedJournalQuery::table('journal_headers')->where('journal_id', $resolution->journal_id)->first();
             $lines = \App\Support\ProtectedJournalQuery::table('journal_details')->where('journal_id', $resolution->journal_id)->orderBy('id')->get()->map(fn ($l) => (array) $l)->all();
+            $correction = DB::table('purchase_return_ap_corrections as c')
+                ->join('purchase_return_reversals as rv', 'rv.id', '=', 'c.reversal_id')
+                ->join('purchase_returns as r', 'r.id', '=', 'rv.purchase_return_id')
+                ->join('accounting_posting_intents as i', 'i.journal_id', '=', 'rv.journal_id')
+                ->where('c.reconciliation_id', $resolution->id)->where('c.purchase_bill_id', $bill->id)
+                ->where('rv.original_journal_id', $resolution->journal_id)->whereColumn('i.reversal_of', 'rv.original_journal_id')
+                ->whereNotNull('i.sealed_at')->where('r.status', 'REVERSED')->first(['c.id', 'c.amount', 'rv.purchase_return_id', 'rv.journal_id']);
+            $currentReturn = isset($snapshot['return'])
+                ? (array) DB::table('purchase_returns')->where('id', $snapshot['return']['id'])->first() : [];
+            $corrected = $correction && isset($snapshot['return'], $snapshot['return_detail'])
+                && (int) $correction->purchase_return_id === (int) $snapshot['return']['id']
+                && bccomp((string) $correction->amount, (string) $resolution->amount, 2) === 0;
+            if ($corrected) {
+                $currentReturn['status'] = $snapshot['return']['status'];
+                $currentReturn['updated_at'] = $snapshot['return']['updated_at'];
+            }
             $returnChanged = isset($snapshot['return_detail']) && (
                 $snapshot['return_detail'] !== (array) DB::table('purchase_return_details')->where('id', $resolution->purchase_return_detail_id)->first()
-                || $snapshot['return'] !== (array) DB::table('purchase_returns')->where('id', $snapshot['return']['id'])->first());
+                || $snapshot['return'] !== $currentReturn);
             if (!$header || $snapshot['header'] !== (array) $header || $snapshot['lines'] !== $lines || $snapshot['account'] !== $account || $returnChanged) {
                 $exceptions[] = ['source' => 'reconciliation:'.$resolution->id, 'reason' => 'approved_source_changed'];
                 $resolved[$resolution->journal_id] = true;
@@ -48,6 +64,11 @@ final class ApResidualProjection
             }
             $events[] = ['source' => 'reconciliation:'.$resolution->id, 'journal_id' => $resolution->journal_id, 'status' => 'approved', 'reduction' => (string) $resolution->amount];
             $used = bcadd($used, (string) $resolution->amount, 2);
+            if ($corrected) {
+                $events[] = ['source' => 'return_ap_correction:'.$correction->id, 'journal_id' => $correction->journal_id,
+                    'status' => 'posted', 'reduction' => bcsub('0', (string) $correction->amount, 2)];
+                $used = bcsub($used, (string) $correction->amount, 2);
+            }
             $resolved[$resolution->journal_id] = true;
         }
         foreach (DB::table('ppl_ap_allocations')->where('purchase_bill_id', $bill->id)->orderBy('request_id')->get() as $allocation) {

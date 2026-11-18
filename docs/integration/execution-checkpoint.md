@@ -1,3 +1,10 @@
+# 2026-11-18 — Full approved return attribution compensated without rewriting history
+
+- Extends `7ae58e6` for one full approved attribution to the one posted unpaid invoice. The original approval, snapshot and decision rows remain unchanged; a unique correction links the reversal, approved attribution and invoice in the same transaction as stock IN, sealed reversal journal, return status and audit. Cancellation of a compensated approval is rejected. A partial or ambiguous attribution, another live proposal, active reservation, payment or unresolved legacy evidence remains outside scope.
+- Apache/MariaDB disposable: authenticated reversal restored residual 180.50 to 200.50, with one 20.00 correction and journal count 3 to 4 (only the reversal posts). Identical retry added nothing; changed payload conflicted. Injected correction-insert failure rolled back earlier writes. Partial invoice, unauthorized actor and closed posting period were rejected. Original approved snapshot and decision rows matched before and after.
+- Separate reservation-service process and HTTP reversal overlapped; InnoDB observed reversal waiting on the financial-context row. Reservation committed first (10.00), reversal then returned 409, and no reversal-side tables changed. This verifies one ordering, not all pairs or a complete bank-workflow HTTP race.
+- Focused regression 8 tests / 138 assertions and default full suite 792 tests / 16,054 assertions, exit 0. Evidence: `D:\ERP-Recovery\return-ap-correction-20261118`. AC03/F11 remain OPEN for paid or reserved invoice reversal, complex attribution and credit notes; human UAT DEFERRED, production NO-GO.
+
 # 2026-11-18 — Narrow purchase return compensation verified
 
 - Implemented authenticated POST reversal for a single proven, unattributed stock line, one posted unpaid invoice and a balanced IDR return without variance or downstream stock movements. Requires active single-MGI A2 scope, current FINANCE role and reversal allowlist, bank workflow and posting intents. User chooses a posting date or defaults to the MGI business date. Closed compensation period is rejected.

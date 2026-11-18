@@ -74,10 +74,22 @@ final class PurchaseReturnReversal
             abort_unless($sourceLine->count() === 1 && (int) $sourceLine->first()->product_id === (int) $detail->product_id
                 && (int) $sourceLine->first()->qty_received >= (int) $detail->qty_returned,
                 409, 'Return does not match a unique received PO line.');
-            abort_if(DB::table('ppl_ap_reconciliations')->whereIn('status', ['proposed', 'approved'])
-                ->where(fn ($q) => $q->where('journal_id', $journal->journal_id)->orWhere('purchase_return_detail_id', $detail->id))
-                ->lockForUpdate()->get(['id'])->isNotEmpty(), 409, 'Return already has active AP attribution.');
-            $this->assertUnpaid($bill, $company->id, $id);
+            $attributions = DB::table('ppl_ap_reconciliations')->whereIn('status', ['proposed', 'approved'])
+                ->where(fn ($q) => $q->where('journal_id', $journal->journal_id)->orWhere('purchase_return_detail_id', $detail->id)
+                    ->orWhere('purchase_bill_id', $bill->id))->limit(2)->lockForUpdate()->get();
+            $attribution = $attributions->first();
+            if ($attribution) {
+                abort_unless($attributions->count() === 1 && $attribution->status === 'approved'
+                    && (int) $attribution->company_id === (int) $company->id
+                    && (int) $attribution->purchase_bill_id === (int) $bill->id
+                    && (int) $attribution->purchase_return_detail_id === (int) $detail->id
+                    && $attribution->journal_id === $journal->journal_id
+                    && bccomp((string) $attribution->quantity, (string) $detail->qty_returned, 6) === 0
+                    && bccomp((string) $attribution->amount, (string) $detail->subtotal, 2) === 0
+                    && bccomp((string) $attribution->amount, (string) $return->total_return_amount, 2) === 0,
+                    409, 'Only one full approved AP attribution is eligible; active proposals or ambiguous relations are not supported.');
+            }
+            $this->assertUnpaid($bill, $company->id, $id, $attribution);
 
             $product = Product::whereKey($detail->product_id)->lockForUpdate()->first();
             $movements = InventoryLedger::where('evidence_number', $return->return_number)->limit(2)->lockForUpdate()->get();
@@ -117,15 +129,19 @@ final class PurchaseReturnReversal
                     'position' => $line->position === 'DEBET' ? 'KREDIT' : 'DEBET'])->all(), null, null,
                 ['idempotency_key' => $evidence, 'source_type' => 'PURCHASE_RETURN_REVERSAL', 'source_id' => (string) $id, 'actor_id' => (string) $actor->id]);
             DB::table('accounting_posting_intents')->where('journal_id', $reversal->getKey())->update(['reversal_of' => $journal->journal_id]);
-            DB::table('purchase_return_reversals')->insert(['purchase_return_id' => $id, 'actor_id' => $actor->id,
+            $reversalId = DB::table('purchase_return_reversals')->insertGetId(['purchase_return_id' => $id, 'actor_id' => $actor->id,
                 'original_journal_id' => $journal->journal_id, 'journal_id' => $reversal->getKey(), 'evidence_number' => $evidence,
                 'posting_date' => $date, 'reason' => $reason, 'created_at' => now(), 'updated_at' => now()]);
+            if ($attribution) {
+                DB::table('purchase_return_ap_corrections')->insert(['reversal_id' => $reversalId, 'reconciliation_id' => $attribution->id,
+                    'purchase_bill_id' => $bill->id, 'amount' => $attribution->amount, 'created_at' => now()]);
+            }
             DB::table('purchase_returns')->where('id', $id)->update(['status' => 'REVERSED', 'updated_at' => now()]);
             return DB::table('purchase_return_reversals')->where('purchase_return_id', $id)->first();
         });
     }
 
-    private function assertUnpaid(object $bill, int $company, int $returnId): void
+    private function assertUnpaid(object $bill, int $company, int $returnId, ?object $attribution): void
     {
         abort_if(DB::table('ppl_ap_allocations')->where('purchase_bill_id', $bill->id)->whereIn('status', ['active', 'consumed'])
             ->lockForUpdate()->get(['request_id'])->isNotEmpty(), 409, 'Invoice has payment or reservation evidence.');
@@ -139,8 +155,13 @@ final class PurchaseReturnReversal
         } catch (\App\Modules\PaymentPlan\Domain\RuleViolation $e) {
             abort(409, $e->rule);
         }
-        abort_if(bccomp($source['residual'], $source['total'], 2) !== 0 || collect($source['events'])->contains(fn ($e) => bccomp($e['reduction'], '0', 2) !== 0)
+        $target = $attribution ? 'reconciliation:'.$attribution->id : null;
+        $events = collect($source['events']);
+        $expected = bcsub($source['total'], (string) ($attribution->amount ?? '0'), 2);
+        abort_if(bccomp($source['residual'], $expected, 2) !== 0
+            || ($attribution && $events->where('source', $target)->count() !== 1)
+            || $events->contains(fn ($e) => $e['source'] !== $target && bccomp($e['reduction'], '0', 2) !== 0)
             || collect($source['exceptions'])->contains(fn ($e) => $e['reason'] !== 'return_invoice_allocation_required'
-                || $e['source'] !== 'purchase_return:'.$returnId), 409, 'Invoice has unresolved AP evidence outside this return.');
+                || $e['source'] !== 'purchase_return:'.$returnId || $attribution !== null), 409, 'Invoice has unresolved AP evidence outside this return.');
     }
 }
