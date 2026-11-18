@@ -6,16 +6,14 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnDetail;
-use App\Models\PurchaseOrder;
-use App\Models\PurchaseOrderDetail;
 use App\Models\JournalHeader;
 use App\Models\JournalDetail;
-use App\Models\InventoryLedger;
 use App\Models\Product;
-use App\Support\NumberParser;
-use App\Support\DocumentSequence;
+use App\Modules\Platform\Support\OperationalCompany;
+use App\Services\PurchaseReturnEligibility;
 use App\Support\JournalBalanceValidator;
 use App\Services\InventorySyncService;
+use App\Services\PurchaseReturnValuationService;
 
 class FastImportPR extends Command
 {
@@ -29,13 +27,22 @@ class FastImportPR extends Command
 
         $filePath = $this->argument('file');
         if (!file_exists($filePath)) {
-            return $this->error("❌ File tidak ditemukan: {$filePath}");
+            $this->error("❌ File tidak ditemukan: {$filePath}");
+            return self::FAILURE;
         }
 
         $handle = fopen($filePath, "r");
-        if (!$handle) return $this->error("❌ Gagal membuka file CSV.");
+        if (!$handle) {
+            $this->error("❌ Gagal membuka file CSV.");
+            return self::FAILURE;
+        }
 
         $firstLine = fgets($handle);
+        if ($firstLine === false) {
+            fclose($handle);
+            $this->error('Tidak ada data valid di dalam CSV.');
+            return self::FAILURE;
+        }
         $delimiter = str_contains($firstLine, ';') ? ';' : ',';
         rewind($handle);
 
@@ -72,32 +79,35 @@ class FastImportPR extends Command
 
         $this->info("🚀 Memulai import Purchase Return (PR → OUT). Delimiter: '{$delimiter}'");
 
-        $this->info("⏳ Memuat master produk (SKU) ke dalam RAM...");
-        $products = DB::table('products')->pluck('id', 'sku')->toArray();
-
         $documents = [];
         $count = 0;
         $now = now();
 
         while (($row = fgetcsv($handle, 0, $delimiter, '"', '\\')) !== false) {
-            if (count($row) === 1 && str_contains($row[0], $delimiter)) {
+            if (count($row) === 1 && str_contains((string) $row[0], $delimiter)) {
                 $row = str_getcsv($row[0], $delimiter, '"', '\\');
             }
-            if (count($row) < 6) continue;
+            if (!array_filter($row, fn ($value) => trim((string) $value) !== '')) continue;
 
             $tanggal  = trim($row[$idxDate] ?? '');
             $noRetur  = trim($row[$idxNoRetur] ?? '');
             $noPO     = trim($row[$idxNoPO] ?? '');
             $sku      = trim($row[$idxSku] ?? '');
-            $qty      = (int) preg_replace('/[^0-9\-]/', '', $row[$idxQty] ?? '0');
-            $price    = NumberParser::parseDecimal($row[$idxPrice] ?? '0');
+            $qty      = filter_var(trim($row[$idxQty] ?? ''), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 2147483647]]);
+            $price    = trim($row[$idxPrice] ?? '');
             $desc     = trim($row[$idxDesc] ?? '');
 
-            if (empty($noRetur) || strtolower($noRetur) === 'no retur') continue;
-            if (empty($sku) || $qty <= 0) continue;
-
-            $time = strtotime(str_replace(['Mei', 'Okt', 'Ags', 'Des'], ['May', 'Oct', 'Aug', 'Dec'], $tanggal));
-            $date = $time ? date('Y-m-d', $time) : date('Y-m-d');
+            if ($noRetur === '' || mb_strlen($noRetur) > 100 || $noPO === '' || $sku === '' || $qty === false
+                || !preg_match('/\A[0-9]{1,18}(?:\.[0-9]{1,2})?\z/', $price)
+                || !preg_match('/\A(\d{4})-(\d{2})-(\d{2})\z/', $tanggal, $dateParts)
+                || !checkdate((int) $dateParts[2], (int) $dateParts[3], (int) $dateParts[1])
+                || (isset($documents[$noRetur]) && ($documents[$noRetur]['po_number'] !== $noPO
+                    || $documents[$noRetur]['return_date'] !== $tanggal || isset($documents[$noRetur]['items'][$sku])))) {
+                fclose($handle);
+                $this->error('Data retur tidak valid pada record '.($count + 2).'.');
+                return self::FAILURE;
+            }
+            $date = $tanggal;
 
             if (!isset($documents[$noRetur])) {
                 $documents[$noRetur] = [
@@ -108,10 +118,10 @@ class FastImportPR extends Command
                 ];
             }
 
-            $documents[$noRetur]['items'][] = [
+            $documents[$noRetur]['items'][$sku] = [
                 'sku'       => $sku,
                 'qty'       => $qty,
-                'unit_cost' => $price,
+                'unit_cost' => bcadd($price, '0', 2),
                 'description' => $desc,
             ];
 
@@ -120,48 +130,69 @@ class FastImportPR extends Command
         fclose($handle);
 
         if (empty($documents)) {
-            return $this->error("❌ Tidak ada data valid di dalam CSV.");
+            $this->error("❌ Tidak ada data valid di dalam CSV.");
+            return self::FAILURE;
         }
 
         $this->info("📋 Ditemukan {$count} baris item dalam " . count($documents) . " dokumen PR.");
 
         DB::beginTransaction();
         try {
+            $scope = app(OperationalCompany::class);
+            if (!$scope->enabled() || !app()->runningInConsole() || request()->route() !== null) {
+                throw new \RuntimeException('Import retur hanya tersedia pada CLI dengan ownership A2 aktif.');
+            }
+            $companyId = $scope->id();
+            $eligibility = app(PurchaseReturnEligibility::class);
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
+            \App\Support\AccountingPeriodGuard::source(array_column($documents, 'return_date'));
             $prCount = 0;
             foreach ($documents as $noRetur => $doc) {
-                $existing = PurchaseReturn::where('return_number', $noRetur)->first();
+                $po = $eligibility->lockOrder($companyId, $doc['po_number'], byNumber: true);
+                ksort($doc['items'], SORT_STRING);
+                $fingerprint = 'Imported via CSV: '.hash('sha256', json_encode($doc, JSON_THROW_ON_ERROR));
+                $existing = PurchaseReturn::where('return_number', $noRetur)->lockForUpdate()->first();
                 if ($existing) {
+                    if ((int) $existing->purchase_order_id !== (int) $po->id || $existing->status !== 'COMPLETED'
+                        || !hash_equals($fingerprint, (string) $existing->notes)) {
+                        throw new \RuntimeException("Nomor retur {$noRetur} sudah ada dengan isi berbeda atau tanpa bukti impor.");
+                    }
                     $this->warn("⚠️  PR {$noRetur} sudah ada, dilewati.");
                     continue;
                 }
 
-                // Find the PO
-                $po = PurchaseOrder::where('po_number', $doc['po_number'])->first();
-                $poId = $po ? $po->id : null;
+                $poId = $po->id;
 
                 $return = PurchaseReturn::create([
                     'return_number'       => $doc['return_number'],
                     'purchase_order_id'   => $poId,
                     'return_date'         => $doc['return_date'],
                     'status'              => 'COMPLETED',
-                    'notes'               => 'Imported via CSV',
+                    'notes'               => $fingerprint,
                 ]);
 
                 $detailsToInsert = [];
                 $invItems = [];
-                $totalReturnAmount = 0;
+                $totalReturnAmount = '0.00';
 
                 foreach ($doc['items'] as $item) {
-                    $productId = $products[$item['sku']] ?? null;
+                    $lines = $po->details()->where('item_code', $item['sku'])->limit(2)->lockForUpdate()->get();
+                    $line = $lines->first();
+                    $product = $line?->product_id ? Product::whereKey($line->product_id)->lockForUpdate()->first() : null;
+                    if ($lines->count() !== 1 || !$product || $line->item_code !== $item['sku'] || $product->sku !== $item['sku']
+                        || bccomp((string) $line->price, $item['unit_cost'], 2) !== 0) {
+                        throw new \RuntimeException("Baris SKU {$item['sku']} tidak cocok dengan detail PO.");
+                    }
                     $qty = $item['qty'];
-                    $lineTotal = $qty * $item['unit_cost'];
-                    $totalReturnAmount += $lineTotal;
+                    $eligibility->assertLine($po, $line, $qty);
+                    $lineTotal = bcmul((string) $qty, (string) $line->price, 2);
+                    $totalReturnAmount = bcadd($totalReturnAmount, $lineTotal, 2);
 
                     $detailsToInsert[] = [
                         'purchase_return_id' => $return->id,
-                        'product_id'         => $productId,
+                        'product_id'         => $product->id,
                         'item_code'          => $item['sku'],
-                        'description'        => $item['description'] ?: $item['sku'],
+                        'description'        => $line->description,
                         'qty_returned'       => $qty,
                         'price'              => $item['unit_cost'],
                         'subtotal'           => $lineTotal,
@@ -172,16 +203,19 @@ class FastImportPR extends Command
                     $invItems[] = [
                         'sku'       => $item['sku'],
                         'qty'       => $qty,
-                        'unit_cost' => $item['unit_cost'],
+                        'unit_cost' => $product->average_cost,
                     ];
                 }
 
+                if (bccomp($totalReturnAmount, '0', 2) <= 0) {
+                    throw new \RuntimeException(__('erp.audit_return_guard'));
+                }
                 PurchaseReturnDetail::insert($detailsToInsert);
 
                 // INTEGRASI GUDANG: PR → OUT (Stok Keluar)
                 if (!empty($invItems)) {
                     $inventoryService = new InventorySyncService();
-                    $inventoryService->processStockMovements(
+                    $inventoryResult = $inventoryService->processStockMovements(
                         $invItems,
                         $return->return_number,
                         $doc['return_date'],
@@ -200,16 +234,20 @@ class FastImportPR extends Command
                     'transaction_type' => 'Purchase Return',
                 ]);
 
-                $jDetails = [
-                    ['journal_id' => $journalHeader->getKey(), 'account_code' => config('coa.hutang_usaha'), 'position' => 'DEBET', 'amount' => $totalReturnAmount, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null],
-                    ['journal_id' => $journalHeader->getKey(), 'account_code' => config('coa.persediaan'), 'position' => 'KREDIT', 'amount' => $totalReturnAmount, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null],
-                ];
+                $noTransaksiPP = str_replace('PO-', '', $po->po_number);
+                $paymentPlan = DB::table('transaksi_payment_plan')->where('no_transaksi', $noTransaksiPP)
+                    ->where('kategori_payment', 'PEMBELIAN PERSEDIAAN (UANG MUKA)')->first();
+                $akunHutang = $paymentPlan ? config('coa.uang_muka_beli') : config('coa.hutang_usaha');
+                $jDetails = app(PurchaseReturnValuationService::class)->journalDetails(
+                    $journalHeader->getKey(), $akunHutang, $totalReturnAmount, $inventoryResult['cogs_value']
+                );
 
                 if (!JournalBalanceValidator::isBalanced($jDetails)) {
                     throw new \Exception("Jurnal PR {$return->return_number} tidak balance.");
                 }
                 JournalDetail::insert($jDetails);
-                $return->update(['total_return_amount' => $totalReturnAmount, 'journal_id' => $journalHeader->getKey()]);
+                // Same linkage as controller: journal_headers.source_doc_no = return_number.
+                $return->update(['total_return_amount' => $totalReturnAmount]);
 
                 $prCount++;
                 if ($prCount % 50 === 0) {
@@ -219,10 +257,12 @@ class FastImportPR extends Command
 
             DB::commit();
             $this->info("✅ SYNC PR SELESAI! Total {$prCount} dokumen PR berhasil di-import dengan stok Gudang terpotong (OUT).");
+            return self::SUCCESS;
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             $this->error("❌ SYNC GAGAL: " . $e->getMessage());
+            return self::FAILURE;
         }
     }
 }

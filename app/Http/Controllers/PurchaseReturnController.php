@@ -70,7 +70,8 @@ class PurchaseReturnController extends Controller
             $prefix = 'PR-' . date('Ymd', strtotime($request->return_date)) . '-';
             $secureReturnNumber = DocumentSequence::generateSecure('purchase_returns', 'return_number', $prefix);
 
-            $po = PurchaseOrder::where('company_id', $companyId)->lockForUpdate()->findOrFail($request->purchase_order_id);
+            $eligibility = app(\App\Services\PurchaseReturnEligibility::class);
+            $po = $eligibility->lockOrder($companyId, (string) $request->purchase_order_id);
             $return = PurchaseReturn::create([
                 'return_number' => $secureReturnNumber,
                 'purchase_order_id' => $po->id,
@@ -85,14 +86,11 @@ class PurchaseReturnController extends Controller
             // OPTIMASI N+1 (N3): Preload semua PO detail & produk sekali saja,
             // bukan query per item (2 query per baris retur).
             $itemIds  = array_keys($request->items);
-            $poDetails = PurchaseOrderDetail::where('purchase_order_id', $po->id)->whereIn('id', $itemIds)->get()->keyBy('id');
+            $poDetails = PurchaseOrderDetail::where('purchase_order_id', $po->id)->whereIn('id', $itemIds)->lockForUpdate()->get()->keyBy('id');
             foreach ($request->items as $itemId => $qty) {
                 if ($qty > 0 && !$poDetails->has($itemId)) {
                     throw new \Exception("Detail PO #{$itemId} tidak ditemukan.");
                 }
-            }
-            if (!in_array($po->status, ['PARTIAL', 'RECEIVED'], true)) {
-                throw new \RuntimeException(__('erp.audit_return_guard'));
             }
             $productIds = $poDetails->pluck('product_id')->filter()->unique()->toArray();
             $products   = Product::whereIn('id', $productIds)->get()->keyBy('id');
@@ -108,14 +106,7 @@ class PurchaseReturnController extends Controller
                 if (!$poDetail) {
                     throw new \Exception("Detail PO #{$itemId} tidak ditemukan.");
                 }
-                $used = DB::table('purchase_return_details as d')
-                    ->join('purchase_returns as r', 'r.id', '=', 'd.purchase_return_id')
-                    ->where('r.purchase_order_id', $po->id)->where('d.item_code', $poDetail->item_code)
-                    ->where('r.status', 'COMPLETED')->sum('d.qty_returned');
-                if ($po->details()->where('item_code', $poDetail->item_code)->count() !== 1
-                    || $qty + $used > (int) $poDetail->qty_received) {
-                    throw new \RuntimeException(__('erp.audit_return_guard'));
-                }
+                $eligibility->assertLine($po, $poDetail, $qty);
                 $product = $products->get($poDetail->product_id);
                 if (!$product) {
                     throw new \Exception("Produk untuk detail PO #{$itemId} tidak ditemukan.");
