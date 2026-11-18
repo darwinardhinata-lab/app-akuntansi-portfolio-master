@@ -11,7 +11,10 @@ final class ErpPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel->id('erp')->path('erp-panel')->authGuard('web')
-            ->resources([\App\Filament\Resources\DivisionResource::class])
+            // Legacy layouts disable global injection; reactive ERP pages still need Livewire.
+            ->renderHook(\Filament\View\PanelsRenderHook::SCRIPTS_AFTER,
+                fn () => new \Illuminate\Support\HtmlString(\Illuminate\Support\Facades\Blade::render('@livewireScripts')))
+            ->resources([\App\Filament\Resources\DivisionResource::class, \App\Filament\Resources\AuxiliaryMaterialResource::class])
             ->widgets([\App\Filament\Widgets\DivisionOverview::class])
             ->pages([\Filament\Pages\Dashboard::class, \App\Filament\Pages\ApReconciliationQueue::class, \App\Filament\Pages\BankPayments::class])
             ->middleware([

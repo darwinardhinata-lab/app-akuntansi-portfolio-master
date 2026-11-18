@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'auxiliary_material_master' => 'Auxiliary Material Master',
     'multi_account_hint' => 'Select one or more accounts. Balances are shown separately for each account.',
     'journal_multi_account_hint' => 'Leave empty for all accounts. Journals containing any selected account include all counterpart entries.',
     'journal_sync_background' => 'Synchronization is running in the background. You may close this page or continue working.',
