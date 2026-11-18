@@ -16,6 +16,49 @@ class ApReconciliationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_sealed_generic_ap_journal_matching_document_text_does_not_establish_invoice_identity(): void
+    {
+        config(['platform.posting_intents_enabled' => true]);
+        $company = Company::create(['code' => 'MGI', 'name' => 'Synthetic MGI', 'active' => true, 'base_currency' => 'IDR']);
+        foreach (['211001' => 'KREDIT', '610001' => 'DEBET'] as $account => $normal) {
+            DB::table('accounts')->insert(['account_code' => $account, 'account_name' => 'Synthetic',
+                'coa_type' => 'Other', 'normal_balance' => $normal, 'report_pos' => 'NERACA']);
+        }
+        $number = 'BILL-SEALED-SOURCE-REVIEW';
+        $recognition = \App\Support\PostingService::post(['source_doc_no' => $number], [
+            ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '200.50'],
+            ['account_code' => '211001', 'position' => 'KREDIT', 'amount' => '200.50'],
+        ]);
+        $bill = DB::table('purchase_bills')->insertGetId(['bill_number' => $number, 'bill_date' => '2026-01-01',
+            'vendor_name' => 'Synthetic', 'credit_account' => '211001', 'grand_total' => '200.50',
+            'payment_status' => 'UNPAID', 'journal_id' => $recognition->getKey()]);
+        $candidate = \App\Support\PostingService::post(['source_doc_no' => $number,
+            'journal_type' => 'MANUAL', 'notes' => 'Credit note (unverified display text)'], [
+            ['account_code' => '211001', 'position' => 'DEBET', 'amount' => '20.00'],
+            ['account_code' => '610001', 'position' => 'KREDIT', 'amount' => '20.00'],
+        ], null, null, ['idempotency_key' => 'manual:sealed-source-review', 'source_type' => 'MANUAL', 'source_id' => 'synthetic-review']);
+        $this->assertNotNull(DB::table('accounting_posting_intents')->where('journal_id', $candidate->getKey())->value('sealed_at'));
+        $this->assertNotNull($candidate->details()->where('account_code', '211001')->sole()->getKey());
+
+        $allocation = new PurchaseBillAllocation();
+        $projection = DB::transaction(fn () => $allocation->source($bill, $company->id));
+        $this->assertSame('200.50', $projection['residual']);
+        $this->assertSame('ap_reconciliation_required', $projection['blocked']);
+        $this->assertSame([['source' => 'journal:'.$candidate->getKey(), 'reason' => 'invoice_identity_unverified',
+            'candidate_reduction' => '20.00']], $projection['exceptions']);
+        try {
+            DB::transaction(fn () => $allocation->reserve(['id' => (string) \Illuminate\Support\Str::uuid(),
+                'purchaseBillId' => $bill, 'settlement' => ['gross' => '1.00']], $company->id));
+            $this->fail('An ambiguous journal must not unblock reservation.');
+        } catch (\App\Modules\PaymentPlan\Domain\RuleViolation $e) {
+            $this->assertSame('ap_reconciliation_required', $e->rule);
+        }
+        $this->assertDatabaseCount('ppl_ap_allocations', 0);
+        $this->assertDatabaseCount('ppl_ap_reconciliations', 0);
+        $this->assertDatabaseCount('ppl_ap_reconciliation_decisions', 0);
+        $this->assertDatabaseCount('journal_headers', 2);
+    }
+
     private function reconciliationAction(array $updates, string $method, array $params): void
     {
         app('livewire')->flushState();
