@@ -53,6 +53,35 @@ final class YarnPanelTest extends TestCase
         $list->searchTable('Unique blue')->assertCanSeeTableRecords([$records->last()])
             ->assertCanNotSeeTableRecords([$records->first()]);
         $list->searchTable('')->filterTable('is_active', true)->assertCanNotSeeTableRecords([$records->last()]);
+        $this->assertSame('exportFiltered', $list->instance()->getAction('export')->getLivewireClickHandler());
+        $list->call('exportFiltered')->assertFileDownloaded('Master_Yarn_Filtered.xlsx');
+        $path = tempnam(sys_get_temp_dir(), 'yarn-export-');
+        try {
+            file_put_contents($path, base64_decode(data_get($list->effects, 'download.content')));
+            $workbook = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
+            $sheet = $workbook->getActiveSheet();
+            // Thirty active records plus heading, not the current 25-record page.
+            $this->assertSame(31, $sheet->getHighestDataRow());
+            $this->assertSame('LEGACY-001', $sheet->getCell('B2')->getValue());
+            $this->assertSame('LEGACY-030', $sheet->getCell('B31')->getValue());
+            $this->assertSame('12.75', $sheet->getCell('J2')->getValue());
+            $this->assertSame('1.25', $sheet->getCell('K2')->getValue());
+            $workbook->disconnectWorksheets();
+        } finally {
+            unlink($path);
+        }
+        $list->filterTable('is_active', null)->searchTable('Unique blue')->call('exportFiltered')
+            ->assertFileDownloaded('Master_Yarn_Filtered.xlsx');
+        $path = tempnam(sys_get_temp_dir(), 'yarn-export-');
+        try {
+            file_put_contents($path, base64_decode(data_get($list->effects, 'download.content')));
+            $workbook = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
+            $this->assertSame(2, $workbook->getActiveSheet()->getHighestDataRow());
+            $this->assertSame('LEGACY-031', $workbook->getActiveSheet()->getCell('B2')->getValue());
+            $workbook->disconnectWorksheets();
+        } finally {
+            unlink($path);
+        }
         $this->assertFalse(YarnResource::canCreate());
         $this->assertFalse(YarnResource::canEdit($records->first()));
         $this->assertFalse(YarnResource::canDelete($records->first()));
@@ -68,8 +97,10 @@ final class YarnPanelTest extends TestCase
         $view = Livewire::test(ViewYarn::class, ['record' => $detail->getKey()])->assertOk();
         $this->get(YarnResource::getUrl('view', ['record' => 999999]))->assertNotFound();
         $this->assertSame($before, Yarn::orderBy('id')->get()->toJson());
+        $exportList = Livewire::test(ListYarns::class)->assertOk();
         $role->permissions()->detach(Permission::where('code', 'material.view')->value('id'));
         $this->get(YarnResource::getUrl())->assertForbidden();
+        $exportList->call('exportFiltered')->assertForbidden();
         $list->searchTable('LEGACY')->assertForbidden();
         $view->call('$refresh')->assertForbidden();
         $this->get(YarnResource::getUrl('view', ['record' => $detail]))->assertForbidden();

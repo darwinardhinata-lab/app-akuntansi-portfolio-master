@@ -6,8 +6,12 @@ use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
 
-class YarnExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
+class YarnExport extends DefaultValueBinder implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithCustomValueBinder
 {
     protected $query;
 
@@ -43,5 +47,17 @@ class YarnExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
             $yarn->average_cost,
             $yarn->is_active ? 'AKTIF' : 'NONAKTIF',
         ];
+    }
+
+    public function bindValue(Cell $cell, $value): bool
+    {
+        // Match AccountExport: formula-like master values, leading zeros and
+        // DECIMAL casts are interchange text, never executable spreadsheet input.
+        if (is_string($value)) {
+            $cell->setValueExplicit($value, DataType::TYPE_STRING);
+            return true;
+        }
+
+        return parent::bindValue($cell, $value);
     }
 }
