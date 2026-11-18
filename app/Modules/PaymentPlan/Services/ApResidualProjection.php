@@ -15,6 +15,25 @@ final class ApResidualProjection
         $used = '0.00';
         $represented = [];
         $resolved = [];
+        // Legacy allocations have a different lifecycle/ownership contract from R1.
+        // Until that contract is reconciled, never silently expose their invoice as payable.
+        $legacyPayments = DB::table('transaksi_payment_plan')->where(function ($query) use ($bill) {
+            $query->where('ref_bill_number', $bill->bill_number)
+                ->orWhereIn('id_payment', DB::table('bill_payment_allocations')->where('purchase_bill_id', $bill->id)->select('id_payment'));
+        })->where(function ($query) use ($bill) {
+            $query->where('status_payment', 'POSTED')
+                ->orWhereIn('id_payment', DB::table('bill_payment_allocations')->where('purchase_bill_id', $bill->id)->select('id_payment'));
+        })->orderBy('id_payment')->get();
+        foreach ($legacyPayments as $payment) {
+            $exceptions[] = ['source' => 'legacy_payment:'.$payment->id_payment,
+                'reason' => 'legacy_payment_reconciliation_required', 'journal_id' => $payment->journal_id,
+                'status' => $payment->status_payment,
+                'allocations' => DB::table('bill_payment_allocations')->where('id_payment', $payment->id_payment)->orderBy('id')->get()->toArray()];
+        }
+        foreach (DB::table('bill_payment_allocations')->where('purchase_bill_id', $bill->id)
+            ->whereNotIn('id_payment', DB::table('transaksi_payment_plan')->select('id_payment'))->get() as $allocation) {
+            $exceptions[] = ['source' => 'legacy_allocation:'.$allocation->id, 'reason' => 'orphan_legacy_payment_allocation'];
+        }
         foreach (DB::table('ppl_ap_reconciliations')->where('purchase_bill_id', $bill->id)->where('status', 'approved')->get() as $resolution) {
             $snapshot = json_decode($resolution->source_snapshot, true, 512, JSON_THROW_ON_ERROR);
             $header = \App\Support\ProtectedJournalQuery::table('journal_headers')->where('journal_id', $resolution->journal_id)->first();
