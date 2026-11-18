@@ -170,7 +170,7 @@ public function test_waive_match_success(): void
         $this->assertEquals(now()->toDateString(), $bill->fresh()->matched_at);
     }
 
-    public function test_validate_three_way_match_exception(): void
+    public function test_reverse_allocation_updates_existing_amount(): void
     {
         $this->seedData();
 
@@ -197,7 +197,7 @@ public function test_waive_match_success(): void
         $this->assertTrue(DB::table('ppl_ap_payment_allocations')->where('id', 1)->where('updated_at', '>=', $allocation['updated_at'])->exists());
     }
 
-    public function test_post_allocation_journal_success(): void
+    public function test_post_allocation_journal_for_factory_allocation(): void
     {
         $this->seedData();
 
