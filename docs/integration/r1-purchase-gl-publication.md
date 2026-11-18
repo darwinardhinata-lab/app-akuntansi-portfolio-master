@@ -1,0 +1,9 @@
+# R1 Purchase Bill posting and General Ledger source navigation
+
+Publication candidate based on `dcfc905`, following the provenance contract first evidenced on 13 November 2026. No production grants, migration, or historical backfill.
+
+- The read-only Purchase Bill detail requires enabled A2 ownership, fresh MGI membership, `purchase_bill.view`, and an explicit persisted PO owned by that company. GL requires panel access and `gl.view` separately; a missing bill grant hides the source link and denies direct detail access.
+- GRN persists the locked PO on the bill, validates the PO/bill/receipt/journal relationship on initial posting and retry, and does not repair historical or ambiguous relationships. General Ledger resolves only coherent posted provenance, never by a document-number guess. Shared journal references or null-PO bills do not establish provenance.
+- On a new disposable Apache/MariaDB target, normal authenticated PO and receive POSTs produced a partial GRN, bill, and balanced journal for 50.00, with inventory stock 0 to 4 at 12.50. Exact retry left persisted state unchanged; changed payload and reused bill number were rejected. MariaDB negative source and retry probes passed; an injected post-legacy failure rolled back the ten checked tables.
+- Chrome followed GL summary, account contributors, journal, and the exact bill link. Revocation denied direct access (403) while GL remained accessible without the bill link. Read-side inventory checks passed.
+- Focused PHP suite: 32 tests / 308 assertions. Default full suite: 785 tests / 15,965 assertions. This is sequential retry and handled rollback evidence, not transaction-overlap, process-kill, or reversal evidence. Human UAT DEFERRED; production NO-GO.

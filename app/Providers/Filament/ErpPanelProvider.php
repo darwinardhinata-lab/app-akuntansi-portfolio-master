@@ -16,7 +16,7 @@ final class ErpPanelProvider extends PanelProvider
                 fn () => new \Illuminate\Support\HtmlString(\Illuminate\Support\Facades\Blade::render('@livewireScripts')))
             ->resources([\App\Filament\Resources\DivisionResource::class, \App\Filament\Resources\AuxiliaryMaterialResource::class, \App\Filament\Resources\PartyResource::class, \App\Filament\Resources\YarnResource::class, \App\Filament\Resources\FabricResource::class])
             ->widgets([\App\Filament\Widgets\DivisionOverview::class])
-            ->pages([\Filament\Pages\Dashboard::class, \App\Filament\Pages\ApReconciliationQueue::class, \App\Filament\Pages\BankPayments::class])
+            ->pages([\Filament\Pages\Dashboard::class, \App\Filament\Pages\ApReconciliationQueue::class, \App\Filament\Pages\BankPayments::class, \App\Filament\Pages\GeneralLedger::class])
             ->middleware([
                 \Illuminate\Cookie\Middleware\EncryptCookies::class,
                 \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,

@@ -13,6 +13,7 @@ class PlatformPermissionSeeder extends Seeder
         Permission::firstOrCreate(['code' => 'purchase_bill.view'], [
             'resource' => 'purchase_bill', 'action' => 'view', 'description' => 'Read purchase bills with proven purchase-order ownership',
         ]);
+        Permission::firstOrCreate(['code' => 'gl.view'], ['resource' => 'gl', 'action' => 'view', 'description' => 'Read-only single-MGI general ledger trace']);
         foreach (['view', 'propose', 'approve', 'cancel', 'audit'] as $action) {
             Permission::firstOrCreate(['code' => 'ap.reconcile.'.$action], ['resource' => 'ap.reconcile', 'action' => $action, 'description' => 'AP reconciliation: '.$action]);
         }

@@ -46,6 +46,7 @@ class GrnReceivingService
                 if (! hash_equals((string) $old->payload_hash, $hash) || $old->status !== 'POSTED') {
                     throw new \RuntimeException('Request key sudah digunakan dengan isi berbeda atau status tidak valid.');
                 }
+                $this->assertPostingLinks($old, $po, $companyId, $bill);
                 return (int) $old->id;
             }
             if ($po->receipt_mode === 'LEGACY' || (! $po->receipt_mode && $po->details->sum('qty_received') > 0)) {
@@ -95,6 +96,7 @@ class GrnReceivingService
                     'created_at' => now(), 'updated_at' => now()];
             }
             $billId = DB::table('purchase_bills')->insertGetId(['bill_number' => $bill, 'bill_date' => $date,
+                'purchase_order_id' => $po->id,
                 'due_date' => $due ?: null, 'vendor_name' => $po->contact_name, 'payment_status' => 'UNPAID',
                 'sub_total' => $total, 'tax_amount' => 0, 'grand_total' => $total,
                 'credit_account' => $payableAccount, 'notes' => 'GRN Ref PO: '.$po->po_number,
@@ -117,7 +119,28 @@ class GrnReceivingService
             $journalId = DB::table('purchase_bills')->where('id', $billId)->value('journal_id');
             if (! $journalId) { throw new \RuntimeException('Posting tidak menghasilkan linkage jurnal Bill.'); }
             DB::table('purchase_receipts')->where('id', $receiptId)->update(['status' => 'POSTED', 'journal_id' => $journalId, 'updated_at' => now()]);
+            $this->assertPostingLinks(DB::table('purchase_receipts')->where('id', $receiptId)->first(), $po, $companyId, $bill);
             return $receiptId;
         });
+    }
+
+    /** Validate persisted provenance on first commit and retry; never repair historical links. */
+    private function assertPostingLinks(object $receipt, PurchaseOrder $po, int $companyId, string $number): void
+    {
+        $bill = DB::table('purchase_bills')->where('id', $receipt->purchase_bill_id)->lockForUpdate()->first();
+        $journal = $receipt->journal_id
+            ? \App\Support\ProtectedJournalQuery::table('journal_headers')->where('journal_id', $receipt->journal_id)->lockForUpdate()->first()
+            : null;
+        if ((int) $po->company_id !== $companyId || (int) $receipt->company_id !== $companyId
+            || (int) $receipt->purchase_order_id !== (int) $po->id || $receipt->status !== 'POSTED'
+            || ! $bill || (int) $bill->purchase_order_id !== (int) $po->id
+            || $bill->bill_number !== $number || ! $journal || $bill->journal_id !== $receipt->journal_id
+            || $journal->source_doc_no !== $bill->bill_number
+            || substr((string) $journal->transaction_date, 0, 10) !== (string) $bill->bill_date
+            || (string) $receipt->receipt_date !== (string) $bill->bill_date
+            || DB::table('purchase_bills')->where('journal_id', $receipt->journal_id)->count() !== 1
+            || DB::table('purchase_receipts')->where('journal_id', $receipt->journal_id)->count() !== 1) {
+            throw new \RuntimeException('Relasi PO/Bill/GRN/jurnal tidak konsisten atau ambigu; posting/retry dibatalkan tanpa perbaikan otomatis.');
+        }
     }
 }
