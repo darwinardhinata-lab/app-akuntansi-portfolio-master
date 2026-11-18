@@ -105,6 +105,7 @@ class JournalImportTest extends TestCase
     {
         $this->seedImportAccounts();
         foreach (['csv', 'xlsx', 'csv', 'xlsx'] as $attempt => $extension) {
+            app()->setLocale(['en', 'en', 'id', 'zh_CN'][$attempt]);
             $amount = 100 + $attempt;
             $result = $this->importRows($extension, 'GJ-REPEAT', 'REF-'.$attempt, $amount);
             $this->assertSame('success', $result['status'], $result['message']);

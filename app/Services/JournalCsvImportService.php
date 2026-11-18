@@ -81,7 +81,7 @@ class JournalCsvImportService
             $idxTgl         = $findCol(['tanggal', 'date']);
             $idxNoJurnal    = $findCol(['no jurnal', 'no. jurnal']);
             $idxNoBukti     = $findCol(['no bukti', 'no. bukti', 'referensi']);
-            $idxDesc        = $findCol(['textbox35', 'deskripsi', 'keterangan']);
+            $idxDesc        = $findCol(['textbox35', 'deskripsi', 'keterangan', 'description', '说明']);
             $idxNilaiDebet  = $findCol(['nilai debet']);
             $idxNilaiKredit = $findCol(['nilai kredit']);
             $idxAkun        = $findCol(['akun', 'account']);
