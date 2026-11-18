@@ -30,6 +30,7 @@ class Fabric extends Model
     ];
 
     protected $casts = [
+        'width' => 'decimal:2',
         'stock_quantity' => 'decimal:2',
         'average_cost' => 'decimal:2',
         'meters_per_roll' => 'decimal:2',

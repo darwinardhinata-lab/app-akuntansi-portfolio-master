@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'fabric_master' => 'Fabric master',
     'yarn_master' => 'Yarn master',
     'party_master' => 'Party master',
     'auxiliary_material_master' => 'Auxiliary Material Master',

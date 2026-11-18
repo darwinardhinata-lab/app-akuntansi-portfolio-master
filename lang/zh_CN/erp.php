@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'fabric_master' => '面料主数据',
     'yarn_master' => '纱线主数据',
     'party_master' => '往来单位主数据',
     'auxiliary_material_master' => '辅料主数据',

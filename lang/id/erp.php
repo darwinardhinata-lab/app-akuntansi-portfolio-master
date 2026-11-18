@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'fabric_master' => 'Master Kain',
     'yarn_master' => 'Master Benang',
     'party_master' => 'Master Party',
     'auxiliary_material_master' => 'Master Bahan Penolong',
