@@ -121,6 +121,7 @@ class JournalController extends Controller
         try {
             DB::beginTransaction();
             \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCapacity($request->details);
             $journal = \App\Support\PostingService::post([
                 'transaction_date' => $request->transaction_date,
                 'source_doc_no' => $request->input('source_doc_no', $request->input('evidence_number')),

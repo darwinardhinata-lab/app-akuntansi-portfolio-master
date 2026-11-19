@@ -1,3 +1,7 @@
+# 2026-11-19 - R1 active manual-journal capacity correction
+
+Separate integration-base branch feat/r1-manual-journal-capacity-20261119; not bundled into PR #5. Normal authenticated journal POST reproduced idr3 overspend on MariaDB: actual 500.00, reserved 400.00, manual outflow 200.00 yielded available -100.00. Reused capacity guard under financial fence. Final MariaDB 1 test / 9 assertions; affected SQLite 111 tests / 1,449 assertions; exit 0. Rejected write unchanged, affordable 100.00 preserves hold. Details: docs/integration/r1-manual-journal-capacity-20261119.md. Sequential only; maker/manual overlapping schedules remain next R1 prerequisite. TAHAN MERGE for this separate candidate. Human UAT DEFERRED; production NO-GO.
+
 # 2026-11-19 — Supplier credit source rejection matrix; review candidate only
 
 - Continues `08daa3f` on the existing `feat/supplier-price-credit-20261119` branch, not the ERP integration branch. Review/Finance acceptance package: `docs/integration/supplier-credit-review-20261119.md`.
