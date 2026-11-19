@@ -81,7 +81,7 @@ final class SupplierCreditPosting
         return (int) $po->party_id;
     }
 
-    public static function sealed(object $binding): bool
+    public static function sealed(object $binding, bool $allowReversed = false): bool
     {
         $identity = 'supplier-credit:'.hash('sha256', json_encode(['company_id' => $binding->company_id,
             'party_id' => $binding->party_id, 'supplier_reference' => $binding->supplier_reference], JSON_THROW_ON_ERROR));
@@ -89,7 +89,7 @@ final class SupplierCreditPosting
             || !DB::table('accounting_posting_intents')->where('journal_id', $binding->journal_id)
                 ->where('idempotency_key', $identity)->where('source_id', $identity)->where('actor_id', $binding->posted_by)
                 ->where('source_type', $binding->kind)->whereNotNull('sealed_at')->whereNull('reversal_of')->exists()
-            || DB::table('accounting_posting_intents')->where('reversal_of', $binding->journal_id)->exists()) return false;
+            || (!$allowReversed && DB::table('accounting_posting_intents')->where('reversal_of', $binding->journal_id)->exists())) return false;
         $bill = DB::table('purchase_bills')->where('id', $binding->purchase_bill_id)->first();
         $header = ProtectedJournalQuery::table('journal_headers')->where('journal_id', $binding->journal_id)->first();
         $lines = ProtectedJournalQuery::table('journal_details')->where('journal_id', $binding->journal_id)->get();

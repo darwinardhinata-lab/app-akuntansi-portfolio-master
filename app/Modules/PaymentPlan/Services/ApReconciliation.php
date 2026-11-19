@@ -74,6 +74,9 @@ final class ApReconciliation
             LegacyFinancialFence::lock(true);
             $row = DB::table('ppl_ap_reconciliations')->where('company_id', $company)->where('id', $id)->lockForUpdate()->first();
             abort_unless($row, 404);
+            if ($row->supplier_credit_binding_id && DB::table('supplier_credit_reversals')->where('binding_id', $row->supplier_credit_binding_id)->exists()) {
+                $this->fail('supplier_credit_reversed');
+            }
             if ($row->supplier_credit_binding_id && $action === 'cancel') $this->fail('supplier_credit_void_not_supported');
             if ($row->supplier_credit_binding_id && $action === 'approve' && $row->status === 'approved'
                 && (int) $row->version === $version + 1 && (int) $row->approved_by === (int) auth()->id()

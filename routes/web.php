@@ -276,6 +276,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/purchase-returns/{id}', [App\Http\Controllers\PurchaseReturnController::class, 'show'])->name('purchase-returns.show');
 
     // --- TAGIHAN PEMBELIAN (PURCHASE BILLS) ---
+    Route::post('/purchase-bills/{id}/supplier-credit/{binding}/reverse', function (\Illuminate\Http\Request $request, int $id, int $binding,
+        \App\Modules\PaymentPlan\Services\SupplierCreditReversal $service) {
+        return response()->json($service->reverse($request, $id, $binding));
+    })->name('purchase-bills.supplier-credit.reverse');
     Route::post('/purchase-bills/{id}/supplier-credit', function (\Illuminate\Http\Request $request, int $id, \App\Modules\PaymentPlan\Services\SupplierCreditPosting $service) {
         return response()->json($service->post($request, $id));
     })->name('purchase-bills.supplier-credit');
