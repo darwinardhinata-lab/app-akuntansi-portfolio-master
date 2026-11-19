@@ -24,6 +24,12 @@ final class ManualJournalMakerWorker extends \Tests\TestCase
                 'edit' => $this->put(route('jurnal.update', [$f['payload']['journal_id']]), $f['payload']),
                 'bulk' => $this->delete(route('jurnal.massDestroy'), $f['payload']),
                 'opening' => $this->post(route('account.store_opening_balance'), $f['payload']),
+                'opening-fx' => $this->post(route('account.store_opening_balance'), $f['payload']),
+                'opening-csv' => $this->post(route('account.import_opening_balance'), [
+                    'tanggal_saldo' => $f['payload']['transaction_date'],
+                    'file' => \Illuminate\Http\UploadedFile::fake()->createWithContent('opening.csv',
+                        "Account,Name,Debit,Credit\n610001,Other,200.00,0\n310001,Equity,0,200.00\n"),
+                ]),
                 'csv', 'xlsx' => $this->importReplacement($f['action']),
             };
             $result = ['status' => $response->status(), 'body' => $f['action'] === 'maker' ? $response->json() : null,

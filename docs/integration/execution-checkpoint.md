@@ -1,3 +1,9 @@
+# 2026-11-19 - R1 combined writer verification and opening variants
+
+- Draft PR #12 combines exact head commits of #8–#11. The tested runtime tree is unchanged from `e65f090` (tree `34313c83`); original integrated suite: targeted SQLite 38/289, full SQLite 805/16,304, MariaDB 15/393 including ten observed InnoDB waits. Subsequent changes are test harness and documentation only.
+- Additional opening balance witnesses: both CSV orders recorded in `variants-retry-race.jsonl`; both mixed FX form orders passed 2/72 in `fx-only.log` and `fx-only-race.jsonl`. Maker-first preserves 500/400/100; replacement-first leaves 300/0/300 and rejects maker with no partial AP/hold. FX form posts USD 4.00 as base IDR 200.00 on the replacement debit and only marks the rate used on success. Earlier fixture/assertion errors and unfinished run retained; no claim that they passed. Evidence: `D:\ERP-Recovery\r1-combined-20261119`.
+- Recommend review/merge #12 as a single candidate preserving ancestry rather than merging #8–#11 independently. #13 manual FX stays separate and must be checked against the resulting base; #5 remains a separate review/Finance decision. No merge without Darwin approval. Human UAT DEFERRED; production NO-GO.
+
 # 2026-11-19 - R1 manual edit protects reserved idr3
 
 - Based on `fc671b6`, tree-identical to tested PR #7 `754b718`. `PUT jurnal.update` previously accepted moving a current 200.00 receipt to tomorrow despite a 400.00 hold on 500.00. Red route test retained. Under the existing fence and after source/FX protections, the guard subtracts projected old lines and adds projected replacement lines per account before any writes; uses Jakarta day for both sides. Tests cover date/account changes rejected unchanged and a net 100.00 reduction leaving zero available.

@@ -75,6 +75,18 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $this->overlap('opening', 'opening');
     }
 
+    public static function openingVariantOrders(): array
+    {
+        return [['maker', 'opening-csv'], ['opening-csv', 'opening-csv'],
+            ['maker', 'opening-fx'], ['opening-fx', 'opening-fx']];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('openingVariantOrders')]
+    public function test_opening_variant_maker_overlap(string $first, string $variant): void
+    {
+        $this->overlap($first, $variant);
+    }
+
     private function overlap(string $first, string $journalAction = 'manual'): void
     {
         $flags = ['payment_plan_v33.enabled' => true, 'payment_plan_v33.bank_workflow' => true,
@@ -100,7 +112,8 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $opening = $journalAction === 'manual' ? '500.00' : '300.00';
         \App\Support\PostingService::post(['transaction_date' => '2026-01-01'], [
             ['account_code' => '111003', 'position' => 'DEBET', 'amount' => $opening], ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => $opening]]);
-        $receipt = !in_array($journalAction, ['manual', 'bulk', 'opening'], true) ? \App\Support\PostingService::post([
+        $openingAction = str_starts_with($journalAction, 'opening');
+        $receipt = ! $openingAction && !in_array($journalAction, ['manual', 'bulk'], true) ? \App\Support\PostingService::post([
             'transaction_date' => '2026-01-03', 'source_doc_no' => 'RACE-RECEIPT', 'journal_type' => 'MANUAL',
         ], [
             ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00'],
@@ -116,10 +129,20 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             }
         }
         $openingDate = '2026-01-03';
-        if ($journalAction === 'opening') {
+        if ($openingAction) {
             $this->actingAs($users['fs'])->post(route('account.store_opening_balance'), [
                 'transaction_date' => $openingDate, 'balances' => ['111003' => '200.00', '310001' => '200.00'],
             ])->assertSessionHas('success');
+        }
+        if ($journalAction === 'opening-fx') {
+            config(['platform.multicurrency_enabled' => true]);
+            $flags['platform.multicurrency_enabled'] = true;
+            $this->seed(\Database\Seeders\CurrencySeeder::class);
+            DB::table('accounts')->insert(['account_code' => '111004', 'account_name' => 'Synthetic USD',
+                'currency_code' => 'USD', 'normal_balance' => 'DEBET', 'coa_type' => 'Other', 'report_pos' => 'NERACA']);
+            app(\App\Modules\Currency\Services\ExchangeRateService::class)->save([
+                'currency_code' => 'USD', 'rate' => '50.00', 'rate_date' => $openingDate, 'type' => 'SPOT', 'source' => 'BI',
+            ], null, $users['fs']->id);
         }
         $journal = \App\Support\PostingService::post(['transaction_date' => '2026-01-02'], [
             ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '600.00'], ['account_code' => '211001', 'position' => 'KREDIT', 'amount' => '600.00']]);
@@ -160,6 +183,8 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
                 ]];
             if ($action === 'bulk') $payload = ['ids' => $bulkIds];
             if ($action === 'opening') $payload = ['transaction_date' => $openingDate, 'balances' => ['610001' => '200.00', '310001' => '200.00']];
+            if ($action === 'opening-csv') $payload = ['transaction_date' => $openingDate];
+            if ($action === 'opening-fx') $payload = ['transaction_date' => $openingDate, 'balances' => ['111004' => '4.00', '310001' => '200.00']];
             $workers[] = new Process([PHP_BINARY, base_path('tests/Support/manual-journal-maker-worker.php')], base_path(), ['MANUAL_MAKER_FIXTURE' => json_encode([
                 'connection' => config('database.connections.writer_test'), 'flags' => $flags, 'action' => $action, 'actor' => $users[$action === 'maker' ? 'mk' : 'fs']->id,
                 'payload' => $payload, 'hold' => $index === 0, 'release' => $release], JSON_THROW_ON_ERROR)], null, 110);
@@ -221,7 +246,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             $this->assertSame($first === 'maker' ? '100.00' : '300.00', $balance['available']);
             $journalCount = match ($journalAction) {
                 'delete' => $first === 'maker' ? 3 : 2,
-                'edit', 'csv', 'xlsx', 'opening' => 3,
+                'edit', 'csv', 'xlsx', 'opening', 'opening-csv', 'opening-fx' => 3,
                 'bulk' => $first === 'maker' ? 4 : 2,
                 default => $first === 'maker' ? 2 : 3,
             };
@@ -234,9 +259,14 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             } elseif (in_array($journalAction, ['csv', 'xlsx'], true)) {
                 $this->assertSame($first === 'maker' ? 0 : 1, DB::table('journal_headers')->where('journal_no', 'RACE-RECEIPT')->where('journal_type', 'IMPORT')->count());
                 if ($first === 'maker') $this->assertDatabaseHas('journal_details', ['journal_id' => $receipt->getKey(), 'account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00']);
-            } elseif ($journalAction === 'opening') {
+            } elseif ($openingAction) {
                 $this->assertDatabaseHas('journal_details', ['journal_id' => 'JRN-SA-'.$openingDate,
-                    'account_code' => $first === 'maker' ? '111003' : '610001', 'position' => 'DEBET', 'amount' => '200.00']);
+                    'account_code' => $first === 'maker' ? '111003' : ($journalAction === 'opening-fx' ? '111004' : '610001'), 'position' => 'DEBET', 'amount' => '200.00']);
+                if ($journalAction === 'opening-fx') {
+                    $this->assertSame($first !== 'maker', \App\Modules\Currency\Models\ExchangeRate::query()->whereNotNull('first_used_at')->exists());
+                    if ($first !== 'maker') $this->assertDatabaseHas('journal_details', ['journal_id' => 'JRN-SA-'.$openingDate,
+                        'account_code' => '111004', 'currency_code' => 'USD', 'amount_txn' => '4.00', 'amount' => '200.00']);
+                }
             } elseif ($journalAction === 'edit') {
                 $this->assertDatabaseHas('journal_details', ['journal_id' => $receipt->getKey(),
                     'account_code' => $first === 'maker' ? '111003' : '610001', 'position' => 'DEBET', 'amount' => '200.00']);
