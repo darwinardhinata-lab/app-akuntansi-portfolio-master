@@ -98,4 +98,43 @@ class ManualJournalBankCapacityTest extends \Tests\TestCase
         $this->assertDatabaseHas('journal_headers', ['journal_id' => $large->getKey()]);
         $this->assertDatabaseMissing('journal_headers', ['journal_id' => $small->getKey()]);
     }
+
+    public static function importFormats(): array
+    {
+        return [['csv'], ['xlsx']];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('importFormats')]
+    public function test_reimport_cannot_remove_reserved_bank_capacity(string $format): void
+    {
+        $f = $this->fixture('300.00');
+        PostingService::post(['transaction_date' => '2026-01-02', 'source_doc_no' => 'GJ-R1-REIMPORT', 'journal_type' => 'MANUAL'], [
+            ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00'],
+            ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '200.00'],
+        ]);
+        $before = $this->state($f);
+        $this->assertSame('100.00', $before['balance']['available']);
+        $csv = "Tanggal,No Jurnal,No Bukti,Deskripsi,Col5,Col6,Nilai Debet,Nilai Kredit,Akun\n"
+            ."2026-01-02,GJ-R1-REIMPORT,TEST,Reclassify,,,200.00,0.00,610001\n"
+            ."2026-01-02,GJ-R1-REIMPORT,TEST,Reclassify,,,0.00,200.00,310001\n";
+        $upload = static function (string $content) use ($format) {
+            if ($format === 'csv') return \Illuminate\Http\UploadedFile::fake()->createWithContent('r1.csv', $content);
+            $book = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $book->getActiveSheet()->fromArray(array_map('str_getcsv', explode("\n", trim($content))));
+            ob_start();
+            (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save('php://output');
+            return \Illuminate\Http\UploadedFile::fake()->createWithContent('r1.xlsx', ob_get_clean());
+        };
+        $this->post(route('jurnal.import'), ['file_excel' => $upload($csv)])
+            ->assertSessionHas('error', fn ($error) => str_contains($error, 'funds_insufficient'));
+        $this->assertSame($before, $this->state($f));
+        $affordable = str_replace(['200.00', '610001'], ['100.00', '111003'], $csv);
+        for ($attempt = 0; $attempt < 2; $attempt++) {
+            $this->post(route('jurnal.import'), ['file_excel' => $upload($affordable)])->assertSessionHas('success');
+            $state = $this->state($f);
+            $this->assertSame('0.00', $state['balance']['available']);
+            $this->assertSame($before['ppl_reservations'], $state['ppl_reservations']);
+            $this->assertDatabaseCount('journal_headers', 2);
+        }
+    }
 }
