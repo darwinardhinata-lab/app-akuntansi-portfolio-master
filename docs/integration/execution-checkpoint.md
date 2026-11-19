@@ -1,3 +1,9 @@
+# 2026-11-19 - R1 CSV/Excel journal replacement protects reserved idr3
+
+- Independent candidate based on `fc671b6`. Normal-route RED CSV reimport reproduced reclassification of a held receipt. CSV and Excel preflight the combined current Jakarta ledger effect of removed and replacement lines, including existing rounding legs, before auto-wipe. Existing source protections, replacement identities, and retry behavior retained. Excel takes the existing financial fence before its import transaction reads.
+- CSV and XLSX each prove maker-first (replacement rejected, 500.00/400.00/100.00) and import-first (replacement committed, maker rejected with no partial allocations, 300.00/0.00/300.00). Real InnoDB financial-context waits observed via separate connection; committed state read through a fresh connection. Sequential upload tests cover exact unchanged rejection, affordable replacement and identical retry without duplicate journals.
+- MariaDB 6 / 160; full SQLite 802 / 16,279. Initial database startup probe failed before any assertions; readiness-gated run passed. Evidence `D:\ERP-Recovery\r1-journal-import-20261119`. Draft only; merge requires explicit Darwin approval. XLSX tested, legacy XLS shares engine but not independently raced. Separate from drafts #5, #8 and #9. Human UAT DEFERRED; production NO-GO.
+
 # 2026-11-19 - R1 single receipt deletion protects reserved idr3
 
 - Base `7feca6e` (merged PR #6). Disposable MariaDB baseline accepted deleting a 200.00 receipt, removing header/details and lowering available from 100.00 to -100.00 with 400.00 still held.
