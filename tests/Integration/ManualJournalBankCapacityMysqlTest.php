@@ -34,6 +34,16 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $this->overlap('delete', 'delete');
     }
 
+    public function test_maker_first_rejects_waiting_fx(): void
+    {
+        $this->overlap('maker', 'fx');
+    }
+
+    public function test_fx_first_rejects_waiting_maker(): void
+    {
+        $this->overlap('fx', 'fx');
+    }
+
     private function overlap(string $first, string $journalAction = 'manual'): void
     {
         $flags = ['payment_plan_v33.enabled' => true, 'payment_plan_v33.bank_workflow' => true,
@@ -51,6 +61,10 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         }
         foreach (['111003' => 'DEBET', '310001' => 'KREDIT', '610001' => 'DEBET', '211001' => 'KREDIT'] as $code => $side) {
             DB::table('accounts')->insert(['account_code' => $code, 'account_name' => 'Synthetic', 'normal_balance' => $side, 'coa_type' => 'Other', 'report_pos' => 'NERACA']);
+        }
+        if ($journalAction === 'fx') {
+            $this->seedFx($users['fs']->id);
+            $flags['platform.multicurrency_enabled'] = true;
         }
         DB::table('company_coa_mappings')->insert(['company_id' => $company->id, 'semantic_key' => 'ppl.bank.idr3', 'account_code' => '111003', 'active' => true]);
         $settings = ['version' => 1, 'erp_cutoff' => '2026-01-01', 'accounts' => [['id' => 'idr3', 'name' => 'Synthetic',
@@ -97,6 +111,14 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
                 : ['transaction_date' => '2026-01-03', 'source_doc_no' => 'RACE-MANUAL', 'description' => 'Manual race outflow', 'details' => [
                     ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '200.00'], ['account_code' => '111003', 'position' => 'KREDIT', 'amount' => '200.00']]];
             if ($action === 'delete') $payload = ['journal_id' => $receipt->getKey()];
+            if ($action === 'fx') {
+                $payload['currency_code'] = 'USD';
+                $payload['details'] = [
+                    ['account_code' => '610001', 'position' => 'DEBET', 'amount_txn' => '2.00'],
+                    ['account_code' => '610001', 'position' => 'DEBET', 'amount_txn' => '2.00'],
+                    ['account_code' => '111003', 'position' => 'KREDIT', 'amount_txn' => '4.00'],
+                ];
+            }
             $workers[] = new Process([PHP_BINARY, base_path('tests/Support/manual-journal-maker-worker.php')], base_path(), ['MANUAL_MAKER_FIXTURE' => json_encode([
                 'connection' => config('database.connections.writer_test'), 'flags' => $flags, 'action' => $action, 'actor' => $users[$action === 'maker' ? 'mk' : 'fs']->id,
                 'payload' => $payload, 'hold' => $index === 0, 'release' => $release], JSON_THROW_ON_ERROR)], null, 110);
@@ -158,7 +180,8 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             $this->assertSame($first === 'maker' ? '100.00' : '300.00', $balance['available']);
             $journalCount = $journalAction === 'delete' ? ($first === 'maker' ? 3 : 2) : ($first === 'maker' ? 2 : 3);
             $this->assertDatabaseCount('journal_headers', $journalCount);
-            $this->assertDatabaseCount('journal_details', $journalCount * 2);
+            $this->assertDatabaseCount('journal_details', $journalCount * 2 + ($first === 'fx' ? 1 : 0));
+            if ($first === 'fx') $this->assertDatabaseHas('journal_details', ['account_code' => '111003', 'position' => 'KREDIT', 'amount' => '200.00']);
             $this->assertDatabaseCount('accounting_posting_intents', $intentsBefore);
             if ($receipt) {
                 $this->assertSame($first === 'maker', DB::table('journal_headers')->where('journal_id', $receipt->getKey())->exists());
