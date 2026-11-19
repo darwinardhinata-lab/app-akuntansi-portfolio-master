@@ -317,6 +317,9 @@ class JournalController extends Controller
                 unset($line);
                 $prepared = $service::prepareManualJournal($lines, $data['currency_code'], $metadata['rate'], $date);
                 $lines = $prepared['lines'];
+                if ($data['transaction_date'] <= now('Asia/Jakarta')->toDateString()) {
+                    \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCapacity($lines);
+                }
                 $journal = JournalHeader::query()->create([
                     'transaction_date' => $data['transaction_date'], 'source_doc_no' => $data['source_doc_no'] ?? null,
                     'notes' => $data['description'], 'journal_type' => 'MANUAL',

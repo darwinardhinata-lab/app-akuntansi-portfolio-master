@@ -45,6 +45,38 @@ class ManualJournalBankCapacityTest extends \Tests\TestCase
         return $state;
     }
 
+    public function test_fx_bank_capacity_uses_final_rounded_idr_amount(): void
+    {
+        $f = $this->fixture();
+        $this->seedFx(auth()->id());
+        $payload = static fn (string $part, string $total) => ['transaction_date' => '2026-01-03',
+            'description' => 'Synthetic FX bank credit', 'currency_code' => 'USD', 'details' => [
+                ['account_code' => '610001', 'position' => 'DEBET', 'amount_txn' => $part],
+                ['account_code' => '610001', 'position' => 'DEBET', 'amount_txn' => $part],
+                ['account_code' => '111003', 'position' => 'KREDIT', 'amount_txn' => $total],
+            ]];
+        $before = $this->state($f);
+        $blocked = $this->post(route('jurnal.store'), $payload('2.00', '4.00'));
+        if ($path = getenv('FX_BANK_RED_EVIDENCE')) {
+            file_put_contents($path, json_encode(['status' => $blocked->status(), 'success' => session('success'),
+                'balance' => $this->state($f)['balance'], 'bank_credit' => DB::table('journal_details')->where('account_code', '111003')->where('position', 'KREDIT')->value('amount')], JSON_THROW_ON_ERROR));
+        }
+        $blocked->assertSessionHasErrors(['currency_code' => 'funds_insufficient']);
+        $this->assertSame($before, $this->state($f));
+        $this->post(route('jurnal.store'), $payload('1.00', '2.00'))->assertSessionHas('success');
+        $this->assertDatabaseHas('journal_details', ['account_code' => '111003', 'position' => 'KREDIT', 'amount' => '100.00']);
+        $this->assertSame('0.00', $this->state($f)['balance']['available']);
+    }
+
+    protected function seedFx(int $actor): void
+    {
+        config(['platform.multicurrency_enabled' => true]);
+        $this->seed(\Database\Seeders\CurrencySeeder::class);
+        app(\App\Modules\Currency\Services\ExchangeRateService::class)->save([
+            'currency_code' => 'USD', 'rate' => '49.998', 'rate_date' => '2026-01-03', 'type' => 'SPOT', 'source' => 'BI',
+        ], null, $actor);
+    }
+
     public function test_manual_journal_cannot_spend_reserved_idr3_and_affordable_write_preserves_hold(): void
     {
         $f = $this->fixture();
