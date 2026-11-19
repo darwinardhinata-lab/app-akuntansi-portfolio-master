@@ -45,6 +45,29 @@ class ManualJournalBankCapacityTest extends \Tests\TestCase
         return $state;
     }
 
+    public function test_opening_balance_replacement_must_preserve_reserved_idr3(): void
+    {
+        $f = $this->fixture('300.00');
+        DB::table('accounts')->where('account_code', '310001')->update(['normal_balance' => 'KREDIT']);
+        $url = route('account.store_opening_balance');
+        $payload = ['transaction_date' => '2026-01-02', 'balances' => ['111003' => '200.00', '310001' => '200.00']];
+        $this->post($url, $payload)->assertSessionHas('success');
+        $before = $this->state($f);
+        $this->assertSame('100.00', $before['balance']['available']);
+        $this->post($url, ['transaction_date' => $payload['transaction_date'], 'balances' => ['111003' => '0', '310001' => '0']])
+            ->assertSessionHas('error', fn ($error) => str_contains($error, 'funds_insufficient'));
+        $this->assertSame($before, $this->state($f));
+        $import = route('account.import_opening_balance');
+        $csv = static fn ($amount) => \Illuminate\Http\UploadedFile::fake()->createWithContent('opening.csv',
+            "Account,Name,Debit,Credit\n610001,Other,$amount,0\n310001,Equity,0,$amount\n");
+        $this->post($import, ['tanggal_saldo' => $payload['transaction_date'], 'file' => $csv('200.00')])
+            ->assertSessionHas('error', fn ($error) => str_contains($error, 'funds_insufficient'));
+        $this->assertSame($before, $this->state($f));
+        $payload['balances'] = ['111003' => '100.00', '310001' => '100.00'];
+        $this->post($url, $payload)->assertSessionHas('success');
+        $this->assertSame('0.00', $this->state($f)['balance']['available']);
+    }
+
     public function test_manual_journal_cannot_spend_reserved_idr3_and_affordable_write_preserves_hold(): void
     {
         $f = $this->fixture();

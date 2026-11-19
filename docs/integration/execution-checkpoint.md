@@ -1,3 +1,9 @@
+# 2026-11-19 - R1 opening-balance replacement protects reserved idr3
+
+- Independent `fc671b6` candidate. Normal form previously cleared a 200.00 opening receipt despite only 100.00 available. Existing form (IDR/FX) and CSV opening-balance import take the financial fence before opening-journal locks; shared service checks net current Jakarta GL effect before replacing details. Rejection rolls back header and details.
+- Normal form and CSV sequential guard verified; affordable form replacement leaves zero available. Form versus maker both commit orders: 500.00/400.00/100.00 with replacement rejected; 300.00/0.00/300.00 with maker rejected without partial holds/AP rows. Independent InnoDB lock observer and fresh committed-state reader. No separate FX or CSV opening-balance race claimed.
+- MariaDB 3 / 78; full SQLite 801 / 16,265. Evidence `D:\ERP-Recovery\r1-opening-balance-20261119`. Draft only; merge requires explicit Darwin approval; human UAT DEFERRED and production NO-GO.
+
 # 2026-11-19 - R1 single receipt deletion protects reserved idr3
 
 - Base `7feca6e` (merged PR #6). Disposable MariaDB baseline accepted deleting a 200.00 receipt, removing header/details and lowering available from 100.00 to -100.00 with 400.00 still held.
