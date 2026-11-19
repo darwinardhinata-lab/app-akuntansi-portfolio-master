@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 /** Runs the actual reconciliation/Livewire regression against a disposable MySQL schema. */
 class ApReconciliationMysqlTest extends \Tests\Feature\ApReconciliationTest
 {
+    use \Tests\Support\SupplierCreditSourceCases;
+
     private ?string $isolatedDatabase = null;
 
     public function test_competing_return_approvals_serialize_and_recheck_capacity(): void

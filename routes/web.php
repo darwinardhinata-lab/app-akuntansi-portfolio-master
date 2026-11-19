@@ -276,6 +276,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/purchase-returns/{id}', [App\Http\Controllers\PurchaseReturnController::class, 'show'])->name('purchase-returns.show');
 
     // --- TAGIHAN PEMBELIAN (PURCHASE BILLS) ---
+    Route::post('/purchase-bills/{id}/supplier-credit', function (\Illuminate\Http\Request $request, int $id, \App\Modules\PaymentPlan\Services\SupplierCreditPosting $service) {
+        return response()->json($service->post($request, $id));
+    })->name('purchase-bills.supplier-credit');
     Route::get('/purchase-bills', [App\Http\Controllers\PurchaseBillController::class, 'index'])->name('purchase-bills.index');
     Route::get('/purchase-bills/create', [App\Http\Controllers\PurchaseBillController::class, 'create'])->name('purchase-bills.create');
     Route::post('/purchase-bills', [App\Http\Controllers\PurchaseBillController::class, 'store'])->name('purchase-bills.store');

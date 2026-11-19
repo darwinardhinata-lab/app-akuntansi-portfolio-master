@@ -10,6 +10,9 @@ class PlatformPermissionSeeder extends Seeder
     public function run(): void
     {
         // Catalog only: no implied grants to ADMIN, FINANCE or STAFF.
+        Permission::firstOrCreate(['code' => 'supplier_credit.post'], [
+            'resource' => 'supplier_credit', 'action' => 'post', 'description' => 'Post supplier price credit for a proven Purchase Bill',
+        ]);
         Permission::firstOrCreate(['code' => 'purchase_bill.view'], [
             'resource' => 'purchase_bill', 'action' => 'view', 'description' => 'Read purchase bills with proven purchase-order ownership',
         ]);

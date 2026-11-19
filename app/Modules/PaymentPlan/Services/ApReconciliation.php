@@ -31,6 +31,19 @@ final class ApReconciliation
             LegacyFinancialFence::lock(true);
             $bill = PurchaseBill::whereKey($data['purchase_bill_id'])->lockForUpdate()->firstOrFail();
             $snapshot = $this->source($data['journal_id'], $bill, $data['purchase_return_detail_id'] ?? null);
+            if (isset($snapshot['supplier_credit'])) {
+                if (bccomp((string) $data['amount'], $snapshot['capacity'], 2) !== 0) $this->fail('supplier_credit_full_amount_required');
+                $data['amount'] = $snapshot['capacity'];
+                $data['supplier_credit_binding_id'] = $snapshot['supplier_credit']['id'];
+                $existing = DB::table('ppl_ap_reconciliations')->where('supplier_credit_binding_id', $data['supplier_credit_binding_id'])->lockForUpdate()->first();
+                if ($existing) {
+                    if ((int) $existing->proposed_by !== (int) auth()->id() || $existing->reason !== $data['reason']
+                        || $existing->evidence !== $data['evidence']) $this->fail('supplier_credit_proposal_conflict');
+                    return (int) $existing->id;
+                }
+                if (DB::table('ppl_ap_reconciliations')->where('journal_id', $data['journal_id'])->exists()) $this->fail('supplier_credit_already_claimed');
+                SupplierCreditPosting::eligible($bill, $company);
+            }
             $this->validateReturnAmount($data, $snapshot);
             $id = DB::table('ppl_ap_reconciliations')->insertGetId($data + ['company_id' => $company, 'proposed_by' => auth()->id(),
                 'source_snapshot' => json_encode($snapshot, JSON_THROW_ON_ERROR), 'created_at' => now(), 'updated_at' => now()]);
@@ -61,11 +74,20 @@ final class ApReconciliation
             LegacyFinancialFence::lock(true);
             $row = DB::table('ppl_ap_reconciliations')->where('company_id', $company)->where('id', $id)->lockForUpdate()->first();
             abort_unless($row, 404);
+            if ($row->supplier_credit_binding_id && $action === 'cancel') $this->fail('supplier_credit_void_not_supported');
+            if ($row->supplier_credit_binding_id && $action === 'approve' && $row->status === 'approved'
+                && (int) $row->version === $version + 1 && (int) $row->approved_by === (int) auth()->id()
+                && DB::table('ppl_ap_reconciliation_decisions')->where('reconciliation_id', $id)->where('action', 'approve')->value('reason') === $reason) return;
             if ($row->version !== $version) $this->fail('stale_version');
             $bill = PurchaseBill::whereKey($row->purchase_bill_id)->lockForUpdate()->firstOrFail();
             if ($action === 'approve') {
                 if ($row->status !== 'proposed' || (int) $row->proposed_by === auth()->id()) $this->fail('independent_approval_required');
                 $source = $this->source($row->journal_id, $bill, $row->purchase_return_detail_id);
+                if ($row->supplier_credit_binding_id) {
+                    $projection = SupplierCreditPosting::eligible($bill, $company);
+                    if ($projection['exceptions'] || (int) ($source['supplier_credit']['id'] ?? 0) !== (int) $row->supplier_credit_binding_id
+                        || bccomp((string) $row->amount, $source['capacity'], 2) !== 0) $this->fail('supplier_credit_source_unresolved');
+                }
                 if (json_encode($source, JSON_THROW_ON_ERROR) !== $row->source_snapshot) $this->fail('source_changed');
                 $this->validateReturnAmount((array) $row, $source);
                 $used = '0.00';
@@ -107,7 +129,15 @@ final class ApReconciliation
             $returnSnapshot = ['return' => (array) $return, 'return_detail' => (array) $detail];
         }
         $header = ProtectedJournalQuery::table('journal_headers')->where('journal_id', $journalId)->lockForUpdate()->first();
-        if (!$header || $journalId === $bill->journal_id || $header->bill_id || ($header->currency_code ?? 'IDR') !== 'IDR') $this->fail('unattributed_idr_journal_required');
+        $credit = DB::table('supplier_credit_bindings')->where('journal_id', $journalId)->lockForUpdate()->first();
+        if ($credit) {
+            $company = app(CompanyContext::class)->requireCompany(request())->id;
+            if ($returnDetailId || !$header || (int) $credit->company_id !== (int) $company
+                || (int) $credit->purchase_bill_id !== (int) $bill->id || (int) $header->bill_id !== (int) $bill->id
+                || (int) $credit->party_id !== SupplierCreditPosting::supplier($bill, $company)
+                || !SupplierCreditPosting::sealed($credit)) $this->fail('supplier_credit_binding_invalid');
+        }
+        if (!$header || $journalId === $bill->journal_id || ($header->bill_id && !$credit) || ($header->currency_code ?? 'IDR') !== 'IDR') $this->fail('unattributed_idr_journal_required');
         if ($returnDetailId) {
             if ($header->source_doc_no !== $return->return_number || ($header->purch_ret_id && (int) $header->purch_ret_id !== (int) $return->id)
                 || ProtectedJournalQuery::table('journal_headers')->where('source_doc_no', $return->return_number)->count() !== 1) $this->fail('unique_return_journal_required');
@@ -115,6 +145,15 @@ final class ApReconciliation
         if (DB::table('ppl_payment_events')->where('journal_id', $journalId)->exists()
             || DB::table('accounting_posting_intents')->where('journal_id', $journalId)->where('source_type', 'PPL_PAYMENT_EVENT')->exists()) $this->fail('already_represented_payment');
         $lines = ProtectedJournalQuery::table('journal_details')->where('journal_id', $journalId)->orderBy('id')->lockForUpdate()->get();
+        if ($credit) {
+            $line = $lines->firstWhere('id', $credit->ap_line_id);
+            $counterpart = $lines->firstWhere('position', 'KREDIT');
+            $account = \App\Modules\Platform\Support\CompanyCoaRegistry::financeMgi()[$credit->kind]['mgi_account'] ?? null;
+            if ($lines->count() !== 2 || !$line || !$counterpart || $line->position !== 'DEBET'
+                || $line->account_code !== $bill->credit_account || $counterpart->account_code !== $account
+                || $header->currency_code !== 'IDR' || $lines->contains(fn ($l) => $l->currency_code !== 'IDR')) $this->fail('supplier_credit_line_invalid');
+            $returnSnapshot['supplier_credit'] = (array) $credit;
+        }
         if (!\App\Support\JournalBalanceValidator::isBalanced($lines->map(fn ($l) => (array) $l)->all())) $this->fail('unbalanced_source');
         $capacity = '0.00';
         foreach ($lines as $line) {

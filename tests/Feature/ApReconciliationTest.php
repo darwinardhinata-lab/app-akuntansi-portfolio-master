@@ -16,6 +16,116 @@ class ApReconciliationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_supplier_credit_posts_once_and_requires_independent_attribution(): void
+    {
+        config(['platform.filament_enabled' => true, 'platform.order_company_scope_enabled' => true,
+            'platform.legacy_sync_enabled' => false, 'customs.enabled' => false, 'platform.posting_intents_enabled' => true,
+            'payment_plan_v33.bank_workflow' => true]);
+        $company = Company::create(['code' => 'MGI', 'name' => 'Synthetic', 'active' => true, 'base_currency' => 'IDR']);
+        DB::table('ppl_financial_contexts')->insert(['company_id' => $company->id, 'settings' => '{}']);
+        $this->seed(\Database\Seeders\PlatformPermissionSeeder::class);
+        $role = Role::create(['code' => 'CREDIT_TEST', 'name' => 'Synthetic']);
+        $role->permissions()->attach(Permission::whereIn('code', ['erp.panel.access', 'supplier_credit.post', 'ap.reconcile.propose', 'ap.reconcile.approve', 'ap.reconcile.cancel'])->pluck('id'));
+        [$finance, $approver] = [User::factory()->create(['role' => 'FINANCE']), User::factory()->create()];
+        foreach ([$finance, $approver] as $user) {
+            $user->companies()->attach($company->id, ['is_default' => true]);
+            $user->platformRoles()->attach($role->id, ['company_id' => $company->id]);
+        }
+        $party = \App\Modules\Platform\Models\Party::create(['company_id' => $company->id, 'code' => 'SUP', 'legal_name' => 'Synthetic', 'active' => true]);
+        $party->roles()->create(['role' => 'SUPPLIER', 'active' => true]);
+        $po = DB::table('purchase_orders')->insertGetId(['company_id' => $company->id, 'party_id' => $party->id,
+            'po_number' => 'CREDIT-PO', 'transaction_date' => '2026-01-01', 'contact_name' => 'Synthetic']);
+        foreach (['510003', '610001', '211001'] as $code) DB::table('accounts')->insert(['account_code' => $code,
+            'account_name' => 'Synthetic', 'coa_type' => 'Other', 'report_pos' => 'NERACA', 'normal_balance' => $code === '211001' ? 'KREDIT' : 'DEBET']);
+        $bills = [];
+        foreach (['TARGET', 'OTHER'] as $number) {
+            $recognition = \App\Support\PostingService::post(['source_doc_no' => $number, 'transaction_date' => '2026-01-01', 'currency_code' => 'IDR'], [
+                ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '200.50'], ['account_code' => '211001', 'position' => 'KREDIT', 'amount' => '200.50'],
+            ]);
+            $bills[] = DB::table('purchase_bills')->insertGetId(['purchase_order_id' => $po, 'bill_number' => $number,
+                'bill_date' => '2026-01-01', 'vendor_name' => 'Synthetic', 'credit_account' => '211001', 'grand_total' => '200.50', 'journal_id' => $recognition->getKey()]);
+        }
+        [$bill, $other] = $bills;
+        $this->actingAs($finance)->withSession([\App\Modules\Platform\Support\CompanyContext::SESSION_KEY => $company->id]);
+        $url = route('purchase-bills.supplier-credit', $bill);
+        $payload = ['supplier_reference' => 'CN-FIXTURE', 'posting_date' => '2026-01-02', 'amount' => '20.00', 'reason' => 'Synthetic price allowance'];
+        $this->postJson($url, $payload)->assertConflict();
+        $this->assertDatabaseCount('journal_headers', 2);
+        DB::table('company_coa_mappings')->insert(['company_id' => $company->id, 'semantic_key' => 'AP_SUPPLIER_PRICE_DISCOUNT_CREDIT_NOTE', 'account_code' => '510003', 'active' => true]);
+        $mapping = DB::table('company_coa_mappings')->where('company_id', $company->id);
+        foreach ([['active' => false], ['active' => true, 'account_code' => '610001']] as $invalid) {
+            (clone $mapping)->update($invalid);
+            $this->postJson($url, $payload)->assertConflict();
+            $this->assertDatabaseCount('journal_headers', 2);
+            $this->assertDatabaseCount('supplier_credit_bindings', 0);
+        }
+        $mapping->update(['active' => true, 'account_code' => '510003']);
+        $postingPermission = Permission::where('code', 'supplier_credit.post')->value('id');
+        $role->permissions()->detach($postingPermission);
+        $this->postJson($url, $payload)->assertForbidden();
+        $role->permissions()->attach($postingPermission);
+        DB::table('purchase_bills')->where('id', $bill)->update(['payment_status' => 'PARTIAL']);
+        $this->postJson($url, $payload)->assertConflict();
+        DB::table('purchase_bills')->where('id', $bill)->update(['payment_status' => 'UNPAID']);
+        $party->roles()->update(['active' => false]);
+        $this->postJson($url, $payload)->assertConflict();
+        $party->roles()->update(['active' => true]);
+        $this->postJson($url, [...$payload, 'amount' => '200.51'])->assertConflict();
+        $this->assertDatabaseCount('journal_headers', 2);
+        $this->assertDatabaseCount('supplier_credit_bindings', 0);
+        $binding = $this->postJson($url, $payload)->assertOk()->json();
+        $this->postJson($url, $payload)->assertOk()->assertJsonPath('journal_id', $binding['journal_id']);
+        $this->postJson($url, [...$payload, 'amount' => '21.00'])->assertConflict();
+        $this->assertDatabaseCount('supplier_credit_bindings', 1);
+        $this->assertDatabaseHas('journal_details', ['journal_id' => $binding['journal_id'], 'account_code' => '510003', 'position' => 'KREDIT', 'amount' => 20]);
+        $projection = fn ($id) => DB::transaction(fn () => app(PurchaseBillAllocation::class)->source($id, $company->id));
+        $this->assertSame('200.50', $projection($bill)['residual']);
+        $ap = app(ApReconciliation::class);
+        $input = ['purchase_bill_id' => $bill, 'journal_id' => $binding['journal_id'], 'amount' => '20.00', 'reason' => 'Supplier credit verified', 'evidence' => 'CN-FIXTURE'];
+        $this->app->rebinding('request', function ($app, $request) {
+            if (!$request->hasSession()) $request->setLaravelSession($app['session']->driver());
+        });
+        if (!request()->hasSession()) request()->setLaravelSession(app('session')->driver());
+        try {
+            $ap->propose([...$input, 'purchase_bill_id' => $other]);
+            $this->fail('Incorrect invoice accepted');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->assertSame(['supplier_credit_binding_invalid'], $e->errors()['reconciliation']);
+        }
+        $id = $ap->propose($input);
+        $this->assertSame($id, $ap->propose($input));
+        foreach ([['amount' => '19.00'], ['evidence' => 'DIFFERENT-CREDIT']] as $change) {
+            try {
+                $ap->propose([...$input, ...$change]);
+                $this->fail('Changed supplier credit proposal accepted');
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                $this->assertContains($e->errors()['reconciliation'][0], ['supplier_credit_full_amount_required', 'supplier_credit_proposal_conflict']);
+            }
+        }
+        try {
+            $ap->decide($id, 1, 'approve', 'Self approval must fail');
+            $this->fail('Supplier credit self approval accepted');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->assertSame(['independent_approval_required'], $e->errors()['reconciliation']);
+        }
+        $this->assertSame('200.50', $projection($bill)['residual']);
+        $this->actingAs($approver);
+        $ap->decide($id, 1, 'approve', 'Independent credit approval');
+        $ap->decide($id, 1, 'approve', 'Independent credit approval');
+        try {
+            $ap->decide($id, 1, 'approve', 'Changed approval retry');
+            $this->fail('Changed approval retry accepted');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->assertSame(['stale_version'], $e->errors()['reconciliation']);
+        }
+        $this->assertSame('180.50', $projection($bill)['residual']);
+        $this->assertSame('200.50', $projection($other)['residual']);
+        $this->assertDatabaseCount('ppl_ap_reconciliations', 1);
+        $this->assertDatabaseCount('ppl_ap_reconciliation_decisions', 2);
+        $this->assertDatabaseCount('journal_headers', 3);
+        $this->assertDatabaseCount('inventory_ledgers', 0);
+    }
+
     public function test_sealed_generic_ap_journal_matching_document_text_does_not_establish_invoice_identity(): void
     {
         config(['platform.posting_intents_enabled' => true]);

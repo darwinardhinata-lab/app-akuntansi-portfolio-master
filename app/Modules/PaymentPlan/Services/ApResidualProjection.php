@@ -36,6 +36,16 @@ final class ApResidualProjection
         }
         foreach (DB::table('ppl_ap_reconciliations')->where('purchase_bill_id', $bill->id)->where('status', 'approved')->get() as $resolution) {
             $snapshot = json_decode($resolution->source_snapshot, true, 512, JSON_THROW_ON_ERROR);
+            if ($resolution->supplier_credit_binding_id) {
+                $binding = DB::table('supplier_credit_bindings')->where('id', $resolution->supplier_credit_binding_id)->first();
+                if (!$binding || (int) $binding->company_id !== (int) $resolution->company_id || (int) $binding->purchase_bill_id !== (int) $bill->id
+                    || $binding->journal_id !== $resolution->journal_id || (array) $binding !== ($snapshot['supplier_credit'] ?? null)
+                    || !SupplierCreditPosting::sealed($binding)) {
+                    $exceptions[] = ['source' => 'reconciliation:'.$resolution->id, 'reason' => 'approved_source_changed'];
+                    $resolved[$resolution->journal_id] = true;
+                    continue;
+                }
+            }
             $header = \App\Support\ProtectedJournalQuery::table('journal_headers')->where('journal_id', $resolution->journal_id)->first();
             $lines = \App\Support\ProtectedJournalQuery::table('journal_details')->where('journal_id', $resolution->journal_id)->orderBy('id')->get()->map(fn ($l) => (array) $l)->all();
             $correction = DB::table('purchase_return_ap_corrections as c')
@@ -89,6 +99,14 @@ final class ApResidualProjection
         foreach ($journals as $journal) {
             if ($journal->journal_id === $bill->journal_id || isset($represented[$journal->journal_id])) continue;
             if (isset($resolved[$journal->journal_id])) continue;
+            // Bound supplier credits are recognized only through their single approved reconciliation.
+            $credit = DB::table('supplier_credit_bindings')->where('journal_id', $journal->journal_id)->first();
+            if ($credit) {
+                if ((int) $credit->purchase_bill_id !== (int) $bill->id || !SupplierCreditPosting::sealed($credit)) {
+                    $exceptions[] = ['source' => 'journal:'.$journal->journal_id, 'reason' => 'supplier_credit_binding_invalid'];
+                }
+                continue;
+            }
             $lines = \App\Support\ProtectedJournalQuery::table('journal_details')->where('journal_id', $journal->journal_id)->get();
             $reduction = '0.00';
             foreach ($lines->where('account_code', $account) as $line) {
