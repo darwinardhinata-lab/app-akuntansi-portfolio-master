@@ -1,3 +1,11 @@
+# 2026-11-19 — PR #5 date / AP capacity defect reproduced and corrected
+
+- On `e154fdd`, disposable MariaDB proved before-original and future cancellation dates were accepted and immediately restored residual/maker capacity 180.50 -> 200.50, allowing a 190.00 maker reserve. RED: 3 tests / 15 assertions / 2 failures. Evidence `D:\ERP-Recovery\supplier-credit-date-review-20261119\date-red.jsonl` and `maria-red.log/.exit`.
+- No scheduled AP cancellation contract found. Applied the explicit conservative task boundary: original journal date <= reversal date <= MGI business date (company timezone, Asia/Jakarta fallback); destination period must remain open. Checks run under financial fence before financial writes. Existing idempotent completed retries preserved.
+- Fresh MariaDB **12 tests / 273 assertions**, affected SQLite **29 tests / 757 assertions**, exit 0. Rejected cases preserve exact snapshots and 180.50 maker capacity; current MGI date restores 200.50. Tests distinguish Jakarta November 19 from UTC November 18. No full suite or concurrency rerun claimed for this targeted patch.
+- Contract/evidence: `docs/integration/supplier-credit-date-review-20261119.md`. Candidate remains draft, no merge. Next R1 writer selected for independent review: active authenticated `JournalController::store`, which acquires the financial fence but does not call existing `assertBankCapacity`; verify real idr3 held-capacity behavior on integration base separately, not in PR #5.
+- **Human UAT DEFERRED; production NO-GO.** AC03/F11 end-to-end acceptance remains OPEN; this date review does not supersede R1 writer closure.
+
 # 2026-11-19 — AC03/F11 supplier price credit cancellation candidate
 
 - PR #4 merged at `4182523c56311cf89cb553c74110996e8e0073d0`; fetched latest integration tip and created isolated `D:\ERP-Recovery\supplier-credit-void-20261119\tree` on `feat/supplier-credit-void-20261119`. Original working tree/index and staging preserved.

@@ -38,13 +38,17 @@ final class SupplierCreditReversal
                 return $existing;
             }
             abort_unless(SupplierCreditPosting::sealed($binding), 409, 'Supplier credit source is unavailable.');
+            $original = ProtectedJournalQuery::table('journal_headers')->where('journal_id', $binding->journal_id)->lockForUpdate()->first();
+            // Cancellation is effective immediately; scheduled reversals have no AP contract.
+            abort_unless($original && $data['posting_date'] >= substr($original->transaction_date, 0, 10)
+                && $data['posting_date'] <= now($company->timezone ?: 'Asia/Jakarta')->toDateString(),
+                409, 'Reversal date must be between the original journal date and the MGI business date.');
             $source = SupplierCreditPosting::eligible($bill, $company->id);
             abort_if($source['exceptions'], 409, 'Invoice provenance is unresolved.');
             try { AccountingPeriodGuard::dates([$data['posting_date']]); }
             catch (\RuntimeException $e) { abort(409, $e->getMessage()); }
             $resolution = DB::table('ppl_ap_reconciliations')->where('supplier_credit_binding_id', $bindingId)->lockForUpdate()->first();
             abort_if($resolution && !in_array($resolution->status, ['proposed', 'approved'], true), 409, 'Supplier credit attribution state is unresolved.');
-            $original = ProtectedJournalQuery::table('journal_headers')->where('journal_id', $binding->journal_id)->lockForUpdate()->first();
             $lines = ProtectedJournalQuery::table('journal_details')->where('journal_id', $binding->journal_id)->orderBy('id')->lockForUpdate()->get();
             $snapshot = ['binding' => (array) $binding, 'header' => (array) $original,
                 'lines' => $lines->map(fn ($line) => (array) $line)->all(), 'reconciliation' => $resolution ? (array) $resolution : null];
