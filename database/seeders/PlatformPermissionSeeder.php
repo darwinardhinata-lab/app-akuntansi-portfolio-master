@@ -10,6 +10,9 @@ class PlatformPermissionSeeder extends Seeder
     public function run(): void
     {
         // Catalog only: no implied grants to ADMIN, FINANCE or STAFF.
+        Permission::firstOrCreate(['code' => 'supplier_credit.reverse'], [
+            'resource' => 'supplier_credit', 'action' => 'reverse', 'description' => 'Reverse a proven unpaid supplier price credit',
+        ]);
         Permission::firstOrCreate(['code' => 'supplier_credit.post'], [
             'resource' => 'supplier_credit', 'action' => 'post', 'description' => 'Post supplier price credit for a proven Purchase Bill',
         ]);

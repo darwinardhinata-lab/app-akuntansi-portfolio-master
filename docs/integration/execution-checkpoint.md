@@ -1,3 +1,12 @@
+# 2026-11-19 — AC03/F11 supplier price credit cancellation candidate
+
+- PR #4 merged at `4182523c56311cf89cb553c74110996e8e0073d0`; fetched latest integration tip and created isolated `D:\ERP-Recovery\supplier-credit-void-20261119\tree` on `feat/supplier-credit-void-20261119`. Original working tree/index and staging preserved.
+- Added Finance/company-permissioned authenticated reversal endpoint, one sealed opposite journal through PostingService, unique original-binding/reversal identity, immutable cancellation/audit snapshot and approved attribution correction in one transaction. Existing period mutex, source ownership and current invoice/payment/hold checks run under financial fence. No operational grants, stock or tax effects.
+- Pending residual 200.50 stays 200.50; approved 180.50 returns to 200.50 once. Historical proposed/approved rows, approval audit, binding and journal remain intact; reversal excludes active contribution and blocks subsequent approval/proposal. Identical retry returns original reversal; changed payload conflicts. Evidence-retaining migration and fail-closed reversal projection included.
+- Fresh focused SQLite **17 tests / 496 assertions**, full SQLite **807 tests / 16,481 assertions**, MariaDB **13 tests / 303 assertions**, exit 0. Fresh actual InnoDB fence waits prove reversal-first rejects approval, approval-first is compensated by waiting reversal, and payment-first rejects reversal after re-reading committed PAID state. Third connection inspects committed state. Failure injected after reversal/audit writes rolls back journals/evidence/audit/projection together.
+- Details, endpoint contract, migration preservation, RED findings and coverage limits: `docs/integration/supplier-credit-reversal-20261119.md`. Evidence root `D:\ERP-Recovery\supplier-credit-void-20261119`; final hash/remote and SHA-256 manifest recorded there after publication. No claim that old approval-maker race was rerun against this changed projection.
+- **AC03/F11 Finance end-to-end acceptance remains OPEN; human UAT DEFERRED; production NO-GO.** Draft PR only; merge requires explicit Darwin approval. No production migration/posting/deployment.
+
 # 2026-11-19 — Supplier credit source rejection matrix; review candidate only
 
 - Continues `08daa3f` on the existing `feat/supplier-price-credit-20261119` branch, not the ERP integration branch. Review/Finance acceptance package: `docs/integration/supplier-credit-review-20261119.md`.
