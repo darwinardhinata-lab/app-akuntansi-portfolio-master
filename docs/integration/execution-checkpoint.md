@@ -1,3 +1,14 @@
+# 2026-11-19 - R1 maker/manual overlap proof complete; separate draft publication
+
+- Supersedes the sequential-only TAHAN gate below for this scoped writer. Integration tip reconfirmed 4182523. Both workers use normal authenticated HTTP routes, not synthetic hold/GL writes; AP-backed maker 400.00 versus manual outflow 200.00 with idr3 actual 500.00.
+- Maker-first: real InnoDB wait on company 1 PRIMARY ppl_financial_contexts (holder/waiter/observer 12/13/10), fresh reader 14 proves actual/reserved/available 500.00/400.00/100.00; manual rejected without journal. Manual-first: wait 17/18/15, fresh reader 19 proves 300.00/0.00/300.00, one manual journal; maker rejected with exact request row unchanged and no partial AP/bank hold.
+- Evidence D:\ERP-Recovery\r1-manual-journal-capacity-20261119\race-final.jsonl and maria-final-races.log/.exit/.xml: 3 tests / 76 assertions, exit 0. Related SQLite focused-final 113 / 1,496; full-final 799 / 16,247; exit 0. Syntax/diff checks pass. No extra production fix beyond 1978e37; concurrency harness/tests added. Explicit outer transaction orchestrates first commit only after third observer confirms lock wait.
+- Recommendation SIAP MERGE for this scoped blocker, subject to review/explicit instruction. Draft-only publication to integration, separate from untouched draft PR #5 b781e09. Not a manual repeated-submit idempotency proof or blanket writer/R1 acceptance closure. Human UAT DEFERRED; production NO-GO. Full evidence/limitations in docs/integration/r1-manual-journal-capacity-20261119.md.
+
+# 2026-11-19 - R1 active manual-journal capacity correction
+
+Separate integration-base branch feat/r1-manual-journal-capacity-20261119; not bundled into PR #5. Normal authenticated journal POST reproduced idr3 overspend on MariaDB: actual 500.00, reserved 400.00, manual outflow 200.00 yielded available -100.00. Reused capacity guard under financial fence. Final MariaDB 1 test / 9 assertions; affected SQLite 111 tests / 1,449 assertions; exit 0. Rejected write unchanged, affordable 100.00 preserves hold. Details: docs/integration/r1-manual-journal-capacity-20261119.md. Sequential only; maker/manual overlapping schedules remain next R1 prerequisite. TAHAN MERGE for this separate candidate. Human UAT DEFERRED; production NO-GO.
+
 # 2026-11-19 — Supplier credit source rejection matrix; review candidate only
 
 - Continues `08daa3f` on the existing `feat/supplier-price-credit-20261119` branch, not the ERP integration branch. Review/Finance acceptance package: `docs/integration/supplier-credit-review-20261119.md`.
