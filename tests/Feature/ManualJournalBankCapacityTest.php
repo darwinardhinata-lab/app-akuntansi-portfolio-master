@@ -98,4 +98,26 @@ class ManualJournalBankCapacityTest extends \Tests\TestCase
         $this->assertDatabaseHas('journal_headers', ['journal_id' => $large->getKey()]);
         $this->assertDatabaseMissing('journal_headers', ['journal_id' => $small->getKey()]);
     }
+
+    public function test_bulk_delete_checks_combined_current_bank_impact(): void
+    {
+        $f = $this->fixture('300.00');
+        $ids = [];
+        foreach (['2026-01-02', '2026-01-03', '2099-01-01'] as $date) {
+            $ids[] = PostingService::post(['transaction_date' => $date, 'journal_type' => 'MANUAL'], [
+                ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '100.00'],
+                ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '100.00'],
+            ])->getKey();
+        }
+        $before = $this->state($f);
+        $this->assertSame('100.00', $before['balance']['available']);
+        $this->delete(route('jurnal.massDestroy'), ['ids' => $ids])->assertSessionHas('error');
+        $this->assertSame($before, $this->state($f));
+        $this->delete(route('jurnal.massDestroy'), ['ids' => [$ids[0], $ids[2]]])->assertSessionHas('success');
+        $after = $this->state($f);
+        $this->assertSame('400.00', $after['balance']['actual']);
+        $this->assertSame('0.00', $after['balance']['available']);
+        $this->assertSame($before['ppl_reservations'], $after['ppl_reservations']);
+        $this->assertDatabaseCount('journal_headers', 2);
+    }
 }
