@@ -71,6 +71,7 @@ final class SupplierCreditPosting
             && DB::table('party_roles')->where('party_id', $po->party_id)->where('role', 'SUPPLIER')->where('active', true)->lockForUpdate()->first(),
             409, 'A proven active supplier on the owned PO is required.');
         $receipts = DB::table('purchase_receipts')->where('purchase_bill_id', $bill->id)->limit(2)->lockForUpdate()->get();
+        abort_if($po->receipt_mode === 'GRN_V1' && $receipts->isEmpty(), 409, 'GRN supplier or invoice provenance is inconsistent.');
         if ($receipts->isNotEmpty()) {
             $receipt = $receipts->first();
             abort_unless($receipts->count() === 1 && $receipt->status === 'POSTED' && $receipt->journal_id === $bill->journal_id
@@ -82,10 +83,26 @@ final class SupplierCreditPosting
 
     public static function sealed(object $binding): bool
     {
-        return $binding->kind === CompanyCoaRegistry::SUPPLIER_PRICE_CREDIT
-            && DB::table('accounting_posting_intents')->where('journal_id', $binding->journal_id)
+        $identity = 'supplier-credit:'.hash('sha256', json_encode(['company_id' => $binding->company_id,
+            'party_id' => $binding->party_id, 'supplier_reference' => $binding->supplier_reference], JSON_THROW_ON_ERROR));
+        if ($binding->kind !== CompanyCoaRegistry::SUPPLIER_PRICE_CREDIT
+            || !DB::table('accounting_posting_intents')->where('journal_id', $binding->journal_id)
+                ->where('idempotency_key', $identity)->where('source_id', $identity)->where('actor_id', $binding->posted_by)
                 ->where('source_type', $binding->kind)->whereNotNull('sealed_at')->whereNull('reversal_of')->exists()
-            && !DB::table('accounting_posting_intents')->where('reversal_of', $binding->journal_id)->exists();
+            || DB::table('accounting_posting_intents')->where('reversal_of', $binding->journal_id)->exists()) return false;
+        $bill = DB::table('purchase_bills')->where('id', $binding->purchase_bill_id)->first();
+        $header = ProtectedJournalQuery::table('journal_headers')->where('journal_id', $binding->journal_id)->first();
+        $lines = ProtectedJournalQuery::table('journal_details')->where('journal_id', $binding->journal_id)->get();
+        $ap = $lines->firstWhere('id', $binding->ap_line_id);
+        $credit = $lines->firstWhere('position', 'KREDIT');
+        if (!$bill || !$header || (int) $header->bill_id !== (int) $bill->id || $header->source_doc_no !== $identity
+            || $header->currency_code !== 'IDR' || $lines->count() !== 2 || !$ap || !$credit
+            || $ap->position !== 'DEBET' || $ap->account_code !== $bill->credit_account
+            || $credit->account_code !== CompanyCoaRegistry::financeMgi()[$binding->kind]['mgi_account']
+            || $lines->contains(fn ($line) => $line->currency_code !== 'IDR' || bccomp((string) $line->amount, '0', 2) <= 0)
+            || !\App\Support\JournalBalanceValidator::isBalanced($lines->map(fn ($line) => (array) $line)->all())) return false;
+        $hash = hash('sha256', json_encode([(int) $bill->id, substr($header->transaction_date, 0, 10), bcadd((string) $ap->amount, '0', 2), $header->notes], JSON_THROW_ON_ERROR));
+        return hash_equals($binding->payload_hash, $hash);
     }
 
     public static function eligible(PurchaseBill $bill, int $company): array
