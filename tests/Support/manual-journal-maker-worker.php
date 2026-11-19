@@ -22,6 +22,9 @@ final class ManualJournalMakerWorker extends \Tests\TestCase
                 'manual' => $this->post(route('jurnal.store'), $f['payload']),
                 'delete' => $this->delete(route('jurnal.destroy', [$f['payload']['journal_id']])),
                 'edit' => $this->put(route('jurnal.update', [$f['payload']['journal_id']]), $f['payload']),
+                'bulk' => $this->delete(route('jurnal.massDestroy'), $f['payload']),
+                'opening' => $this->post(route('account.store_opening_balance'), $f['payload']),
+                'csv', 'xlsx' => $this->importReplacement($f['action']),
             };
             $result = ['status' => $response->status(), 'body' => $f['action'] === 'maker' ? $response->json() : null,
                 'error' => session('error'), 'success' => session('success')];
@@ -42,6 +45,25 @@ final class ManualJournalMakerWorker extends \Tests\TestCase
             // Closing its PDO connections releases resources without invoking runner-only teardown.
             \Illuminate\Support\Facades\DB::disconnect();
         }
+    }
+
+    private function importReplacement(string $format): \Illuminate\Testing\TestResponse
+    {
+        $rows = [
+            ['Tanggal', 'No Jurnal', 'No Bukti', 'Deskripsi', 'Col5', 'Col6', 'Nilai Debet', 'Nilai Kredit', 'Akun'],
+            ['2026-01-03', 'RACE-RECEIPT', 'TEST', 'Reclassify', '', '', '200.00', '0.00', '610001'],
+            ['2026-01-03', 'RACE-RECEIPT', 'TEST', 'Reclassify', '', '', '0.00', '200.00', '310001'],
+        ];
+        if ($format === 'xlsx') {
+            $book = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $book->getActiveSheet()->fromArray($rows);
+            ob_start();
+            (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save('php://output');
+            $content = ob_get_clean();
+        } else {
+            $content = implode("\n", array_map(fn ($row) => implode(',', $row), $rows))."\n";
+        }
+        return $this->post(route('jurnal.import'), ['file_excel' => \Illuminate\Http\UploadedFile::fake()->createWithContent('race.'.$format, $content)]);
     }
 }
 

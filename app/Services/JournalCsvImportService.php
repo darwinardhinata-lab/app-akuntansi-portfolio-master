@@ -12,6 +12,7 @@ use App\Models\SystemLog;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Support\NumberParser;
 use App\Support\JournalBalanceValidator;
+use App\Modules\PaymentPlan\Services\LegacyFinancialFence;
 
 class JournalCsvImportService
 {
@@ -45,7 +46,16 @@ class JournalCsvImportService
             }
 
             if (in_array($extension, ['xlsx', 'xls'])) {
-                Excel::import(new \App\Imports\JournalImport, $file);
+                $import = fn () => Excel::import(new \App\Imports\JournalImport, $file);
+                if (config('payment_plan_v33.bank_workflow', false) && config('payment_plan_v33.erp_bank_balance', false)) {
+                    // Excel wraps collection() in a transaction; fence before its first consistent read.
+                    DB::transaction(function () use ($import) {
+                        LegacyFinancialFence::lock();
+                        $import();
+                    });
+                } else {
+                    $import();
+                }
                 return ['status' => 'success', 'message' => 'Import file Excel berhasil disinkronisasi.'];
             }
 
@@ -245,6 +255,10 @@ class JournalCsvImportService
                     $allHeadersToDelete = $allHeadersToDelete->merge($chunkHeaders);
                 }
 
+                if (config('payment_plan_v33.bank_workflow', false) && config('payment_plan_v33.erp_bank_balance', false)) {
+                    self::assertReplacementBankCapacity($allHeadersToDelete->unique()->all(), $parsedRows, $needsRounding, $this->accountMapping, $this->roundingAccountCode);
+                }
+
                 if ($allHeadersToDelete->isNotEmpty()) {
                     $chunks = array_chunk($allHeadersToDelete->toArray(), 200);
                     foreach ($chunks as $chunk) {
@@ -414,6 +428,46 @@ class JournalCsvImportService
         } catch (\Throwable $e) {
             return ['status' => 'error', 'message' => "Gagal Membaca File: " . $e->getMessage()];
         }
+    }
+
+    /** Both import engines preflight the same projected replacement before auto-wipe. */
+    public static function assertReplacementBankCapacity(array $replacedIds, array $rows, array $rounding, array $accountMapping, string $roundingAccount): void
+    {
+        $today = now('Asia/Jakarta')->toDateString();
+        $lines = [];
+        foreach (array_chunk($replacedIds, 200) as $ids) {
+            $old = \App\Support\ProtectedJournalQuery::table('journal_details')
+                ->join('journal_headers as h', 'h.journal_id', '=', 'journal_details.journal_id')
+                ->whereIn('h.journal_id', $ids)->whereDate('h.transaction_date', '<=', $today)
+                ->get(['journal_details.account_code', 'journal_details.position', 'journal_details.amount']);
+            foreach ($old as $line) {
+                $lines[] = ['account_code' => $line->account_code, 'amount' => (string) $line->amount,
+                    'position' => match ($line->position) {
+                        'DEBET' => 'KREDIT', 'KREDIT' => 'DEBET',
+                        default => throw new \App\Modules\PaymentPlan\Domain\RuleViolation('invalid_bank_ledger', 409),
+                    }];
+            }
+        }
+        $dates = [];
+        foreach ($rows as $row) {
+            $debit = NumberParser::parseDecimal($row['raw_debet']);
+            $credit = NumberParser::parseDecimal($row['raw_kredit']);
+            if ($debit == 0 && $credit == 0) continue;
+            // Persisted header date is the first nonzero row's date for this document.
+            $date = $dates[$row['evidence']] ??= $row['tanggal'];
+            if ($date > $today) continue;
+            $code = str_replace('-', '', trim(explode(' - ', $row['raw_akun'])[0]));
+            $code = $accountMapping[$code] ?? $code;
+            foreach (['DEBET' => $debit, 'KREDIT' => $credit] as $side => $amount) {
+                if ($amount != 0) $lines[] = ['account_code' => $code, 'position' => $side, 'amount' => number_format($amount, 2, '.', '')];
+            }
+        }
+        foreach ($rounding as $entry) {
+            if (($dates[$entry['evidence']] ?? '9999-12-31') > $today) continue;
+            $lines[] = ['account_code' => $roundingAccount, 'position' => $entry['d'] > $entry['k'] ? 'KREDIT' : 'DEBET',
+                'amount' => number_format($entry['diff'], 2, '.', '')];
+        }
+        LegacyFinancialFence::assertBankCapacity($lines);
     }
 
     public function setRoundingAccount(string $accountCode): void

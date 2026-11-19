@@ -3,10 +3,34 @@
 namespace App\Services;
 
 use App\Models\JournalHeader;
+use App\Modules\PaymentPlan\Domain\RuleViolation;
+use App\Modules\PaymentPlan\Services\LegacyFinancialFence;
 use Illuminate\Support\Carbon;
 
 class OpeningBalanceService
 {
+    public function assertReplacementCapacity(JournalHeader $header, array $newLines): void
+    {
+        if (! config('payment_plan_v33.bank_workflow', false) || ! config('payment_plan_v33.erp_bank_balance', false)
+            || substr((string) $header->transaction_date, 0, 10) > now('Asia/Jakarta')->toDateString()) {
+            return;
+        }
+
+        foreach ($header->details()->get(['account_code', 'position', 'amount']) as $old) {
+            $newLines[] = ['account_code' => $old->account_code, 'amount' => (string) $old->amount,
+                'position' => match ($old->position) {
+                    'DEBET' => 'KREDIT',
+                    'KREDIT' => 'DEBET',
+                    default => throw new RuleViolation('invalid_bank_ledger', 409),
+                }];
+        }
+        foreach ($newLines as &$line) {
+            if (is_float($line['amount'])) $line['amount'] = number_format($line['amount'], 2, '.', '');
+        }
+        unset($line);
+        LegacyFinancialFence::assertBankCapacity($newLines);
+    }
+
     public function query()
     {
         return JournalHeader::where(function ($query) {
