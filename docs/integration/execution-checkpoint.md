@@ -1,3 +1,9 @@
+# 2026-11-19 - R1 bulk journal deletion protects reserved idr3
+
+- Independent candidate from `fc671b6`. Red `jurnal.massDestroy` regression reproduced aggregate overspend even though each current 100.00 receipt fit available funds. Before any deletion, under the existing fence and source/GRN protections, check the aggregate signed effect of selected journals that contribute to the current Jakarta projection. Future lines do not count. A batch reducing capacity by 100.00 leaves zero available; rejection preserves the captured state.
+- MariaDB maker-first: both receipts and their details remain, 500.00 actual / 400.00 reserved / 100.00 available. Bulk-first: both receipts and details removed, 300.00 / 0.00 / 300.00; maker leaves no partial AP allocation, hold or request change. Normal routes, real InnoDB financial-context row waits and separate committed-state reader. MariaDB 3 / 78; full SQLite 801 / 16,265. Evidence `D:\ERP-Recovery\r1-manual-journal-bulk-20261119`.
+- Separate from edit draft PR #8 and supplier cancellation draft PR #5. Reconcile shared test-harness and checkpoint hunks on the final integration candidate if either sibling advances the base. Next: CSV reimport, evaluate the combined removed/replacement effect across the existing chunk transaction including rounding legs. No merge authority; human UAT DEFERRED; production NO-GO.
+
 # 2026-11-19 - R1 single receipt deletion protects reserved idr3
 
 - Base `7feca6e` (merged PR #6). Disposable MariaDB baseline accepted deleting a 200.00 receipt, removing header/details and lowering available from 100.00 to -100.00 with 400.00 still held.
