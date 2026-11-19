@@ -112,6 +112,9 @@ final class ApReconciliationQueue extends \Filament\Pages\Page
                         ($this->proposal['purchase_return_detail_id'] ?? null) ?: null);
                 } catch (\Illuminate\Validation\ValidationException $e) {
                     $journal->preview = ['blocked' => $e->errors()['reconciliation'][0]];
+                } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+                    if ($e->getStatusCode() !== 409) throw $e;
+                    $journal->preview = ['blocked' => $e->getMessage()];
                 }
             }
             $resolutions = DB::table('ppl_ap_reconciliations')->where('company_id', $company)->orderByDesc('id')->paginate(20, ['*'], 'resolutions');

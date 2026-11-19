@@ -8,6 +8,13 @@ namespace App\Modules\Platform\Support;
  */
 class CompanyCoaRegistry
 {
+    public const SUPPLIER_PRICE_CREDIT = 'AP_SUPPLIER_PRICE_DISCOUNT_CREDIT_NOTE';
+
+    public static function financeMgi(): array
+    {
+        return [self::SUPPLIER_PRICE_CREDIT => ['mgi_account' => '510003', 'label' => 'Diskon Pembelian']];
+    }
+
     /** @return array<string, array{normal_balance: string, label: string, mgi_account: string}> */
     public static function manufacturingMgi(): array
     {
