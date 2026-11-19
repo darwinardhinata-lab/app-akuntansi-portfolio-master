@@ -369,6 +369,26 @@ class JournalController extends Controller
             $journal = JournalHeader::lockForUpdate()->findOrFail($id);
             \App\Support\SourceJournalProtection::check($journal);
 
+            if (config('payment_plan_v33.bank_workflow', false)
+                && config('payment_plan_v33.erp_bank_balance', false)
+                && substr((string) $journal->transaction_date, 0, 10) <= now('Asia/Jakarta')->toDateString()) {
+                // Deleting a journal removes its signed contribution from the current bank ledger.
+                $removedLines = $journal->details()->get(['account_code', 'position', 'amount'])
+                    ->map(static function (JournalDetail $line): array {
+                        return [
+                            'account_code' => $line->account_code,
+                            'position' => match ($line->position) {
+                                'DEBET' => 'KREDIT',
+                                'KREDIT' => 'DEBET',
+                                default => throw new \App\Modules\PaymentPlan\Domain\RuleViolation('invalid_bank_ledger', 409),
+                            },
+                            'amount' => (string) $line->amount,
+                        ];
+                    })->all();
+
+                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCapacity($removedLines);
+            }
+
             // Hapus aset tetap yang terhubung ke detail jurnal ini sebelum detail dihapus
             $detailIds = $journal->details()->pluck('id')->toArray();
             if (! empty($detailIds)) {

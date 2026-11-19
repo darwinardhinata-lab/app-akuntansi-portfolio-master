@@ -17,9 +17,11 @@ final class ManualJournalMakerWorker extends \Tests\TestCase
             echo 'READY:'.$db->selectOne('SELECT CONNECTION_ID() AS id')->id.PHP_EOL;
             flush();
             if ($f['hold']) $db->beginTransaction();
-            $response = $f['action'] === 'maker'
-                ? $this->postJson(route('payment-plan-v33.action'), $f['payload'])
-                : $this->post(route('jurnal.store'), $f['payload']);
+            $response = match ($f['action']) {
+                'maker' => $this->postJson(route('payment-plan-v33.action'), $f['payload']),
+                'manual' => $this->post(route('jurnal.store'), $f['payload']),
+                'delete' => $this->delete(route('jurnal.destroy', [$f['payload']['journal_id']])),
+            };
             $result = ['status' => $response->status(), 'body' => $f['action'] === 'maker' ? $response->json() : null,
                 'error' => session('error'), 'success' => session('success')];
             echo 'RESULT:'.json_encode($result, JSON_THROW_ON_ERROR).PHP_EOL;

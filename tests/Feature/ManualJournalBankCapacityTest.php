@@ -13,7 +13,7 @@ class ManualJournalBankCapacityTest extends \Tests\TestCase
 {
     use RefreshDatabase;
 
-    private function fixture(): array
+    private function fixture(string $bankAmount = '500.00'): array
     {
         config(['payment_plan_v33.bank_workflow' => true, 'payment_plan_v33.erp_bank_balance' => true]);
         $actor = User::factory()->create(['role' => 'FINANCE']);
@@ -29,8 +29,8 @@ class ManualJournalBankCapacityTest extends \Tests\TestCase
         DB::table('ppl_reservations')->insert(['request_id' => $request, 'company_id' => $company->id,
             'account_key' => 'idr3', 'currency' => 'IDR', 'amount' => '400.00', 'status' => 'active']);
         PostingService::post(['transaction_date' => '2026-01-01'], [
-            ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '500.00'],
-            ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '500.00']]);
+            ['account_code' => '111003', 'position' => 'DEBET', 'amount' => $bankAmount],
+            ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => $bankAmount]]);
         $this->actingAs($actor);
         return compact('company', 'settings');
     }
@@ -69,5 +69,33 @@ class ManualJournalBankCapacityTest extends \Tests\TestCase
         $this->assertSame('400.00', $balance['reserved']);
         $this->assertSame('0.00', $balance['available']);
         $this->assertDatabaseCount('journal_headers', 2);
+    }
+
+    public function test_deleting_bank_receipts_cannot_spend_reserved_idr3(): void
+    {
+        $f = $this->fixture('200.00');
+        $addReceipt = static fn (string $amount) => PostingService::post([
+            'transaction_date' => '2026-01-02',
+            'journal_type' => 'MANUAL',
+        ], [
+            ['account_code' => '111003', 'position' => 'DEBET', 'amount' => $amount],
+            ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => $amount],
+        ]);
+        $large = $addReceipt('200.00');
+        $small = $addReceipt('100.00');
+        $before = $this->state($f);
+
+        $this->assertSame('100.00', $before['balance']['available']);
+        $this->delete(route('jurnal.destroy', [$large->getKey()]))->assertSessionHas('error');
+        $this->assertSame($before, $this->state($f));
+
+        $this->delete(route('jurnal.destroy', [$small->getKey()]))->assertSessionHas('success');
+        $after = $this->state($f);
+        $this->assertSame('400.00', $after['balance']['actual']);
+        $this->assertSame('400.00', $after['balance']['reserved']);
+        $this->assertSame('0.00', $after['balance']['available']);
+        $this->assertSame($before['ppl_reservations'], $after['ppl_reservations']);
+        $this->assertDatabaseHas('journal_headers', ['journal_id' => $large->getKey()]);
+        $this->assertDatabaseMissing('journal_headers', ['journal_id' => $small->getKey()]);
     }
 }
