@@ -24,7 +24,17 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $this->overlap('manual');
     }
 
-    private function overlap(string $first): void
+    public function test_maker_first_rejects_waiting_receipt_delete(): void
+    {
+        $this->overlap('maker', 'delete');
+    }
+
+    public function test_receipt_delete_first_rejects_waiting_maker_without_partial_allocation(): void
+    {
+        $this->overlap('delete', 'delete');
+    }
+
+    private function overlap(string $first, string $journalAction = 'manual'): void
     {
         $flags = ['payment_plan_v33.enabled' => true, 'payment_plan_v33.bank_workflow' => true,
             'payment_plan_v33.erp_bank_balance' => true, 'payment_plan_v33.ap_allocations' => true,
@@ -46,8 +56,15 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $settings = ['version' => 1, 'erp_cutoff' => '2026-01-01', 'accounts' => [['id' => 'idr3', 'name' => 'Synthetic',
             'number' => 'TEST', 'currency' => 'IDR', 'payment' => true, 'opening' => '500.00', 'asOf' => '2026-01-01']], 'receipts' => []];
         DB::table('ppl_financial_contexts')->insert(['company_id' => $company->id, 'settings' => json_encode($settings)]);
+        $opening = $journalAction === 'delete' ? '300.00' : '500.00';
         \App\Support\PostingService::post(['transaction_date' => '2026-01-01'], [
-            ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '500.00'], ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '500.00']]);
+            ['account_code' => '111003', 'position' => 'DEBET', 'amount' => $opening], ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => $opening]]);
+        $receipt = $journalAction === 'delete' ? \App\Support\PostingService::post([
+            'transaction_date' => '2026-01-03', 'source_doc_no' => 'RACE-RECEIPT', 'journal_type' => 'MANUAL',
+        ], [
+            ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00'],
+            ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '200.00'],
+        ]) : null;
         $journal = \App\Support\PostingService::post(['transaction_date' => '2026-01-02'], [
             ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '600.00'], ['account_code' => '211001', 'position' => 'KREDIT', 'amount' => '600.00']]);
         $bill = DB::table('purchase_bills')->insertGetId(['bill_number' => 'RACE-AP', 'bill_date' => '2026-01-02', 'vendor_name' => 'Synthetic',
@@ -75,10 +92,11 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $release = tempnam(sys_get_temp_dir(), 'manual_maker_');
         unlink($release);
         $workers = [];
-        foreach ([$first, $first === 'maker' ? 'manual' : 'maker'] as $index => $action) {
+        foreach ([$first, $first === 'maker' ? $journalAction : 'maker'] as $index => $action) {
             $payload = $action === 'maker' ? ['id' => $id, 'version' => $version, 'mutationId' => 'race-maker', 'action' => 'mark_maker', 'input' => ['reference' => 'RACE']]
                 : ['transaction_date' => '2026-01-03', 'source_doc_no' => 'RACE-MANUAL', 'description' => 'Manual race outflow', 'details' => [
                     ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '200.00'], ['account_code' => '111003', 'position' => 'KREDIT', 'amount' => '200.00']]];
+            if ($action === 'delete') $payload = ['journal_id' => $receipt->getKey()];
             $workers[] = new Process([PHP_BINARY, base_path('tests/Support/manual-journal-maker-worker.php')], base_path(), ['MANUAL_MAKER_FIXTURE' => json_encode([
                 'connection' => config('database.connections.writer_test'), 'flags' => $flags, 'action' => $action, 'actor' => $users[$action === 'maker' ? 'mk' : 'fs']->id,
                 'payload' => $payload, 'hold' => $index === 0, 'release' => $release], JSON_THROW_ON_ERROR)], null, 110);
@@ -138,16 +156,22 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             $this->assertSame($first === 'maker' ? '500.00' : '300.00', $balance['actual']);
             $this->assertSame($first === 'maker' ? '400.00' : '0.00', $balance['reserved']);
             $this->assertSame($first === 'maker' ? '100.00' : '300.00', $balance['available']);
-            $this->assertDatabaseCount('journal_headers', $first === 'maker' ? 2 : 3);
-            $this->assertDatabaseCount('journal_details', $first === 'maker' ? 4 : 6);
+            $journalCount = $journalAction === 'delete' ? ($first === 'maker' ? 3 : 2) : ($first === 'maker' ? 2 : 3);
+            $this->assertDatabaseCount('journal_headers', $journalCount);
+            $this->assertDatabaseCount('journal_details', $journalCount * 2);
             $this->assertDatabaseCount('accounting_posting_intents', $intentsBefore);
-            $this->assertSame($first === 'maker' ? 0 : 1, DB::table('journal_headers')->where('source_doc_no', 'RACE-MANUAL')->count());
+            if ($receipt) {
+                $this->assertSame($first === 'maker', DB::table('journal_headers')->where('journal_id', $receipt->getKey())->exists());
+                $this->assertSame($first === 'maker' ? 2 : 0, DB::table('journal_details')->where('journal_id', $receipt->getKey())->count());
+            } else {
+                $this->assertSame($first === 'maker' ? 0 : 1, DB::table('journal_headers')->where('source_doc_no', 'RACE-MANUAL')->count());
+            }
             $this->assertDatabaseCount('ppl_reservations', $first === 'maker' ? 1 : 0);
             $this->assertDatabaseCount('ppl_ap_allocations', $first === 'maker' ? 1 : 0);
             $this->assertDatabaseCount('ppl_payment_events', 0);
             $this->assertSame($eventsBefore + ($first === 'maker' ? 1 : 0), DB::table('ppl_events')->count());
             $row = DB::table('ppl_requests')->where('id', $id)->first();
-            if ($first === 'manual') $this->assertEquals($makerBefore, $row);
+            if ($first !== 'maker') $this->assertEquals($makerBefore, $row);
             else {
                 $this->assertSame('bank_prepared', $row->status);
                 $this->assertSame($version + 1, $row->version);
@@ -155,7 +179,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
                 $this->assertDatabaseHas('ppl_reservations', ['request_id' => $id, 'amount' => '400.00', 'status' => 'active']);
             }
             if ($path = getenv('MANUAL_MAKER_RACE_EVIDENCE')) file_put_contents($path, json_encode([
-                'first' => $first, 'holder' => (int) $holder[1], 'waiter' => (int) $waiter[1], 'observer' => $observerId, 'final_reader' => $finalId,
+                'first' => $first, 'journal_action' => $journalAction, 'holder' => (int) $holder[1], 'waiter' => (int) $waiter[1], 'observer' => $observerId, 'final_reader' => $finalId,
                 'wait' => $wait, 'results' => $results, 'balance' => $balance, 'journals' => DB::table('journal_headers')->get(),
                 'reservations' => DB::table('ppl_reservations')->get(), 'allocations' => DB::table('ppl_ap_allocations')->get(),
                 'maker_status' => $row->status, 'maker_version' => $row->version], JSON_THROW_ON_ERROR).PHP_EOL, FILE_APPEND);

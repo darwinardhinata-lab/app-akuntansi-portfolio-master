@@ -1,3 +1,11 @@
+# 2026-11-19 - R1 single receipt deletion protects reserved idr3
+
+- Base `7feca6e` (merged PR #6). Disposable MariaDB baseline accepted deleting a 200.00 receipt, removing header/details and lowering available from 100.00 to -100.00 with 400.00 still held.
+- Verified Darwin's SHA-256 artifact. Strict context check found one whitespace mismatch in the test hunk; the whitespace-tolerant check and apply succeeded with `--whitespace=error-all`. Adapted the route arguments and extended the PR #6 race harness. Runtime change only in single `JournalController::destroy`: existing source protection retained; under the fence, reverse projected ledger contribution and check capacity before asset/detail/header deletion. Future journal dates outside the Jakarta projection do not affect current capacity.
+- Sequential: delete 200.00 rejected with equal captured state; delete 100.00 succeeds leaving actual/reserved/available 400.00/400.00/0.00. Maker-first: 24/25/22/26 holder/waiter/observer/final reader; 200.00 receipt remains, balances 500.00/400.00/100.00. Delete-first: 29/30/27/31; receipt and details gone, maker rejected with unchanged request and no hold or AP allocation, balances 300.00/0.00/300.00. Both waits observed on company 1 PRIMARY `ppl_financial_contexts` through normal authenticated routes and fresh committed reads.
+- MariaDB 6 tests / 156 assertions; focused SQLite 111 / 1,495; full SQLite 800 / 16,257. Initial parallel full run had two Windows Blade-cache rename errors; isolated compiled-view path passed. Evidence `D:\ERP-Recovery\r1-manual-journal-delete-capacity-20261119` (`baseline-delete.*`, `race-final.jsonl`, `maria.*`, `focused.*`, `full-final.*`).
+- SIAP MERGE scoped, draft only pending explicit Darwin approval. Edit, bulk delete and import remain separate. No operational DB changes or deployment. Human UAT DEFERRED; production NO-GO. PR #5 remains separate.
+
 # 2026-11-19 - R1 maker/manual overlap proof complete; separate draft publication
 
 - Supersedes the sequential-only TAHAN gate below for this scoped writer. Integration tip reconfirmed 4182523. Both workers use normal authenticated HTTP routes, not synthetic hold/GL writes; AP-backed maker 400.00 versus manual outflow 200.00 with idr3 actual 500.00.
