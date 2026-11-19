@@ -1,3 +1,9 @@
+# 2026-11-19 - R1 manual edit protects reserved idr3
+
+- Based on `fc671b6`, tree-identical to tested PR #7 `754b718`. `PUT jurnal.update` previously accepted moving a current 200.00 receipt to tomorrow despite a 400.00 hold on 500.00. Red route test retained. Under the existing fence and after source/FX protections, the guard subtracts projected old lines and adds projected replacement lines per account before any writes; uses Jakarta day for both sides. Tests cover date/account changes rejected unchanged and a net 100.00 reduction leaving zero available.
+- Normal-route MariaDB maker-first: edit rejected, actual/reserved/available 500.00/400.00/100.00. Edit-first: receipt reclassified, maker rejected, 300.00/0.00/300.00, no partial AP/hold or request mutation. Independent InnoDB observer verified the company financial-context PK wait; fresh reader verified committed results.
+- MariaDB 3 / 77; full SQLite 801 / 16,266. Evidence `D:\ERP-Recovery\r1-manual-journal-edit-20261119` (`red.log`, `race.jsonl`, `maria.log`, `full.log`). Scoped review recommendation only; merge requires explicit approval. Next independent writer: aggregate guard for bulk delete, followed by CSV reimport. PR #5 remains draft; merge simulation against `fc671b6` reports only a checkpoint conflict, not a runtime conflict. Integration-tree regression still needed before PR #5 readiness. UAT DEFERRED; production NO-GO.
+
 # 2026-11-19 - R1 single receipt deletion protects reserved idr3
 
 - Base `7feca6e` (merged PR #6). Disposable MariaDB baseline accepted deleting a 200.00 receipt, removing header/details and lowering available from 100.00 to -100.00 with 400.00 still held.

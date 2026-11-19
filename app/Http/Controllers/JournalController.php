@@ -234,8 +234,17 @@ class JournalController extends Controller
             }
             \App\Support\SourceJournalProtection::check($journal);
 
+            $date = $request->transaction_date;
+            if (\App\Modules\PaymentPlan\Services\LegacyFinancialFence::bankCapacityEnabled()) {
+                $date = \Illuminate\Support\Carbon::parse($date)->toDateTimeString();
+                $today = now('Asia/Jakarta')->toDateString();
+                $removed = \App\Modules\PaymentPlan\Services\LegacyFinancialFence::removedBankLines($journal, $today);
+                $added = substr($date, 0, 10) <= $today ? $request->details : [];
+                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCapacity(array_merge($removed, $added));
+            }
+
             $journal->update([
-                'transaction_date' => $request->transaction_date,
+                'transaction_date' => $date,
                 'source_doc_no' => $request->input('source_doc_no', $request->input('evidence_number')),
                 'notes' => $request->description,
             ]);

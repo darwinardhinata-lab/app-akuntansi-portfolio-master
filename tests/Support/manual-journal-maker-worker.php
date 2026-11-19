@@ -21,6 +21,7 @@ final class ManualJournalMakerWorker extends \Tests\TestCase
                 'maker' => $this->postJson(route('payment-plan-v33.action'), $f['payload']),
                 'manual' => $this->post(route('jurnal.store'), $f['payload']),
                 'delete' => $this->delete(route('jurnal.destroy', [$f['payload']['journal_id']])),
+                'edit' => $this->put(route('jurnal.update', [$f['payload']['journal_id']]), $f['payload']),
             };
             $result = ['status' => $response->status(), 'body' => $f['action'] === 'maker' ? $response->json() : null,
                 'error' => session('error'), 'success' => session('success')];

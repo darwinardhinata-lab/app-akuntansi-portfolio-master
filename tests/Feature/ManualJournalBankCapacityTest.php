@@ -98,4 +98,38 @@ class ManualJournalBankCapacityTest extends \Tests\TestCase
         $this->assertDatabaseHas('journal_headers', ['journal_id' => $large->getKey()]);
         $this->assertDatabaseMissing('journal_headers', ['journal_id' => $small->getKey()]);
     }
+
+    public function test_edit_uses_net_current_bank_impact_and_preserves_held_funds(): void
+    {
+        $f = $this->fixture('300.00');
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-18 18:30:00', 'UTC'));
+        try {
+            $receipt = PostingService::post(['transaction_date' => '2026-11-19', 'journal_type' => 'MANUAL'], [
+                ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00'],
+                ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '200.00'],
+            ]);
+            $url = route('jurnal.update', [$receipt->getKey()]);
+            $payload = ['transaction_date' => '2026-11-19', 'description' => 'Adjusted receipt', 'details' => [
+                ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00'],
+                ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '200.00'],
+            ]];
+            $before = $this->state($f);
+            $this->assertSame('100.00', $before['balance']['available']);
+            $future = array_replace($payload, ['transaction_date' => '2026-11-20']);
+            $other = $payload;
+            $other['details'][0]['account_code'] = '610001';
+            foreach ([$future, $other] as $invalid) {
+                $this->put($url, $invalid)->assertSessionHas('error', fn ($error) => str_contains($error, 'funds_insufficient'));
+                $this->assertSame($before, $this->state($f));
+            }
+            $payload['details'][0]['amount'] = $payload['details'][1]['amount'] = '100.00';
+            $this->put($url, $payload)->assertSessionHas('success');
+            $after = $this->state($f);
+            $this->assertSame('400.00', $after['balance']['actual']);
+            $this->assertSame('0.00', $after['balance']['available']);
+            $this->assertSame($before['ppl_reservations'], $after['ppl_reservations']);
+        } finally {
+            $this->travelBack();
+        }
+    }
 }
