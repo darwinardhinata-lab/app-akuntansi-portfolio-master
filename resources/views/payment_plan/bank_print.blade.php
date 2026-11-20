@@ -12,7 +12,7 @@
         .signature-group{break-inside:avoid;page-break-inside:avoid;margin:18px 0}.signature-grid{table-layout:fixed}.signature-grid td{vertical-align:top;width:33.33%}.signature-grid strong,.signature-grid small{display:block;overflow-wrap:anywhere}.manual-space{height:20mm;border-bottom:1px dotted #777;margin:6px 0}.signature-note{font-size:11px;overflow-wrap:anywhere}.signature-grid small{margin-top:4px}@media screen and (max-width:600px){.signature-grid,.signature-grid tbody,.signature-grid tr,.signature-grid td{display:block;width:auto}.signature-grid td{margin-bottom:8px}}
     </style>
 </head>
-<body>
+<body data-bank-request-id="{{ $row->id }}" data-bank-doc="{{ $payload['doc'] ?? $row->id }}">
     <button class="no-print" onclick="window.print()">{{ __('bank_payment.print') }}</button>
     <table class="print-sheet"><thead><tr><th><h1>MGI · {{ __('bank_payment.title') }} — {{ $payload['doc'] ?? $row->id }}</h1></th></tr></thead><tbody><tr><td>
     <p>{{ __('bank_payment.status') }}: {{ $row->status }} · {{ __('bank_payment.version') }}: {{ $row->version }}</p>

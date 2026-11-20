@@ -173,6 +173,8 @@ class PaymentPlanBankHttpTest extends TestCase
             file_put_contents(getenv('R1_UI_CAPTURE').'/data.json', json_encode(['requests'=>[$result], 'bankBalances'=>[], 'apReconciliation'=>[]]));
         }
         $this->get(route('payment-plan-v33.print', $id))->assertOk()
+            ->assertSee('data-bank-request-id="'.$id.'"', false)
+            ->assertSee('data-bank-doc="'.$result['request']['doc'].'"', false)
             ->assertSee('111003')->assertSee('100.25')->assertSee('receipt.png')->assertSee('<img', false)->assertSee($result['request']['journal']['journalId']);
         $this->assertDatabaseHas('ppl_payment_events', ['request_id' => $id, 'journal_id' => $result['request']['journal']['journalId']]);
         $this->assertDatabaseCount('journal_headers', $baselineJournals + 1);
