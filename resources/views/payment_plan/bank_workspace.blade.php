@@ -81,7 +81,8 @@
  async function run(fn) { if(busy) return; busy=true; message.classList.remove('bank-error');message.textContent=ui.loading;document.getElementById('bankWorkspace').setAttribute('aria-busy','true'); try {await fn(); message.textContent=ui.success;} catch(e){message.classList.add('bank-error');message.textContent=ui.error+' '+e.message;} finally{busy=false;document.getElementById('bankWorkspace').setAttribute('aria-busy','false');} }
  function select(row) {
    selected=row; const p=row.request, form=document.getElementById('bankAction'); form.hidden=false;
-   document.getElementById('selectedBankDoc').textContent=p.doc+' — '+label('statuses',p.status)+' — IDR '+p.amount;
+   const heading=document.getElementById('selectedBankDoc');heading.textContent=p.doc+' — '+label('statuses',p.status)+' — IDR '+p.amount;
+   heading.dataset.bankRequestId=p.id;heading.dataset.bankDoc=p.doc;
    const detail=document.getElementById('bankDetail');detail.replaceChildren();
    ['payee','recipientBank','recipientAccount','due','invoice','createdName'].forEach(k=>{const item=document.createElement('p');item.textContent=(ui[k]||k)+': '+(p[k]||'—');detail.append(item);});
    ['subject','purpose'].forEach(k=>{const item=document.createElement('p');item.textContent=ui[k]+': '+(p[k]||[]).join(' / ');detail.append(item);});
@@ -100,7 +101,7 @@
    Object.entries(data.bankBalances||{}).forEach(([key,b])=>{const line=document.createElement('p');line.textContent=key+' · GL '+b.ledger+' · pending debit '+b.unposted_actual_debits+' · reserved '+b.reserved+' · available '+b.available;balances.append(line);});
    const visible=data.requests.filter(row=>document.getElementById('bankInbox').value==='all'||actionsFor(row.request).length);
    if(!visible.length){const empty=document.createElement('p');empty.textContent=ui.empty;list.append(empty);}
-   visible.forEach(row=>{const b=document.createElement('button');b.type='button';b.className='btn btn-outline-secondary d-block mb-2';b.textContent=row.request.doc+' — '+row.request.payee+' — '+label('statuses',row.request.status);b.onclick=()=>select(row);list.append(b);});
+   visible.forEach(row=>{const b=document.createElement('button');b.type='button';b.className='btn btn-outline-secondary d-block mb-2';b.textContent=row.request.doc+' — '+row.request.payee+' — '+label('statuses',row.request.status);b.dataset.bankRequestId=row.request.id;b.dataset.bankDoc=row.request.doc;b.onclick=()=>select(row);list.append(b);});
    const current=data.requests.find(row=>selected?.request.id===row.request.id);if(current)select(current);}
  document.getElementById('refreshBank').onclick=()=>run(refresh);
  document.getElementById('bankInbox').onchange=()=>run(refresh);
