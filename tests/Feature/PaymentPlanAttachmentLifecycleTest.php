@@ -46,12 +46,19 @@ class PaymentPlanAttachmentLifecycleTest extends TestCase
             Storage::fake('local');
         }
         config(['payment_plan_v33.enabled' => true, 'payment_plan_v33.bank_workflow' => true,
-            'payment_plan_v33.erp_bank_balance' => false]);
+            'payment_plan_v33.erp_bank_balance' => false, 'platform.legacy_sync_enabled' => false,
+            'customs.enabled' => false]);
         $user = User::factory()->create();
         $this->actingAs($user);
         $company = Company::create(['code' => 'MGI', 'name' => 'MGI', 'base_currency' => 'IDR', 'active' => true]);
+        $outsider = User::factory()->create();
+        $role = \App\Modules\Platform\Models\Role::create(['code' => 'PPL_REQUESTER', 'name' => 'Requester']);
+        foreach ([$user, $outsider] as $member) {
+            $member->companies()->attach($company->id, ['is_default' => true]);
+            $member->platformRoles()->attach($role->id, ['company_id' => $company->id]);
+        }
         DB::table('ppl_financial_contexts')->insert(['company_id' => $company->id, 'settings' => '{}']);
-        $actor = ['id' => $user->id, 'name' => $user->name, 'department' => 'Test',
+        $actor = ['id' => (string) $user->id, 'name' => $user->name, 'department' => 'Test',
             'company_id' => $company->id, 'roles' => ['requester']];
         $id = (string) Str::uuid();
         (new BankRequestStore())->create(['id' => $id, 'payee' => 'Synthetic supplier',
@@ -75,8 +82,11 @@ class PaymentPlanAttachmentLifecycleTest extends TestCase
         $this->assertDatabaseCount('ppl_events', 1);
         $this->assertSame([], Storage::disk('local')->allFiles('payment-plan'));
 
-        $result = (new PrivateAttachmentStore())->add($id, 1, 'request', $file, $actor);
-        $this->assertSame(2, $result['version']);
+        $upload = $this->post(route('payment-plan-v33.attachment'), [
+            'id' => $id, 'version' => 1, 'kind' => 'request', 'file' => $file,
+        ]);
+        $this->assertSame(200, $upload->getStatusCode(), $upload->getContent());
+        $upload->assertJsonPath('version', 2);
         $attachment = DB::table('ppl_attachments')->sole();
         $this->assertSame($attachment->sha256, hash('sha256', Storage::disk('local')->get($attachment->storage_key)));
         $this->assertDatabaseHas('ppl_attachment_audits', ['attachment_id' => $attachment->id, 'actor_id' => $user->id, 'action' => 'upload']);
@@ -108,14 +118,12 @@ class PaymentPlanAttachmentLifecycleTest extends TestCase
             $this->assertSame($attachment->sha256, DB::table('ppl_attachments')->where('id', $attachment->id)->value('sha256'));
         }
         Storage::disk('local')->put($attachment->storage_key, $original);
-        $response = (new PrivateAttachmentStore())->response($attachment);
-        ob_start();
-        try {
-            $response->sendContent();
-            $this->assertSame($attachment->sha256, hash('sha256', ob_get_contents()));
-        } finally {
-            ob_end_clean();
-        }
+        $url = route('payment-plan-v33.download', $attachment->id);
+        $this->actingAs($outsider)->get($url)->assertForbidden();
+        $this->get($url.'?preview=1')->assertForbidden();
+        $this->assertDatabaseCount('ppl_attachment_audits', 1);
+        $response = $this->actingAs($user)->get($url)->assertOk();
+        $this->assertSame($attachment->sha256, hash('sha256', $response->streamedContent()));
         $this->assertDatabaseHas('ppl_attachment_audits', ['attachment_id' => $attachment->id, 'actor_id' => $user->id, 'action' => 'download']);
         $this->assertDatabaseCount('ppl_attachment_audits', 2);
     }
