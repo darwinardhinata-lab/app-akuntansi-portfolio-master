@@ -314,6 +314,7 @@ class AccountController extends Controller
                     throw new \RuntimeException('Multicurrency belum diaktifkan; saldo awal akun valas ditolak.');
                 }
                 DB::transaction(function () use ($request) {
+                    \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
                     $date = \Carbon\Carbon::parse($request->transaction_date);
                     \App\Support\AccountingPeriodGuard::source([$date->toDateString()]);
                     $service = app(\App\Modules\Currency\Services\FxPostingService::class);
@@ -354,6 +355,7 @@ class AccountController extends Controller
                     }
                     $header = app(\App\Services\OpeningBalanceService::class)->headerForDate($date->toDateString());
                     $lines = $service::prepareOpeningLines($lines, $header->journal_type);
+                    app(\App\Services\OpeningBalanceService::class)->assertReplacementCapacity($header, $lines);
                     $header->forceFill(['currency_code' => $base, 'exchange_rate' => '1.00000000'])->save();
                     JournalDetail::query()->where('journal_id', $header->getKey())->delete();
                     foreach ($lines as $line) {
@@ -375,6 +377,7 @@ class AccountController extends Controller
         try {
             DB::beginTransaction();
 
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
             $header = app(\App\Services\OpeningBalanceService::class)->headerForDate($request->transaction_date);
 
             if (! config('platform.multicurrency_enabled')
@@ -383,8 +386,6 @@ class AccountController extends Controller
             }
 
             $primaryKeyId = $header->journal_id ?? $header->id;
-
-            JournalDetail::where('journal_id', $primaryKeyId)->delete();
 
             $detailsToInsert = [];
             $totalDebet  = 0;
@@ -431,6 +432,8 @@ class AccountController extends Controller
                 );
             }
 
+            app(\App\Services\OpeningBalanceService::class)->assertReplacementCapacity($header, $detailsToInsert);
+            JournalDetail::where('journal_id', $primaryKeyId)->delete();
             if (!empty($detailsToInsert)) {
                 JournalDetail::insert($detailsToInsert);
             }
@@ -466,6 +469,7 @@ class AccountController extends Controller
 
         DB::beginTransaction();
         try {
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
             $header = app(\App\Services\OpeningBalanceService::class)->headerForDate($tanggal);
             if (! config('platform.multicurrency_enabled')
                 && JournalDetail::query()->where('journal_id', $header->getKey())->whereNotNull('amount_txn')->exists()) {
@@ -473,8 +477,6 @@ class AccountController extends Controller
                 throw new \RuntimeException('Multicurrency belum diaktifkan; saldo awal valas yang sudah ada tidak dapat diganti.');
             }
             $primaryKeyId = $header->getKey();
-            JournalDetail::where('journal_id', $primaryKeyId)->delete();
-
             $existingAccounts = Account::pluck('account_code')->toArray();
             $accountMapping = ['1133' => '11307'];
 
@@ -555,6 +557,8 @@ class AccountController extends Controller
                 );
             }
 
+            app(\App\Services\OpeningBalanceService::class)->assertReplacementCapacity($header, $detailsToInsert);
+            JournalDetail::where('journal_id', $primaryKeyId)->delete();
             foreach (array_chunk($detailsToInsert, 200) as $chunk) {
                 JournalDetail::insert($chunk);
             }

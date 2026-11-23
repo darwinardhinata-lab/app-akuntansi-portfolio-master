@@ -234,8 +234,17 @@ class JournalController extends Controller
             }
             \App\Support\SourceJournalProtection::check($journal);
 
+            $date = $request->transaction_date;
+            if (\App\Modules\PaymentPlan\Services\LegacyFinancialFence::bankCapacityEnabled()) {
+                $date = \Illuminate\Support\Carbon::parse($date)->toDateTimeString();
+                $today = now('Asia/Jakarta')->toDateString();
+                $removed = \App\Modules\PaymentPlan\Services\LegacyFinancialFence::removedBankLines($journal, $today);
+                $added = substr($date, 0, 10) <= $today ? $request->details : [];
+                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCapacity(array_merge($removed, $added));
+            }
+
             $journal->update([
-                'transaction_date' => $request->transaction_date,
+                'transaction_date' => $date,
                 'source_doc_no' => $request->input('source_doc_no', $request->input('evidence_number')),
                 'notes' => $request->description,
             ]);
@@ -426,6 +435,23 @@ class JournalController extends Controller
 
             $journalIds = $journals->pluck('journal_id')->toArray();
             GrnProtection::journals($journalIds);
+
+            if (config('payment_plan_v33.bank_workflow', false) && config('payment_plan_v33.erp_bank_balance', false)) {
+                $today = now('Asia/Jakarta')->toDateString();
+                $projectedIds = $journals->filter(fn (JournalHeader $journal) =>
+                    substr((string) $journal->transaction_date, 0, 10) <= $today)->modelKeys();
+                $removed = JournalDetail::whereIn('journal_id', $projectedIds)->get(['account_code', 'position', 'amount'])
+                    ->map(static fn (JournalDetail $line) => [
+                        'account_code' => $line->account_code,
+                        'position' => match ($line->position) {
+                            'DEBET' => 'KREDIT',
+                            'KREDIT' => 'DEBET',
+                            default => throw new \App\Modules\PaymentPlan\Domain\RuleViolation('invalid_bank_ledger', 409),
+                        },
+                        'amount' => (string) $line->amount,
+                    ])->all();
+                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCapacity($removed);
+            }
 
             if (! empty($journalIds)) {
                 // Hapus aset tetap yang terhubung ke detail jurnal yang akan dihapus
