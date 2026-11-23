@@ -98,4 +98,122 @@ class ManualJournalBankCapacityTest extends \Tests\TestCase
         $this->assertDatabaseHas('journal_headers', ['journal_id' => $large->getKey()]);
         $this->assertDatabaseMissing('journal_headers', ['journal_id' => $small->getKey()]);
     }
+
+    public function test_edit_uses_net_current_bank_impact_and_preserves_held_funds(): void
+    {
+        $f = $this->fixture('300.00');
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-18 18:30:00', 'UTC'));
+        try {
+            $receipt = PostingService::post(['transaction_date' => '2026-11-19', 'journal_type' => 'MANUAL'], [
+                ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00'],
+                ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '200.00'],
+            ]);
+            $url = route('jurnal.update', [$receipt->getKey()]);
+            $payload = ['transaction_date' => '2026-11-19', 'description' => 'Adjusted receipt', 'details' => [
+                ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00'],
+                ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '200.00'],
+            ]];
+            $before = $this->state($f);
+            $this->assertSame('100.00', $before['balance']['available']);
+            $future = array_replace($payload, ['transaction_date' => '2026-11-20']);
+            $other = $payload;
+            $other['details'][0]['account_code'] = '610001';
+            foreach ([$future, $other] as $invalid) {
+                $this->put($url, $invalid)->assertSessionHas('error', fn ($error) => str_contains($error, 'funds_insufficient'));
+                $this->assertSame($before, $this->state($f));
+            }
+            $payload['details'][0]['amount'] = $payload['details'][1]['amount'] = '100.00';
+            $this->put($url, $payload)->assertSessionHas('success');
+            $after = $this->state($f);
+            $this->assertSame('400.00', $after['balance']['actual']);
+            $this->assertSame('0.00', $after['balance']['available']);
+            $this->assertSame($before['ppl_reservations'], $after['ppl_reservations']);
+        } finally {
+            $this->travelBack();
+        }
+    }
+
+    public function test_bulk_delete_checks_combined_current_bank_impact(): void
+    {
+        $f = $this->fixture('300.00');
+        $ids = [];
+        foreach (['2026-01-02', '2026-01-03', '2099-01-01'] as $date) {
+            $ids[] = PostingService::post(['transaction_date' => $date, 'journal_type' => 'MANUAL'], [
+                ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '100.00'],
+                ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '100.00'],
+            ])->getKey();
+        }
+        $before = $this->state($f);
+        $this->assertSame('100.00', $before['balance']['available']);
+        $this->delete(route('jurnal.massDestroy'), ['ids' => $ids])->assertSessionHas('error');
+        $this->assertSame($before, $this->state($f));
+        $this->delete(route('jurnal.massDestroy'), ['ids' => [$ids[0], $ids[2]]])->assertSessionHas('success');
+        $after = $this->state($f);
+        $this->assertSame('400.00', $after['balance']['actual']);
+        $this->assertSame('0.00', $after['balance']['available']);
+        $this->assertSame($before['ppl_reservations'], $after['ppl_reservations']);
+        $this->assertDatabaseCount('journal_headers', 2);
+    }
+
+    public static function importFormats(): array
+    {
+        return [['csv'], ['xlsx']];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('importFormats')]
+    public function test_reimport_cannot_remove_reserved_bank_capacity(string $format): void
+    {
+        $f = $this->fixture('300.00');
+        PostingService::post(['transaction_date' => '2026-01-02', 'source_doc_no' => 'GJ-R1-REIMPORT', 'journal_type' => 'MANUAL'], [
+            ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00'],
+            ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '200.00'],
+        ]);
+        $before = $this->state($f);
+        $this->assertSame('100.00', $before['balance']['available']);
+        $csv = "Tanggal,No Jurnal,No Bukti,Deskripsi,Col5,Col6,Nilai Debet,Nilai Kredit,Akun\n"
+            ."2026-01-02,GJ-R1-REIMPORT,TEST,Reclassify,,,200.00,0.00,610001\n"
+            ."2026-01-02,GJ-R1-REIMPORT,TEST,Reclassify,,,0.00,200.00,310001\n";
+        $upload = static function (string $content) use ($format) {
+            if ($format === 'csv') return \Illuminate\Http\UploadedFile::fake()->createWithContent('r1.csv', $content);
+            $book = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $book->getActiveSheet()->fromArray(array_map('str_getcsv', explode("\n", trim($content))));
+            ob_start();
+            (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save('php://output');
+            return \Illuminate\Http\UploadedFile::fake()->createWithContent('r1.xlsx', ob_get_clean());
+        };
+        $this->post(route('jurnal.import'), ['file_excel' => $upload($csv)])
+            ->assertSessionHas('error', fn ($error) => str_contains($error, 'funds_insufficient'));
+        $this->assertSame($before, $this->state($f));
+        $affordable = str_replace(['200.00', '610001'], ['100.00', '111003'], $csv);
+        for ($attempt = 0; $attempt < 2; $attempt++) {
+            $this->post(route('jurnal.import'), ['file_excel' => $upload($affordable)])->assertSessionHas('success');
+            $state = $this->state($f);
+            $this->assertSame('0.00', $state['balance']['available']);
+            $this->assertSame($before['ppl_reservations'], $state['ppl_reservations']);
+            $this->assertDatabaseCount('journal_headers', 2);
+        }
+    }
+
+    public function test_opening_balance_replacement_must_preserve_reserved_idr3(): void
+    {
+        $f = $this->fixture('300.00');
+        DB::table('accounts')->where('account_code', '310001')->update(['normal_balance' => 'KREDIT']);
+        $url = route('account.store_opening_balance');
+        $payload = ['transaction_date' => '2026-01-02', 'balances' => ['111003' => '200.00', '310001' => '200.00']];
+        $this->post($url, $payload)->assertSessionHas('success');
+        $before = $this->state($f);
+        $this->assertSame('100.00', $before['balance']['available']);
+        $this->post($url, ['transaction_date' => $payload['transaction_date'], 'balances' => ['111003' => '0', '310001' => '0']])
+            ->assertSessionHas('error', fn ($error) => str_contains($error, 'funds_insufficient'));
+        $this->assertSame($before, $this->state($f));
+        $import = route('account.import_opening_balance');
+        $csv = static fn ($amount) => \Illuminate\Http\UploadedFile::fake()->createWithContent('opening.csv',
+            "Account,Name,Debit,Credit\n610001,Other,$amount,0\n310001,Equity,0,$amount\n");
+        $this->post($import, ['tanggal_saldo' => $payload['transaction_date'], 'file' => $csv('200.00')])
+            ->assertSessionHas('error', fn ($error) => str_contains($error, 'funds_insufficient'));
+        $this->assertSame($before, $this->state($f));
+        $payload['balances'] = ['111003' => '100.00', '310001' => '100.00'];
+        $this->post($url, $payload)->assertSessionHas('success');
+        $this->assertSame('0.00', $this->state($f)['balance']['available']);
+    }
 }
