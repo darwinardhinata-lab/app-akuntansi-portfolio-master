@@ -97,6 +97,24 @@ WHERE CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME = 'ppl_attachments_one_
 
 ---
 
+## 3.6 Payment confirmation timestamp gate
+
+On the approved staging target, verify the deployed SHA, effective schema and connection alias before collecting the following read-only evidence:
+
+```sql
+SHOW CREATE TABLE ppl_payment_events;
+SELECT @@SESSION.explicit_defaults_for_timestamp, @@GLOBAL.explicit_defaults_for_timestamp;
+SELECT COLUMN_TYPE, COLUMN_DEFAULT, EXTRA
+FROM information_schema.COLUMNS
+WHERE TABLE_SCHEMA = DATABASE()
+  AND TABLE_NAME = 'ppl_payment_events'
+  AND COLUMN_NAME = 'created_at';
+```
+
+Compare the installed DDL with the DBA-approved baseline. A current server setting does not establish how an existing column was created. If `created_at` has an unexpected `ON UPDATE` clause, stop before seeding and send the DDL delta to the DBA; do not change shared settings or active schema as part of preflight.
+
+For each approved synthetic journey, use a new reader to capture event ID, `created_at`, and `journal_id` after payment confirmation, after posting, and after same-key retry. Separate confirmation and posting by more than the timestamp precision. Require the same event and original timestamp at all three points, one linked journal after posting, and no additional journal on retry. This is staging evidence, not human Finance acceptance. Keep synthetic objects and transactions until the independent restore snapshot is captured.
+
 ## 4. Rollback Procedure (Migration Failure)
 
 The migration `down()` method throws `RuntimeException` intentionally — attachment evidence and audit records **must not be discarded**.
