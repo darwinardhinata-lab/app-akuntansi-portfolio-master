@@ -87,6 +87,16 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $this->overlap($first, $variant);
     }
 
+    public function test_maker_first_rejects_waiting_fx(): void
+    {
+        $this->overlap('maker', 'fx');
+    }
+
+    public function test_fx_first_rejects_waiting_maker(): void
+    {
+        $this->overlap('fx', 'fx');
+    }
+
     private function overlap(string $first, string $journalAction = 'manual'): void
     {
         $flags = ['payment_plan_v33.enabled' => true, 'payment_plan_v33.bank_workflow' => true,
@@ -105,15 +115,19 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         foreach (['111003' => 'DEBET', '310001' => 'KREDIT', '610001' => 'DEBET', '211001' => 'KREDIT'] as $code => $side) {
             DB::table('accounts')->insert(['account_code' => $code, 'account_name' => 'Synthetic', 'normal_balance' => $side, 'coa_type' => 'Other', 'report_pos' => 'NERACA']);
         }
+        if ($journalAction === 'fx') {
+            $this->seedFx($users['fs']->id);
+            $flags['platform.multicurrency_enabled'] = true;
+        }
         DB::table('company_coa_mappings')->insert(['company_id' => $company->id, 'semantic_key' => 'ppl.bank.idr3', 'account_code' => '111003', 'active' => true]);
         $settings = ['version' => 1, 'erp_cutoff' => '2026-01-01', 'accounts' => [['id' => 'idr3', 'name' => 'Synthetic',
             'number' => 'TEST', 'currency' => 'IDR', 'payment' => true, 'opening' => '500.00', 'asOf' => '2026-01-01']], 'receipts' => []];
         DB::table('ppl_financial_contexts')->insert(['company_id' => $company->id, 'settings' => json_encode($settings)]);
-        $opening = $journalAction === 'manual' ? '500.00' : '300.00';
+        $opening = in_array($journalAction, ['manual', 'fx'], true) ? '500.00' : '300.00';
         \App\Support\PostingService::post(['transaction_date' => '2026-01-01'], [
             ['account_code' => '111003', 'position' => 'DEBET', 'amount' => $opening], ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => $opening]]);
         $openingAction = str_starts_with($journalAction, 'opening');
-        $receipt = ! $openingAction && !in_array($journalAction, ['manual', 'bulk'], true) ? \App\Support\PostingService::post([
+        $receipt = ! $openingAction && !in_array($journalAction, ['manual', 'bulk', 'fx'], true) ? \App\Support\PostingService::post([
             'transaction_date' => '2026-01-03', 'source_doc_no' => 'RACE-RECEIPT', 'journal_type' => 'MANUAL',
         ], [
             ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00'],
@@ -185,6 +199,14 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             if ($action === 'opening') $payload = ['transaction_date' => $openingDate, 'balances' => ['610001' => '200.00', '310001' => '200.00']];
             if ($action === 'opening-csv') $payload = ['transaction_date' => $openingDate];
             if ($action === 'opening-fx') $payload = ['transaction_date' => $openingDate, 'balances' => ['111004' => '4.00', '310001' => '200.00']];
+            if ($action === 'fx') {
+                $payload['currency_code'] = 'USD';
+                $payload['details'] = [
+                    ['account_code' => '610001', 'position' => 'DEBET', 'amount_txn' => '2.00'],
+                    ['account_code' => '610001', 'position' => 'DEBET', 'amount_txn' => '2.00'],
+                    ['account_code' => '111003', 'position' => 'KREDIT', 'amount_txn' => '4.00'],
+                ];
+            }
             $workers[] = new Process([PHP_BINARY, base_path('tests/Support/manual-journal-maker-worker.php')], base_path(), ['MANUAL_MAKER_FIXTURE' => json_encode([
                 'connection' => config('database.connections.writer_test'), 'flags' => $flags, 'action' => $action, 'actor' => $users[$action === 'maker' ? 'mk' : 'fs']->id,
                 'payload' => $payload, 'hold' => $index === 0, 'release' => $release], JSON_THROW_ON_ERROR)], null, 110);
@@ -251,7 +273,8 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
                 default => $first === 'maker' ? 2 : 3,
             };
             $this->assertDatabaseCount('journal_headers', $journalCount);
-            $this->assertDatabaseCount('journal_details', $journalCount * 2);
+            $this->assertDatabaseCount('journal_details', $journalCount * 2 + ($first === 'fx' ? 1 : 0));
+            if ($first === 'fx') $this->assertDatabaseHas('journal_details', ['account_code' => '111003', 'position' => 'KREDIT', 'amount' => '200.00']);
             $this->assertDatabaseCount('accounting_posting_intents', $intentsBefore);
             if ($bulkIds) {
                 $this->assertSame($first === 'maker' ? 2 : 0, DB::table('journal_headers')->whereIn('journal_id', $bulkIds)->count());
