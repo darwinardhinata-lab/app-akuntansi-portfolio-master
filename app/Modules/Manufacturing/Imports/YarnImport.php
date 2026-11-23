@@ -4,6 +4,7 @@ namespace App\Modules\Manufacturing\Imports;
 
 use App\Modules\Manufacturing\Models\Yarn;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
@@ -31,7 +32,12 @@ class YarnImport implements ToCollection, WithStartRow, WithCustomCsvSettings
 
     public function collection(Collection $rows)
     {
-        foreach ($rows as $row) {
+        DB::transaction(fn () => $this->importRows($rows));
+    }
+
+    private function importRows(Collection $rows): void
+    {
+        foreach ($rows as $index => $row) {
             if (!isset($row[0]) || empty(trim((string) $row[0]))) {
                 continue;
             }
@@ -56,7 +62,7 @@ class YarnImport implements ToCollection, WithStartRow, WithCustomCsvSettings
                     'color' => trim((string) ($isStandardFormat ? ($row[6] ?? '') : ($row[4] ?? ''))) ?: null,
                     'specification' => $isStandardFormat ? trim((string) ($row[7] ?? '')) ?: null : null,
                     'unit' => trim((string) ($isStandardFormat ? ($row[8] ?? 'KGS') : ($row[5] ?? 'KGS'))),
-                    'meters_per_roll' => $isStandardFormat && is_numeric($row[9] ?? null) ? (float) $row[9] : null,
+                    'meters_per_roll' => $isStandardFormat ? MetersPerRoll::parse($row[9] ?? null, $this->startRow() + $index) : null,
                     'yarn_count'  => $isStandardFormat ? null : (trim((string) ($row[2] ?? '')) ?: null),
                     'composition' => $isStandardFormat ? null : (trim((string) ($row[3] ?? '')) ?: null),
                     'inventory_account_code' => config('coa.persediaan_bahan_baku_benang'),

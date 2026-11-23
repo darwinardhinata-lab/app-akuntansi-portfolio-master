@@ -33,7 +33,7 @@ class FabricImport implements ToCollection, WithCustomCsvSettings, WithStartRow
     {
         $account = FabricInventoryAccount::resolve($this->inventoryAccount);
         DB::transaction(function () use ($rows, $account) {
-            foreach ($rows as $row) {
+            foreach ($rows as $index => $row) {
                 if (! isset($row[0]) || empty(trim((string) $row[0]))) {
                     continue;
                 }
@@ -66,7 +66,7 @@ class FabricImport implements ToCollection, WithCustomCsvSettings, WithStartRow
                         'english_name' => $isStandardFormat ? trim((string) ($row[4] ?? '')) ?: null : null,
                         'category' => $isStandardFormat ? trim((string) ($row[5] ?? '')) ?: null : null,
                         'specification' => $isStandardFormat ? trim((string) ($row[7] ?? '')) ?: null : null,
-                        'meters_per_roll' => $isStandardFormat && is_numeric($row[9] ?? null) ? (float) $row[9] : null,
+                        'meters_per_roll' => $isStandardFormat ? MetersPerRoll::parse($row[9] ?? null, $this->startRow() + $index) : null,
                         'subtype' => $isStandardFormat ? null : (trim((string) ($row[2] ?? '')) ?: null),
                         'state' => $state,
                         'gsm' => $isStandardFormat ? null : (is_numeric($row[4] ?? null) ? (int) $row[4] : null),
