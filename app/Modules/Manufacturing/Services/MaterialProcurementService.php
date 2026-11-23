@@ -162,7 +162,7 @@ class MaterialProcurementService
             $request = MaterialPurchaseRequest::lockForUpdate()->findOrFail($requestId);
             $request->setRelation('details', $request->details()->lockForUpdate()->get());
             $this->requireStatus($request->approval_status, MaterialPurchaseRequest::APPROVED, 'Material PO harus berasal dari PR APPROVED.');
-            $this->validateItems($items);
+            $this->validateItems($items, exactQuantity: true);
             Validator::make(['items' => $items], ['items.*.rate' => 'required|numeric|min:0'])->validate();
             if (! Supplier::whereKey($supplierId)->where('is_active', true)->where('supplier_type', 'RAW_MATERIAL')->exists()) {
                 throw new \RuntimeException('Supplier Material PO harus aktif dan bertipe RAW_MATERIAL.');
@@ -181,14 +181,14 @@ class MaterialProcurementService
                     || (int) ($requestDetail->yarn_id ?? 0) !== (int) ($item['yarn_id'] ?? 0)
                     || (int) ($requestDetail->fabric_id ?? 0) !== (int) ($item['fabric_id'] ?? 0)
                     || (int) ($requestDetail->auxiliary_material_id ?? 0) !== (int) ($item['auxiliary_material_id'] ?? 0)
-                    || (float) $item['qty'] > (float) $requestDetail->qty_requested - (float) $requestDetail->qty_ordered) {
+                    || ! $this->fitsRemaining($requestDetail, (string) $item['qty'])) {
                     throw new \RuntimeException('Detail Material PO harus berasal dari sisa detail PR yang disetujui.');
                 }
                 $this->requireSourceUnit($requestDetail, $item);
                 $amount = round((float) $item['qty'] * (float) $item['rate'], 2);
                 $total += $amount;
                 $order->details()->create($this->orderDetailAttributes($item) + ['source_request_detail_id' => $requestDetail->id, 'amount' => $amount]);
-                $requestDetail->increment('qty_ordered', $item['qty']);
+                $requestDetail->update(['qty_ordered' => bcadd((string) $requestDetail->qty_ordered, (string) $item['qty'], 2)]);
             }
             $order->update(['sub_total' => $total, 'tax_amount' => 0, 'grand_total' => $total]);
             $this->recordOrderHistory($order, 'CREATED', null, $header['created_by']);
@@ -249,7 +249,7 @@ class MaterialProcurementService
             $order = MaterialPurchaseOrder::lockForUpdate()->findOrFail($id);
             MaterialOrderAuthorization::ensure(MaterialOrderAuthorization::canEdit(User::find($actorId), $order));
             $oldDetails = $this->requireUnreceivedOrder($order);
-            $this->validateItems($items);
+            $this->validateItems($items, exactQuantity: true);
             Validator::make(['items' => $items], ['items.*.rate' => 'required|numeric|min:0'])->validate();
             $data = array_intersect_key($header, array_flip(['po_date', 'remarks']));
             Validator::make($data, ['po_date' => 'sometimes|required|date', 'remarks' => 'nullable|string'])->validate();
@@ -269,10 +269,10 @@ class MaterialProcurementService
             // FIX: lepaskan reservasi PO ini saja; reservasi PO lain tetap mengurangi sisa PR.
             foreach ($oldDetails as $detail) {
                 $source = $sources->get($detail->source_request_detail_id);
-                if ((float) $source->qty_ordered < (float) $detail->qty) {
+                if (bccomp((string) $source->qty_ordered, (string) $detail->qty, 2) < 0) {
                     throw new \RuntimeException('Reservasi quantity PR tidak konsisten.');
                 }
-                $source->decrement('qty_ordered', $detail->qty);
+                $source->update(['qty_ordered' => bcsub((string) $source->qty_ordered, (string) $detail->qty, 2)]);
             }
             $order->details()->delete();
             $total = 0;
@@ -282,14 +282,14 @@ class MaterialProcurementService
                     || (int) ($source->yarn_id ?? 0) !== (int) ($item['yarn_id'] ?? 0)
                     || (int) ($source->fabric_id ?? 0) !== (int) ($item['fabric_id'] ?? 0)
                     || (int) ($source->auxiliary_material_id ?? 0) !== (int) ($item['auxiliary_material_id'] ?? 0)
-                    || (float) $item['qty'] > (float) $source->qty_requested - (float) $source->qty_ordered) {
+                    || ! $this->fitsRemaining($source, (string) $item['qty'])) {
                     throw new \RuntimeException('Detail Material PO harus berasal dari sisa detail PR yang disetujui.');
                 }
                 $this->requireSourceUnit($source, $item);
                 $amount = round((float) $item['qty'] * (float) $item['rate'], 2);
                 $total += $amount;
                 $order->details()->create($this->orderDetailAttributes($item) + ['source_request_detail_id' => $source->id, 'amount' => $amount]);
-                $source->increment('qty_ordered', $item['qty']);
+                $source->update(['qty_ordered' => bcadd((string) $source->qty_ordered, (string) $item['qty'], 2)]);
             }
             // FIX: pertahankan pajak existing; edit ini tidak mengubah supplier atau PR sumber.
             $order->update($data + ['sub_total' => $total, 'grand_total' => $total + (float) $order->tax_amount]);
@@ -346,6 +346,11 @@ class MaterialProcurementService
             'remarks' => $item['remarks'] ?? null];
     }
 
+    private function fitsRemaining(MaterialPurchaseRequestDetail $source, string $qty): bool
+    {
+        return bccomp($qty, bcsub((string) $source->qty_requested, (string) $source->qty_ordered, 2), 2) <= 0;
+    }
+
     private function requireSourceUnit(MaterialPurchaseRequestDetail $source, array $item): void
     {
         if (($item['unit'] ?? 'KGS') !== $source->unit) {
@@ -361,13 +366,17 @@ class MaterialProcurementService
             'rate' => $item['rate'] ?? 0];
     }
 
-    private function validateItems(array $items): void
+    private function validateItems(array $items, bool $exactQuantity = false): void
     {
         if (! $items) {
             throw new \RuntimeException('Dokumen harus memiliki minimal satu detail bahan baku.');
         }
         foreach ($items as $item) {
-            if (! in_array($item['item_type'] ?? null, ['YARN', 'FABRIC', 'AUXILIARY'], true) || (float) ($item['qty'] ?? 0) <= 0
+            $qty = (string) ($item['qty'] ?? '');
+            $validQuantity = $exactQuantity
+                ? preg_match('/\A[0-9]{1,18}(?:\.[0-9]{1,2})?\z/', $qty) && bccomp($qty, '0', 2) > 0
+                : (float) $qty > 0;
+            if (! in_array($item['item_type'] ?? null, ['YARN', 'FABRIC', 'AUXILIARY'], true) || ! $validQuantity
                 || empty($item['item_name']) || (($item['item_type'] ?? null) === 'YARN' && empty($item['yarn_id']))
                 || (($item['item_type'] ?? null) === 'FABRIC' && empty($item['fabric_id']))
                 || (($item['item_type'] ?? null) === 'AUXILIARY' && empty($item['auxiliary_material_id']))) {
