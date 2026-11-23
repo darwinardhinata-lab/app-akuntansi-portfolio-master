@@ -223,6 +223,15 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
                 $allHeadersToDelete = $allHeadersToDelete->merge($chunkHeaders);
             }
 
+            if (config('payment_plan_v33.bank_workflow', false) && config('payment_plan_v33.erp_bank_balance', false)) {
+                $capacityRows = array_map(static fn (array $row) => $row + ['raw_debet' => $row['debet'], 'raw_kredit' => $row['kredit']], $parsedRows);
+                // Preserve the existing Excel rounding-leg direction in the preflight.
+                $capacityRounding = array_map(static fn (array $entry) => $entry + ['d' => $entry['kredit'], 'k' => $entry['debet']], $needsRounding);
+                \App\Services\JournalCsvImportService::assertReplacementBankCapacity(
+                    $allHeadersToDelete->unique()->all(), $capacityRows, $capacityRounding, $accountMapping, $this->roundingAccountCode,
+                );
+            }
+
             if ($allHeadersToDelete->isNotEmpty()) {
                 $chunks = array_chunk($allHeadersToDelete->toArray(), 200);
                 foreach ($chunks as $chunk) {

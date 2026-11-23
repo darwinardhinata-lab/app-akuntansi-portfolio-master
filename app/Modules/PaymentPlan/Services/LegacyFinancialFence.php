@@ -7,13 +7,33 @@ use Illuminate\Support\Facades\DB;
 
 final class LegacyFinancialFence
 {
+    public static function bankCapacityEnabled(): bool
+    {
+        return config('payment_plan_v33.bank_workflow', false) && config('payment_plan_v33.erp_bank_balance', false);
+    }
+
+    /** Turn the removal of an existing, currently projected journal into opposite ledger lines. */
+    public static function removedBankLines(\App\Models\JournalHeader $journal, string $today): array
+    {
+        if (substr((string) $journal->transaction_date, 0, 10) > $today) return [];
+
+        return $journal->details()->get(['account_code', 'position', 'amount'])->map(static fn ($line) => [
+            'account_code' => $line->account_code,
+            'position' => match ($line->position) {
+                'DEBET' => 'KREDIT',
+                'KREDIT' => 'DEBET',
+                default => throw new RuleViolation('invalid_bank_ledger', 409),
+            },
+            'amount' => (string) $line->amount,
+        ])->all();
+    }
+
     /** Manual GL debits must not spend capacity held by the bank workflow.
      * Call immediately after lock(), before any journal writes or snapshot reads.
      */
     public static function assertBankCapacity(array $lines): void
     {
-        if (!config('payment_plan_v33.bank_workflow', false)
-            || !config('payment_plan_v33.erp_bank_balance', false)) return;
+        if (!self::bankCapacityEnabled()) return;
         if (DB::transactionLevel() === 0) throw new RuleViolation('financial_transaction_required', 409);
         $net = [];
         foreach ($lines as $line) {
