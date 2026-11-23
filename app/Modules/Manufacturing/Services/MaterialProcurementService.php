@@ -184,6 +184,7 @@ class MaterialProcurementService
                     || (float) $item['qty'] > (float) $requestDetail->qty_requested - (float) $requestDetail->qty_ordered) {
                     throw new \RuntimeException('Detail Material PO harus berasal dari sisa detail PR yang disetujui.');
                 }
+                $this->requireSourceUnit($requestDetail, $item);
                 $amount = round((float) $item['qty'] * (float) $item['rate'], 2);
                 $total += $amount;
                 $order->details()->create($this->orderDetailAttributes($item) + ['source_request_detail_id' => $requestDetail->id, 'amount' => $amount]);
@@ -284,6 +285,7 @@ class MaterialProcurementService
                     || (float) $item['qty'] > (float) $source->qty_requested - (float) $source->qty_ordered) {
                     throw new \RuntimeException('Detail Material PO harus berasal dari sisa detail PR yang disetujui.');
                 }
+                $this->requireSourceUnit($source, $item);
                 $amount = round((float) $item['qty'] * (float) $item['rate'], 2);
                 $total += $amount;
                 $order->details()->create($this->orderDetailAttributes($item) + ['source_request_detail_id' => $source->id, 'amount' => $amount]);
@@ -342,6 +344,13 @@ class MaterialProcurementService
             'fabric_id' => $item['item_type'] === 'FABRIC' ? $item['fabric_id'] : null, 'auxiliary_material_id' => $item['item_type'] === 'AUXILIARY' ? $item['auxiliary_material_id'] : null,
             'item_name' => $item['item_name'], 'qty_requested' => $item['qty'], 'unit' => $item['unit'] ?? 'KGS',
             'remarks' => $item['remarks'] ?? null];
+    }
+
+    private function requireSourceUnit(MaterialPurchaseRequestDetail $source, array $item): void
+    {
+        if (($item['unit'] ?? 'KGS') !== $source->unit) {
+            throw new \RuntimeException('Unit detail Material PO harus sama dengan unit detail PR sumber.');
+        }
     }
 
     private function orderDetailAttributes(array $item): array

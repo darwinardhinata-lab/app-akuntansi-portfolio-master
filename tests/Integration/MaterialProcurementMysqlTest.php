@@ -125,18 +125,26 @@ class MaterialProcurementMysqlTest extends TestCase
             ksort($state);
             return $state;
         };
-        foreach (['wrong_type', 'inactive', 'revoked_permission', 'second_line'] as $case) {
+        foreach (['wrong_type', 'inactive', 'revoked_permission', 'second_line', 'wrong_unit'] as $case) {
             $supplier->update(['is_active' => $case !== 'inactive']);
             config(['platform.po_create_user_ids' => $case === 'revoked_permission' ? [] : [(string) $creator->id]]);
             $before = $snapshot();
             try {
-                $service->createOrderFromRequest($pr->id, $case === 'wrong_type' ? $wrong->id : $supplier->id,
-                    $case === 'second_line' ? [$line, $line] : [$line], $header);
-                $this->fail('Invalid supplier, revoked permission or exhausted PR must reject the entire PO.');
+                $lines = match ($case) {
+                    'second_line' => [$line, $line],
+                    'wrong_unit' => [array_replace($line, ['qty' => '1.00']), array_replace($line, ['qty' => '1.00', 'unit' => 'ROLL'])],
+                    default => [$line],
+                };
+                $service->createOrderFromRequest($pr->id, $case === 'wrong_type' ? $wrong->id : $supplier->id, $lines, $header);
+                $this->fail('Invalid supplier, permission, residual or source unit must reject the entire PO.');
             } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
                 $this->assertSame('revoked_permission', $case);
             } catch (\RuntimeException $e) {
-                $this->assertStringContainsString($case === 'second_line' ? 'sisa detail PR' : 'Supplier Material PO', $e->getMessage());
+                $this->assertStringContainsString(match ($case) {
+                    'second_line' => 'sisa detail PR',
+                    'wrong_unit' => 'unit detail PR sumber',
+                    default => 'Supplier Material PO',
+                }, $e->getMessage());
             }
             $this->assertSame($before, $snapshot(), $case.' must not mutate table rows');
         }
