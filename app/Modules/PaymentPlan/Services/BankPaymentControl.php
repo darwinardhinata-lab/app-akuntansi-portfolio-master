@@ -130,7 +130,11 @@ final class BankPaymentControl
                 'idempotency_key' => 'ppl:paid:'.$event->id, 'source_type' => 'PPL_PAYMENT_EVENT', 'source_id' => $event->id,
                 'actor_id' => (string) $event->confirmed_by,
             ]);
-            DB::table('ppl_payment_events')->where('id', $event->id)->update(['journal_id' => $journal->getKey()]);
+            DB::table('ppl_payment_events')->where('id', $event->id)->update([
+                'journal_id' => $journal->getKey(),
+                // Legacy MariaDB can give the first TIMESTAMP an implicit ON UPDATE clause.
+                'created_at' => DB::raw('created_at'),
+            ]);
             $result['journal']['journalId'] = $journal->getKey();
             $result['journal']['paymentEventId'] = $event->id;
         }
