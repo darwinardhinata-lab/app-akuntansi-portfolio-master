@@ -1,169 +1,182 @@
 #!/usr/bin/env node
-/**
- * r1-browser-acceptance.mjs
- * R1 Browser Acceptance Test Harness
- *
- * Connects to staging URL and verifies R1 Finance Payment UI renders correctly.
- * Gracefully exits if staging is not available.
- *
- * Usage:
- *   R1_STAGING_URL=https://staging.example.com \
- *   R1_UAT_USER=uat_user \
- *   R1_UAT_PASS=uat_pass \
- *   node scripts/r1-browser-acceptance.mjs
- */
+import { mkdir, rename, rm, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 
-import { chromium } from 'playwright';
+const dir = process.env.R1_BROWSER_EVIDENCE_DIR || 'docs/integration';
+const report = join(dir, 'r1-browser-acceptance-report.md');
+const temporary = `${report}.${process.pid}.tmp`;
+const items = [], screenshots = [];
+const uuidPattern = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
+const required = ['R1_STAGING_URL', 'R1_UAT_USER', 'R1_UAT_PASS', 'R1_BANK_REQUEST_UUID'];
+const [url, user, password, fixture] = required.map(key => process.env[key]);
+const timeout = 10_000;
+let complete = false;
+let browser;
 
-const STAGING_URL = process.env.R1_STAGING_URL;
-const UAT_USER = process.env.R1_UAT_USER;
-const UAT_PASS = process.env.R1_UAT_PASS;
-
-const RESULTS = { passed: 0, failed: 0, skipped: 0, items: [] };
-
-function log(status, message, detail = '') {
-  const prefix = status === 'PASS' ? '✓' : status === 'FAIL' ? '✗' : '⊝';
-  RESULTS.items.push({ status, message, detail });
-  if (status === 'PASS') RESULTS.passed++;
-  else if (status === 'FAIL') RESULTS.failed++;
-  else RESULTS.skipped++;
-  console.log(`${prefix} ${message}${detail ? ` — ${detail}` : ''}`);
+function record(status, message, detail = '') {
+  const safe = String(detail).replaceAll(/\s+/g, ' ').trim();
+  items.push({ status, message, detail: safe });
+  console.log(`${status} ${message}${safe ? ` — ${safe}` : ''}`);
 }
 
-async function captureScreenshot(page, name) {
-  const dir = 'docs/integration/screenshots';
-  const fs = await import('fs');
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  await page.screenshot({ path: `${dir}/${name}.png`, fullPage: true });
+function requireThat(condition, message) {
+  if (!condition) throw new Error(message);
 }
 
-async function main() {
-  console.log('=== R1 Browser Acceptance Test Harness ===\n');
-
-  if (!STAGING_URL || !UAT_USER || !UAT_PASS) {
-    log('SKIP', 'STAGING NOT AVAILABLE', 'Run with R1_STAGING_URL, R1_UAT_USER, R1_UAT_PASS when environment is ready');
-    generateReport();
-    process.exit(0);
-  }
-
-  console.log(`Staging URL: ${STAGING_URL}\n`);
-
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-  const page = await context.newPage();
-
+async function check(name, run) {
   try {
-    log('INFO', 'Navigating to staging login...');
-    await page.goto(STAGING_URL, { waitUntil: 'networkidle' });
-    await captureScreenshot(page, '01-login-page');
-
-    const userInput = page.locator('input[name="email"], input[name="username"]').first();
-    const passInput = page.locator('input[name="password"]').first();
-    if ((await userInput.count()) > 0 && (await passInput.count()) > 0) {
-      await userInput.fill(UAT_USER);
-      await passInput.fill(UAT_PASS);
-      await page.keyboard.press('Enter');
-      await page.waitForURL('**/erp-panel/**', { timeout: 15000 });
-    }
-    await captureScreenshot(page, '02-after-login');
-    // 2. Navigate to /erp-panel/bank-payments
-    log('INFO', 'Navigating to /erp-panel/bank-payments...');
-    await page.goto(`${STAGING_URL}/erp-panel/bank-payments`, { waitUntil: 'networkidle' });
-    await captureScreenshot(page, '03-bank-payments-desktop');
-
-    const inboxVisible = await page.locator('text=Role inbox, text=Awaiting my action, text=All authorized transactions').first().isVisible();
-    log(inboxVisible ? 'PASS' : 'FAIL', 'Bank payments inbox renders', inboxVisible ? '' : 'inbox not found');
-
-    const roleFilter = page.locator('select, [role="combobox"]').first();
-    if ((await roleFilter.count()) > 0) {
-      await roleFilter.click();
-      log('PASS', 'Role filter is interactive');
-    } else {
-      log('FAIL', 'Role filter not found');
-    }
-
-    const firstRow = page.locator('tr, [wire\\:id]').first();
-    if ((await firstRow.count()) > 0) {
-      await firstRow.click();
-      await page.waitForTimeout(1000);
-      const detailPanel = page.locator('text=Detail, text=Payment, text=Amount').first();
-      log(await detailPanel.isVisible() ? 'PASS' : 'FAIL', 'Detail panel opens on row click');
-    } else {
-      log('SKIP', 'No rows to click for detail panel test');
-    }
-
-    // 3. Navigate to /erp-panel/ap-reconciliation
-    log('INFO', 'Navigating to /erp-panel/ap-reconciliation...');
-    await page.goto(`${STAGING_URL}/erp-panel/ap-reconciliation`, { waitUntil: 'networkidle' });
-    await captureScreenshot(page, '04-ap-reconciliation-desktop');
-
-    const queueVisible = await page.locator('text=Search invoice, text=Select a document').first().isVisible();
-    log(queueVisible ? 'PASS' : 'FAIL', 'AP reconciliation queue renders', queueVisible ? '' : 'queue not found');
-
-    const uploadButton = page.locator('input[type="file"], text=Upload').first();
-    log(await uploadButton.isVisible() ? 'PASS' : 'FAIL', 'Upload button visible');
-
-    const versionCheck = page.locator('text=Version, text=v').first();
-    log(await versionCheck.isVisible() ? 'PASS' : 'FAIL', 'Version check present');
-
-    // 4. Test print endpoint
-    log('INFO', 'Testing print endpoint...');
-    const printUrl = `${STAGING_URL}/payment-plan/bank/1/print`;
-    const printResponse = await page.request.get(printUrl);
-    log(printResponse.ok() ? 'PASS' : 'FAIL', `Print endpoint responds (${printUrl})`, `status=${printResponse.status()}`);
-
-    // 5. Mobile viewport test
-    log('INFO', 'Running mobile viewport test (390px)...');
-    const mobilePage = await context.newPage();
-    await mobilePage.setViewportSize({ width: 390, height: 844 });
-    await mobilePage.goto(`${STAGING_URL}/erp-panel/bank-payments`, { waitUntil: 'networkidle' });
-    await captureScreenshot(mobilePage, '05-bank-payments-mobile');
-
-    const mobileInbox = await mobilePage.locator('text=Role inbox, text=Awaiting my action').first().isVisible();
-    log(mobileInbox ? 'PASS' : 'FAIL', 'Mobile: inbox renders at 390px width');
-
-    await mobilePage.close();
-
+    await run();
+    record('PASS', name);
+    return true;
   } catch (error) {
-    log('FAIL', 'Test execution error', error.message);
-  } finally {
-    await browser.close();
+    record('FAIL', name, error.message);
+    return false;
   }
-
-  generateReport();
-}
-function generateReport() {
-  const fs = require('fs');
-  const dir = 'docs/integration';
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
-  const lines = [
-    '# R1 Browser Acceptance Report',
-    '',
-    `Generated: ${new Date().toISOString()}`,
-    `Staging URL: ${STAGING_URL || 'NOT CONFIGURED'}`,
-    '',
-    '## Summary',
-    `- Passed: ${RESULTS.passed}`,
-    `- Failed: ${RESULTS.failed}`,
-    `- Skipped: ${RESULTS.skipped}`,
-    '',
-    '## Results',
-    '',
-  ];
-
-  for (const item of RESULTS.items) {
-    lines.push(`- [${item.status === 'PASS' ? 'x' : ' '}] ${item.message}${item.detail ? ` — ${item.detail}` : ''}`);
-  }
-
-  lines.push('', '## Screenshots', '- `docs/integration/screenshots/01-login-page.png`', '- `docs/integration/screenshots/02-after-login.png`', '- `docs/integration/screenshots/03-bank-payments-desktop.png`', '- `docs/integration/screenshots/04-ap-reconciliation-desktop.png`', '- `docs/integration/screenshots/05-bank-payments-mobile.png`');
-
-  fs.writeFileSync(`${dir}/r1-browser-acceptance-report.md`, lines.join('\n'));
-  console.log(`\nReport written to ${dir}/r1-browser-acceptance-report.md`);
 }
 
-main().catch((error) => {
-  console.error('Fatal error:', error.message);
-  generateReport();
-  process.exit(1);
-});
+async function capture(page, name) {
+  const file = `screenshots/${name}.png`;
+  await page.screenshot({ path: join(dir, file), fullPage: true, timeout });
+  screenshots.push(file);
+}
+
+async function journey(base, expected) {
+  const app = route => new URL(route, base);
+  const bankUrl = app('erp-panel/bank-payments');
+  const { chromium } = await import('playwright');
+  record('INFO', 'Browser launch');
+  browser = await chromium.launch({ headless: true, timeout, executablePath: process.env.R1_BROWSER_EXECUTABLE || undefined });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  context.setDefaultTimeout(timeout);
+  context.setDefaultNavigationTimeout(timeout);
+  const page = await context.newPage();
+  const goto = async (tab, target, exact = true) => {
+    const response = await tab.goto(target.href, { waitUntil: 'domcontentloaded' });
+    requireThat(response?.ok(), `Navigation failed: HTTP ${response?.status() ?? 'unknown'}`);
+    requireThat(new URL(tab.url()).origin === base.origin, 'Unexpected navigation origin');
+    if (exact) requireThat(new URL(tab.url()).pathname === target.pathname, 'Unexpected navigation path');
+    return response;
+  };
+  if (!await check('Authenticated bank payments workspace', async () => {
+    await goto(page, app('login'));
+    await capture(page, '01-login-page');
+    const email = page.locator('input[name="email"], input[name="username"]');
+    const form = email.locator('xpath=ancestor::form[1]');
+    const action = await form.evaluate(node => node.action);
+    requireThat(new URL(action).origin === base.origin, 'Unexpected login form origin');
+    await email.fill(user);
+    const input = form.locator('input[name="password"]');
+    await input.fill(password);
+    await Promise.all([
+      page.waitForURL(next => next.origin === base.origin && next.pathname !== app('login').pathname, { waitUntil: 'domcontentloaded' }),
+      input.press('Enter'),
+    ]);
+    await goto(page, bankUrl);
+    await page.locator('#bankWorkspace').waitFor({ state: 'visible' });
+  })) return;
+
+  let transaction;
+  const selected = await check('Bank inbox and selected transaction', async () => {
+    const workspace = page.locator('#bankWorkspace[aria-busy="false"]');
+    await workspace.waitFor({ state: 'visible' });
+    const inbox = page.locator('#bankInbox');
+    await inbox.selectOption('all');
+    await workspace.waitFor({ state: 'visible' });
+    requireThat(!await page.locator('#bankMessage.bank-error').isVisible(), 'Bank workspace reported an error');
+    const row = page.locator(`#bankRequests button[data-bank-request-id="${expected}" i]`);
+    const doc = await row.getAttribute('data-bank-doc');
+    requireThat(doc, 'Missing document number on fixture row');
+    await row.click();
+    const detail = page.locator('#bankAction #selectedBankDoc');
+    await detail.waitFor({ state: 'visible' });
+    const id = (await detail.getAttribute('data-bank-request-id'))?.toLowerCase();
+    requireThat(id === expected && await detail.getAttribute('data-bank-doc') === doc
+      && (await detail.innerText()).startsWith(`${doc} — `), 'Selected detail does not match fixture');
+    const print = page.locator('#printBank');
+    await print.waitFor({ state: 'visible' });
+    const href = await print.getAttribute('href');
+    requireThat(href, 'Missing print link');
+    const target = new URL(href, page.url());
+    const expectedPath = app(`payment-plan/bank/${id}/print`).pathname;
+    requireThat(target.origin === base.origin && target.pathname.toLowerCase() === expectedPath.toLowerCase()
+      && !target.search && !target.hash && !target.username && !target.password, 'Print link does not match selected UUID');
+    transaction = { id, doc, target };
+    await capture(page, '03-bank-payments-desktop');
+  });
+
+  if (selected) await check('Print identity', async () => {
+    const printed = await context.newPage();
+    try {
+      const response = await goto(printed, transaction.target);
+      const body = printed.locator('body');
+      const id = (await body.getAttribute('data-bank-request-id'))?.toLowerCase();
+      const doc = await body.getAttribute('data-bank-doc');
+      requireThat(id === transaction.id && doc === transaction.doc, `Print identity mismatch (HTTP ${response.status()})`);
+      await printed.locator('h1').waitFor({ state: 'visible' });
+      requireThat((await printed.locator('h1').innerText()).endsWith(` — ${transaction.doc}`), 'Print heading does not match selected document');
+      await capture(printed, '06-bank-print');
+    } finally {
+      await printed.close();
+    }
+  });
+  else record('FAIL', 'Print identity', 'Cannot verify print without a selected transaction');
+
+  await check('AP reconciliation queue and proposal controls', async () => {
+    await goto(page, app('erp-panel/ap-reconciliation'));
+    for (const selector of ['input[wire\\:model\\.live\\.debounce\\.400ms="invoiceSearch"]', 'select[wire\\:model\\.live="proposal.purchase_bill_id"]', 'form[wire\\:submit="propose"] input[wire\\:model="proposal.amount"]', 'form[wire\\:submit="propose"] input[wire\\:model="proposal.reason"]']) {
+      await page.locator(selector).waitFor({ state: 'visible' });
+    }
+    await capture(page, '04-ap-reconciliation-desktop');
+  });
+
+  await check('Mobile bank inbox at 390px', async () => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await goto(page, bankUrl);
+    await page.locator('#bankWorkspace[aria-busy="false"] #bankInbox').waitFor({ state: 'visible' });
+    requireThat(!await page.locator('#bankMessage.bank-error').isVisible(), 'Mobile inbox reported an error');
+    await capture(page, '05-bank-payments-mobile');
+  });
+  complete = true;
+}
+
+try {
+  await mkdir(dir, { recursive: true });
+  // Never leave a previous PASS report at the canonical path if this run aborts.
+  await rm(report, { force: true });
+  const missing = required.filter(key => !process.env[key]?.trim());
+  if (missing.length) {
+    record('FAIL', 'Configuration', `Missing required configuration: ${missing.join(', ')}`);
+  } else if (await check('Configuration', async () => {
+    const base = new URL(url);
+    requireThat(['http:', 'https:'].includes(base.protocol) && !base.username && !base.password && !base.search && !base.hash, 'Use an HTTP(S) application base URL without credentials, query or fragment');
+    requireThat(uuidPattern.test(fixture), 'R1_BANK_REQUEST_UUID must be a UUID of an authorized test fixture');
+  })) {
+    const base = new URL(url);
+    base.pathname = `${base.pathname.replace(/\/+$/, '')}/`;
+    await journey(base, fixture.toLowerCase());
+  }
+} catch (error) {
+  record('FAIL', 'Harness execution', error.message);
+} finally {
+  if (browser) await check('Browser cleanup', () => browser.close());
+  const count = status => items.filter(item => item.status === status).length;
+  const passed = count('PASS'), failed = count('FAIL'), skipped = count('SKIP');
+  const outcome = complete && !failed ? 'PASS' : 'FAIL';
+  process.exitCode = 1;
+  try {
+    await writeFile(temporary, [
+      '# R1 Browser Acceptance Report', '', `Generated: ${new Date().toISOString()}`,
+      `Outcome: ${outcome}`, `Journey complete: ${complete ? 'yes' : 'no'}`,
+      `Passed: ${passed}`, `Failed: ${failed}`, `Skipped: ${skipped}`, '', '## Results', '',
+      ...items.map(({ status, message, detail }) => `- ${status}: ${message}${detail ? ` — ${detail}` : ''}`),
+      '', '## Screenshots', ...screenshots.map(file => `- \`${file}\``), '',
+      'Technical harness evidence only; not Finance UAT or release sign-off.', '',
+    ].join('\n'), { flag: 'wx' });
+    await rename(temporary, report);
+    console.log(`Outcome: ${outcome}; passed=${passed}; failed=${failed}; skipped=${skipped}; report=${report}`);
+    if (outcome === 'PASS') process.exitCode = 0;
+  } catch (error) {
+    console.error(`FAIL report persistence — ${error.message}`);
+    await rm(temporary, { force: true }).catch(() => {});
+  }
+}
