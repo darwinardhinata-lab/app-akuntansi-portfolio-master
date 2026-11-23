@@ -15,6 +15,23 @@ final class ApResidualProjection
         $used = '0.00';
         $represented = [];
         $resolved = [];
+        $reversedCredits = [];
+        foreach (DB::table('supplier_credit_reversals as r')->join('supplier_credit_bindings as b', 'b.id', '=', 'r.binding_id')
+            ->where('b.purchase_bill_id', $bill->id)->select('r.*')->get() as $reversal) {
+            $binding = DB::table('supplier_credit_bindings')->where('id', $reversal->binding_id)->first();
+            $resolved[$binding->journal_id] = $resolved[$reversal->journal_id] = true;
+            $reversedCredits[$binding->id] = true;
+            if (!SupplierCreditReversal::valid($binding, $reversal)) {
+                $exceptions[] = ['source' => 'supplier_credit_reversal:'.$reversal->id, 'reason' => 'supplier_credit_reversal_invalid'];
+                continue;
+            }
+            if (bccomp((string) $reversal->correction_amount, '0', 2) > 0) {
+                $events[] = ['source' => 'reconciliation:'.$reversal->reconciliation_id, 'journal_id' => $binding->journal_id,
+                    'status' => 'approved', 'reduction' => (string) $reversal->correction_amount];
+            }
+            $events[] = ['source' => 'supplier_credit_reversal:'.$reversal->id, 'journal_id' => $reversal->journal_id,
+                'status' => 'reversed', 'reduction' => bcsub('0', (string) $reversal->correction_amount, 2)];
+        }
         // Legacy allocations have a different lifecycle/ownership contract from R1.
         // Until that contract is reconciled, never silently expose their invoice as payable.
         $legacyPayments = DB::table('transaksi_payment_plan')->where(function ($query) use ($bill) {
@@ -35,6 +52,7 @@ final class ApResidualProjection
             $exceptions[] = ['source' => 'legacy_allocation:'.$allocation->id, 'reason' => 'orphan_legacy_payment_allocation'];
         }
         foreach (DB::table('ppl_ap_reconciliations')->where('purchase_bill_id', $bill->id)->where('status', 'approved')->get() as $resolution) {
+            if (isset($reversedCredits[$resolution->supplier_credit_binding_id])) continue;
             $snapshot = json_decode($resolution->source_snapshot, true, 512, JSON_THROW_ON_ERROR);
             if ($resolution->supplier_credit_binding_id) {
                 $binding = DB::table('supplier_credit_bindings')->where('id', $resolution->supplier_credit_binding_id)->first();
