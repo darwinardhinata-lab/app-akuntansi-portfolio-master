@@ -234,6 +234,12 @@ class MaterialProcurementMysqlTest extends TestCase
             $post($low->id, '10.00')->assertSessionHas('success')->assertSessionMissing('error');
             $last = $observer->table('mfg_auxiliary_material_issues')->sole();
             $this->assertSame('0.05', $last->total_cost);
+            if ($directory = getenv('O02_EVIDENCE')) {
+                file_put_contents($directory.'/auxiliary-valuation-rejections.json', json_encode([
+                    'unexplainedOpening' => ['qty' => '2.00', 'movementRows' => 0, 'writes' => false],
+                    'partialOverdraw' => ['qty' => '6.00', 'requestedValue' => '0.06', 'availableValue' => '0.05', 'writes' => false],
+                ], JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+            }
         } finally {
             DB::purge('o04_observer');
         }
