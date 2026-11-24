@@ -192,6 +192,149 @@ class MaterialProcurementMysqlTest extends TestCase
             ->assertRedirect(route('mfg.auxiliary-materials.index'));
     }
 
+    private function approvedReceiptFixture(): array
+    {
+        $requester = User::factory()->create();
+        $buyer = User::factory()->create();
+        config([
+            'platform.order_company_scope_enabled' => true, 'platform.legacy_sync_enabled' => false, 'customs.enabled' => false,
+            'platform.pr_create_user_ids' => [(string) $requester->id], 'platform.pr_approve_user_ids' => [(string) $buyer->id],
+            'platform.po_create_user_ids' => [(string) $buyer->id], 'platform.po_approve_user_ids' => [(string) $requester->id],
+        ]);
+        $company = \App\Modules\Platform\Models\Company::create(['code' => 'MGI', 'name' => 'MGI', 'active' => true]);
+        $buyer->companies()->attach($company->id, ['is_default' => true]);
+        foreach ([['114003', 'ASSET', 'DEBET', 'raw_material_inventory'], ['117008', 'ASSET', 'DEBET', 'input_vat'], ['211001', 'LIABILITY', 'KREDIT', 'accounts_payable']] as [$code, $type, $side, $key]) {
+            \App\Models\Account::create(['account_code' => $code, 'account_name' => $key, 'coa_type' => $type, 'normal_balance' => $side, 'report_pos' => 'NERACA']);
+            \App\Modules\Platform\Models\CompanyCoaMapping::create(['company_id' => $company->id, 'semantic_key' => $key, 'account_code' => $code, 'active' => true]);
+        }
+        $yarn = Yarn::create(['yarn_code' => 'O03-TRACE', 'yarn_type' => 'Cotton', 'unit' => 'KGS']);
+        $supplier = Supplier::create(['supplier_code' => 'O03-TRACE', 'supplier_name' => 'Canonical supplier', 'supplier_type' => 'RAW_MATERIAL']);
+        $item = ['item_type' => 'YARN', 'yarn_id' => $yarn->id, 'item_name' => 'Cotton', 'qty' => '1.25', 'unit' => 'KGS', 'rate' => '100.00'];
+        $procurement = app(MaterialProcurementService::class);
+        $pr = $procurement->createRequest(['request_date' => '2026-11-24', 'created_by' => $requester->id], [$item]);
+        $procurement->submitRequest($pr->id, $requester->id);
+        $procurement->approveRequest($pr->id, $buyer->id);
+        $source = $pr->details()->sole();
+        $po = $procurement->createOrderFromRequest($pr->id, $supplier->id, [$item + ['source_request_detail_id' => $source->id]], ['po_date' => '2026-11-24', 'created_by' => $buyer->id]);
+        $procurement->submitOrder($po->id, $buyer->id);
+        $procurement->approveOrder($po->id, $requester->id);
+        $line = $po->details()->sole();
+        $this->actingAs($buyer);
+        $receive = fn (string $doc, string $qty) => $this->post(route('mfg.material-receipts.store'), [
+            'receipt_date' => '2026-11-24', 'supplier_id' => $supplier->id, 'po_id' => $po->id, 'supplier_doc_no' => $doc,
+            'items' => [array_replace($item, ['qty' => $qty, 'po_detail_id' => $line->id])],
+        ]);
+        return [$receive, $po, $line, $source, $yarn, $buyer];
+    }
+
+    public function test_http_partial_receipt_reconciles_source_lines_stock_and_gl(): void
+    {
+        [$receive, $po, $line, $source, $yarn] = $this->approvedReceiptFixture();
+        $snapshot = fn () => collect(['mfg_material_receipts', 'mfg_material_receipt_details', 'mfg_material_ledgers', 'inventory_ledgers', 'journal_headers', 'journal_details', 'mfg_material_purchase_order_details', 'mfg_material_purchase_request_details', 'mfg_yarns'])->mapWithKeys(fn ($table) => [$table => DB::table($table)->get()->map(fn ($row) => json_encode($row))->sort()->values()->all()])->all();
+        foreach ([['O03-DOC-1', '0.50', '50.00', '0.50', '0.75'], ['O03-DOC-2', '0.75', '75.00', '1.25', '0.00']] as [$doc, $qty, $amount, $received, $remaining]) {
+            $receive($doc, $qty)->assertSessionHas('success');
+            $receipt = DB::table('mfg_material_receipts')->where('supplier_doc_no', $doc)->sole();
+            $this->assertSame($po->id, $receipt->po_id);
+            $this->assertSame($source->id, $line->fresh()->source_request_detail_id);
+            $this->assertDatabaseHas('mfg_material_receipt_details', ['receipt_id' => $receipt->id, 'po_detail_id' => $line->id, 'qty' => $qty, 'unit' => 'KGS', 'amount' => $amount]);
+            $this->assertDatabaseHas('mfg_material_ledgers', ['evidence_number' => $receipt->receipt_number, 'item_id' => $yarn->id, 'qty' => $qty, 'running_qty' => $received, 'total_cost' => $amount]);
+            $this->assertDatabaseHas('journal_headers', ['journal_id' => $receipt->journal_id, 'source_doc_no' => $doc, 'evidence_number' => $receipt->receipt_number]);
+            foreach ([['114003', 'DEBET'], ['211001', 'KREDIT']] as [$account, $side]) {
+                $this->assertDatabaseHas('journal_details', ['journal_id' => $receipt->journal_id, 'account_code' => $account, 'position' => $side, 'amount' => $amount]);
+            }
+            $this->assertSame($received, $line->fresh()->qty_received);
+            $this->assertSame($remaining, bcsub($line->fresh()->qty, $line->fresh()->qty_received, 2));
+            $this->assertSame($received, $yarn->fresh()->stock_quantity);
+            $this->assertSame('1.25', $source->fresh()->qty_ordered);
+            $before = $snapshot();
+            if ($remaining !== '0.00') {
+                $receive($doc, $qty)->assertSessionHas('error', fn ($error) => str_contains($error, 'sudah memiliki jurnal'));
+                $this->assertSame($before, $snapshot());
+            }
+            $receive('O03-OVER', bcadd($remaining, '0.01', 2))->assertSessionHas('error', fn ($error) => str_contains($error, 'melebihi sisa PO'));
+            $this->assertSame($before, $snapshot());
+        }
+        $this->assertDatabaseCount('mfg_material_ledgers', 2);
+        $this->assertDatabaseCount('journal_headers', 2);
+        $this->assertDatabaseCount('journal_details', 4);
+    }
+
+    public function test_http_void_latest_partial_receipt_reconciles_committed_state(): void
+    {
+        [$receive, $po, $line, $source, $yarn, $buyer] = $this->approvedReceiptFixture();
+        $receive('O03-DOC-1', '0.50')->assertSessionHas('success');
+        $receive('O03-DOC-2', '0.75')->assertSessionHas('success');
+        config(['database.connections.o03_observer' => config('database.connections.m2_fixture')]);
+        $observer = DB::connection('o03_observer');
+        try {
+            $writerId = DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+            $observerId = $observer->selectOne('SELECT CONNECTION_ID() AS id')->id;
+            $this->assertNotSame($writerId, $observerId);
+            $this->assertSame(0, DB::transactionLevel());
+            $snapshot = fn () => collect(['mfg_material_receipts', 'mfg_material_receipt_details', 'mfg_material_ledgers', 'inventory_ledgers', 'journal_headers', 'journal_details', 'mfg_material_purchase_orders', 'mfg_material_purchase_order_details', 'mfg_material_purchase_request_details', 'mfg_yarns'])->mapWithKeys(fn ($table) => [$table => $observer->table($table)->get()->map(fn ($row) => (array) $row)->sortBy(fn ($row) => json_encode($row))->values()->all()])->all();
+            $receipts = $observer->table('mfg_material_receipts')->orderBy('id')->get();
+            [$first, $second] = $receipts->all();
+            $void = fn ($receipt, $reason = 'Supplier document correction') => $this->post(route('mfg.material-receipts.void', $receipt->id), ['reason' => $reason]);
+            $before = $snapshot();
+            config(['platform.mrn_void_user_ids' => [$buyer->id]]);
+            $void($second)->assertForbidden();
+            $this->assertSame($before, $snapshot());
+            $finance = User::factory()->create(['role' => 'FINANCE']);
+            $finance->companies()->attach($buyer->companies()->sole()->id, ['is_default' => true]);
+            $this->actingAs($finance);
+            $void($second)->assertForbidden();
+            $this->assertSame($before, $snapshot());
+            config(['platform.mrn_void_user_ids' => [$finance->id]]);
+            $void($first)->assertSessionHas('error', fn ($error) => str_contains($error, 'mutasi lanjutan'));
+            $this->assertSame($before, $snapshot());
+
+            config(['platform.period_lifecycle_preview_enabled' => true]);
+            $periods = DB::table('accounting_periods');
+            $month = substr($second->receipt_date, 0, 7);
+            $periods->insert(['month' => $month, 'closed' => true]);
+            $void($second)->assertSessionHas('error', fn ($error) => str_contains($error, 'Accounting period is closed: '.$month));
+            $this->assertSame($before, $snapshot());
+            $periods->where('month', $month)->update(['closed' => false]);
+
+            $void($second)->assertSessionHas('success');
+            $after = $snapshot();
+            $this->assertEquals($first, $observer->table('mfg_material_receipts')->find($first->id));
+            $this->assertSame('POSTED', $first->status);
+            $voided = $observer->table('mfg_material_receipts')->find($second->id);
+            $this->assertSame('VOIDED', $voided->status);
+            $this->assertSame($second->journal_id, $voided->journal_id);
+            $this->assertSame($finance->id, $voided->voided_by);
+            $this->assertSame('Supplier document correction', $voided->void_reason);
+            $this->assertNotNull($voided->voided_at);
+            $this->assertSame($before['mfg_material_receipt_details'], $after['mfg_material_receipt_details']);
+            $this->assertSame($before['mfg_material_purchase_orders'], $after['mfg_material_purchase_orders']);
+            $this->assertSame('APPROVED', $observer->table('mfg_material_purchase_orders')->find($po->id)->status);
+            $this->assertSame($before['mfg_material_purchase_request_details'], $after['mfg_material_purchase_request_details']);
+            $this->assertSame('1.25', $observer->table('mfg_material_purchase_request_details')->find($source->id)->qty_ordered);
+            $poLine = $observer->table('mfg_material_purchase_order_details')->find($line->id);
+            $this->assertSame('0.50', $poLine->qty_received);
+            $this->assertSame('0.75', bcsub($poLine->qty, $poLine->qty_received, 2));
+            $this->assertSame('0.50', $observer->table('mfg_yarns')->find($yarn->id)->stock_quantity);
+            $evidence = 'VOID-'.$second->receipt_number;
+            $ledger = $observer->table('mfg_material_ledgers')->where('evidence_number', $evidence)->sole();
+            $this->assertSame(['OUT', '0.75', '75.00', '0.50', '50.00'], [$ledger->type, $ledger->qty, $ledger->total_cost, $ledger->running_qty, $ledger->running_value]);
+            $this->assertCount(3, $after['mfg_material_ledgers']);
+            $header = $observer->table('journal_headers')->where('journal_id', $voided->reversal_journal_id)->sole();
+            $this->assertSame([$evidence, 'Material Receipt Reversal'], [$header->source_doc_no, $header->transaction_type]);
+            $postings = $observer->table('journal_details')->where('journal_id', $voided->reversal_journal_id)->orderBy('account_code')->get();
+            $this->assertSame([['114003', 'KREDIT', '75.00'], ['211001', 'DEBET', '75.00']], $postings->map(fn ($row) => [$row->account_code, $row->position, $row->amount])->all());
+            $this->assertCount(3, $after['journal_headers']);
+            $this->assertCount(6, $after['journal_details']);
+            $void($second, 'Different retry reason')->assertSessionHas('success');
+            $this->assertSame($after, $retry = $snapshot());
+            if ($directory = getenv('O02_EVIDENCE')) {
+                file_put_contents($directory.'/void-committed.json', json_encode(compact('writerId', 'observerId', 'before', 'after', 'retry'), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+            }
+        } finally {
+            DB::purge('o03_observer');
+        }
+    }
+
     #[TestWith(['create', 'create'], 'create blocks create')]
     #[TestWith(['create', 'edit'], 'create blocks edit')]
     #[TestWith(['edit', 'create'], 'edit blocks create')]
