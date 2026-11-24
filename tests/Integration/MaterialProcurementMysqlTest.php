@@ -81,7 +81,73 @@ class MaterialProcurementMysqlTest extends TestCase
             'receipt_date' => '2026-11-24', 'supplier_id' => $supplier->id, 'supplier_doc_no' => 'O04-AUX-RECEIPT',
             'items' => [['item_type' => 'AUXILIARY', 'auxiliary_material_id' => $material->id, 'item_name' => $material->material_name, 'qty' => 5, 'unit' => 'PCS', 'rate' => 100]],
         ])->assertSessionHas('success');
-        return [$operator, $material];
+        return [$operator, $material, $supplier];
+    }
+
+    #[TestWith([5, 120, '110.00', '220.00', ['1100.00', '880.00', '1100.00'], ['1100.00', '880.00', '1100.00'], 'exact average'], 'exact average')]
+    #[TestWith([1, 101, '100.17', '200.34', ['601.00', '400.68', '601.02'], ['601.00', '400.66', '601.00'], 'rounding gap'], 'rounding gap')]
+    public function test_http_auxiliary_mixed_cost_issue_and_void_valuation(
+        int $secondQty, int $secondRate, string $average, string $issueValue, array $cardValues, array $glValues, string $scenario,
+    ): void {
+        [, $material, $supplier] = $this->auxiliaryReceiptFixture();
+        config(['database.connections.o04_observer' => config('database.connections.m2_fixture')]);
+        $observer = DB::connection('o04_observer');
+        try {
+            $this->assertNotSame(DB::selectOne('SELECT CONNECTION_ID() AS id')->id, $observer->selectOne('SELECT CONNECTION_ID() AS id')->id);
+            $this->assertSame(0, DB::transactionLevel());
+            $card = fn () => $observer->table('mfg_material_ledgers')->where('item_type', 'AUXILIARY')->where('item_id', $material->id)->orderBy('id')->get();
+            $netGl = fn () => $observer->table('journal_details')->where('account_code', '114004')
+                ->selectRaw("SUM(CASE WHEN position = 'DEBET' THEN amount ELSE -amount END) AS net")->sole()->net;
+            $first = $card()->sole();
+            $this->assertSame(['IN', '5.00', '500.00', '5.00', '500.00'], [$first->type, $first->qty, $first->total_cost, $first->running_qty, $first->running_value]);
+            $this->assertSame('500.00', $netGl());
+            $this->flushSession();
+            $this->post(route('mfg.material-receipts.store'), [
+                'receipt_date' => '2026-11-24', 'supplier_id' => $supplier->id, 'supplier_doc_no' => 'O04-MIXED-RECEIPT',
+                'items' => [['item_type' => 'AUXILIARY', 'auxiliary_material_id' => $material->id, 'item_name' => $material->material_name, 'qty' => $secondQty, 'unit' => 'PCS', 'rate' => $secondRate]],
+            ])->assertSessionHas('success')->assertSessionMissing('error');
+
+            $steps = [];
+            $check = function (int $stage, string $type, string $movementQty, string $cost, string $runningQty) use ($observer, $material, $card, $netGl, $cardValues, $glValues, $average, &$steps): void {
+                $rows = $card();
+                $this->assertCount($stage + 2, $rows);
+                $last = $rows->last();
+                $stock = $observer->table('mfg_auxiliary_materials')->find($material->id);
+                $net = $netGl();
+                $masterValue = bcmul($stock->stock_quantity, $stock->average_cost, 2);
+                $this->assertSame([$type, $movementQty, $cost, $runningQty, $cardValues[$stage]], [$last->type, $last->qty, $last->total_cost, $last->running_qty, $last->running_value]);
+                $this->assertSame([$runningQty, $average], [$stock->stock_quantity, $stock->average_cost]);
+                $this->assertSame($glValues[$stage], $net);
+                $steps[] = compact('last', 'stock', 'net', 'masterValue');
+            };
+            $received = bcadd('5', (string) $secondQty, 2);
+            $check(0, 'IN', bcadd('0', (string) $secondQty, 2), bcmul((string) $secondQty, (string) $secondRate, 2), $received);
+            $this->flushSession();
+            $this->post(route('mfg.auxiliary-material-issues.store'), [
+                'issue_date' => '2026-11-24', 'auxiliary_material_id' => $material->id, 'usage_type' => 'EXPENSE', 'qty' => '2.00',
+            ])->assertSessionHas('success')->assertSessionMissing('error');
+            $issue = $observer->table('mfg_auxiliary_material_issues')->sole();
+            $this->assertSame([$average, $issueValue], [$issue->unit_cost, $issue->total_cost]);
+            $check(1, 'OUT', '2.00', $issueValue, bcsub($received, '2', 2));
+
+            $this->flushSession();
+            $this->post(route('mfg.auxiliary-material-issues.void', $issue->id))->assertSessionHas('success')->assertSessionMissing('error');
+            $voided = $observer->table('mfg_auxiliary_material_issues')->sole();
+            $this->assertNotNull($voided->voided_at);
+            $check(2, 'IN', '2.00', $issueValue, $received);
+            foreach ([$issue->journal_id => ['KREDIT', 'DEBET'], $voided->reversal_journal_id => ['DEBET', 'KREDIT']] as $journalId => [$inventorySide, $expenseSide]) {
+                $postings = $observer->table('journal_details')->where('journal_id', $journalId)->orderBy('account_code')->get()
+                    ->map(fn ($row) => [$row->account_code, $row->position, $row->amount])->all();
+                $this->assertSame([['114004', $inventorySide, $issueValue], ['510010', $expenseSide, $issueValue]], $postings);
+            }
+            $this->assertSame(4, $observer->table('journal_headers')->count());
+            if ($directory = getenv('O02_EVIDENCE')) {
+                $filename = 'auxiliary-mixed-'.str_replace(' ', '-', $scenario).'.json';
+                file_put_contents($directory.'/'.$filename, json_encode(compact('first', 'steps', 'issue', 'voided'), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+            }
+        } finally {
+            DB::purge('o04_observer');
+        }
     }
 
     public function test_http_auxiliary_expense_void_reconciles_stock_card_to_gl(): void
