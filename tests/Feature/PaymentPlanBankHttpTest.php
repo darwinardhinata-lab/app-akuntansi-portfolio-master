@@ -129,8 +129,12 @@ class PaymentPlanBankHttpTest extends TestCase
         $upload('settlement');
         $action('fs', 'prepare_settlement', ['checked' => true, 'base' => '100.25', 'coa' => '610001', 'sourceId' => 'idr3']);
         $approved = $action('dir', 'approve_settlement', ['checked' => true]);
+        $this->assertSame(1, $approved['request']['accountingApproval']['basis']['settings_version']);
+        $context = DB::table('ppl_financial_contexts')->where('company_id', $company->id);
+        $context->update(['settings' => json_encode(array_replace($settings, ['version' => 2]), JSON_THROW_ON_ERROR)]);
         foreach (['id', 'en', 'zh_CN'] as $locale) {
             $this->withSession(['locale' => $locale])->get(route('payment-plan-v33.print', $id))->assertOk()
+                ->assertSee('<tr data-approved-settings-version><th>'.__('bank_payment.basis_settings_version', [], $locale).'</th><td>1</td></tr>', false)
                 ->assertSee(__('bank_payment.request_signatures', [], $locale))
                 ->assertSee(__('bank_payment.settlement_signatures', [], $locale))
                 ->assertSee(__('bank_payment.manual_signature_note', [], $locale))
@@ -144,6 +148,7 @@ class PaymentPlanBankHttpTest extends TestCase
                 ->assertSee($approved['request']['settlementApproval']['at'])
                 ->assertDontSee('bank_payment.signature_');
         }
+        $context->update(['settings' => json_encode($settings, JSON_THROW_ON_ERROR)]);
         $this->withSession(['locale' => 'id']);
 
         DB::table('company_coa_mappings')->where('semantic_key', 'ppl.bank.idr3')->update(['active' => false]);

@@ -39,6 +39,9 @@
     <h2 class="accounting">{{ __('bank_payment.approved_basis') }}</h2>
     @php($basis = $payload['accountingApproval']['basis'] ?? [])
     <table>
+        @if(isset($basis['settings_version']))
+            <tr data-approved-settings-version><th>{{ __('bank_payment.basis_settings_version') }}</th><td>{{ $basis['settings_version'] }}</td></tr>
+        @endif
         <tr><th>{{ __('bank_payment.basis_approved_by') }}</th><td>{{ $payload['accountingApproval']['actor_id'] ?? '—' }}</td></tr>
         <tr><th>{{ __('bank_payment.basis_approved_at') }}</th><td>{{ $payload['accountingApproval']['approved_at'] ?? '—' }}</td></tr>
         @foreach(['base','vat','withholding','fees'] as $field)
