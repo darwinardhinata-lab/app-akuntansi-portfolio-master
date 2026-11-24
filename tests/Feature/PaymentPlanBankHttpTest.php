@@ -39,19 +39,20 @@ class PaymentPlanBankHttpTest extends TestCase
             DB::table('company_coa_mappings')->insert(['company_id' => $company->id, 'semantic_key' => 'ppl.'.$key, 'account_code' => $code, 'active' => true]);
         }
         $billId = null;
-        $baselineJournals = 0;
+        config(['payment_plan_v33.erp_bank_balance' => true]);
+        DB::table('accounts')->insert(['account_code' => '211001', 'account_name' => 'Fixture payable', 'coa_type' => 'Other', 'normal_balance' => 'KREDIT', 'report_pos' => 'NERACA']);
+        \App\Support\PostingService::post(['transaction_date' => '2025-12-31'], [
+            ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '500.00'], ['account_code' => '211001', 'position' => 'KREDIT', 'amount' => '500.00'],
+        ]);
+        $settings['erp_cutoff'] = '2026-01-01';
+        DB::table('ppl_financial_contexts')->where('company_id', $company->id)->update(['settings' => json_encode($settings, JSON_THROW_ON_ERROR)]);
+        $baselineJournals = 1;
         if ($ap) {
-            config(['payment_plan_v33.ap_allocations' => true, 'payment_plan_v33.erp_bank_balance' => true]);
-            DB::table('accounts')->insert(['account_code' => '211001', 'account_name' => 'Fixture payable', 'coa_type' => 'Other', 'normal_balance' => 'KREDIT', 'report_pos' => 'NERACA']);
-            \App\Support\PostingService::post(['transaction_date' => '2025-12-31'], [
-                ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '500.00'], ['account_code' => '211001', 'position' => 'KREDIT', 'amount' => '500.00'],
-            ]);
+            config(['payment_plan_v33.ap_allocations' => true]);
             $source = \App\Support\PostingService::post(['transaction_date' => '2026-01-01'], [
                 ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '200.50'], ['account_code' => '211001', 'position' => 'KREDIT', 'amount' => '200.50'],
             ]);
             $billId = DB::table('purchase_bills')->insertGetId(['bill_number' => 'HTTP-AP', 'bill_date' => '2026-01-01', 'vendor_name' => 'AP supplier', 'credit_account' => '211001', 'grand_total' => '200.50', 'journal_id' => $source->getKey(), 'payment_status' => 'UNPAID']);
-            $settings['erp_cutoff'] = '2026-01-01';
-            DB::table('ppl_financial_contexts')->where('company_id', $company->id)->update(['settings' => json_encode($settings)]);
             $baselineJournals = 2;
         }
         config(['platform.filament_enabled' => true]);
@@ -167,6 +168,12 @@ class PaymentPlanBankHttpTest extends TestCase
         $this->get(route('payment-plan-v33.download', $attachment['id']))->assertOk()->assertHeader('X-Content-Type-Options', 'nosniff');
         $action('fs', 'confirm_paid', ['checked' => true, 'reference' => 'ACTUAL-DEBIT', 'paidDate' => now('Asia/Jakarta')->toDateString()]);
         $this->assertDatabaseCount('journal_headers', $baselineJournals);
+        $event = DB::table('ppl_payment_events')->where('request_id', $id)->sole();
+        $this->assertNull($event->journal_id);
+        $this->getJson(route('payment-plan-v33.data'))->assertOk()
+            ->assertJsonPath('bankBalances.idr3.ledger', '500.00')
+            ->assertJsonPath('bankBalances.idr3.unposted_actual_debits', '100.25')
+            ->assertJsonPath('bankBalances.idr3.actual', '399.75');
         DB::table('company_coa_mappings')->where('semantic_key', 'ppl.bank.idr3')->update(['active' => false]);
         $this->assertDatabaseHas('ppl_requests', ['id' => $id, 'status' => 'paid', 'version' => $version]);
         $this->assertDatabaseCount('journal_headers', $baselineJournals);
@@ -181,16 +188,26 @@ class PaymentPlanBankHttpTest extends TestCase
             ->assertSee('data-bank-request-id="'.$id.'"', false)
             ->assertSee('data-bank-doc="'.$result['request']['doc'].'"', false)
             ->assertSee('111003')->assertSee('100.25')->assertSee('receipt.png')->assertSee('<img', false)->assertSee($result['request']['journal']['journalId']);
-        $this->assertDatabaseHas('ppl_payment_events', ['request_id' => $id, 'journal_id' => $result['request']['journal']['journalId']]);
+        $journal = $result['request']['journal']['journalId'];
+        $this->assertSame($event->id, $result['request']['journal']['paymentEventId']);
+        $this->assertDatabaseHas('ppl_payment_events', ['id' => $event->id, 'request_id' => $id, 'journal_id' => $journal]);
+        $intent = DB::table('accounting_posting_intents')->where('idempotency_key', 'ppl:paid:'.$event->id)->sole();
+        $this->assertSame($journal, $intent->journal_id);
+        $this->assertNotNull($intent->sealed_at);
+        $this->assertDatabaseHas('journal_details', ['journal_id' => $journal, 'account_code' => '111003', 'position' => 'KREDIT', 'amount' => '100.25']);
+        $data = $this->getJson(route('payment-plan-v33.data'))->assertOk()
+            ->assertJsonPath('bankBalances.idr3.ledger', '399.75')
+            ->assertJsonPath('bankBalances.idr3.unposted_actual_debits', '0.00')
+            ->assertJsonPath('bankBalances.idr3.actual', '399.75');
         $this->assertDatabaseCount('journal_headers', $baselineJournals + 1);
         $this->assertSame(2, DB::table('journal_details')->where('journal_id', $result['request']['journal']['journalId'])->count());
         if ($ap) {
             $this->assertDatabaseHas('journal_details', ['journal_id' => $result['request']['journal']['journalId'], 'account_code' => '211001', 'position' => 'DEBET', 'amount' => '100.25']);
             $this->assertDatabaseMissing('journal_details', ['journal_id' => $result['request']['journal']['journalId'], 'account_code' => '610001']);
             $this->assertSame('100.25', DB::transaction(fn () => (new \App\Modules\PaymentPlan\Services\PurchaseBillAllocation())->source($billId, $company->id))['residual']);
-            $data = $this->getJson(route('payment-plan-v33.data'))->assertOk();
-            $data->assertJsonPath('bankBalances.idr3.actual', '399.75')->assertJsonPath('bankBalances.idr3.unposted_actual_debits', '0.00');
             $data->assertJsonPath('purchaseBills.0.residual', '100.25');
+        } else {
+            $this->assertDatabaseHas('journal_details', ['journal_id' => $journal, 'account_code' => '610001', 'position' => 'DEBET', 'amount' => '100.25']);
         }
         $this->assertDatabaseHas('journal_details', ['position' => 'DEBET', 'amount' => '100.25']);
         $this->assertDatabaseHas('journal_details', ['position' => 'KREDIT', 'amount' => '100.25']);
