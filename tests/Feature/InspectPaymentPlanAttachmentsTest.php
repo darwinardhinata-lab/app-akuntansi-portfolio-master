@@ -16,7 +16,7 @@ class InspectPaymentPlanAttachmentsTest extends TestCase
 
     public function test_clean_inventory_includes_archived_evidence(): void
     {
-        $disk = Storage::fake('local');
+        $disk = $this->privateDisk();
         $key = $this->attachment('archived evidence', archived: true);
         $disk->put($key, 'archived evidence');
 
@@ -30,7 +30,7 @@ class InspectPaymentPlanAttachmentsTest extends TestCase
 
     public function test_mismatches_fail_without_repair_or_disclosing_keys(): void
     {
-        $disk = Storage::fake('local');
+        $disk = $this->privateDisk();
         $this->attachment('missing');
         $changed = $this->attachment('original');
         $this->attachment('invalid', key: 'payment-plan/../outside');
@@ -64,7 +64,7 @@ class InspectPaymentPlanAttachmentsTest extends TestCase
 
     public function test_reconciliation_attachment_uses_its_own_context_key(): void
     {
-        $disk = Storage::fake('local');
+        $disk = $this->privateDisk();
         $company = Company::create(['code' => 'MGI', 'name' => 'Synthetic MGI', 'active' => true, 'base_currency' => 'IDR']);
         $user = User::factory()->create();
         $journal = (new \App\Models\JournalHeader())->forceCreate(['transaction_date' => '2026-01-01']);
@@ -89,6 +89,24 @@ class InspectPaymentPlanAttachmentsTest extends TestCase
             ->expectsOutput($this->summary(valid: 1))
             ->assertSuccessful();
         $this->assertDatabaseCount('ppl_attachment_audits', 0);
+    }
+
+    public function test_missing_private_root_is_not_a_pass_even_when_no_rows_exist(): void
+    {
+        config(['filesystems.disks.local.root' => sys_get_temp_dir().'/missing-ppl-root-'.Str::uuid()]);
+
+        $this->artisan('ppl:attachments-inspect')
+            ->expectsOutput('Private local disk root is unavailable.')
+            ->doesntExpectOutputToContain('"counts"')
+            ->assertExitCode(1);
+    }
+
+    private function privateDisk(): \Illuminate\Filesystem\FilesystemAdapter
+    {
+        $disk = Storage::fake('local');
+        config(['filesystems.disks.local.root' => $disk->path('')]);
+
+        return $disk;
     }
 
     private function attachment(string $contents, ?string $key = null, bool $archived = false): string

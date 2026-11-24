@@ -28,8 +28,20 @@ final class InspectPaymentPlanAttachments extends Command
         // Not an atomic DB/filesystem snapshot; run only on an approved, quiesced target.
         // Include archived rows: archiving does not remove their private evidence.
         try {
+            $configuredRoot = config('filesystems.disks.local.root');
+            $root = is_string($configuredRoot) && $configuredRoot !== '' ? realpath($configuredRoot) : false;
+            if ($root === false || ! is_dir($root) || ! is_readable($root)) {
+                $this->error('Private local disk root is unavailable.');
+
+                return self::FAILURE;
+            }
+
             $disk = Storage::disk('local');
-            $root = realpath($disk->path(''));
+            if (realpath($disk->path('')) !== $root) {
+                $this->error('Private local disk root is unavailable.');
+
+                return self::FAILURE;
+            }
             foreach (DB::table('ppl_attachments')->select('id', 'company_id', 'request_id', 'reconciliation_id', 'storage_key', 'sha256')->cursor() as $row) {
                 $key = $this->expectedKey($row);
                 if ($key === null || $row->storage_key !== $key) {
@@ -75,14 +87,14 @@ final class InspectPaymentPlanAttachments extends Command
         return null;
     }
 
-    private function fileStatus(FilesystemAdapter $disk, string|false $root, string $key, string $expectedHash): string
+    private function fileStatus(FilesystemAdapter $disk, string $root, string $key, string $expectedHash): string
     {
         if (! $disk->fileExists($key)) {
             return 'missing_file';
         }
 
         $path = realpath($disk->path($key));
-        if ($root === false || $path === false || ! str_starts_with($path, rtrim($root, '/\\').DIRECTORY_SEPARATOR) || ! is_file($path)) {
+        if ($path === false || ! str_starts_with($path, rtrim($root, '/\\').DIRECTORY_SEPARATOR) || ! is_file($path)) {
             return 'unreadable_file';
         }
 
