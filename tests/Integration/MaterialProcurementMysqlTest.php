@@ -16,7 +16,7 @@ class MaterialProcurementMysqlTest extends TestCase
 {
     private ?string $fixture = null;
 
-    public function test_http_auxiliary_expense_issue_conserves_stock_and_blocks_void_of_consumed_receipt(): void
+    private function auxiliaryReceiptFixture(): array
     {
         $operator = User::factory()->create(['role' => 'FINANCE']);
         config([
@@ -35,6 +35,12 @@ class MaterialProcurementMysqlTest extends TestCase
             'receipt_date' => '2026-11-24', 'supplier_id' => $supplier->id, 'supplier_doc_no' => 'O04-AUX-RECEIPT',
             'items' => [['item_type' => 'AUXILIARY', 'auxiliary_material_id' => $material->id, 'item_name' => $material->material_name, 'qty' => 5, 'unit' => 'PCS', 'rate' => 100]],
         ])->assertSessionHas('success');
+        return [$operator, $material];
+    }
+
+    public function test_http_auxiliary_expense_issue_conserves_stock_and_blocks_void_of_consumed_receipt(): void
+    {
+        [, $material] = $this->auxiliaryReceiptFixture();
         $issue = fn (int $qty) => $this->post(route('mfg.auxiliary-material-issues.store'), [
             'issue_date' => '2026-11-24', 'auxiliary_material_id' => $material->id, 'usage_type' => 'EXPENSE', 'qty' => $qty, 'work_order_id' => null,
         ]);
@@ -57,6 +63,87 @@ class MaterialProcurementMysqlTest extends TestCase
         $this->assertSame($before, $snapshot());
         $this->post(route('mfg.material-receipts.void', $receipt->id), ['reason' => 'Reject void after issue'])->assertSessionHas('error', fn ($error) => str_contains($error, 'mutasi lanjutan'));
         $this->assertSame($before, $snapshot());
+    }
+
+    public function test_http_parallel_auxiliary_issues_cannot_overdraw_committed_stock(): void
+    {
+        [$operator, $material] = $this->auxiliaryReceiptFixture();
+        $line = \App\Modules\Manufacturing\Models\ProductionLine::create(['line_code' => 'O04-RACE', 'line_name' => 'O04 fixture', 'is_active' => true]);
+        $workOrder = \App\Modules\Manufacturing\Models\WorkOrder::create(['spk_number' => 'O04-RACE', 'order_date' => '2026-11-24', 'line_id' => $line->id, 'garment_name' => 'Fixture', 'planned_qty' => 5]);
+        // Same fields sent by the real work-order expense form.
+        $payload = ['issue_date' => '2026-11-24', 'auxiliary_material_id' => $material->id, 'line_id' => $line->id, 'work_order_id' => $workOrder->id, 'usage_type' => 'EXPENSE', 'qty' => '3.00'];
+        $connection = config('database.connections.m2_fixture');
+        $worker = new Process([PHP_BINARY, base_path('tests/Support/auxiliary-issue-race-worker.php')], base_path(), null,
+            json_encode([$connection, $operator->id, $payload], JSON_THROW_ON_ERROR), 30);
+        $snapshot = fn ($db) => collect(['mfg_auxiliary_materials', 'mfg_auxiliary_material_issues', 'mfg_material_ledgers', 'inventory_ledgers', 'journal_headers', 'journal_details'])->mapWithKeys(fn ($table) => [$table => $db->table($table)->get()->map(fn ($row) => (array) $row)->sortBy(fn ($row) => json_encode($row))->values()->all()])->all();
+        DB::beginTransaction();
+        try {
+            $holder = (int) DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+            $this->post(route('mfg.auxiliary-material-issues.store'), $payload)
+                ->assertRedirect(route('mfg.work-orders.show', $workOrder->id))->assertSessionHas('success');
+            $worker->start();
+            $wait = null;
+            for ($i = 0; $i < 100 && $worker->isRunning(); $i++) {
+                if (preg_match('/connection=(\d+)/', $worker->getOutput(), $match)) {
+                    $wait = DB::connection('m2_admin')->selectOne('SELECT l.lock_table, l.lock_index, l.lock_data
+                        FROM information_schema.innodb_lock_waits w
+                        JOIN information_schema.innodb_trx a ON a.trx_id = w.requesting_trx_id
+                        JOIN information_schema.innodb_trx b ON b.trx_id = w.blocking_trx_id
+                        JOIN information_schema.innodb_locks l ON l.lock_id = w.requested_lock_id
+                        WHERE a.trx_mysql_thread_id = ? AND b.trx_mysql_thread_id = ?', [(int) $match[1], $holder]);
+                    if ($wait) break;
+                }
+                usleep(100000);
+            }
+            $this->assertNotNull($wait, $worker->getOutput().$worker->getErrorOutput());
+            $this->assertStringEndsWith('`mfg_auxiliary_materials`', $wait->lock_table);
+            $this->assertSame('PRIMARY', $wait->lock_index);
+            $winningSnapshot = $snapshot(DB::connection());
+            DB::commit();
+            $this->assertSame(3, $worker->wait(), $worker->getOutput().$worker->getErrorOutput());
+            config(['database.connections.o04_observer' => $connection]);
+            $db = DB::connection('o04_observer');
+            $observer = (int) $db->selectOne('SELECT CONNECTION_ID() AS id')->id;
+            $this->assertNotContains($observer, [$holder, (int) $match[1]]);
+            $committed = $snapshot($db);
+            $this->assertSame($winningSnapshot, $committed);
+            $issue = $db->table('mfg_auxiliary_material_issues')->sole();
+            $this->assertSame([$workOrder->id, '3.00', '300.00'], [$issue->work_order_id, $issue->qty, $issue->total_cost]);
+            $this->assertSame('2.00', $db->table('mfg_auxiliary_materials')->find($material->id)->stock_quantity);
+            $out = $db->table('mfg_material_ledgers')->where('type', 'OUT')->sole();
+            $this->assertSame([$issue->issue_number, '3.00', '300.00', '2.00', '200.00'], [$out->evidence_number, $out->qty, $out->total_cost, $out->running_qty, $out->running_value]);
+            $this->assertCount(2, $committed['journal_headers']);
+            $postings = $db->table('journal_details')->where('journal_id', $issue->journal_id)->orderBy('account_code')->get();
+            $this->assertSame([['114004', 'KREDIT', '300.00'], ['510010', 'DEBET', '300.00']], $postings->map(fn ($row) => [$row->account_code, $row->position, $row->amount])->all());
+            if ($directory = getenv('O02_EVIDENCE')) {
+                file_put_contents($directory.'/auxiliary-issue-race.json', json_encode(compact('holder', 'observer', 'wait', 'committed') + ['worker' => (int) $match[1], 'workerExit' => $worker->getExitCode(), 'workerResponse' => trim($worker->getOutput())], JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+            }
+        } finally {
+            if (DB::transactionLevel() > 0) DB::rollBack();
+            $worker->stop();
+            DB::purge('o04_observer');
+        }
+    }
+
+    public function test_http_auxiliary_expense_issue_without_work_order_reports_committed_success(): void
+    {
+        [, $material] = $this->auxiliaryReceiptFixture();
+        $payload = ['issue_date' => '2026-11-24', 'auxiliary_material_id' => $material->id, 'qty' => '2.00'];
+        $endpoint = route('mfg.auxiliary-material-issues.store');
+        $this->post($endpoint, $payload + ['usage_type' => 'WIP'])
+            ->assertSessionHas('error', fn ($error) => str_contains($error, 'wajib memilih SPK'));
+        $this->assertDatabaseCount('mfg_auxiliary_material_issues', 0);
+        $this->assertSame('5.00', $material->fresh()->stock_quantity);
+        $this->flushSession();
+        $response = $this->post($endpoint, $payload + ['usage_type' => 'EXPENSE']);
+        $this->assertDatabaseCount('mfg_auxiliary_material_issues', 1);
+        $issue = DB::table('mfg_auxiliary_material_issues')->sole();
+        $this->assertNull($issue->work_order_id);
+        $this->assertSame('3.00', $material->fresh()->stock_quantity);
+        $this->assertDatabaseCount('mfg_material_ledgers', 2);
+        $this->assertDatabaseCount('journal_headers', 2);
+        $response->assertSessionMissing('error')->assertSessionHas('success')
+            ->assertRedirect(route('mfg.auxiliary-materials.index'));
     }
 
     #[TestWith(['create', 'create'], 'create blocks create')]
