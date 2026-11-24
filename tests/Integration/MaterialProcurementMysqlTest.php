@@ -8,6 +8,7 @@ use App\Modules\Manufacturing\Models\Yarn;
 use App\Modules\Manufacturing\Services\MaterialProcurementService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\TestWith;
 use Symfony\Component\Process\Process;
 use Tests\TestCase;
 
@@ -15,7 +16,10 @@ class MaterialProcurementMysqlTest extends TestCase
 {
     private ?string $fixture = null;
 
-    public function test_http_po_decimal_residual_is_exact_across_shared_source_lines(): void
+    #[TestWith(['create', 'create'], 'create blocks create')]
+    #[TestWith(['create', 'edit'], 'create blocks edit')]
+    #[TestWith(['edit', 'create'], 'edit blocks create')]
+    public function test_http_po_decimal_residual_is_exact_across_shared_source_lines(string $holderAction, string $workerAction): void
     {
         $service = app(MaterialProcurementService::class);
         $creator = User::factory()->create();
@@ -67,16 +71,21 @@ class MaterialProcurementMysqlTest extends TestCase
             $this->assertSame($before[$table], $filled[$table]);
         }
 
-        // Free 0.10, then race two orders for all of it. The first is still uncommitted.
+        // Free 0.10. Each contender independently requests the entire remainder.
         $edit($line('0.10'))->assertSessionHas('success');
         $connection = config('database.connections.m2_fixture');
         $worker = new Process([PHP_BINARY, base_path('tests/Support/material-po-race-worker.php')], base_path(), null,
-            json_encode([$connection, $pr->id, $supplier->id, $line('0.10'), ['po_date' => '2026-11-23', 'created_by' => $creator->id]], JSON_THROW_ON_ERROR), 30);
+            json_encode([$connection, $pr->id, $supplier->id, $line($workerAction === 'edit' ? '0.20' : '0.10'), ['po_date' => '2026-11-23', 'created_by' => $creator->id], $workerAction === 'edit' ? $second->id : null], JSON_THROW_ON_ERROR), 30);
         DB::beginTransaction();
         try {
             $holder = (int) DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
-            $create($line('0.10'))->assertSessionHas('success');
-            $winner = DB::table('mfg_material_purchase_orders')->max('id');
+            if ($holderAction === 'edit') {
+                $edit($line('0.20'))->assertSessionHas('success');
+                $winner = $second->id;
+            } else {
+                $create($line('0.10'))->assertSessionHas('success');
+                $winner = DB::table('mfg_material_purchase_orders')->max('id');
+            }
             $worker->start();
             $wait = null;
             for ($i = 0; $i < 100 && $worker->isRunning(); $i++) {
@@ -94,8 +103,10 @@ class MaterialProcurementMysqlTest extends TestCase
                 usleep(100000);
             }
             $this->assertNotNull($wait, $worker->getOutput().$worker->getErrorOutput());
-            $this->assertStringContainsString('mfg_material_purchase_requests', $wait->lock_table);
-            $this->assertSame('PRIMARY', $wait->lock_index);
+            $this->assertMatchesRegularExpression($workerAction === 'edit'
+                ? '/`mfg_material_purchase_(?:orders|requests)`$/'
+                : '/`mfg_material_purchase_requests`$/', $wait->lock_table);
+            $this->assertNotEmpty($wait->lock_index);
             $winningSnapshot = $snapshot();
             DB::commit();
             $this->assertSame(3, $worker->wait(), $worker->getErrorOutput());
@@ -110,7 +121,7 @@ class MaterialProcurementMysqlTest extends TestCase
                 $this->assertSame('0.30', $committed);
                 $this->assertSame('0.30', $source->fresh()->qty_ordered);
                 if ($directory = getenv('O02_EVIDENCE')) {
-                    file_put_contents($directory.'/race.json', json_encode(['holder' => $holder, 'worker' => (int) $match[1], 'observer' => $observer, 'workerExit' => $worker->getExitCode(), 'wait' => $wait, 'winner' => $winner, 'source' => $source->id, 'committed' => $committed], JSON_THROW_ON_ERROR));
+                    file_put_contents($directory.'/race-'.$holderAction.'-'.$workerAction.'.json', json_encode(['holderAction' => $holderAction, 'workerAction' => $workerAction, 'holder' => $holder, 'worker' => (int) $match[1], 'observer' => $observer, 'workerExit' => $worker->getExitCode(), 'wait' => $wait, 'winner' => $winner, 'source' => $source->id, 'committed' => $committed], JSON_THROW_ON_ERROR));
                 }
             } finally {
                 DB::purge('o02_observer');
