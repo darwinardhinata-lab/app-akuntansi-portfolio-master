@@ -1,0 +1,24 @@
+# O04 EXPENSE retry — usulan, belum disetujui
+
+**Keputusan diminta:** Darwin menyetujui scope, pemeriksaan izin, retensi dan kompatibilitas di bawah sebelum implementasi. Cakupan hanya POST issue bahan penolong `EXPENSE`, termasuk standalone dan dari SPK. WIP, void, dan pilot `idr3` tidak berubah.
+
+## Identitas dan respons
+
+- Form normal membuat UUID acak `expense_intent_key` saat membuka intent baru. Pertahankan key dan data intent untuk pengiriman ulang, validasi yang gagal, respons hilang, atau reload/recovery di browser yang sama (draft lokal dibatasi ke akun, perusahaan dan form; jangan menyimpan token CSRF). Pastikan operator dapat membedakan **Kirim ulang** dari **Pengeluaran baru**; yang kedua selalu membuat key baru. Jangan mengganti key hanya karena timeout. Pemanggil lain dapat mengirim field yang sama; key bukan kredensial.
+- Scope unik DB: `(company_id, expense_intent_key)` pada tabel klaim khusus EXPENSE. Company ditentukan server, bukan request. Simpan `actor_id` asli dan referensi issue untuk audit dan otorisasi, bukan sebagai bagian dari unique key. Retensi mengikuti umur catatan issue/audit (termasuk setelah void); jangan mengizinkan pemakaian ulang key yang sudah commit. Jangan mengklaim fitur ini membuka dukungan multi-company untuk stok/GL yang masih single-MGI.
+- Bandingkan versi payload kanonis: tanggal bisnis `YYYY-MM-DD`, material ID, SPK nullable, line efektif (line SPK jika tidak dikirim, setelah memastikan line eksplisit cocok), `EXPENSE`, qty desimal eksak menurut presisi yang disetujui untuk route, dan remarks opsional (kosong menjadi null). Validasi nilai sebelum menyusun representasi; tolak presisi berlebih, jangan diam-diam membulatkan. Jangan gunakan float, token CSRF, biaya, stok, COA atau nomor dokumen hasil posting sebagai identitas input. Simpan data normalisasi yang diperlukan agar replay tidak tergantung pada master data yang berubah.
+- Key sama + payload kanonis sama: kembalikan issue asli, tanpa posting baru atau audit event `POST` kedua. Browser: `302` ke tujuan yang sama berdasarkan issue tersimpan, flash bahwa issue sudah tercatat beserta nomornya. Jika telah void, nyatakan status void; jangan membuat pengganti. Stok saat ini, periode posting sudah tutup, atau material dinonaktifkan bukan alasan untuk mencoba posting ulang.
+- Key sama + payload bisnis berbeda: `409` setelah otorisasi, tanpa perubahan; pertahankan key asli dan tampilkan pilihan memeriksa hasil atau memulai intent baru. Key berbeda dengan payload sama tetap bisa menghasilkan issue baru bila aturan bisnis dan stok mengizinkan.
+- Pemanggil lama tanpa field tetap berperilaku unkeyed: setiap POST adalah issue baru, tanpa jaminan retry. Jangan mengarang key di server untuk pemanggil lama. Key yang dikirim tetapi kosong/tidak valid adalah kesalahan validasi, bukan fallback. Persyaratan key bagi pemanggil lama perlu keputusan migrasi terpisah.
+
+## Otorisasi dan atomisitas
+
+- Sebelum lookup/replay: periksa sesi, CSRF, hak posting EXPENSE saat ini, keanggotaan dan MGI yang sedang dipilih. Terapkan pengecekan yang sama pada issue baru dan akses SPK/material yang relevan. Untuk replay harus aktor yang sama **dan** masih berhak melihat issue tersimpan; jika akses dicabut atau aktor lain memakai key, tolak tanpa membocorkan keberadaan, payload atau hasil issue. Jangan memperlakukan key sebagai otorisasi. Setujui izin posting dan baca yang akan dipakai sebelum coding; cek route aktual, jangan berasumsi middleware `auth` sudah cukup.
+- Klaim key dengan unique insert sebelum mutasi dalam transaksi InnoDB yang sama dengan issue, mutasi stok, jurnal dan relasi hasil klaim. Bukan `SELECT` lalu `INSERT` tanpa constraint. Pesaing menunggu transaksi pemilik; setelah commit, baca hasil committed dalam transaksi baru/current read yang sesuai. Bila pemilik rollback, key tidak dikonsumsi; lawan dapat mengambil klaim. Jika lock timeout/deadlock tidak dapat dipulihkan, berikan kegagalan sementara yang dapat di-retry dengan **key sama**; jangan mem-post ulang tanpa key. Validasi pra-commit yang gagal tidak meninggalkan klaim atau efek parsial.
+
+## Bukti yang dibutuhkan setelah approval
+
+1. Respons hilang setelah commit: retry mengembalikan ID issue pertama; tepat satu OUT dan satu jurnal; uji juga setelah stok berubah/periode ditutup.
+2. Dua request paralel dengan key/payload sama dan stok cukup untuk keduanya: buktikan kontensi, observer terpisah melihat satu klaim dan satu efek; kedua hasil mengacu ke issue yang sama. Uji rollback pemilik klaim.
+3. Key sama dengan payload berbeda: `409`, state tidak berubah. Key berbeda/payload sama: dua efek sah.
+4. Aktor lain, konteks perusahaan berbeda, izin dicabut, dan void: tidak ada kebocoran, posting atau penggantian. Pemanggil tanpa key dan WIP mempertahankan perilaku lama. Baseline dua POST unkeyed tetap tersimpan untuk pembanding.
