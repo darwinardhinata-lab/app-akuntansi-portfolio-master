@@ -4,6 +4,7 @@ return [    'title' => 'Bank payments', 'ap_source' => 'AP invoice source (optio
     'search_ap' => 'Search AP invoice or supplier', 'print' => 'Print payment', 'approved_basis' => 'Approved accounting basis',
     'status' => 'Status', 'version' => 'Version', 'currency' => 'Currency', 'journal' => 'ERP journal', 'history' => 'Decision history',
     'new' => 'New request',
+    'create' => 'Create payment request',
     'payee' => 'Payee',
     'subject' => 'Subject',
     'purpose' => 'Purpose',

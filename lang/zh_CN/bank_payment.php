@@ -4,6 +4,7 @@ return [    'title' => '银行付款', 'ap_source' => '应付发票来源（可�
     'search_ap' => '搜索应付发票或供应商', 'print' => '打印付款', 'approved_basis' => '已批准的会计依据',
     'status' => '状态', 'version' => '版本', 'currency' => '币种', 'journal' => 'ERP日记账', 'history' => '决策记录',
     'new' => '新申请',
+    'create' => '创建付款申请',
     'payee' => '收款人',
     'subject' => '主题',
     'purpose' => '用途',
