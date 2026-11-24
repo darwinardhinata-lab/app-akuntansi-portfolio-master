@@ -14,6 +14,7 @@ use App\Modules\Manufacturing\Models\Fabric;
 use App\Modules\Manufacturing\Models\AuxiliaryMaterial;
 use App\Modules\Manufacturing\Models\MaterialLedger;
 use App\Modules\Manufacturing\Support\MaterialCostHelper;
+use App\Modules\Manufacturing\Support\AuxiliaryStockValue;
 use App\Modules\Platform\Support\CompanyCoaResolver;
 use App\Modules\Platform\Support\OperationalCompany;
 use Illuminate\Support\Facades\DB;
@@ -152,7 +153,10 @@ class MaterialReceiptService
                 $qty  = (float) $row['qty'];
                 $rate = (float) $row['rate'];
                 $amount = $qty * $rate;
-                $grossAmount += $amount;
+                if ($auxiliaryIds) {
+                    $amount = AuxiliaryStockValue::product($row['qty'], $row['rate']);
+                }
+                $grossAmount = $auxiliaryIds ? bcadd((string) $grossAmount, $amount, 2) : $grossAmount + $amount;
 
                 // RULES.md §5 (pola "H2 FIX" PurchaseOrderService) — Validasi Qty Terima:
                 // qtyTerima <= (qtyPO - qtyReceivedSebelumnya), jika MRN ini berasal dari PO.
@@ -176,11 +180,19 @@ class MaterialReceiptService
                 } else {
                     $auxiliaryMaterialAccount ??= $coa->account($company, 'auxiliary_material_inventory');
                     $auxiliary = $auxiliaries->get($row['auxiliary_material_id']) ?? throw new Exception("Bahan penolong ID {$row['auxiliary_material_id']} tidak ditemukan.");
-                    $result = MaterialCostHelper::receiveStock($auxiliary, 'AUXILIARY', $qty, $rate, $header['receipt_date'], $receiptNumber, "Penerimaan MRN: {$receiptNumber} - {$row['item_name']}");
+                    $qty = AuxiliaryStockValue::decimal($row['qty']);
+                    $rate = AuxiliaryStockValue::decimal($row['rate']);
+                    [$stock, $value] = AuxiliaryStockValue::balance($auxiliary);
+                    $stock = bcadd($stock, $qty, 2);
+                    $value = bcadd($value, $amount, 2);
+                    AuxiliaryStockValue::record($auxiliary, $header['receipt_date'], $receiptNumber, 'IN', $qty, $rate,
+                        $amount, $stock, $value, AuxiliaryStockValue::average($value, $stock), "Penerimaan MRN: {$receiptNumber} - {$row['item_name']}");
                     $accountCode = $auxiliaryMaterialAccount;
                 }
 
-                $costByAccount[$accountCode] = ($costByAccount[$accountCode] ?? 0) + $amount;
+                $costByAccount[$accountCode] = $auxiliaryIds
+                    ? bcadd($costByAccount[$accountCode] ?? '0', $amount, 2)
+                    : ($costByAccount[$accountCode] ?? 0) + $amount;
 
                 $detailRows[] = [
                     'po_detail_id' => $row['po_detail_id'] ?? null,
@@ -199,8 +211,8 @@ class MaterialReceiptService
                 ];
             }
 
-            $taxAmount = (float) ($header['tax_amount'] ?? 0);
-            $netAmount = $grossAmount + $taxAmount;
+            $taxAmount = $auxiliaryIds ? AuxiliaryStockValue::decimal($header['tax_amount'] ?? 0) : (float) ($header['tax_amount'] ?? 0);
+            $netAmount = $auxiliaryIds ? bcadd($grossAmount, $taxAmount, 2) : $grossAmount + $taxAmount;
 
             // Anti-dobel posting: 1 nomor evidence hanya boleh 1 jurnal utk transaction_type ini.
             $existing = JournalHeader::where('source_doc_no', $header['supplier_doc_no'] ?? $receiptNumber)
