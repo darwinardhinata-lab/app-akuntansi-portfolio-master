@@ -16,6 +16,52 @@ class MaterialProcurementMysqlTest extends TestCase
 {
     private ?string $fixture = null;
 
+    public function test_http_identical_unkeyed_expense_submissions_with_stock_available(): void
+    {
+        [, $material] = $this->auxiliaryReceiptFixture();
+        $line = \App\Modules\Manufacturing\Models\ProductionLine::create(['line_code' => 'O04-REPEAT', 'line_name' => 'O04 fixture', 'is_active' => true]);
+        $workOrder = \App\Modules\Manufacturing\Models\WorkOrder::create(['spk_number' => 'O04-REPEAT', 'order_date' => '2026-11-24', 'line_id' => $line->id, 'garment_name' => 'Fixture', 'planned_qty' => 5]);
+        $payload = ['issue_date' => '2026-11-24', 'auxiliary_material_id' => $material->id, 'work_order_id' => $workOrder->id, 'line_id' => $line->id, 'usage_type' => 'EXPENSE', 'qty' => '2.00'];
+        config(['database.connections.o04_observer' => config('database.connections.m2_fixture')]);
+        $observer = DB::connection('o04_observer');
+        try {
+            $writerId = DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+            $observerId = $observer->selectOne('SELECT CONNECTION_ID() AS id')->id;
+            $this->assertNotSame($writerId, $observerId);
+            $this->assertSame(0, DB::transactionLevel());
+            $this->assertSame('5.00', $observer->table('mfg_auxiliary_materials')->find($material->id)->stock_quantity);
+            $runs = [];
+            foreach ([1 => ['3.00', '300.00'], 2 => ['1.00', '100.00']] as $count => [$remaining, $value]) {
+                $this->flushSession();
+                $response = $this->post(route('mfg.auxiliary-material-issues.store'), $payload);
+                $response->assertRedirect(route('mfg.work-orders.show', $workOrder->id))->assertSessionHas('success')->assertSessionMissing('error');
+                $issues = $observer->table('mfg_auxiliary_material_issues')->orderBy('id')->get();
+                $this->assertCount($count, $issues);
+                $this->assertCount($count, $issues->pluck('issue_number')->unique());
+                $this->assertCount($count, $issues->pluck('journal_id')->unique());
+                $this->assertSame($count, $observer->table('mfg_material_ledgers')->where('type', 'OUT')->count());
+                $this->assertSame($count + 1, $observer->table('journal_headers')->count());
+                $issue = $issues->last();
+                $out = $observer->table('mfg_material_ledgers')->where('evidence_number', $issue->issue_number)->sole();
+                $this->assertSame(['OUT', '2.00', '200.00', $remaining, $value], [$out->type, $out->qty, $out->total_cost, $out->running_qty, $out->running_value]);
+                $this->assertSame($remaining, $observer->table('mfg_auxiliary_materials')->find($material->id)->stock_quantity);
+                $journal = $observer->table('journal_headers')->where('journal_id', $issue->journal_id)->sole();
+                $this->assertCount($count, $observer->table('journal_headers')->whereIn('journal_id', $issues->pluck('journal_id'))->pluck('evidence_number')->unique());
+                $postings = $observer->table('journal_details')->where('journal_id', $issue->journal_id)->orderBy('account_code')->get()->map(fn ($row) => [$row->account_code, $row->position, $row->amount])->all();
+                $this->assertSame([['114004', 'KREDIT', '200.00'], ['510010', 'DEBET', '200.00']], $postings);
+                if ($count === 2) {
+                    $this->assertEquals($runs[0]['issue'], $issues->first());
+                }
+                $runs[] = ['status' => $response->getStatusCode(), 'redirect' => $response->headers->get('Location'), 'success' => session('success'), 'issueCount' => $count] + compact('issue', 'out', 'journal', 'postings');
+            }
+            if ($directory = getenv('O02_EVIDENCE')) {
+                file_put_contents($directory.'/auxiliary-issue-repeat.json', json_encode(compact('writerId', 'observerId', 'payload', 'runs'), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+            }
+        } finally {
+            DB::purge('o04_observer');
+        }
+    }
+
     private function auxiliaryReceiptFixture(): array
     {
         $operator = User::factory()->create(['role' => 'FINANCE']);
