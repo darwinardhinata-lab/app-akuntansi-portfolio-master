@@ -84,6 +84,76 @@ class MaterialProcurementMysqlTest extends TestCase
         return [$operator, $material];
     }
 
+    public function test_http_auxiliary_expense_void_reconciles_stock_card_to_gl(): void
+    {
+        [, $material] = $this->auxiliaryReceiptFixture();
+        $this->flushSession();
+        $this->post(route('mfg.auxiliary-material-issues.store'), [
+            'issue_date' => '2026-11-24', 'auxiliary_material_id' => $material->id,
+            'usage_type' => 'EXPENSE', 'qty' => '2.00',
+        ])->assertSessionHas('success')->assertSessionMissing('error');
+
+        config(['database.connections.o04_observer' => config('database.connections.m2_fixture')]);
+        $observer = DB::connection('o04_observer');
+        try {
+            $this->assertNotSame(DB::selectOne('SELECT CONNECTION_ID() AS id')->id, $observer->selectOne('SELECT CONNECTION_ID() AS id')->id);
+            $this->assertSame(0, DB::transactionLevel());
+            $receipt = $observer->table('mfg_material_receipts')->sole();
+            $issue = $observer->table('mfg_auxiliary_material_issues')->sole();
+            $this->flushSession();
+            $this->post(route('mfg.auxiliary-material-issues.void', $issue->id))
+                ->assertSessionHas('success')->assertSessionMissing('error');
+            $voided = $observer->table('mfg_auxiliary_material_issues')->sole();
+            $this->assertSame($issue->id, $voided->id);
+            $this->assertNotNull($voided->voided_at);
+            $this->assertNotSame($issue->journal_id, $voided->reversal_journal_id);
+
+            $card = $observer->table('mfg_material_ledgers')->where('item_type', 'AUXILIARY')->where('item_id', $material->id)->orderBy('id')->get();
+            $this->assertCount(3, $card);
+            $qty = $value = '0.00';
+            $stages = [];
+            foreach ([
+                [$receipt->receipt_number, $receipt->journal_id, 'IN', '5.00', '500.00', '211001'],
+                [$issue->issue_number, $issue->journal_id, 'OUT', '2.00', '200.00', '510010'],
+                [$issue->issue_number.'-VOID', $voided->reversal_journal_id, 'IN', '2.00', '200.00', '510010'],
+            ] as $index => [$evidence, $journalId, $movement, $units, $amount, $counterparty]) {
+                $row = $card[$index];
+                $this->assertSame([$evidence, $movement, $units, $amount], [$row->evidence_number, $row->type, $row->qty, $row->total_cost]);
+                $qty = $movement === 'IN' ? bcadd($qty, $units, 2) : bcsub($qty, $units, 2);
+                $value = $movement === 'IN' ? bcadd($value, $amount, 2) : bcsub($value, $amount, 2);
+                $this->assertSame([$qty, $value], [$row->running_qty, $row->running_value]);
+                $postings = $observer->table('journal_details')->where('journal_id', $journalId)->orderBy('account_code')->get()
+                    ->map(fn ($line) => [$line->account_code, $line->position, $line->amount])->all();
+                $this->assertSame([
+                    ['114004', $movement === 'IN' ? 'DEBET' : 'KREDIT', $amount],
+                    [$counterparty, $movement === 'IN' ? 'KREDIT' : 'DEBET', $amount],
+                ], $postings);
+                $stages[] = compact('row', 'journalId', 'postings');
+            }
+            $stock = $observer->table('mfg_auxiliary_materials')->find($material->id);
+            $netInventory = $observer->table('journal_details')->where('account_code', '114004')
+                ->selectRaw("SUM(CASE WHEN position = 'DEBET' THEN amount ELSE -amount END) AS net")->sole()->net;
+            $this->assertSame($qty, $stock->stock_quantity);
+            $this->assertSame($value, bcmul($stock->stock_quantity, $stock->average_cost, 2));
+            $this->assertSame($value, $netInventory);
+            $this->assertSame(3, $observer->table('journal_headers')->count());
+            $this->assertSame(0, $observer->table('inventory_ledgers')->count());
+
+            $this->flushSession();
+            $this->post(route('mfg.auxiliary-material-issues.void', $issue->id))
+                ->assertSessionHas('error', fn ($error) => str_contains($error, 'sudah dibatalkan'));
+            $this->assertSame(3, $observer->table('mfg_material_ledgers')->count());
+            $this->assertSame(3, $observer->table('journal_headers')->count());
+            $this->assertSame(6, $observer->table('journal_details')->count());
+            $this->assertEquals($stock, $observer->table('mfg_auxiliary_materials')->find($material->id));
+            if ($directory = getenv('O02_EVIDENCE')) {
+                file_put_contents($directory.'/auxiliary-issue-conservation.json', json_encode(compact('stages', 'stock', 'netInventory'), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+            }
+        } finally {
+            DB::purge('o04_observer');
+        }
+    }
+
     public function test_http_auxiliary_expense_issue_conserves_stock_and_blocks_void_of_consumed_receipt(): void
     {
         [, $material] = $this->auxiliaryReceiptFixture();
