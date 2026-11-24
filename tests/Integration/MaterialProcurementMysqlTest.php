@@ -16,6 +16,49 @@ class MaterialProcurementMysqlTest extends TestCase
 {
     private ?string $fixture = null;
 
+    public function test_http_auxiliary_expense_issue_conserves_stock_and_blocks_void_of_consumed_receipt(): void
+    {
+        $operator = User::factory()->create(['role' => 'FINANCE']);
+        config([
+            'platform.order_company_scope_enabled' => true, 'platform.legacy_sync_enabled' => false,
+            'customs.enabled' => false, 'platform.mrn_void_user_ids' => [$operator->id],
+        ]);
+        $company = \App\Modules\Platform\Models\Company::create(['code' => 'MGI', 'name' => 'MGI', 'active' => true]);
+        $operator->companies()->attach($company->id, ['is_default' => true]);
+        foreach ([['114004', 'ASSET', 'DEBET', 'auxiliary_material_inventory'], ['117008', 'ASSET', 'DEBET', 'input_vat'], ['211001', 'LIABILITY', 'KREDIT', 'accounts_payable'], ['510010', 'EXPENSE', 'DEBET', 'auxiliary_material_expense']] as [$code, $type, $side, $key]) {
+            \App\Models\Account::create(['account_code' => $code, 'account_name' => $key, 'coa_type' => $type, 'normal_balance' => $side, 'report_pos' => $type === 'EXPENSE' ? 'LABA RUGI' : 'NERACA']);
+            \App\Modules\Platform\Models\CompanyCoaMapping::create(['company_id' => $company->id, 'semantic_key' => $key, 'account_code' => $code, 'active' => true]);
+        }
+        $material = \App\Modules\Manufacturing\Models\AuxiliaryMaterial::create(['material_code' => 'AUX-O04', 'material_name' => 'Canonical label', 'unit' => 'PCS', 'is_active' => true]);
+        $supplier = Supplier::create(['supplier_code' => 'SUP-O04', 'supplier_name' => 'Canonical supplier', 'supplier_type' => 'RAW_MATERIAL']);
+        $this->actingAs($operator)->post(route('mfg.material-receipts.store'), [
+            'receipt_date' => '2026-11-24', 'supplier_id' => $supplier->id, 'supplier_doc_no' => 'O04-AUX-RECEIPT',
+            'items' => [['item_type' => 'AUXILIARY', 'auxiliary_material_id' => $material->id, 'item_name' => $material->material_name, 'qty' => 5, 'unit' => 'PCS', 'rate' => 100]],
+        ])->assertSessionHas('success');
+        $issue = fn (int $qty) => $this->post(route('mfg.auxiliary-material-issues.store'), [
+            'issue_date' => '2026-11-24', 'auxiliary_material_id' => $material->id, 'usage_type' => 'EXPENSE', 'qty' => $qty, 'work_order_id' => null,
+        ]);
+        $response = $issue(2);
+        $this->assertNull(session('error'), (string) session('error'));
+        $response->assertSessionHas('success');
+        $posted = DB::table('mfg_auxiliary_material_issues')->sole();
+        $this->assertSame('3.00', $material->fresh()->stock_quantity);
+        $this->assertSame('100.00', $material->fresh()->average_cost);
+        $this->assertSame('200.00', $posted->total_cost);
+        $ledger = DB::table('mfg_material_ledgers')->where('evidence_number', $posted->issue_number)->sole();
+        $this->assertSame(['OUT', '2.00', '200.00', '3.00', '300.00'], [$ledger->type, $ledger->qty, $ledger->total_cost, $ledger->running_qty, $ledger->running_value]);
+        $postings = DB::table('journal_details')->where('journal_id', $posted->journal_id)->orderBy('account_code')->get();
+        $this->assertSame([['114004', 'KREDIT', '200.00'], ['510010', 'DEBET', '200.00']], $postings->map(fn ($row) => [$row->account_code, $row->position, $row->amount])->all());
+        $this->assertDatabaseCount('mfg_material_ledgers', 2);
+        $receipt = DB::table('mfg_material_receipts')->sole();
+        $snapshot = fn () => collect(['mfg_auxiliary_materials', 'mfg_auxiliary_material_issues', 'mfg_material_receipts', 'mfg_material_receipt_details', 'mfg_material_ledgers', 'inventory_ledgers', 'journal_headers', 'journal_details'])->map(fn ($table) => DB::table($table)->get()->map(fn ($row) => json_encode($row))->sort()->values()->all())->all();
+        $before = $snapshot();
+        $issue(4)->assertSessionHas('error', fn ($error) => str_contains($error, 'tidak mencukupi'));
+        $this->assertSame($before, $snapshot());
+        $this->post(route('mfg.material-receipts.void', $receipt->id), ['reason' => 'Reject void after issue'])->assertSessionHas('error', fn ($error) => str_contains($error, 'mutasi lanjutan'));
+        $this->assertSame($before, $snapshot());
+    }
+
     #[TestWith(['create', 'create'], 'create blocks create')]
     #[TestWith(['create', 'edit'], 'create blocks edit')]
     #[TestWith(['edit', 'create'], 'edit blocks create')]
