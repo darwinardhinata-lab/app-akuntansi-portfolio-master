@@ -85,7 +85,8 @@ class MaterialProcurementMysqlTest extends TestCase
     }
 
     #[TestWith([5, 120, '110.00', '220.00', ['1100.00', '880.00', '1100.00'], ['1100.00', '880.00', '1100.00'], 'exact average'], 'exact average')]
-    #[TestWith([1, 101, '100.17', '200.34', ['601.00', '400.68', '601.02'], ['601.00', '400.66', '601.00'], 'rounding gap'], 'rounding gap')]
+    #[TestWith([1, 101, '100.17', '200.34', ['601.00', '400.66', '601.00'], ['601.00', '400.66', '601.00'], 'residual void'], 'residual void')]
+    #[TestWith([1, 101, '100.17', '200.34', ['601.00', '400.66', '0.00'], ['601.00', '400.66', '0.00'], 'depletion'], 'depletion')]
     public function test_http_auxiliary_mixed_cost_issue_and_void_valuation(
         int $secondQty, int $secondRate, string $average, string $issueValue, array $cardValues, array $glValues, string $scenario,
     ): void {
@@ -116,7 +117,7 @@ class MaterialProcurementMysqlTest extends TestCase
                 $net = $netGl();
                 $masterValue = bcmul($stock->stock_quantity, $stock->average_cost, 2);
                 $this->assertSame([$type, $movementQty, $cost, $runningQty, $cardValues[$stage]], [$last->type, $last->qty, $last->total_cost, $last->running_qty, $last->running_value]);
-                $this->assertSame([$runningQty, $average], [$stock->stock_quantity, $stock->average_cost]);
+                $this->assertSame([$runningQty, $runningQty === '0.00' ? '0.00' : $average], [$stock->stock_quantity, $stock->average_cost]);
                 $this->assertSame($glValues[$stage], $net);
                 $steps[] = compact('last', 'stock', 'net', 'masterValue');
             };
@@ -131,10 +132,45 @@ class MaterialProcurementMysqlTest extends TestCase
             $check(1, 'OUT', '2.00', $issueValue, bcsub($received, '2', 2));
 
             $this->flushSession();
+            if ($scenario === 'depletion') {
+                $this->post(route('mfg.auxiliary-material-issues.store'), [
+                    'issue_date' => '2026-11-24', 'auxiliary_material_id' => $material->id, 'usage_type' => 'EXPENSE', 'qty' => '4.00',
+                ])->assertSessionHas('success')->assertSessionMissing('error');
+                $lastIssue = $observer->table('mfg_auxiliary_material_issues')->orderByDesc('id')->first();
+                $this->assertSame('400.66', $lastIssue->total_cost);
+                $check(2, 'OUT', '4.00', '400.66', '0.00');
+                $this->flushSession();
+                $this->post(route('mfg.auxiliary-material-issues.void', $issue->id))->assertSessionHas('error', fn ($error) => str_contains($error, 'mutasi lanjutan'));
+                $this->assertCount(4, $card());
+                $this->assertSame(4, $observer->table('journal_headers')->count());
+                if ($directory = getenv('O02_EVIDENCE')) {
+                    file_put_contents($directory.'/auxiliary-mixed-depletion.json', json_encode(compact('steps', 'issue', 'lastIssue'), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
+                }
+                return;
+            }
+            if ($scenario === 'residual void') {
+                // Use the same signed movement with a legacy running-value snapshot.
+                $outId = $card()->last()->id;
+                DB::table('mfg_material_ledgers')->where('id', $outId)->update(['running_value' => '400.68']);
+                config(['platform.period_lock_enabled' => true]);
+                DB::table('accounting_periods')->insert(['month' => '2026-11', 'closed' => true, 'created_at' => now(), 'updated_at' => now()]);
+                $this->post(route('mfg.auxiliary-material-issues.void', $issue->id))
+                    ->assertSessionHas('error', fn ($error) => str_contains($error, 'Accounting period is closed'));
+                $this->assertCount(3, $card());
+                $this->assertSame(3, $observer->table('journal_headers')->count());
+                DB::table('accounting_periods')->where('month', '2026-11')->update(['closed' => false]);
+                $this->flushSession();
+            }
             $this->post(route('mfg.auxiliary-material-issues.void', $issue->id))->assertSessionHas('success')->assertSessionMissing('error');
             $voided = $observer->table('mfg_auxiliary_material_issues')->sole();
             $this->assertNotNull($voided->voided_at);
             $check(2, 'IN', '2.00', $issueValue, $received);
+            if ($scenario === 'residual void') {
+                $this->assertSame('400.68', $card()[2]->running_value);
+            }
+            $this->flushSession();
+            $this->post(route('mfg.auxiliary-material-issues.void', $issue->id))->assertSessionHas('error', fn ($error) => str_contains($error, 'sudah dibatalkan'));
+            $this->assertCount(4, $card());
             foreach ([$issue->journal_id => ['KREDIT', 'DEBET'], $voided->reversal_journal_id => ['DEBET', 'KREDIT']] as $journalId => [$inventorySide, $expenseSide]) {
                 $postings = $observer->table('journal_details')->where('journal_id', $journalId)->orderBy('account_code')->get()
                     ->map(fn ($row) => [$row->account_code, $row->position, $row->amount])->all();
@@ -145,6 +181,59 @@ class MaterialProcurementMysqlTest extends TestCase
                 $filename = 'auxiliary-mixed-'.str_replace(' ', '-', $scenario).'.json';
                 file_put_contents($directory.'/'.$filename, json_encode(compact('first', 'steps', 'issue', 'voided'), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT));
             }
+        } finally {
+            DB::purge('o04_observer');
+        }
+    }
+
+    public function test_http_auxiliary_valuation_rejects_partial_overdraw_and_unexplained_opening_stock(): void
+    {
+        [, $material, $supplier] = $this->auxiliaryReceiptFixture();
+        $this->flushSession();
+        $this->post(route('mfg.material-receipts.store'), [
+            'receipt_date' => '2026-11-24', 'supplier_id' => $supplier->id, 'supplier_doc_no' => 'O04-RESIDUAL-CAP',
+            'items' => [['item_type' => 'AUXILIARY', 'auxiliary_material_id' => $material->id, 'item_name' => $material->material_name, 'qty' => '1.00', 'unit' => 'PCS', 'rate' => '101.00']],
+        ])->assertSessionHas('success');
+        config(['database.connections.o04_observer' => config('database.connections.m2_fixture')]);
+        $observer = DB::connection('o04_observer');
+        try {
+            $snapshot = fn () => collect(['mfg_auxiliary_materials', 'mfg_auxiliary_material_issues', 'mfg_material_ledgers', 'journal_headers', 'journal_details'])
+                ->mapWithKeys(fn ($table) => [$table => $observer->table($table)->get()->map(fn ($row) => (array) $row)->all()])->all();
+            $post = fn ($id, $qty) => $this->post(route('mfg.auxiliary-material-issues.store'), [
+                'issue_date' => '2026-11-24', 'auxiliary_material_id' => $id, 'usage_type' => 'EXPENSE', 'qty' => $qty,
+            ]);
+            // Simulate an existing opening quantity with no auditable movement history.
+            $opening = \App\Modules\Manufacturing\Models\AuxiliaryMaterial::create([
+                'material_code' => 'AUX-UNEXPLAINED', 'material_name' => 'Unexplained opening', 'unit' => 'PCS',
+                'stock_quantity' => '2.00', 'average_cost' => '100.00', 'is_active' => true,
+            ]);
+            $snapshotBefore = $snapshot();
+            $this->flushSession();
+            $post($opening->id, '1.00')->assertSessionHas('error', fn ($error) => str_contains($error, 'tidak cocok dengan saldo master'));
+            $this->assertSame($snapshotBefore, $snapshot());
+
+            // Current rounding may make a partial charge exceed stock value when price is small.
+            $low = \App\Modules\Manufacturing\Models\AuxiliaryMaterial::create([
+                'material_code' => 'AUX-LOW-MAC', 'material_name' => 'Low MAC', 'unit' => 'PCS', 'is_active' => true,
+            ]);
+            foreach ([['O04-LOW-1', '5.00', '0.00'], ['O04-LOW-2', '5.00', '0.01']] as [$reference, $qty, $rate]) {
+                $this->flushSession();
+                $this->post(route('mfg.material-receipts.store'), [
+                    'receipt_date' => '2026-11-24', 'supplier_id' => $supplier->id, 'supplier_doc_no' => $reference,
+                    'items' => [['item_type' => 'AUXILIARY', 'auxiliary_material_id' => $low->id, 'item_name' => $low->material_name, 'qty' => $qty, 'unit' => 'PCS', 'rate' => $rate]],
+                ])->assertSessionHas('success');
+            }
+            $stock = $observer->table('mfg_auxiliary_materials')->find($low->id);
+            $card = $observer->table('mfg_material_ledgers')->where('item_type', 'AUXILIARY')->where('item_id', $low->id)->orderByDesc('id')->first();
+            $this->assertSame(['10.00', '0.01', '0.05'], [$stock->stock_quantity, $stock->average_cost, $card->running_value]);
+            $snapshotBefore = $snapshot();
+            $this->flushSession();
+            $post($low->id, '6.00')->assertSessionHas('error', fn ($error) => str_contains($error, 'Nilai issue parsial melebihi saldo'));
+            $this->assertSame($snapshotBefore, $snapshot());
+            $this->flushSession();
+            $post($low->id, '10.00')->assertSessionHas('success')->assertSessionMissing('error');
+            $last = $observer->table('mfg_auxiliary_material_issues')->sole();
+            $this->assertSame('0.05', $last->total_cost);
         } finally {
             DB::purge('o04_observer');
         }

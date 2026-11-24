@@ -10,6 +10,7 @@ use App\Modules\Manufacturing\Models\MaterialLedger;
 use App\Modules\Manufacturing\Models\Yarn;
 use App\Modules\Manufacturing\Models\Fabric;
 use App\Modules\Manufacturing\Models\AuxiliaryMaterial;
+use App\Modules\Manufacturing\Support\AuxiliaryStockValue;
 use App\Support\JournalBalanceValidator;
 use Illuminate\Support\Facades\DB;
 
@@ -53,6 +54,24 @@ class MaterialReceiptVoidService
                 $item = $model::lockForUpdate()->findOrFail($itemId);
                 $ledgerQuery = MaterialLedger::where('item_type', $detail->item_type)->where('item_id', $itemId);
                 $ledgers = (clone $ledgerQuery)->where('evidence_number', $receipt->receipt_number)->where('type', 'IN')->orderBy('id')->lockForUpdate()->get();
+                if ($item instanceof AuxiliaryMaterial) {
+                    $sum = fn ($rows, string $column) => $rows->reduce(fn ($total, $row) => bcadd($total, (string) $row->$column, 2), '0.00');
+                    $qty = $sum($details, 'qty');
+                    $value = $sum($details, 'amount');
+                    if ($ledgers->isEmpty() || $sum($ledgers, 'qty') !== $qty || $sum($ledgers, 'total_cost') !== $value) {
+                        throw new \RuntimeException('Ledger asal MRN tidak konsisten.');
+                    }
+                    [$stock, $newValue, $last] = AuxiliaryStockValue::balance($item);
+                    if ($last->id !== $ledgers->last()->id) {
+                        throw new \RuntimeException('Void ditolak: terdapat mutasi lanjutan pada material.');
+                    }
+                    $stock = bcsub($stock, $qty, 2);
+                    $newValue = bcsub($newValue, $value, 2);
+                    AuxiliaryStockValue::assertBalance($stock, $newValue);
+                    $mac = AuxiliaryStockValue::average($newValue, $stock);
+                    $updates[] = compact('item', 'detail', 'qty', 'value', 'stock', 'newValue', 'mac');
+                    continue;
+                }
                 $qty = round((float) $details->sum('qty'), 2);
                 $value = round((float) $details->sum('amount'), 2);
                 if ($ledgers->isEmpty() || round((float) $ledgers->sum('qty'), 2) !== $qty
@@ -91,6 +110,12 @@ class MaterialReceiptVoidService
                     'helper_code' => $line->helper_code, 'position' => $line->position === 'DEBET' ? 'KREDIT' : 'DEBET', 'amount' => $line->amount]);
             }
             foreach ($updates as $u) {
+                if ($u['item'] instanceof AuxiliaryMaterial) {
+                    AuxiliaryStockValue::record($u['item'], now()->toDateString(), 'VOID-'.$receipt->receipt_number,
+                        'OUT', $u['qty'], AuxiliaryStockValue::average($u['value'], $u['qty']), $u['value'],
+                        $u['stock'], $u['newValue'], $u['mac'], 'Void MRN '.$receipt->receipt_number);
+                    continue;
+                }
                 $u['item']->update(['stock_quantity' => $u['stock'], 'average_cost' => $u['mac']]);
                 MaterialLedger::create(['transaction_date' => now()->toDateString(), 'evidence_number' => 'VOID-'.$receipt->receipt_number,
                     'item_type' => $u['detail']->item_type, 'item_id' => $u['item']->id, 'type' => 'OUT', 'qty' => $u['qty'],
