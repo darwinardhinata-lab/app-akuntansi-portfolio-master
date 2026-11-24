@@ -45,6 +45,7 @@ return [    'title' => 'Pembayaran bank', 'ap_source' => 'Sumber invoice AP (ops
     'item_total' => 'Total rincian item',
     'basis_approved_by' => 'Disetujui oleh (ID aktor)',
     'basis_approved_at' => 'Waktu persetujuan',
+    'basis_settings_version' => 'Versi pengaturan',
     'inbox' => 'Inbox peran',
     'awaiting_me' => 'Menunggu tindakan saya',
     'all_visible' => 'Semua transaksi yang berwenang dilihat',

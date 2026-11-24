@@ -45,6 +45,7 @@ return [    'title' => '银行付款', 'ap_source' => '应付发票来源（可�
     'item_total' => '项目合计',
     'basis_approved_by' => '批准人（用户ID）',
     'basis_approved_at' => '批准时间',
+    'basis_settings_version' => '设置版本',
     'inbox' => '付款收件箱',
     'awaiting_me' => '等待我的操作',
     'all_visible' => '所有可见交易',

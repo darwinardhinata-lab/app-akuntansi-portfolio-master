@@ -45,6 +45,7 @@ return [    'title' => 'Bank payments', 'ap_source' => 'AP invoice source (optio
     'item_total' => 'Item total',
     'basis_approved_by' => 'Approved by (actor ID)',
     'basis_approved_at' => 'Approved at',
+    'basis_settings_version' => 'Settings version',
     'inbox' => 'Role inbox',
     'awaiting_me' => 'Awaiting my action',
     'all_visible' => 'All authorized transactions',
