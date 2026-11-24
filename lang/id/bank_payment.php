@@ -4,6 +4,7 @@ return [    'title' => 'Pembayaran bank', 'ap_source' => 'Sumber invoice AP (ops
     'search_ap' => 'Cari invoice AP atau pemasok', 'print' => 'Cetak pembayaran', 'approved_basis' => 'Dasar akuntansi yang disetujui',
     'status' => 'Status', 'version' => 'Versi', 'currency' => 'Mata uang', 'journal' => 'Jurnal ERP', 'history' => 'Riwayat keputusan',
     'new' => 'Pengajuan baru',
+    'create' => 'Buat permintaan pembayaran',
     'payee' => 'Penerima',
     'subject' => 'Judul',
     'purpose' => 'Tujuan',
