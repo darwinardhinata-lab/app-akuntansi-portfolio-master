@@ -17,7 +17,7 @@
                 <input type="hidden" name="items[{{ $index }}][auxiliary_material_id]" value="{{ $detail->auxiliary_material_id }}">
                 <div class="col-md-2"><label class="form-label">Tipe</label><div><span class="badge bg-secondary">{{ $detail->item_type }}</span></div></div>
                 <div class="col-md-3"><label class="form-label">Material</label><input class="form-control" name="items[{{ $index }}][item_name]" value="{{ $detail->item_name }}" required></div>
-                <div class="col-md-2"><label class="form-label">Qty</label><input class="form-control" type="number" step="0.01" min="0.01" name="items[{{ $index }}][qty]" value="{{ $detail->qty_requested - $detail->qty_ordered }}" required></div>
+                <div class="col-md-2"><label class="form-label">Qty</label><input class="form-control" type="number" step="0.01" min="0.01" name="items[{{ $index }}][qty]" value="{{ bcsub((string) $detail->qty_requested, (string) $detail->qty_ordered, 2) }}" required></div>
                 <div class="col-md-2"><label class="form-label">UOM</label><input class="form-control" name="items[{{ $index }}][unit]" value="{{ $detail->unit }}" required></div>
                 <div class="col-md-3"><label class="form-label">Harga Satuan</label><input class="form-control" type="number" step="0.01" min="0" name="items[{{ $index }}][rate]" required></div>
             </div>

@@ -8,11 +8,132 @@ use App\Modules\Manufacturing\Models\Yarn;
 use App\Modules\Manufacturing\Services\MaterialProcurementService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\TestWith;
+use Symfony\Component\Process\Process;
 use Tests\TestCase;
 
 class MaterialProcurementMysqlTest extends TestCase
 {
     private ?string $fixture = null;
+
+    #[TestWith(['create', 'create'], 'create blocks create')]
+    #[TestWith(['create', 'edit'], 'create blocks edit')]
+    #[TestWith(['edit', 'create'], 'edit blocks create')]
+    public function test_http_po_decimal_residual_is_exact_across_shared_source_lines(string $holderAction, string $workerAction): void
+    {
+        $service = app(MaterialProcurementService::class);
+        $creator = User::factory()->create();
+        $approver = User::factory()->create();
+        config([
+            'platform.pr_create_user_ids' => [(string) $creator->id],
+            'platform.pr_approve_user_ids' => [(string) $approver->id],
+            'platform.po_create_user_ids' => [(string) $creator->id],
+            'platform.po_approve_user_ids' => [(string) $approver->id],
+        ]);
+        $yarn = Yarn::create(['yarn_code' => 'O02-EXACT', 'yarn_type' => 'Cotton', 'unit' => 'KGS']);
+        $supplier = Supplier::create(['supplier_code' => 'O02-EXACT', 'supplier_name' => 'Canonical supplier', 'supplier_type' => 'RAW_MATERIAL']);
+        $item = ['item_type' => 'YARN', 'yarn_id' => $yarn->id, 'item_name' => 'Cotton', 'qty' => '0.30', 'unit' => 'KGS', 'rate' => '10.00'];
+        $pr = $service->createRequest(['request_date' => '2026-11-23', 'created_by' => $creator->id], [$item]);
+        $service->submitRequest($pr->id, $creator->id);
+        $service->approveRequest($pr->id, $approver->id);
+        $source = $pr->details()->sole();
+        $line = fn (string $qty) => array_replace($item, ['qty' => $qty, 'source_request_detail_id' => $source->id]);
+        $header = ['request_id' => $pr->id, 'supplier_id' => $supplier->id, 'po_date' => '2026-11-23'];
+        $create = fn (...$lines) => $this->post(route('mfg.material-orders.store'), $header + ['items' => $lines]);
+        $snapshot = fn () => collect(['mfg_material_purchase_orders', 'mfg_material_purchase_order_details', 'mfg_material_purchase_order_histories', 'mfg_material_purchase_request_details', 'mfg_yarns', 'journal_headers', 'journal_details', 'inventory_ledgers', 'mfg_material_ledgers'])->mapWithKeys(fn ($table) => [$table => DB::table($table)->get()->map(fn ($row) => json_encode($row))->sort()->values()->all()])->all();
+
+        $this->actingAs($creator);
+        $create($line('0.10'))->assertSessionHas('success');
+        $first = DB::table('mfg_material_purchase_orders')->sole();
+        $service->submitOrder($first->id, $creator->id);
+        $service->approveOrder($first->id, $approver->id);
+        $this->get(route('mfg.material-orders.create', ['request_id' => $pr->id]))->assertOk()
+            ->assertSee('name="items[0][qty]" value="0.20"', false);
+        $before = $snapshot();
+        foreach ([[$line('0.21')], [$line('0.10'), $line('0.11')], [$line('0.10'), $line('0.101')]] as $lines) {
+            $create(...$lines)->assertSessionHas('error');
+            $this->assertSame($before, $snapshot());
+        }
+        $create($line('0.10'), $line('0.10'))->assertSessionHas('success');
+        $second = DB::table('mfg_material_purchase_orders')->where('id', '!=', $first->id)->sole();
+        $this->assertSame('0.30', $source->fresh()->qty_ordered);
+        $edit = fn (...$lines) => $this->put(route('mfg.material-orders.update', $second->id), $header + ['items' => $lines]);
+        foreach (['0.10', '0.15', '0.15', '0.20'] as $qty) {
+            $edit($line($qty))->assertSessionHas('success');
+            $this->assertSame(bcadd('0.10', $qty, 2), $source->fresh()->qty_ordered);
+            $this->assertDatabaseHas('mfg_material_purchase_order_details', ['po_id' => $second->id, 'source_request_detail_id' => $source->id, 'qty' => $qty, 'unit' => 'KGS']);
+        }
+        $filled = $snapshot();
+        $edit($line('0.10'), $line('0.11'))->assertSessionHas('error');
+        $this->assertSame($filled, $snapshot());
+        $this->assertDatabaseHas('mfg_material_purchase_order_details', ['po_id' => $first->id, 'qty' => '0.10']);
+        foreach (['mfg_yarns', 'journal_headers', 'journal_details', 'inventory_ledgers', 'mfg_material_ledgers'] as $table) {
+            $this->assertSame($before[$table], $filled[$table]);
+        }
+
+        // Free 0.10. Each contender independently requests the entire remainder.
+        $edit($line('0.10'))->assertSessionHas('success');
+        $connection = config('database.connections.m2_fixture');
+        $worker = new Process([PHP_BINARY, base_path('tests/Support/material-po-race-worker.php')], base_path(), null,
+            json_encode([$connection, $pr->id, $supplier->id, $line($workerAction === 'edit' ? '0.20' : '0.10'), ['po_date' => '2026-11-23', 'created_by' => $creator->id], $workerAction === 'edit' ? $second->id : null], JSON_THROW_ON_ERROR), 30);
+        DB::beginTransaction();
+        try {
+            $holder = (int) DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+            if ($holderAction === 'edit') {
+                $edit($line('0.20'))->assertSessionHas('success');
+                $winner = $second->id;
+            } else {
+                $create($line('0.10'))->assertSessionHas('success');
+                $winner = DB::table('mfg_material_purchase_orders')->max('id');
+            }
+            $worker->start();
+            $wait = null;
+            for ($i = 0; $i < 100 && $worker->isRunning(); $i++) {
+                if (preg_match('/connection=(\d+)/', $worker->getOutput(), $match)) {
+                    $wait = DB::connection('m2_admin')->selectOne('SELECT l.lock_table, l.lock_index
+                        FROM information_schema.innodb_lock_waits w
+                        JOIN information_schema.innodb_trx a ON a.trx_id = w.requesting_trx_id
+                        JOIN information_schema.innodb_trx b ON b.trx_id = w.blocking_trx_id
+                        JOIN information_schema.innodb_locks l ON l.lock_id = w.requested_lock_id
+                        WHERE a.trx_mysql_thread_id = ? AND b.trx_mysql_thread_id = ?', [(int) $match[1], $holder]);
+                    if ($wait) {
+                        break;
+                    }
+                }
+                usleep(100000);
+            }
+            $this->assertNotNull($wait, $worker->getOutput().$worker->getErrorOutput());
+            $this->assertMatchesRegularExpression($workerAction === 'edit'
+                ? '/`mfg_material_purchase_(?:orders|requests)`$/'
+                : '/`mfg_material_purchase_requests`$/', $wait->lock_table);
+            $this->assertNotEmpty($wait->lock_index);
+            $winningSnapshot = $snapshot();
+            DB::commit();
+            $this->assertSame(3, $worker->wait(), $worker->getErrorOutput());
+
+            config(['database.connections.o02_observer' => $connection]);
+            DB::setDefaultConnection('o02_observer');
+            try {
+                $observer = (int) DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+                $this->assertNotContains($observer, [$holder, (int) $match[1]]);
+                $this->assertSame($winningSnapshot, $snapshot());
+                $committed = DB::table('mfg_material_purchase_order_details')->where('source_request_detail_id', $source->id)->sum('qty');
+                $this->assertSame('0.30', $committed);
+                $this->assertSame('0.30', $source->fresh()->qty_ordered);
+                if ($directory = getenv('O02_EVIDENCE')) {
+                    file_put_contents($directory.'/race-'.$holderAction.'-'.$workerAction.'.json', json_encode(['holderAction' => $holderAction, 'workerAction' => $workerAction, 'holder' => $holder, 'worker' => (int) $match[1], 'observer' => $observer, 'workerExit' => $worker->getExitCode(), 'wait' => $wait, 'winner' => $winner, 'source' => $source->id, 'committed' => $committed], JSON_THROW_ON_ERROR));
+                }
+            } finally {
+                DB::purge('o02_observer');
+                DB::setDefaultConnection('m2_fixture');
+            }
+        } finally {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+            $worker->stop();
+        }
+    }
 
     private bool $created = false;
 
@@ -125,18 +246,26 @@ class MaterialProcurementMysqlTest extends TestCase
             ksort($state);
             return $state;
         };
-        foreach (['wrong_type', 'inactive', 'revoked_permission', 'second_line'] as $case) {
+        foreach (['wrong_type', 'inactive', 'revoked_permission', 'second_line', 'wrong_unit'] as $case) {
             $supplier->update(['is_active' => $case !== 'inactive']);
             config(['platform.po_create_user_ids' => $case === 'revoked_permission' ? [] : [(string) $creator->id]]);
             $before = $snapshot();
             try {
-                $service->createOrderFromRequest($pr->id, $case === 'wrong_type' ? $wrong->id : $supplier->id,
-                    $case === 'second_line' ? [$line, $line] : [$line], $header);
-                $this->fail('Invalid supplier, revoked permission or exhausted PR must reject the entire PO.');
+                $lines = match ($case) {
+                    'second_line' => [$line, $line],
+                    'wrong_unit' => [array_replace($line, ['qty' => '1.00']), array_replace($line, ['qty' => '1.00', 'unit' => 'ROLL'])],
+                    default => [$line],
+                };
+                $service->createOrderFromRequest($pr->id, $case === 'wrong_type' ? $wrong->id : $supplier->id, $lines, $header);
+                $this->fail('Invalid supplier, permission, residual or source unit must reject the entire PO.');
             } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
                 $this->assertSame('revoked_permission', $case);
             } catch (\RuntimeException $e) {
-                $this->assertStringContainsString($case === 'second_line' ? 'sisa detail PR' : 'Supplier Material PO', $e->getMessage());
+                $this->assertStringContainsString(match ($case) {
+                    'second_line' => 'sisa detail PR',
+                    'wrong_unit' => 'unit detail PR sumber',
+                    default => 'Supplier Material PO',
+                }, $e->getMessage());
             }
             $this->assertSame($before, $snapshot(), $case.' must not mutate table rows');
         }

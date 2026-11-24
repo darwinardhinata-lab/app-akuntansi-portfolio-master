@@ -77,6 +77,40 @@ class MaterialOrderApprovalTest extends TestCase
         $this->assertSame(3, $other->histories()->count());
     }
 
+    public function test_http_po_create_and_edit_reject_unit_mismatch_without_partial_writes(): void
+    {
+        $source = $this->pr->details()->sole();
+        $valid = $this->orderItem(10);
+        $invalid = array_replace($valid, ['unit' => 'ROLL']);
+        $header = ['request_id' => $this->pr->id, 'supplier_id' => $this->supplierId, 'po_date' => '2026-10-05'];
+        $message = 'Unit detail Material PO harus sama dengan unit detail PR sumber.';
+        $stock = Yarn::findOrFail($this->yarnId)->stock_quantity;
+        $journalCount = DB::table('journal_headers')->count();
+
+        $this->actingAs($this->creator)->post(route('mfg.material-orders.store'), $header + ['items' => [$valid, $invalid]])
+            ->assertSessionHas('error', $message);
+        $this->assertDatabaseCount('mfg_material_purchase_orders', 0);
+        $this->assertEquals(0, $source->fresh()->qty_ordered);
+
+        $this->post(route('mfg.material-orders.store'), $header + ['items' => [$valid]])->assertRedirect(route('mfg.material-orders.index'));
+        $order = MaterialPurchaseOrder::sole();
+        $line = $order->details()->sole();
+        $this->assertSame($source->id, $line->source_request_detail_id);
+        $this->assertSame('KGS', $line->unit);
+        $update = route('mfg.material-orders.update', $order->id);
+        $this->put($update, $header + ['items' => [$valid, $invalid]])->assertSessionHas('error', $message);
+        $this->assertSame($line->getRawOriginal(), $order->details()->sole()->getRawOriginal());
+        $this->assertSame(['CREATED'], $order->histories()->pluck('action')->all());
+        $this->assertEquals(10, $source->fresh()->qty_ordered);
+
+        $this->put($update, $header + ['items' => [$this->orderItem(15)]])->assertSessionHas('success');
+        $this->assertEquals(15, $source->fresh()->qty_ordered);
+        $this->assertSame($source->id, $order->details()->sole()->source_request_detail_id);
+        $this->assertSame(['CREATED', 'EDITED'], $order->histories()->pluck('action')->all());
+        $this->assertSame($stock, Yarn::findOrFail($this->yarnId)->stock_quantity);
+        $this->assertDatabaseCount('journal_headers', $journalCount);
+    }
+
     public function test_history_rejects_update_save_and_delete(): void
     {
         $po = $this->order();
