@@ -26,7 +26,14 @@ final class WorkflowController extends Controller
         $requests = [];
         foreach ($rows as $row) {
             $payload = json_decode($row->payload, true, 512, JSON_THROW_ON_ERROR);
-            if ($domain->canSee($actor, $payload)) $requests[] = ['request' => $payload, 'version' => $row->version];
+            if (!$domain->canSee($actor, $payload)) continue;
+            $supported = in_array($payload['category'], ['services', 'raw_ap'], true)
+                && ($payload['category'] !== 'raw_ap' || config('payment_plan_v33.ap_allocations'));
+            $actions = $supported && config('payment_plan_v33.bank_workflow') ? $domain->bankQueueActions($payload, $actor) : [];
+            $actions = array_values(array_filter($actions, fn ($action) =>
+                (!in_array($action, \App\Modules\PaymentPlan\Services\BankPaymentControl::ACTIONS, true) || config('payment_plan_v33.reservations'))
+                && ($action !== 'post_external' || config('payment_plan_v33.posting'))));
+            $requests[] = ['request' => $payload, 'version' => $row->version, 'actions' => $actions];
         }
         $purchaseBills = [];
         $bankBalances = [];

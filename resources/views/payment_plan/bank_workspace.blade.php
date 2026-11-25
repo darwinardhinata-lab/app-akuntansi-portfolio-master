@@ -15,7 +15,14 @@
         <a href="{{ route('payment.index') }}">{{ __('bank_payment.legacy') }}</a>
     </header>
     <div role="alert" id="bankMessage" class="alert alert-info" aria-live="polite"></div>
-    <div id="erpBankBalances" hidden></div>
+    <nav class="bank-toolbar" aria-label="{{ __('bank_payment.title') }}">
+        <button type="button" class="btn" id="openBankFunds" hidden>{{ __('bank_payment.funds_position') }}</button>
+    </nav>
+    <section id="bankFunds" class="card" aria-labelledby="bankFundsHeading" hidden>
+        <div class="bank-toolbar"><h2 id="bankFundsHeading" tabindex="-1">{{ __('bank_payment.funds_position') }}</h2><button type="button" id="backBankFunds" class="btn">{{ __('bank_payment.back_inbox') }}</button></div>
+        <p>{{ __('bank_payment.funds_read_only') }}</p>
+        <div id="erpBankBalances"></div>
+    </section>
     <form id="newBankRequest" class="card card-body mb-3" hidden aria-labelledby="bankCreateHeading">
         <div class="bank-toolbar"><h2 id="bankCreateHeading" tabindex="-1">{{ __('bank_payment.new') }}</h2><button type="button" id="cancelBankCreate" class="btn">{{ __('bank_payment.back_inbox') }}</button></div>
         <div class="input-group my-2">
@@ -50,6 +57,7 @@
                 @endforeach
             </select></label>
         </div>
+        <h3 id="bankQueueHeading" hidden>{{ __('bank_payment.queue') }}</h3>
         <p id="bankInboxCount" role="status"></p>
         <div id="bankRequests" class="bank-inbox-list"></div>
     </section>
@@ -89,18 +97,16 @@
  const endpoints = @json($endpoints);
  const token = @json(csrf_token()), roles = @json($actor['roles']);
  const ui = @json(__('bank_payment'));
- const rules={draft:[['submit','requester']],submitted:[['approve_request','director'],['reject','director']],request_approved:[['prepare_settlement','finance_staff'],['prepare_settlement','finance_manager']],settlement_review:[['approve_settlement','director']],settlement_approved:[['mark_maker','maker']],bank_prepared:[['release_gm','general_manager'],['hold_bank','general_manager']],bank_hold:[['restart_after_no_debit','finance_manager']],bank_released:[['confirm_paid','finance_staff'],['confirm_paid','finance_manager']],paid:[['post_external','accountant']]};
  const actorId=@json($actor['id']);
- const separated={approve_request:p=>[p.createdBy],reject:p=>[p.createdBy],approve_settlement:p=>[p.createdBy,p.settlement?.preparedBy],hold_bank:p=>[p.createdBy],mark_maker:p=>[p.createdBy,p.settlementApproval?.actorId],release_gm:p=>[p.createdBy,p.bankMaker?.actorId],confirm_paid:p=>[p.bankMaker?.actorId,p.bankRelease?.actorId]};
- for(const role of ['finance_staff','finance_manager'])rules.draft.push(['submit',role]);
- const actionsFor=p=>[...new Set((rules[p.status]||[]).filter(([action,role])=>roles.includes(role)&&(p.status!=='draft'||p.createdBy===actorId)&&!separated[action]?.(p).includes(actorId)).map(([action])=>action))];
  const label=(group,key)=>ui[group]?.[key]||key;
  const byId=id=>document.getElementById(id);
- const screens={inbox:['bankInboxPanel','bankInboxHeading'],create:['newBankRequest','bankCreateHeading'],detail:['bankAction','selectedBankDoc']};
+ const screens={inbox:['bankInboxPanel','bankInboxHeading'],create:['newBankRequest','bankCreateHeading'],detail:['bankAction','selectedBankDoc'],funds:['bankFunds','bankFundsHeading']};
  function show(screen, focus=true){Object.entries(screens).forEach(([name,[id]])=>byId(id).hidden=name!==screen);if(focus)byId(screens[screen][1]).focus();}
  byId('openBankCreate').onclick=()=>show('create');
  byId('cancelBankCreate').onclick=()=>{show('inbox',false);byId('openBankCreate').focus();};
  byId('backBankInbox').onclick=()=>{selected=null;show('inbox');};
+ byId('openBankFunds').onclick=()=>{selected=null;show('funds');run(refresh);};
+ byId('backBankFunds').onclick=()=>{show('inbox',false);byId('openBankFunds').focus();};
  const langIndex={id:0,en:1,zh_CN:2}[document.documentElement.lang.replace('-','_')]??0;
  const translated=values=>values?.[langIndex] || values?.find(Boolean) || '—';
  const amount=value=>new Intl.NumberFormat(document.documentElement.lang.replace('_','-'),{style:'currency',currency:'IDR',minimumFractionDigits:2}).format(value);
@@ -131,7 +137,7 @@
    const detail=document.getElementById('bankDetail');detail.replaceChildren();
    ['payee','recipientBank','recipientAccount','due','invoice','createdName'].forEach(k=>{const item=document.createElement('p');item.textContent=(ui[k]||k)+': '+(p[k]||'—');detail.append(item);});
    ['subject','purpose'].forEach(k=>{const item=document.createElement('p');item.textContent=ui[k]+': '+translated(p[k]);detail.append(item);});
-   const actions=actionsFor(p);
+   const actions=row.actions??[];
    form.elements.action.replaceChildren(...actions.map(a=>new Option(label('actions',a),a))); form.querySelector('button[type=submit]').disabled=!actions.length;
    byId('bankActionFields').hidden=!actions.length;
     form.elements.base.value=p.settlement?.base ?? p.amount;
@@ -166,21 +172,24 @@
    const query=inboxSearchText(byId('bankInboxSearch').value);
    const status=byId('bankInboxStatus').value;
    const awaitingMe=byId('bankInbox').value==='mine';
-   const visible=inboxRows.filter(({request:p})=>
+   byId('bankQueueHeading').hidden=!awaitingMe;
+   const visible=inboxRows.filter(({request:p,actions})=>
      (status==='all'||p.status===status)
-     &&(!awaitingMe||actionsFor(p).length>0)
+     &&(!awaitingMe||actions.length>0)
      &&(!query||[p.doc,p.payee,p.subject,p.purpose].flat().some(value=>inboxSearchText(value).includes(query)))
    );
    list.replaceChildren();
    byId('bankInboxCount').textContent=ui.inbox_count.replace(':count',new Intl.NumberFormat().format(visible.length));
    if(!visible.length){const empty=document.createElement('p');empty.textContent=ui.empty;list.append(empty);}
-   visible.forEach(row=>{const p=row.request,b=document.createElement('button');b.type='button';b.className='bank-inbox-row';for(const [tag,value] of [['strong',p.payee],['span',p.doc],['span',label('statuses',p.status)],['span',amount(p.amount)]]){const field=document.createElement(tag);field.textContent=value;b.append(field);}b.dataset.bankRequestId=p.id;b.dataset.bankDoc=p.doc;b.onclick=()=>select(row,true);list.append(b);});
+   visible.forEach(row=>{const p=row.request,b=document.createElement('button');b.type='button';b.className='bank-inbox-row';for(const [tag,value] of [['strong',p.payee],['span',p.doc],['span',label('statuses',p.status)],['span',amount(p.amount)]]){const field=document.createElement(tag);field.textContent=value;b.append(field);}if(awaitingMe){const next=document.createElement('span');next.style.gridColumn='1 / -1';next.textContent=ui.next_action+': '+row.actions.map(a=>label('actions',a)).join(' · ');b.append(next);}b.dataset.bankRequestId=p.id;b.dataset.bankDoc=p.doc;b.onclick=()=>select(row,true);list.append(b);});
  }
  async function refresh() {
    const data=await api(endpoints.data);
    const balances=document.getElementById('erpBankBalances');balances.replaceChildren();
-   Object.entries(data.bankBalances||{}).forEach(([key,b])=>{const card=document.createElement('section'), heading=document.createElement('h2'), values=document.createElement('dl');card.className='card';heading.textContent=ui.bank_balance+' · '+key.toUpperCase();values.className='bank-detail';for(const field of ['available','ledger','unposted_actual_debits','reserved'])term(values,label('balance_fields',field),amount(b[field]));card.append(heading,values);balances.append(card);});
-   balances.hidden=!balances.children.length;
+   const idr3=data.bankBalances?.idr3;
+   byId('openBankFunds').hidden=!idr3;
+   if(idr3){const heading=document.createElement('h3'),values=document.createElement('dl');heading.textContent=ui.bank_balance+' · IDR3 · '+idr3.account_code;values.className='bank-detail';for(const field of ['available','ledger','unposted_actual_debits','reserved','opening','movement'])term(values,label('balance_fields',field),amount(idr3[field]));term(values,ui.ledger_cutoff,idr3.cutoff);balances.append(heading,values);}
+   else if(!byId('bankFunds').hidden)show('inbox');
    inboxRows=data.requests;
    renderInbox();
    const current=inboxRows.find(row=>selected?.request.id===row.request.id);if(current)select(current);
