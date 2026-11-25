@@ -57,7 +57,9 @@
     </table>
     <details class="no-print"><summary>{{ __('bank_payment.approved_basis') }}</summary><pre>{{ json_encode($payload['accountingApproval'] ?? null, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre></details>
     <h2>{{ __('bank_payment.journal') }}</h2>
-    <pre>{{ json_encode($payload['journal'] ?? null, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+    <p>{{ $payload['journal']['journalId'] ?? '—' }}
+        @if(!empty($payload['journal']['reference'])) · {{ __('bank_payment.reference') }}: {{ $payload['journal']['reference'] }} @endif
+    </p>
     <h2>{{ __('bank_payment.attachment') }}</h2>
     <table>
         @foreach($payload['attachments'] ?? [] as $attachment)
@@ -65,8 +67,16 @@
         @endforeach
     </table>
     <h2>{{ __('bank_payment.history') }}</h2>
-    <pre>{{ json_encode($payload['decisions'] ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
-    @foreach($events as $event)<pre>{{ json_encode($event, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>@endforeach
+    <ul>
+        @forelse($payload['decisions'] ?? [] as $decision)
+            <li>{{ trans('bank_payment.actions.'.$decision['action']) }} · {{ $decision['actor'] ?? '—' }} · {{ $decision['at'] ?? '—' }}
+                @if(!empty($decision['reference'])) · {{ __('bank_payment.reference') }}: {{ $decision['reference'] }} @endif
+                @if(!empty($decision['reason'])) · {{ __('bank_payment.reason') }}: {{ $decision['reason'] }} @endif
+            </li>
+        @empty
+            <li>{{ __('bank_payment.no_approval') }}</li>
+        @endforelse
+    </ul>
     @foreach($photos as $photo)
         <figure class="photo"><figcaption>{{ $photo->kind }} · {{ $photo->name }} · {{ __('bank_payment.uploader') }} #{{ $photo->uploader_id }} · {{ $photo->created_at }}<br>SHA-256 {{ $photo->sha256 }}</figcaption>
             <img src="{{ route('payment-plan-v33.download', ['id' => $photo->id, 'preview' => 1]) }}" alt="{{ $photo->name }}">

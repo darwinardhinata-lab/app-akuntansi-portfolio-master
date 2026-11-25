@@ -14,6 +14,7 @@ final class WorkflowController extends Controller
     {
         app(ErpActor::class)->resolve($request);
         abort_unless(config('payment_plan_v33.bank_workflow'), 404);
+        abort_unless(\App\Filament\Pages\BankPayments::canAccess(), 403);
         return redirect()->to(\App\Filament\Pages\BankPayments::getUrl(panel: 'erp'));
     }
 

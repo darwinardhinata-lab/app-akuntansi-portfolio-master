@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'primary_navigation' => env('PAYMENT_PLAN_V33_PRIMARY_NAVIGATION', false),
     'ap_allocations' => env('PAYMENT_PLAN_V33_AP_ALLOCATIONS', false),
     'erp_bank_balance' => env('PAYMENT_PLAN_V33_ERP_BANK_BALANCE', false),
     'bank_workflow' => env('PAYMENT_PLAN_V33_BANK_WORKFLOW', false),
