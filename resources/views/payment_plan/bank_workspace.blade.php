@@ -15,7 +15,7 @@
         <a href="{{ route('payment.index') }}">{{ __('bank_payment.legacy') }}</a>
     </header>
     <div role="alert" id="bankMessage" class="alert alert-info" aria-live="polite"></div>
-    <div id="erpBankBalances" class="mb-3"></div>
+    <div id="erpBankBalances" hidden></div>
     <form id="newBankRequest" class="card card-body mb-3" hidden aria-labelledby="bankCreateHeading">
         <div class="bank-toolbar"><h2 id="bankCreateHeading" tabindex="-1">{{ __('bank_payment.new') }}</h2><button type="button" id="cancelBankCreate" class="btn">{{ __('bank_payment.back_inbox') }}</button></div>
         <div class="input-group my-2">
@@ -57,7 +57,7 @@
         <div class="bank-toolbar"><h2 id="selectedBankDoc" tabindex="-1"></h2><button type="button" id="backBankInbox" class="btn">{{ __('bank_payment.back_inbox') }}</button></div>
         <div id="bankDetail" class="bank-detail"></div>
         <a id="printBank" class="btn btn-outline-secondary mb-2" target="_blank" rel="noopener">{{ __('bank_payment.print') }}</a>
-        <details open><summary>{{ __('bank_payment.approved_basis') }}</summary><dl id="approvedBasis" class="bank-detail"></dl></details>
+        <details open><summary id="bankBasisHeading">{{ __('bank_payment.approved_basis') }}</summary><dl id="approvedBasis" class="bank-detail"></dl></details>
         <details><summary>{{ __('bank_payment.history') }}</summary><ol id="bankHistory"></ol></details>
         <fieldset id="bankActionFields"><legend>{{ __('bank_payment.action') }}</legend>
         <label>{{ __('bank_payment.action') }}<select name="action" class="form-select"></select></label>
@@ -76,6 +76,7 @@
         <hr>
         <h2>{{ __('bank_payment.private_evidence') }}</h2>
         <div id="bankUploadFields" hidden>
+        <p id="bankEvidenceHint"></p>
         <label>{{ __('bank_payment.attachment') }}<select name="kind" class="form-select"></select></label>
         <input type="file" name="file" aria-label="{{ __('bank_payment.private_evidence') }}" class="form-control" accept="application/pdf,image/png,image/jpeg,image/webp">
         <button type="button" id="uploadBank" class="btn btn-outline-primary mt-2">{{ __('bank_payment.upload') }}</button>
@@ -140,8 +141,12 @@
    const approval=byId('approvedBasis'), history=byId('bankHistory');approval.replaceChildren();history.replaceChildren();
    const record=p.accountingApproval;
    if(record){term(approval,ui.basis_approved_by,p.settlementApproval?.actor || record.actor_id);term(approval,ui.basis_approved_at,record.approved_at);term(approval,ui.basis_settings_version,record.basis?.settings_version);}
-   else term(approval,ui.approved_basis,ui.no_approval);
-   for(const k of ['sourceId','coa','base','vat','withholding','fees','gross','debit'])if(p.settlement?.[k]!=null)term(approval,k==='sourceId'?ui.source:ui[k],p.settlement[k]);
+   else if(!p.settlement) term(approval,ui.approved_basis,ui.no_approval);
+   byId('bankBasisHeading').textContent=!record&&p.settlement?ui.pending_settlement:ui.approved_basis;
+   const settlement=record?.basis?.settlement??p.settlement;
+   const source=record?.basis?.source_account?.id??p.settlement?.sourceId;
+   if(source)term(approval,ui.source,source.toUpperCase());
+   for(const k of ['base','vat','withholding','fees','gross','debit'])if(settlement?.[k]!=null)term(approval,ui[k],amount(settlement[k]));
    for(const line of record?.basis?.lines||[])term(approval,ui.coa+' '+line.account_code,label('positions',line.position)+' · '+amount(line.amount));
    if(p.journal?.journalId)term(approval,ui.journal,p.journal.journalId);
    for(const decision of p.decisions||[]){const item=document.createElement('li');item.textContent=[label('actions',decision.action),decision.actor,decision.at,decision.reference,decision.reason].filter(Boolean).join(' · ');history.append(item);}
@@ -151,6 +156,7 @@
    const kinds=[];if(p.status==='draft'&&p.createdBy===actorId)kinds.push('request');
    if(roles.some(r=>['finance_staff','finance_manager'].includes(r))){if(p.status==='request_approved')kinds.push('settlement');if(['bank_released','bank_hold'].includes(p.status))kinds.push('payment');}
    form.elements.kind.replaceChildren(...kinds.map(k=>new Option(label('attachment_kinds',k),k)));byId('bankUploadFields').hidden=!kinds.length;
+   byId('bankEvidenceHint').textContent=p.status==='request_approved'?ui.settlement_evidence_hint:p.status==='bank_released'?ui.debit_evidence_hint:'';
    show('detail',focus);
  }
  let inboxRows=[];
@@ -173,7 +179,8 @@
  async function refresh() {
    const data=await api(endpoints.data);
    const balances=document.getElementById('erpBankBalances');balances.replaceChildren();
-   Object.entries(data.bankBalances||{}).forEach(([key,b])=>{const line=document.createElement('p');line.textContent=key+' · GL '+b.ledger+' · pending debit '+b.unposted_actual_debits+' · reserved '+b.reserved+' · available '+b.available;balances.append(line);});
+   Object.entries(data.bankBalances||{}).forEach(([key,b])=>{const card=document.createElement('section'), heading=document.createElement('h2'), values=document.createElement('dl');card.className='card';heading.textContent=ui.bank_balance+' · '+key.toUpperCase();values.className='bank-detail';for(const field of ['available','ledger','unposted_actual_debits','reserved'])term(values,label('balance_fields',field),amount(b[field]));card.append(heading,values);balances.append(card);});
+   balances.hidden=!balances.children.length;
    inboxRows=data.requests;
    renderInbox();
    const current=inboxRows.find(row=>selected?.request.id===row.request.id);if(current)select(current);
