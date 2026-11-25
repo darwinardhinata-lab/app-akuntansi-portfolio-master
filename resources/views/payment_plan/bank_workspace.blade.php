@@ -4,6 +4,10 @@
  #bankWorkspace .bank-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem}#bankWorkspace .bank-inbox-list{display:grid;gap:.5rem}#bankWorkspace .bank-inbox-row{display:grid;grid-template-columns:1fr 1.5fr 1fr auto;gap:.75rem;text-align:start;border:1px solid var(--bank-border);border-radius:.5rem;padding:.85rem;width:100%;overflow-wrap:anywhere}#bankWorkspace .bank-inbox-row:hover{background:#dbeafe;color:#172554}#bankWorkspace :focus-visible{outline:2px solid #2563eb;outline-offset:3px}#bankWorkspace dt{font-size:.85rem;font-weight:600}#bankWorkspace dd{overflow-wrap:anywhere}#bankWorkspace details{margin:.75rem 0}#bankWorkspace summary{cursor:pointer;font-weight:600}#bankWorkspace fieldset{min-width:0}#bankWorkspace legend{font-weight:600}#bankWorkspace #bankAttachments p{margin:.5rem 0}
  #bankWorkspace #selectedBankDoc{min-width:0;overflow-wrap:anywhere}#bankWorkspace .alert:empty{display:none}
  @media(max-width:640px){#bankWorkspace .row,#bankWorkspace .bank-detail,#bankWorkspace .bank-inbox-row{grid-template-columns:minmax(0,1fr)}#bankWorkspace .bank-inbox-row{gap:.2rem}}
+ #bankWorkspace .bank-inbox-filters{display:grid;gap:.75rem;grid-template-columns:2fr 1fr 1fr;margin:.75rem 0}
+ #bankWorkspace .bank-inbox-filters label{min-width:0;margin:0}
+ #bankWorkspace #bankInboxCount{margin:.5rem 0;font-size:.875rem}
+ @media(max-width:640px){#bankWorkspace .bank-inbox-filters{grid-template-columns:minmax(0,1fr)}}
 </style>
 <div id="bankWorkspace" wire:ignore>
     <header class="bank-toolbar">
@@ -36,7 +40,17 @@
     </form>
     <section id="bankInboxPanel" class="card" aria-labelledby="bankInboxHeading">
         <div class="bank-toolbar"><h2 id="bankInboxHeading" tabindex="-1">{{ __('bank_payment.inbox') }}</h2><div><button type="button" id="openBankCreate" class="btn btn-primary" hidden>{{ __('bank_payment.new') }}</button><button type="button" id="refreshBank" class="btn">{{ __('bank_payment.refresh') }}</button></div></div>
-        <label>{{ __('bank_payment.status') }}<select id="bankInbox"><option value="all">{{ __('bank_payment.all_visible') }}</option><option value="mine">{{ __('bank_payment.awaiting_me') }}</option></select></label>
+        <div class="bank-inbox-filters">
+            <label>{{ __('bank_payment.inbox_search') }}<input type="search" id="bankInboxSearch" maxlength="200" aria-controls="bankRequests"></label>
+            <label>{{ __('bank_payment.inbox_scope') }}<select id="bankInbox" aria-controls="bankRequests"><option value="all">{{ __('bank_payment.all_visible') }}</option><option value="mine">{{ __('bank_payment.awaiting_me') }}</option></select></label>
+            <label>{{ __('bank_payment.status') }}<select id="bankInboxStatus" aria-controls="bankRequests">
+                <option value="all">{{ __('bank_payment.inbox_all_statuses') }}</option>
+                @foreach (__('bank_payment.statuses') as $status => $statusLabel)
+                    <option value="{{ $status }}">{{ $statusLabel }}</option>
+                @endforeach
+            </select></label>
+        </div>
+        <p id="bankInboxCount" role="status"></p>
         <div id="bankRequests" class="bank-inbox-list"></div>
     </section>
     <form id="bankAction" class="card card-body mt-3" hidden>
@@ -139,15 +153,35 @@
    form.elements.kind.replaceChildren(...kinds.map(k=>new Option(label('attachment_kinds',k),k)));byId('bankUploadFields').hidden=!kinds.length;
    show('detail',focus);
  }
- async function refresh() {const data=await api(endpoints.data); const list=document.getElementById('bankRequests'); list.replaceChildren();
-   const balances=document.getElementById('erpBankBalances');balances.replaceChildren();
-   Object.entries(data.bankBalances||{}).forEach(([key,b])=>{const line=document.createElement('p');line.textContent=key+' · GL '+b.ledger+' · pending debit '+b.unposted_actual_debits+' · reserved '+b.reserved+' · available '+b.available;balances.append(line);});
-   const visible=data.requests.filter(row=>document.getElementById('bankInbox').value==='all'||actionsFor(row.request).length);
+ let inboxRows=[];
+ const inboxSearchText=value=>String(value??'').normalize('NFKC').trim().toLowerCase();
+ function renderInbox() {
+   const list=byId('bankRequests');
+   const query=inboxSearchText(byId('bankInboxSearch').value);
+   const status=byId('bankInboxStatus').value;
+   const awaitingMe=byId('bankInbox').value==='mine';
+   const visible=inboxRows.filter(({request:p})=>
+     (status==='all'||p.status===status)
+     &&(!awaitingMe||actionsFor(p).length>0)
+     &&(!query||[p.doc,p.payee,p.subject,p.purpose].flat().some(value=>inboxSearchText(value).includes(query)))
+   );
+   list.replaceChildren();
+   byId('bankInboxCount').textContent=ui.inbox_count.replace(':count',new Intl.NumberFormat().format(visible.length));
    if(!visible.length){const empty=document.createElement('p');empty.textContent=ui.empty;list.append(empty);}
    visible.forEach(row=>{const p=row.request,b=document.createElement('button');b.type='button';b.className='bank-inbox-row';for(const [tag,value] of [['strong',p.payee],['span',p.doc],['span',label('statuses',p.status)],['span',amount(p.amount)]]){const field=document.createElement(tag);field.textContent=value;b.append(field);}b.dataset.bankRequestId=p.id;b.dataset.bankDoc=p.doc;b.onclick=()=>select(row,true);list.append(b);});
-   const current=data.requests.find(row=>selected?.request.id===row.request.id);if(current)select(current);}
- document.getElementById('refreshBank').onclick=()=>run(refresh);
- document.getElementById('bankInbox').onchange=()=>run(refresh);
+ }
+ async function refresh() {
+   const data=await api(endpoints.data);
+   const balances=document.getElementById('erpBankBalances');balances.replaceChildren();
+   Object.entries(data.bankBalances||{}).forEach(([key,b])=>{const line=document.createElement('p');line.textContent=key+' · GL '+b.ledger+' · pending debit '+b.unposted_actual_debits+' · reserved '+b.reserved+' · available '+b.available;balances.append(line);});
+   inboxRows=data.requests;
+   renderInbox();
+   const current=inboxRows.find(row=>selected?.request.id===row.request.id);if(current)select(current);
+ }
+ byId('refreshBank').onclick=()=>run(refresh);
+ byId('bankInboxSearch').oninput=renderInbox;
+ byId('bankInbox').onchange=renderInbox;
+ byId('bankInboxStatus').onchange=renderInbox;
  byId('openBankCreate').hidden=!roles.some(r=>['requester','finance_staff','finance_manager'].includes(r));
   let apPage=1, apLastPage=1, apGeneration=0;
   async function loadAp(page=1){
