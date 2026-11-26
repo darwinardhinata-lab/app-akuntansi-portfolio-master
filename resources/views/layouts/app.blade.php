@@ -663,7 +663,8 @@
                     <span class="nav-icon"><i class="fa-solid fa-file-invoice text-warning"></i></span>
                     <span class="nav-text">{{ __('erp.purchase_bill') }}</span>
                 </a>
-                <a href="{{ route('payment.index') }}" class="nav-link {{ request()->routeIs('payment.*') ? 'active' : '' }}">
+                @php($paymentMenu = config('payment_plan_v33.primary_navigation') && \App\Filament\Pages\BankPayments::canAccess() ? 'payment-plan-v33.workspace' : 'payment.index')
+                <a href="{{ route($paymentMenu) }}" class="nav-link {{ request()->routeIs('payment.*') ? 'active' : '' }}">
                     <span class="nav-icon"><i class="fa-solid fa-money-check-dollar text-danger"></i></span>
                     <span class="nav-text">{{ __('erp.payment_plan') }}</span>
                 </a>
@@ -985,7 +986,7 @@
     <div class="bottom-nav-items">
         <a href="{{ route('dashboard') }}" class="bnav-item {{ request()->routeIs('dashboard*') ? 'active' : '' }}"><i class="fa-solid fa-gauge-high"></i><span>{{ __('erp.home') }}</span></a>
         <a href="{{ route('jurnal.index') }}" class="bnav-item {{ request()->routeIs('jurnal.*') ? 'active' : '' }}"><i class="fa-solid fa-book"></i><span>{{ __('erp.journal') }}</span></a>
-        <a href="{{ route('payment.index') }}" class="bnav-item {{ request()->routeIs('payment.*') ? 'active' : '' }}"><i class="fa-solid fa-money-check-dollar"></i><span>{{ __('erp.payment') }}</span></a>
+        <a href="{{ route($paymentMenu ?? (config('payment_plan_v33.primary_navigation') && \App\Filament\Pages\BankPayments::canAccess() ? 'payment-plan-v33.workspace' : 'payment.index')) }}" class="bnav-item {{ request()->routeIs('payment.*') ? 'active' : '' }}"><i class="fa-solid fa-money-check-dollar"></i><span>{{ __('erp.payment') }}</span></a>
         <a href="{{ route('laba-rugi.index') }}" class="bnav-item {{ request()->routeIs('laba-rugi.*') ? 'active' : '' }}"><i class="fa-solid fa-chart-line"></i><span>{{ __('erp.report') }}</span></a>
         <a href="#" class="bnav-item" onclick="toggleSidebar(); return false;"><i class="fa-solid fa-grip"></i><span>{{ __('erp.all_menu') }}</span></a>
     </div>

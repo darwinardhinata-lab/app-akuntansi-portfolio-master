@@ -13,4 +13,5 @@ Route::middleware('auth')->prefix('payment-plan/api')->name('payment-plan-v33.')
     Route::post('action', [WorkflowController::class, 'action'])->name('action');
 });
 Route::get('/payment-plan/bank', [WorkflowController::class, 'workspace'])->middleware('auth')->name('payment-plan-v33.workspace');
+Route::get('/payment-plan/bank/idr3/movements', [WorkflowController::class, 'idr3Movements'])->middleware('auth')->name('payment-plan-v33.idr3-movements');
 Route::get('/payment-plan/bank/{id}/print', [WorkflowController::class, 'printRequest'])->middleware('auth')->name('payment-plan-v33.print');

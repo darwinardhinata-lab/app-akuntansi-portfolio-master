@@ -12,7 +12,7 @@ final class V33ApprovalDomain
     {
     }
 
-    public function transition(array $request, string $action, array $input, array $actor, array $allRequests = [], array $settings = []): array
+    private function authorize(array $request, string $action, array $actor): void
     {
         if (!$this->canSee($actor, $request)) throw new RuleViolation('forbidden', 403);
         $expected = match ($action) {
@@ -55,6 +55,44 @@ final class V33ApprovalDomain
         if (in_array($action, ['ack_manager', 'ack_gm'], true) && $actor['id'] === $request['createdBy']) throw new RuleViolation('self_approval', 403);
         if (!array_intersect($roles, $actor['roles'])) throw new RuleViolation('role_denied', 403);
         if ($independent && $actor['id'] === $request['createdBy']) throw new RuleViolation('self_approval', 403);
+    }
+
+    /** Stage and actor eligibility only. The mutation still validates evidence, balances and version. */
+    public function bankQueueActions(array $request, array $actor): array
+    {
+        if (($request['route'] ?? null) !== 'bank' || ($request['currency'] ?? null) !== 'IDR'
+            || ($request['stage'] ?? null) !== 'direct') return [];
+        $actions = [];
+        foreach (['submit', 'approve_request', 'reject', 'prepare_settlement', 'approve_settlement', 'mark_maker',
+            'release_gm', 'hold_bank', 'restart_after_no_debit', 'confirm_paid', 'post_external'] as $action) {
+            try {
+                $this->authorize($request, $action, $actor);
+                $this->authorizeBankSeparation($request, $action, $actor);
+                $actions[] = $action;
+            } catch (RuleViolation) {
+                // No CTA for a stage or actor that cannot take this action.
+            }
+        }
+        return $actions;
+    }
+
+    private function authorizeBankSeparation(array $request, string $action, array $actor): void
+    {
+        $excluded = match ($action) {
+            'approve_settlement' => [$request['settlement']['preparedBy'] ?? null],
+            'mark_maker' => [$request['createdBy'], $request['settlementApproval']['actorId'] ?? null],
+            'release_gm' => [$request['createdBy'], $request['bankMaker']['actorId'] ?? null],
+            'confirm_paid' => [$request['bankMaker']['actorId'] ?? null, $request['bankRelease']['actorId'] ?? null],
+            'post_external' => [$request['bankMaker']['actorId'] ?? null, $request['paymentConfirmation']['actorId'] ?? null],
+            default => [],
+        };
+        if ($action === 'submit' && $actor['id'] !== $request['createdBy']) throw new RuleViolation('forbidden', 403);
+        if (in_array($actor['id'], $excluded, true)) throw new RuleViolation('role_separation', 403);
+    }
+
+    public function transition(array $request, string $action, array $input, array $actor, array $allRequests = [], array $settings = []): array
+    {
+        $this->authorize($request, $action, $actor);
         $instant = ($this->clock)();
         if (!$instant instanceof DateTimeImmutable) throw new \LogicException('Clock must return DateTimeImmutable.');
         $decision = [
@@ -121,7 +159,7 @@ final class V33ApprovalDomain
             }
             $request['settlement'] = $settlement;
         } elseif ($action === 'submit') {
-            if ($actor['id'] !== $request['createdBy']) throw new RuleViolation('forbidden', 403);
+            $this->authorizeBankSeparation($request, $action, $actor);
             if (in_array($request['category'], ['asset', 'raw_dp'], true) && empty($request['po'])) throw new RuleViolation('po_required');
             if ($request['category'] === 'raw_ap' && empty($request['invoice'])) throw new RuleViolation('invoice_required');
             if ($request['category'] === 'asset' && empty($request['capex'])) throw new RuleViolation('capex_required');
@@ -129,7 +167,7 @@ final class V33ApprovalDomain
             $balances->allocation($request, $allRequests, (string) $request['amount']);
             $request['status'] = $request['route'] === 'petty' ? 'petty_review' : 'submitted';
         } elseif ($action === 'mark_maker') {
-            if (in_array($actor['id'], [$request['createdBy'], $request['settlementApproval']['actorId']], true)) throw new RuleViolation('role_separation', 403);
+            $this->authorizeBankSeparation($request, $action, $actor);
             if ($decision['reference'] === '') throw new RuleViolation('bank_reference');
             $account = $balances->source($request, $settings);
             $balance = $balances->account($account, $allRequests, $settings);
@@ -138,13 +176,16 @@ final class V33ApprovalDomain
             $request['status'] = 'bank_prepared';
         } elseif ($action === 'release_gm') {
             $balances->source($request, $settings);
-            if (in_array($actor['id'], [$request['bankMaker']['actorId'], $request['createdBy']], true)) throw new RuleViolation('role_separation', 403);
+            $this->authorizeBankSeparation($request, $action, $actor);
             if (empty($input['checked']) || $decision['reference'] === '') throw new RuleViolation('bank_reference');
             $request['bankRelease'] = $decision;
             $request['status'] = 'bank_released';
         } elseif ($action === 'confirm_paid') {
-            $separated = $request['route'] === 'petty' ? [$request['pettyApproval']['actorId']] : [$request['bankMaker']['actorId'], $request['bankRelease']['actorId']];
-            if (in_array($actor['id'], $separated, true)) throw new RuleViolation('role_separation', 403);
+            if ($request['route'] === 'petty') {
+                if ($actor['id'] === $request['pettyApproval']['actorId']) throw new RuleViolation('role_separation', 403);
+            } else {
+                $this->authorizeBankSeparation($request, $action, $actor);
+            }
             $date = $input['paidDate'] ?? '';
             $parsed = is_string($date) ? DateTimeImmutable::createFromFormat('!Y-m-d', $date) : false;
             $approval = $request['route'] === 'bank' ? $request['bankRelease'] : $request['pettyApproval'];
@@ -172,7 +213,7 @@ final class V33ApprovalDomain
             if (($request['managerAcknowledgement']['actorId'] ?? null) === $actor['id']) throw new RuleViolation('role_separation', 403);
             $request['gmAcknowledgement'] = $decision;
         } elseif ($action === 'approve_settlement') {
-            if ($actor['id'] === $request['settlement']['preparedBy']) throw new RuleViolation('role_separation', 403);
+            $this->authorizeBankSeparation($request, $action, $actor);
             if (empty($input['checked'])) throw new RuleViolation('confirmation_required');
             if (bccomp((string) $request['settlement']['gross'], (string) $request['requestCeiling'], 2) > 0 && empty($input['revisedCeiling'])) {
                 throw new RuleViolation('new_ceiling_confirmation');
@@ -193,7 +234,7 @@ final class V33ApprovalDomain
             $request['status'] = 'draft';
             foreach (['requestApproval', 'settlement', 'settlementApproval', 'balanceSnapshot', 'bankMaker', 'bankRelease', 'bankHold'] as $field) $request[$field] = null;
         } elseif ($action === 'post_external') {
-            if (in_array($actor['id'], [$request['bankMaker']['actorId'] ?? null, $request['paymentConfirmation']['actorId'] ?? null], true)) throw new RuleViolation('role_separation', 403);
+            $this->authorizeBankSeparation($request, $action, $actor);
             if (empty($input['checked']) || $decision['reference'] === '') throw new RuleViolation('journal_required');
             foreach ($allRequests as $other) {
                 if ($other['id'] !== $request['id'] && ($other['journal']['reference'] ?? null) === $decision['reference']) throw new RuleViolation('duplicate_journal');

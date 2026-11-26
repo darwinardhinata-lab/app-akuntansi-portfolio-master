@@ -11,11 +11,14 @@
     <style>
         .signature-group{break-inside:avoid;page-break-inside:avoid;margin:18px 0}.signature-grid{table-layout:fixed}.signature-grid td{vertical-align:top;width:33.33%}.signature-grid strong,.signature-grid small{display:block;overflow-wrap:anywhere}.manual-space{height:20mm;border-bottom:1px dotted #777;margin:6px 0}.signature-note{font-size:11px;overflow-wrap:anywhere}.signature-grid small{margin-top:4px}@media screen and (max-width:600px){.signature-grid,.signature-grid tbody,.signature-grid tr,.signature-grid td{display:block;width:auto}.signature-grid td{margin-bottom:8px}}
     </style>
+    <style>
+        @media screen and (max-width:600px){body{margin:14px}.print-sheet{table-layout:fixed}.print-items th,.print-items td{padding:4px}.print-items .numeric{white-space:normal;overflow-wrap:anywhere}}
+    </style>
 </head>
 <body data-bank-request-id="{{ $row->id }}" data-bank-doc="{{ $payload['doc'] ?? $row->id }}">
     <button class="no-print" onclick="window.print()">{{ __('bank_payment.print') }}</button>
     <table class="print-sheet"><thead><tr><th><h1>MGI · {{ __('bank_payment.title') }} — {{ $payload['doc'] ?? $row->id }}</h1></th></tr></thead><tbody><tr><td>
-    <p>{{ __('bank_payment.status') }}: {{ $row->status }} · {{ __('bank_payment.version') }}: {{ $row->version }}</p>
+    <p>{{ __('bank_payment.status') }}: {{ __('bank_payment.statuses.'.$row->status) }} · {{ __('bank_payment.version') }}: {{ $row->version }}</p>
     <table>
         @foreach(['payee','amount','currency','due'] as $field)
             <tr><th>{{ __('bank_payment.'.$field) }}</th><td>{{ $payload[$field] ?? '—' }}</td></tr>
@@ -55,18 +58,27 @@
             <tr><th>{{ $line['account_code'] }} · {{ $line['position'] }}</th><td>{{ $line['amount'] }} {{ $basis['currency'] ?? '' }}</td></tr>
         @endforeach
     </table>
-    <details class="no-print"><summary>{{ __('bank_payment.approved_basis') }}</summary><pre>{{ json_encode($payload['accountingApproval'] ?? null, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre></details>
     <h2>{{ __('bank_payment.journal') }}</h2>
-    <pre>{{ json_encode($payload['journal'] ?? null, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+    <p>{{ $payload['journal']['journalId'] ?? '—' }}
+        @if(!empty($payload['journal']['reference'])) · {{ __('bank_payment.reference') }}: {{ $payload['journal']['reference'] }} @endif
+    </p>
     <h2>{{ __('bank_payment.attachment') }}</h2>
     <table>
         @foreach($payload['attachments'] ?? [] as $attachment)
-            <tr><th>{{ $attachment['kind'] ?? '—' }}</th><td>{{ $attachment['name'] ?? $attachment['id'] ?? '—' }}</td></tr>
+            <tr><th>{{ __('bank_payment.attachment_kinds.'.($attachment['kind'] ?? 'request')) }}</th><td>{{ $attachment['name'] ?? $attachment['id'] ?? '—' }}</td></tr>
         @endforeach
     </table>
     <h2>{{ __('bank_payment.history') }}</h2>
-    <pre>{{ json_encode($payload['decisions'] ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
-    @foreach($events as $event)<pre>{{ json_encode($event, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>@endforeach
+    <ul>
+        @forelse($payload['decisions'] ?? [] as $decision)
+            <li>{{ trans('bank_payment.actions.'.$decision['action']) }} · {{ $decision['actor'] ?? '—' }} · {{ $decision['at'] ?? '—' }}
+                @if(!empty($decision['reference'])) · {{ __('bank_payment.reference') }}: {{ $decision['reference'] }} @endif
+                @if(!empty($decision['reason'])) · {{ __('bank_payment.reason') }}: {{ $decision['reason'] }} @endif
+            </li>
+        @empty
+            <li>{{ __('bank_payment.no_approval') }}</li>
+        @endforelse
+    </ul>
     @foreach($photos as $photo)
         <figure class="photo"><figcaption>{{ $photo->kind }} · {{ $photo->name }} · {{ __('bank_payment.uploader') }} #{{ $photo->uploader_id }} · {{ $photo->created_at }}<br>SHA-256 {{ $photo->sha256 }}</figcaption>
             <img src="{{ route('payment-plan-v33.download', ['id' => $photo->id, 'preview' => 1]) }}" alt="{{ $photo->name }}">

@@ -4,11 +4,25 @@ namespace App\Modules\PaymentPlan\Services;
 
 use App\Modules\PaymentPlan\Domain\RuleViolation;
 use App\Modules\Platform\Models\CompanyCoaMapping;
+use App\Support\ProtectedJournalQuery;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
 /** Read projection only: ERP GL plus actual debit events not yet represented in GL. */
 final class ErpBankBalance
 {
+    public function ledgerLines(string $code, string $through): Builder
+    {
+        return ProtectedJournalQuery::table('journal_details')->join('journal_headers as h', 'h.journal_id', '=', 'journal_details.journal_id')
+            ->where('journal_details.account_code', $code)->whereDate('h.transaction_date', '<=', $through);
+    }
+
+    public function signedAmount(object $line): string
+    {
+        if (!in_array($line->position, ['DEBET', 'KREDIT'], true)) throw new RuleViolation('invalid_bank_ledger', 409);
+        return $line->position === 'DEBET' ? (string) $line->amount : bcsub('0', (string) $line->amount, 2);
+    }
+
     public function project(int $company, array $account, array $settings): array
     {
         $cutoff = $settings['erp_cutoff'] ?? null;
@@ -21,11 +35,9 @@ final class ErpBankBalance
         $today = now('Asia/Jakarta')->toDateString();
         $opening = '0.00';
         $movement = '0.00';
-        foreach (\App\Support\ProtectedJournalQuery::table('journal_details')->join('journal_headers as h', 'h.journal_id', '=', 'journal_details.journal_id')
-            ->where('journal_details.account_code', $code)->whereDate('h.transaction_date', '<=', $today)
+        foreach ($this->ledgerLines($code, $today)
             ->select('h.transaction_date', 'journal_details.position', 'journal_details.amount')->cursor() as $line) {
-            if (!in_array($line->position, ['DEBET', 'KREDIT'], true)) throw new RuleViolation('invalid_bank_ledger', 409);
-            $amount = $line->position === 'DEBET' ? (string) $line->amount : bcsub('0', (string) $line->amount, 2);
+            $amount = $this->signedAmount($line);
             if (substr($line->transaction_date, 0, 10) < $cutoff) $opening = bcadd($opening, $amount, 2);
             else $movement = bcadd($movement, $amount, 2);
         }
