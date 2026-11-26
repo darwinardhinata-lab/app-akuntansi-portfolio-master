@@ -13,7 +13,16 @@
         label{display:block}input,button{font:inherit;color:inherit;background:white;border:1px solid #64748b;border-radius:.4rem;padding:.4rem .65rem;max-width:100%;box-sizing:border-box}button{cursor:pointer}
         .table-scroll{overflow:auto}table{border-collapse:collapse;width:100%;min-width:40rem}th,td{padding:.6rem;text-align:start;border-bottom:1px solid #cbd5e1;vertical-align:top}thead{background:#f1f5f9}
         .amount{text-align:end;white-space:nowrap;font-variant-numeric:tabular-nums}.notes{max-width:25rem;overflow-wrap:anywhere}.journal{white-space:nowrap}
-        @media(max-width:640px){main{padding:.75rem}section{padding:.75rem}h1{font-size:1.45rem}}
+        .mobile-label{display:none}
+        @media(max-width:640px){
+            main,section{padding:.75rem}h1{font-size:1.45rem}
+            .table-scroll{overflow:visible}table{min-width:0}table,tbody{display:block}
+            thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+            tbody tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.55rem .75rem;border:1px solid #cbd5e1;border-radius:.5rem;padding:.7rem;margin-bottom:.6rem}
+            td{padding:0;border:0;min-width:0}.journal,.notes{grid-column:1/-1;white-space:normal;overflow-wrap:anywhere}
+            td.amount{text-align:start;white-space:normal;overflow-wrap:anywhere}td.amount:last-child{grid-column:1/-1;font-weight:600}
+            .mobile-label{display:block;font-size:.8rem;font-weight:600}
+        }
     </style>
 </head>
 <body>
@@ -48,23 +57,25 @@
                 <div><dt>{{ __('idr3.page_closing') }}</dt><dd id="page-closing">{{ $pageClosing }}</dd></div>
             </dl>
             <div class="table-scroll" role="region" aria-label="{{ __('idr3.title') }}" tabindex="0">
-                <table>
-                    <thead><tr>
+                <table role="table">
+                    <thead role="rowgroup"><tr role="row">
                         @foreach (['date', 'journal', 'description', 'debit', 'credit', 'balance'] as $column)
-                            <th scope="col" @class(['amount' => in_array($column, ['debit', 'credit', 'balance'], true)])>{{ __('idr3.'.$column) }}</th>
+                            <th role="columnheader" scope="col" @class(['amount' => in_array($column, ['debit', 'credit', 'balance'], true)])>{{ __('idr3.'.$column) }}</th>
                         @endforeach
                     </tr></thead>
-                    <tbody>
+                    <tbody role="rowgroup">
                         @foreach ($rows as $row)
-                            <tr data-journal="{{ $row['journal'] }}">
-                                <td><time datetime="{{ $row['date'] }}">{{ $row['date'] }}</time></td>
-                                <td class="journal">
+                            <tr role="row" data-journal="{{ $row['journal'] }}">
+                                <td role="cell"><time datetime="{{ $row['date'] }}">{{ $row['date'] }}</time></td>
+                                <td role="cell" class="journal">
                                     @if ($row['journal_url'])<a href="{{ $row['journal_url'] }}">{{ $row['journal'] }}</a>
                                     @else{{ $row['journal'] }}@endif
                                     @if ($row['request_url'])<br><a href="{{ $row['request_url'] }}">{{ __('idr3.request') }}</a>@endif
                                 </td>
-                                <td class="notes">{{ $row['description'] ?: '—' }}</td>
-                                @foreach (['debit', 'credit', 'balance'] as $column)<td class="amount">{{ $row[$column] }}</td>@endforeach
+                                <td role="cell" class="notes">{{ $row['description'] ?: '—' }}</td>
+                                @foreach (['debit', 'credit', 'balance'] as $column)
+                                    <td role="cell" class="amount"><span class="mobile-label" aria-hidden="true">{{ __('idr3.'.$column) }}</span><span>{{ $row[$column] }}</span></td>
+                                @endforeach
                             </tr>
                         @endforeach
                     </tbody>

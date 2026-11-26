@@ -35,10 +35,16 @@
         </div>
         <label>{{ __('bank_payment.ap_source') }}<select name="purchaseBillId" class="form-select"><option value="">{{ __('bank_payment.direct_service') }}</option></select></label>
         <label>{{ __('bank_payment.payee') }}<input name="payee" class="form-control" required maxlength="150"></label>
-        <label>{{ __('bank_payment.subject') }} (ID / EN / ZH)</label>
-        <div class="row">@foreach(['id','en','zh'] as $locale)<div class="col-md-4"><input name="subject_{{ $locale }}" aria-label="{{ __('bank_payment.subject') }} {{ $locale }}" class="form-control" required></div>@endforeach</div>
-        <label>{{ __('bank_payment.purpose') }} (ID / EN / ZH)</label>
-        <div class="row">@foreach(['id','en','zh'] as $locale)<div class="col-md-4"><input name="purpose_{{ $locale }}" aria-label="{{ __('bank_payment.purpose') }} {{ $locale }}" class="form-control" required></div>@endforeach</div>
+        @foreach(['subject', 'purpose'] as $field)
+            <fieldset>
+                <legend>{{ __('bank_payment.'.$field) }}</legend>
+                <div class="row">
+                    @foreach(['id' => 'Indonesia', 'en' => 'English', 'zh' => '简体中文'] as $locale => $language)
+                        <label>{{ $language }}<input name="{{ $field }}_{{ $locale }}" aria-label="{{ __('bank_payment.'.$field) }} — {{ $language }}" class="form-control" required></label>
+                    @endforeach
+                </div>
+            </fieldset>
+        @endforeach
         <label>{{ __('bank_payment.amount') }} IDR<input name="amount" type="number" min="0.01" step="0.01" class="form-control" required></label>
         <label>{{ __('bank_payment.bank') }}<input name="recipientBank" class="form-control" required></label>
         <label>{{ __('bank_payment.account') }}<input name="recipientAccount" class="form-control" required></label>
