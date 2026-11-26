@@ -22,6 +22,7 @@
         <div class="bank-toolbar"><h2 id="bankFundsHeading" tabindex="-1">{{ __('bank_payment.funds_position') }}</h2><button type="button" id="backBankFunds" class="btn">{{ __('bank_payment.back_inbox') }}</button></div>
         <p>{{ __('bank_payment.funds_read_only') }}</p>
         <div id="erpBankBalances"></div>
+        <a class="btn" href="{{ route('payment-plan-v33.idr3-movements') }}" id="idr3MovementLink" hidden>{{ __('idr3.title') }}</a>
     </section>
     <form id="newBankRequest" class="card card-body mb-3" hidden aria-labelledby="bankCreateHeading">
         <div class="bank-toolbar"><h2 id="bankCreateHeading" tabindex="-1">{{ __('bank_payment.new') }}</h2><button type="button" id="cancelBankCreate" class="btn">{{ __('bank_payment.back_inbox') }}</button></div>
@@ -188,6 +189,7 @@
    const balances=document.getElementById('erpBankBalances');balances.replaceChildren();
    const idr3=data.bankBalances?.idr3;
    byId('openBankFunds').hidden=!idr3;
+   byId('idr3MovementLink').hidden=!idr3;
    if(idr3){const heading=document.createElement('h3'),values=document.createElement('dl');heading.textContent=ui.bank_balance+' · IDR3 · '+idr3.account_code;values.className='bank-detail';for(const field of ['available','ledger','unposted_actual_debits','reserved','opening','movement'])term(values,label('balance_fields',field),amount(idr3[field]));term(values,ui.ledger_cutoff,idr3.cutoff);balances.append(heading,values);}
    else if(!byId('bankFunds').hidden)show('inbox');
    inboxRows=data.requests;
@@ -224,7 +226,7 @@
   const row=await api(endpoints.request,body);createId=crypto.randomUUID();e.target.reset();document.getElementById('bankLines').replaceChildren();select(row,true);await refresh();});};
  document.getElementById('bankAction').onsubmit=e=>{e.preventDefault();run(async()=>{const f=new FormData(e.target), action=f.get('action'), input={checked:f.has('checked'),reference:f.get('reference'),reason:f.get('reason')}; if(action==='prepare_settlement')['base','vat','withholding','fees','coa','sourceId'].forEach(k=>input[k]=f.get(k));if(action==='approve_settlement')input.revisedCeiling=f.has('revisedCeiling');if(action==='confirm_paid')input.paidDate=f.get('paidDate');const body={id:selected.request.id,version:selected.version,action,input}, signature=JSON.stringify(body);if(pendingAction?.signature!==signature)pendingAction={signature,key:crypto.randomUUID()};selected=await api(endpoints.action,{...body,mutationId:pendingAction.key});pendingAction=null;await refresh();});};
  document.getElementById('uploadBank').onclick=()=>run(async()=>{const form=document.getElementById('bankAction'),f=new FormData();f.set('id',selected.request.id);f.set('version',selected.version);f.set('kind',form.elements.kind.value);if(!form.elements.file.files[0])throw new Error('File required');f.set('file',form.elements.file.files[0]);selected=await api(endpoints.attachment,f);await refresh();});
-  run(async()=>{await refresh();await loadAp();});
+  run(async()=>{await refresh();if(location.hash==='#bankFunds'&&!byId('openBankFunds').hidden)show('funds');await loadAp();});
 })();
 </script>
 </x-filament-panels::page>

@@ -4,6 +4,7 @@ namespace App\Modules\PaymentPlan\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\PaymentPlan\Domain\RuleViolation;
+use App\Modules\PaymentPlan\Services\Idr3MovementHistory;
 use App\Modules\PaymentPlan\Services\WorkflowStore;
 use App\Modules\PaymentPlan\Support\ErpActor;
 use Illuminate\Http\Request;
@@ -37,7 +38,7 @@ final class WorkflowController extends Controller
         }
         $purchaseBills = [];
         $bankBalances = [];
-        $finance = (bool) array_intersect($actor['roles'], ['finance_staff', 'finance_manager', 'accountant', 'director', 'maker', 'general_manager']);
+        $finance = (bool) array_intersect($actor['roles'], Idr3MovementHistory::ROLES);
         if ($finance && config('payment_plan_v33.bank_workflow')) {
             \Illuminate\Support\Facades\DB::transaction(function () use ($actor, &$purchaseBills, &$bankBalances) {
                 $settings = (new \App\Modules\PaymentPlan\Services\BankPaymentControl())->lockContext($actor['company_id']);
@@ -53,6 +54,22 @@ final class WorkflowController extends Controller
             });
         }
         return response()->json(compact('actor', 'requests', 'purchaseBills', 'bankBalances'));
+    }
+
+    public function idr3Movements(Request $request, Idr3MovementHistory $history)
+    {
+        abort_unless(config('payment_plan_v33.bank_workflow') && config('payment_plan_v33.erp_bank_balance')
+            && isset(config('payment_plan_v33.payment_accounts')['idr3']), 404);
+        abort_unless(\App\Filament\Pages\BankPayments::canAccess(), 403);
+        $actor = app(ErpActor::class)->resolve($request);
+        abort_unless(array_intersect($actor['roles'], Idr3MovementHistory::ROLES), 403);
+        $validation = validator($request->query(), [
+            'start' => 'sometimes|required|date_format:Y-m-d', 'end' => 'sometimes|required|date_format:Y-m-d',
+            'page' => 'sometimes|required|integer|min:1|max:100000',
+        ]);
+        abort_if($validation->fails(), 422, __('idr3.period_error'));
+        return response()->view('payment_plan.idr3_movements', $history->read($actor, $validation->validated()))
+            ->header('Cache-Control', 'private, no-store');
     }
 
     public function purchaseBills(Request $request)
