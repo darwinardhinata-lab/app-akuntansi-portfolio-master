@@ -14,11 +14,19 @@ final class ManualJournalMakerWorker extends \Tests\TestCase
             \Illuminate\Support\Facades\DB::setDefaultConnection('race_worker');
             $db = \Illuminate\Support\Facades\DB::connection();
             $this->actingAs(\App\Models\User::findOrFail($f['actor']));
+            if ($f['action'] === 'legacy') {
+                config(['filesystems.disks.public.root' => $f['proof_root']]);
+                $controller = new ReflectionClass(\App\Http\Controllers\PaymentPlanController::class);
+                if (realpath($controller->getFileName()) !== realpath(base_path('app/Http/Controllers/PaymentPlanController.php'))) {
+                    throw new RuntimeException('Legacy controller must load from candidate worktree');
+                }
+            }
             echo 'READY:'.$db->selectOne('SELECT CONNECTION_ID() AS id')->id.PHP_EOL;
             flush();
             if ($f['hold']) $db->beginTransaction();
             $response = match ($f['action']) {
                 'maker' => $this->postJson(route('payment-plan-v33.action'), $f['payload']),
+                'legacy' => $this->post(route('payment.post_journal'), $f['payload']),
                 'manual' => $this->post(route('jurnal.store'), $f['payload']),
                 'fx' => $this->post(route('jurnal.store'), $f['payload']),
                 'delete' => $this->delete(route('jurnal.destroy', [$f['payload']['journal_id']])),

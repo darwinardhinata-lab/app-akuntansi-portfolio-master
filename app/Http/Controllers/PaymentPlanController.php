@@ -596,6 +596,8 @@ class PaymentPlanController extends Controller
 
             DB::beginTransaction();
             try {
+                // Serialize with v33 bank decisions before period/payment locks or GL reads.
+                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
                 if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
                 $item = PaymentPlan::where('id_payment', $item->id_payment)->lockForUpdate()->firstOrFail();
                 if ($item->status_payment !== 'PAID') {
@@ -613,6 +615,11 @@ class PaymentPlanController extends Controller
                     throw new \RuntimeException(__('erp.payment_realization_guard'));
                 }
                 $transactionDate = $item->tgl_transaksi;
+                $jumlahDijurnal = $item->nominal_aktual_efektif;
+                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCapacity([
+                    ['account_code' => $debitAccount, 'position' => 'DEBET', 'amount' => $jumlahDijurnal],
+                    ['account_code' => $selectedKasAccount, 'position' => 'KREDIT', 'amount' => $jumlahDijurnal],
+                ]);
 
                 JournalHeader::create([
                     'journal_id'       => $journalId,
@@ -621,11 +628,6 @@ class PaymentPlanController extends Controller
                     'description'      => 'Payment Plan: ' . $item->keterangan,
                     'transaction_type' => 'Payment Plan',
                 ]);
-
-                // FIX: Jurnal WAJIB pakai nominal aktual efektif (COALESCE(nominal_aktual, nominal)),
-                // bukan nominal pengajuan mentah. Jika Finance belum mengisi Nominal Aktual,
-                // accessor ini otomatis fallback ke nominal pengajuan (tidak mengubah perilaku lama).
-                $jumlahDijurnal = $item->nominal_aktual_efektif;
 
                 JournalDetail::create([
                     'journal_id'   => $journalId,
