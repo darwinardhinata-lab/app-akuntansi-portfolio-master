@@ -14,6 +14,16 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
 {
     private ?string $isolatedDatabase = null;
 
+    public function test_maker_first_rejects_waiting_legacy_payment_post(): void
+    {
+        $this->overlap('maker', 'legacy');
+    }
+
+    public function test_legacy_payment_post_first_rejects_waiting_maker(): void
+    {
+        $this->overlap('legacy', 'legacy');
+    }
+
     public function test_maker_commit_first_rejects_waiting_manual_journal(): void
     {
         $this->overlap('maker');
@@ -99,6 +109,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
 
     private function overlap(string $first, string $journalAction = 'manual'): void
     {
+        $legacy = $journalAction === 'legacy';
         $flags = ['payment_plan_v33.enabled' => true, 'payment_plan_v33.bank_workflow' => true,
             'payment_plan_v33.erp_bank_balance' => true, 'payment_plan_v33.ap_allocations' => true,
             'payment_plan_v33.reservations' => true, 'platform.posting_intents_enabled' => true,
@@ -112,22 +123,28 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             $r = Role::create(['code' => 'PPL_'.$role, 'name' => $role]);
             $users[$key]->platformRoles()->attach($r->id, ['company_id' => $company->id]);
         }
-        foreach (['111003' => 'DEBET', '310001' => 'KREDIT', '610001' => 'DEBET', '211001' => 'KREDIT'] as $code => $side) {
-            DB::table('accounts')->insert(['account_code' => $code, 'account_name' => 'Synthetic', 'normal_balance' => $side, 'coa_type' => 'Other', 'report_pos' => 'NERACA']);
+        if ($legacy) {
+            $flags['platform.payment_post_user_ids'] = [$users['fs']->id];
+            config($flags);
+        }
+        $bankCoa = $legacy ? '111101' : '111003';
+        foreach ([$bankCoa => 'DEBET', '310001' => 'KREDIT', '610001' => 'DEBET', '211001' => 'KREDIT'] as $code => $side) {
+            DB::table('accounts')->insert(['account_code' => $code, 'account_name' => 'Synthetic', 'normal_balance' => $side,
+                'coa_type' => $legacy && (string) $code === $bankCoa ? 'Cash & Bank' : 'Other', 'report_pos' => 'NERACA']);
         }
         if ($journalAction === 'fx') {
             $this->seedFx($users['fs']->id);
             $flags['platform.multicurrency_enabled'] = true;
         }
-        DB::table('company_coa_mappings')->insert(['company_id' => $company->id, 'semantic_key' => 'ppl.bank.idr3', 'account_code' => '111003', 'active' => true]);
+        DB::table('company_coa_mappings')->insert(['company_id' => $company->id, 'semantic_key' => 'ppl.bank.idr3', 'account_code' => $bankCoa, 'active' => true]);
         $settings = ['version' => 1, 'erp_cutoff' => '2026-01-01', 'accounts' => [['id' => 'idr3', 'name' => 'Synthetic',
             'number' => 'TEST', 'currency' => 'IDR', 'payment' => true, 'opening' => '500.00', 'asOf' => '2026-01-01']], 'receipts' => []];
         DB::table('ppl_financial_contexts')->insert(['company_id' => $company->id, 'settings' => json_encode($settings)]);
-        $opening = in_array($journalAction, ['manual', 'fx'], true) ? '500.00' : '300.00';
+        $opening = in_array($journalAction, ['manual', 'fx', 'legacy'], true) ? '500.00' : '300.00';
         \App\Support\PostingService::post(['transaction_date' => '2026-01-01'], [
-            ['account_code' => '111003', 'position' => 'DEBET', 'amount' => $opening], ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => $opening]]);
+            ['account_code' => $bankCoa, 'position' => 'DEBET', 'amount' => $opening], ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => $opening]]);
         $openingAction = str_starts_with($journalAction, 'opening');
-        $receipt = ! $openingAction && !in_array($journalAction, ['manual', 'bulk', 'fx'], true) ? \App\Support\PostingService::post([
+        $receipt = ! $openingAction && !in_array($journalAction, ['manual', 'bulk', 'fx', 'legacy'], true) ? \App\Support\PostingService::post([
             'transaction_date' => '2026-01-03', 'source_doc_no' => 'RACE-RECEIPT', 'journal_type' => 'MANUAL',
         ], [
             ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00'],
@@ -182,6 +199,29 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $makerBefore = DB::table('ppl_requests')->where('id', $id)->first();
         $eventsBefore = DB::table('ppl_events')->count();
         $intentsBefore = DB::table('accounting_posting_intents')->count();
+        $payment = $proofRoot = null;
+        if ($legacy) {
+            $division = DB::table('master_divisi')->insertGetId(['kode_divisi' => 'M1', 'nama_divisi' => 'Synthetic', 'status_aktif' => 1]);
+            $disk = \Illuminate\Support\Facades\Storage::fake('public');
+            $disk->put('proof/f03.pdf', 'Synthetic proof');
+            $proofRoot = $disk->path('');
+            $this->actingAs($users['req']);
+            $payment = \App\Models\PaymentPlan::create(['no_transaksi' => 'F03-LEGACY-RACE', 'id_divisi' => $division,
+                'tgl_pengajuan' => '2026-01-02', 'tgl_transaksi' => '2026-01-02', 'jenis_transaksi' => $bankCoa,
+                'kategori_payment' => 'OPERASIONAL', 'vendor_toko' => 'Synthetic', 'penerima_pj' => 'Synthetic',
+                'keterangan' => 'Synthetic direct service', 'id_akun' => '610001', 'nominal' => '100.01',
+                'nominal_aktual' => '100.01', 'status_payment' => 'PENGAJUAN']);
+            $payment->details()->create(['keterangan' => 'Synthetic', 'qty' => 1, 'nominal' => '100.01',
+                'nominal_aktual' => '100.01', 'bukti_file' => 'proof/f03.pdf']);
+            $this->actingAs($users['fs']);
+            \App\Support\PaymentMakerChecker::approve($payment->refresh());
+            $payment->update(['status_payment' => 'PAID']);
+            \App\Support\PaymentPlanWorkflow::realized($payment->refresh());
+            $paymentBefore = $payment->refresh()->getAttributes();
+            $this->assertSame('500.00', app(ErpBankBalance::class)->project($company->id, ['id' => 'idr3', 'currency' => 'IDR'], $settings)['available']);
+            $this->assertDatabaseCount('ppl_reservations', 0);
+            $this->assertDatabaseCount('ppl_ap_allocations', 0);
+        }
         $release = tempnam(sys_get_temp_dir(), 'manual_maker_');
         unlink($release);
         $workers = [];
@@ -190,6 +230,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
                 : ['transaction_date' => '2026-01-03', 'source_doc_no' => 'RACE-MANUAL', 'description' => 'Manual race outflow', 'details' => [
                     ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '200.00'], ['account_code' => '111003', 'position' => 'KREDIT', 'amount' => '200.00']]];
             if ($action === 'delete') $payload = ['journal_id' => $receipt->getKey()];
+            if ($action === 'legacy') $payload = ['selected_ids' => $payment->no_transaksi];
             if ($action === 'edit') $payload = ['journal_id' => $receipt->getKey(), 'transaction_date' => '2026-01-03',
                 'description' => 'Reclassify receipt', 'details' => [
                     ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '200.00'],
@@ -209,7 +250,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             }
             $workers[] = new Process([PHP_BINARY, base_path('tests/Support/manual-journal-maker-worker.php')], base_path(), ['MANUAL_MAKER_FIXTURE' => json_encode([
                 'connection' => config('database.connections.writer_test'), 'flags' => $flags, 'action' => $action, 'actor' => $users[$action === 'maker' ? 'mk' : 'fs']->id,
-                'payload' => $payload, 'hold' => $index === 0, 'release' => $release], JSON_THROW_ON_ERROR)], null, 110);
+                'payload' => $payload, 'hold' => $index === 0, 'release' => $release, 'proof_root' => $proofRoot], JSON_THROW_ON_ERROR)], null, 110);
         }
         try {
             $workers[0]->start();
@@ -243,6 +284,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
                 $worker->wait();
                 $this->assertSame(0, $worker->getExitCode(), $worker->getOutput().$worker->getErrorOutput());
             }
+            $this->assertStringContainsString("\nCOMMITTED", $workers[0]->getOutput());
             $results = [];
             foreach ($workers as $worker) {
                 preg_match('/RESULT:(.*)/', $worker->getOutput(), $m);
@@ -261,11 +303,13 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             config(['database.connections.writer_final' => config('database.connections.writer_test')]);
             DB::setDefaultConnection('writer_final');
             $finalId = (int) DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
-            $this->assertNotContains($finalId, [(int) $holder[1], (int) $waiter[1], $observerId]);
+            $this->assertNotContains($finalId, [(int) $holder[1], (int) $waiter[1], $observerId,
+                (int) DB::connection('writer_test')->selectOne('SELECT CONNECTION_ID() AS id')->id]);
             $balance = app(ErpBankBalance::class)->project($company->id, ['id' => 'idr3', 'currency' => 'IDR'], $settings);
-            $this->assertSame($first === 'maker' ? '500.00' : '300.00', $balance['actual']);
+            $afterOutflow = $legacy ? '399.99' : '300.00';
+            $this->assertSame($first === 'maker' ? '500.00' : $afterOutflow, $balance['actual']);
             $this->assertSame($first === 'maker' ? '400.00' : '0.00', $balance['reserved']);
-            $this->assertSame($first === 'maker' ? '100.00' : '300.00', $balance['available']);
+            $this->assertSame($first === 'maker' ? '100.00' : $afterOutflow, $balance['available']);
             $journalCount = match ($journalAction) {
                 'delete' => $first === 'maker' ? 3 : 2,
                 'edit', 'csv', 'xlsx', 'opening', 'opening-csv', 'opening-fx' => 3,
@@ -276,7 +320,20 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             $this->assertDatabaseCount('journal_details', $journalCount * 2 + ($first === 'fx' ? 1 : 0));
             if ($first === 'fx') $this->assertDatabaseHas('journal_details', ['account_code' => '111003', 'position' => 'KREDIT', 'amount' => '200.00']);
             $this->assertDatabaseCount('accounting_posting_intents', $intentsBefore);
-            if ($bulkIds) {
+            if ($legacy) {
+                $journalId = \App\Models\JournalHeader::idForPaymentPlan($payment->no_transaksi);
+                $committedPayment = $payment->fresh();
+                $this->assertSame($first === 'maker' ? 'PAID' : 'POSTED', $committedPayment->status_payment);
+                $this->assertSame($first === 'maker' ? 0 : 1, DB::table('journal_headers')->where('journal_id', $journalId)->count());
+                if ($first === 'maker') {
+                    $this->assertSame($paymentBefore, $committedPayment->getAttributes());
+                    $this->assertSame(0, DB::table('journal_details')->where('journal_id', $journalId)->count());
+                } else {
+                    $this->assertSame(2, DB::table('journal_details')->where('journal_id', $journalId)->count());
+                    $this->assertDatabaseHas('journal_details', ['journal_id' => $journalId, 'account_code' => $bankCoa, 'position' => 'KREDIT', 'amount' => '100.01']);
+                    $this->assertDatabaseHas('journal_details', ['journal_id' => $journalId, 'account_code' => '610001', 'position' => 'DEBET', 'amount' => '100.01']);
+                }
+            } elseif ($bulkIds) {
                 $this->assertSame($first === 'maker' ? 2 : 0, DB::table('journal_headers')->whereIn('journal_id', $bulkIds)->count());
                 $this->assertSame($first === 'maker' ? 4 : 0, DB::table('journal_details')->whereIn('journal_id', $bulkIds)->count());
             } elseif (in_array($journalAction, ['csv', 'xlsx'], true)) {
@@ -315,7 +372,9 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
                 'first' => $first, 'journal_action' => $journalAction, 'holder' => (int) $holder[1], 'waiter' => (int) $waiter[1], 'observer' => $observerId, 'final_reader' => $finalId,
                 'wait' => $wait, 'results' => $results, 'balance' => $balance, 'journals' => DB::table('journal_headers')->get(),
                 'reservations' => DB::table('ppl_reservations')->get(), 'allocations' => DB::table('ppl_ap_allocations')->get(),
-                'maker_status' => $row->status, 'maker_version' => $row->version], JSON_THROW_ON_ERROR).PHP_EOL, FILE_APPEND);
+                'maker_status' => $row->status, 'maker_version' => $row->version,
+                'legacy_status' => $committedPayment->status_payment ?? null,
+                'legacy_lines' => $legacy ? DB::table('journal_details')->where('journal_id', $journalId)->get() : null], JSON_THROW_ON_ERROR).PHP_EOL, FILE_APPEND);
         } finally {
             touch($release);
             foreach ($workers as $worker) if ($worker->isRunning()) $worker->stop();
@@ -334,6 +393,9 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
     public function refreshDatabase(): void
     {
         if (getenv('AP_MYSQL_TESTS') !== '1') $this->markTestSkipped('Opt-in isolated MariaDB test.');
+        if (str_contains($this->name(), 'legacy_payment_post') && getenv('MGI_TEST_PORT') !== '33391') {
+            $this->markTestSkipped('Legacy overlap requires the dedicated disposable port.');
+        }
         $this->isolatedDatabase = 'audit_manual_writer_'.bin2hex(random_bytes(8));
         $config = ['driver' => 'mysql', 'host' => '127.0.0.1', 'port' => getenv('MGI_TEST_PORT') ?: 3306,
             'username' => 'root', 'password' => '', 'database' => 'information_schema', 'charset' => 'utf8mb4',
