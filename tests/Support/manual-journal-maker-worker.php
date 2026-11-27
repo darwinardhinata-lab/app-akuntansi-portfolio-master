@@ -29,6 +29,7 @@ final class ManualJournalMakerWorker extends \Tests\TestCase
                 'maker' => $this->postJson(route('payment-plan-v33.action'), $f['payload']),
                 'legacy' => $this->post(route('payment.post_journal'), $f['payload']),
                 'cash_bill' => $this->post(route('purchase-bills.store'), $f['payload']),
+                'shipment-rollback' => $this->post(route('so.rollback', $f['payload']['id'])),
                 'bill-delete' => $this->delete(route('purchase-bills.destroy', $f['payload']['id'])),
                 'ar-reverse' => $this->postJson(route('invoice-payment-allocations.reverse', $f['payload']['id']),
                     ['reason' => 'Synthetic reversal for disposable audit']),

@@ -1678,6 +1678,7 @@ return [
     'audit_invoice_cancelled' => 'Faktur dibatalkan. Dokumen asli dipertahankan dan jurnal serta kartu stok pembalik telah dicatat.',
     'audit_invoice_cancel_blocked' => 'Pembatalan ditolak: balikkan pembayaran dan selesaikan retur penjualan terlebih dahulu.',
     'audit_invoice_journal_invalid' => 'Pembatalan ditolak: jurnal sumber atau nilai persediaan perlu direkonsiliasi.',
+    'audit_shipment_stock_source_invalid' => 'Pembatalan ditolak: asal mutasi stok pengiriman tidak dapat dipastikan. Ajukan ke tim gudang dan Accounting untuk review manual.',
     'audit_invoice_cancel_confirm' => 'Batalkan faktur ini? Dokumen asli dipertahankan dan transaksi pembalik dibuat.',
     'audit_cancelled' => 'DIBATALKAN',
     'audit_opening_duplicates' => 'Terdapat beberapa saldo awal pada tanggal ini. Rekonsiliasi sebelum menyimpan; tidak ada jurnal yang dihapus.',
