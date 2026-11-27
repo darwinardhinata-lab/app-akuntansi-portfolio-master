@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use App\Support\DocumentSequence;
 use App\Support\PostingService;
 use App\Services\InventorySyncService;
+use App\Modules\PaymentPlan\Services\LegacyFinancialFence;
 
 class PurchaseBillController extends Controller
 {
@@ -77,8 +78,7 @@ class PurchaseBillController extends Controller
 
         DB::beginTransaction();
         try {
-            $prefix = 'BIL-' . date('Ymd', strtotime($request->bill_date)) . '-';
-            $secureBillNumber = DocumentSequence::generateSecure('purchase_bills', 'bill_number', $prefix);
+            LegacyFinancialFence::lock();
 
             $subTotal = 0;
             foreach ($request->details as $det) {
@@ -86,6 +86,25 @@ class PurchaseBillController extends Controller
             }
             $taxAmount = (float) ($request->tax_amount ?? 0);
             $grandTotal = $subTotal + $taxAmount;
+
+            $now = now();
+            $jDetails = [];
+            if ($grandTotal > 0) {
+                $line = static fn ($code, $position, $amount) => [
+                    'account_code' => $code, 'position' => $position, 'amount' => number_format($amount, 2, '.', ''),
+                    'created_at' => $now, 'updated_at' => $now, 'helper_code' => null,
+                ];
+                foreach ($request->details as $detail) {
+                    $amount = (float) ($detail['amount'] ?? 0);
+                    if ($amount > 0) $jDetails[] = $line($detail['account_code'], 'DEBET', $amount);
+                }
+                if ($taxAmount > 0) $jDetails[] = $line(config('coa.pajak_masukan'), 'DEBET', $taxAmount);
+                $jDetails[] = $line($request->credit_account, 'KREDIT', $grandTotal);
+                LegacyFinancialFence::assertBankCapacity($jDetails);
+            }
+
+            $prefix = 'BIL-' . date('Ymd', strtotime($request->bill_date)) . '-';
+            $secureBillNumber = DocumentSequence::generateSecure('purchase_bills', 'bill_number', $prefix);
 
             $bill = PurchaseBill::create([
                 'bill_number' => $secureBillNumber,
@@ -118,23 +137,7 @@ class PurchaseBillController extends Controller
 
             // Jurnal Akuntansi Otomatis
             $journalId = null;
-            if ($grandTotal > 0) {
-                $now = now();
-                $jDetails = [];
-
-                // Debet: Akun Biaya / Persediaan per baris
-                foreach ($detailsToInsert as $d) {
-                    $jDetails[] = ['account_code' => $d['account_code'], 'position' => 'DEBET', 'amount' => $d['amount'], 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null];
-                }
-
-                // Debet: Pajak (Jika ada PPN Masukan)
-                if ($taxAmount > 0) {
-                    $jDetails[] = ['account_code' => config('coa.pajak_masukan'), 'position' => 'DEBET', 'amount' => $taxAmount, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null];
-                }
-
-                // Kredit: Hutang / Kas Bank
-                $jDetails[] = ['account_code' => $request->credit_account, 'position' => 'KREDIT', 'amount' => $grandTotal, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null];
-
+            if ($jDetails) {
                 $journalHeader = PostingService::post(
                     [
                         'transaction_date' => $request->bill_date,
