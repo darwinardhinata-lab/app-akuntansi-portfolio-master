@@ -107,13 +107,26 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $this->overlap('fx', 'fx');
     }
 
+    public function test_warehouse_inbound_race_maker_first(): void
+    {
+        $this->overlap('maker', 'inbound');
+    }
+
+    public function test_warehouse_inbound_race_receipt_first(): void
+    {
+        $this->overlap('inbound', 'inbound');
+    }
+
     private function overlap(string $first, string $journalAction = 'manual'): void
     {
         $legacy = $journalAction === 'legacy';
+        $inbound = $journalAction === 'inbound';
         $flags = ['payment_plan_v33.enabled' => true, 'payment_plan_v33.bank_workflow' => true,
             'payment_plan_v33.erp_bank_balance' => true, 'payment_plan_v33.ap_allocations' => true,
             'payment_plan_v33.reservations' => true, 'platform.posting_intents_enabled' => true,
             'platform.legacy_sync_enabled' => false, 'customs.enabled' => false];
+        if ($inbound) $flags += ['coa.persediaan' => '11200', 'payment_plan_v33.primary_navigation' => true,
+            'payment_plan_v33.posting' => false];
         config($flags);
         $company = Company::create(['code' => 'MGI', 'name' => 'Synthetic', 'active' => true, 'base_currency' => 'IDR']);
         $users = [];
@@ -140,11 +153,11 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $settings = ['version' => 1, 'erp_cutoff' => '2026-01-01', 'accounts' => [['id' => 'idr3', 'name' => 'Synthetic',
             'number' => 'TEST', 'currency' => 'IDR', 'payment' => true, 'opening' => '500.00', 'asOf' => '2026-01-01']], 'receipts' => []];
         DB::table('ppl_financial_contexts')->insert(['company_id' => $company->id, 'settings' => json_encode($settings)]);
-        $opening = in_array($journalAction, ['manual', 'fx', 'legacy'], true) ? '500.00' : '300.00';
+        $opening = in_array($journalAction, ['manual', 'fx', 'legacy', 'inbound'], true) ? '500.00' : '300.00';
         \App\Support\PostingService::post(['transaction_date' => '2026-01-01'], [
             ['account_code' => $bankCoa, 'position' => 'DEBET', 'amount' => $opening], ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => $opening]]);
         $openingAction = str_starts_with($journalAction, 'opening');
-        $receipt = ! $openingAction && !in_array($journalAction, ['manual', 'bulk', 'fx', 'legacy'], true) ? \App\Support\PostingService::post([
+        $receipt = ! $openingAction && !in_array($journalAction, ['manual', 'bulk', 'fx', 'legacy', 'inbound'], true) ? \App\Support\PostingService::post([
             'transaction_date' => '2026-01-03', 'source_doc_no' => 'RACE-RECEIPT', 'journal_type' => 'MANUAL',
         ], [
             ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00'],
@@ -222,6 +235,16 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             $this->assertDatabaseCount('ppl_reservations', 0);
             $this->assertDatabaseCount('ppl_ap_allocations', 0);
         }
+        if ($inbound) {
+            DB::table('accounts')->insert(['account_code' => '11200', 'account_name' => 'Synthetic inventory',
+                'normal_balance' => 'DEBET', 'coa_type' => 'Other', 'report_pos' => 'NERACA']);
+            $product = \App\Models\Product::create(['sku' => 'F03-INBOUND-RACE', 'name' => 'Synthetic',
+                'stock_quantity' => 0, 'average_cost' => 0]);
+            $form = $this->actingAs($users['fs'])->get(route('warehouse.inbound.create', ['tab' => 'transfer_masuk']))
+                ->assertOk()->assertSee('value="'.$bankCoa.'"', false);
+            $this->assertSame(1, preg_match('/name="evidence_number"[^>]+value="(IN-[^"]+)"/', $form->getContent(), $match));
+            $inboundRef = $match[1];
+        }
         $release = tempnam(sys_get_temp_dir(), 'manual_maker_');
         unlink($release);
         $workers = [];
@@ -231,6 +254,9 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
                     ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '200.00'], ['account_code' => '111003', 'position' => 'KREDIT', 'amount' => '200.00']]];
             if ($action === 'delete') $payload = ['journal_id' => $receipt->getKey()];
             if ($action === 'legacy') $payload = ['selected_ids' => $payment->no_transaksi];
+            if ($action === 'inbound') $payload = ['transaction_date' => '2026-01-03', 'evidence_number' => $inboundRef,
+                'description' => 'Synthetic inbound race', 'offset_account' => $bankCoa,
+                'items' => [['product_id' => $product->id, 'qty' => 1, 'unit_cost' => '100.01']]];
             if ($action === 'edit') $payload = ['journal_id' => $receipt->getKey(), 'transaction_date' => '2026-01-03',
                 'description' => 'Reclassify receipt', 'details' => [
                     ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '200.00'],
@@ -306,7 +332,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             $this->assertNotContains($finalId, [(int) $holder[1], (int) $waiter[1], $observerId,
                 (int) DB::connection('writer_test')->selectOne('SELECT CONNECTION_ID() AS id')->id]);
             $balance = app(ErpBankBalance::class)->project($company->id, ['id' => 'idr3', 'currency' => 'IDR'], $settings);
-            $afterOutflow = $legacy ? '399.99' : '300.00';
+            $afterOutflow = $legacy || $inbound ? '399.99' : '300.00';
             $this->assertSame($first === 'maker' ? '500.00' : $afterOutflow, $balance['actual']);
             $this->assertSame($first === 'maker' ? '400.00' : '0.00', $balance['reserved']);
             $this->assertSame($first === 'maker' ? '100.00' : $afterOutflow, $balance['available']);
@@ -339,7 +365,23 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             } elseif (in_array($journalAction, ['csv', 'xlsx'], true)) {
                 $this->assertSame($first === 'maker' ? 0 : 1, DB::table('journal_headers')->where('journal_no', 'RACE-RECEIPT')->where('journal_type', 'IMPORT')->count());
                 if ($first === 'maker') $this->assertDatabaseHas('journal_details', ['journal_id' => $receipt->getKey(), 'account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00']);
-            } elseif ($openingAction) {
+            } elseif ($inbound) {
+                $committed = $first !== 'maker';
+                $stock = DB::table('products')->where('id', $product->id)->first(['stock_quantity', 'average_cost']);
+                $ledger = DB::table('inventory_ledgers')->where('evidence_number', $inboundRef)->get([
+                    'type', 'qty', 'unit_cost', 'total_cost', 'running_qty', 'running_value', 'moving_average_cost',
+                ]);
+                $inboundHeaders = DB::table('journal_headers')->where('source_doc_no', $inboundRef)->get();
+                $inboundLines = DB::table('journal_details')->whereIn('journal_id', $inboundHeaders->pluck('journal_id'))
+                    ->orderBy('position')->get(['account_code', 'position', 'amount']);
+                $this->assertEquals($committed ? 1 : 0, $stock->stock_quantity);
+                $this->assertEquals($committed ? '100.01' : '0.00', $stock->average_cost);
+                $this->assertCount($committed ? 1 : 0, $ledger);
+                $this->assertCount($committed ? 1 : 0, $inboundHeaders);
+                $this->assertEquals($committed ? [['11200', 'DEBET', '100.01'], [$bankCoa, 'KREDIT', '100.01']] : [],
+                    $inboundLines->map(fn ($line) => array_values((array) $line))->all());
+                if ($committed) $this->assertEquals(['IN', 1, '100.01', '100.01', 1, '100.01', '100.01'], array_values((array) $ledger[0]));
+            } elseif ($journalAction === 'bulk') {
                 $this->assertDatabaseHas('journal_details', ['journal_id' => 'JRN-SA-'.$openingDate,
                     'account_code' => $first === 'maker' ? '111003' : ($journalAction === 'opening-fx' ? '111004' : '610001'), 'position' => 'DEBET', 'amount' => '200.00']);
                 if ($journalAction === 'opening-fx') {
@@ -374,7 +416,8 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
                 'reservations' => DB::table('ppl_reservations')->get(), 'allocations' => DB::table('ppl_ap_allocations')->get(),
                 'maker_status' => $row->status, 'maker_version' => $row->version,
                 'legacy_status' => $committedPayment->status_payment ?? null,
-                'legacy_lines' => $legacy ? DB::table('journal_details')->where('journal_id', $journalId)->get() : null], JSON_THROW_ON_ERROR).PHP_EOL, FILE_APPEND);
+                'legacy_lines' => $legacy ? DB::table('journal_details')->where('journal_id', $journalId)->get() : null,
+                'inbound' => $inbound ? compact('inboundRef', 'stock', 'ledger', 'inboundHeaders', 'inboundLines') : null], JSON_THROW_ON_ERROR).PHP_EOL, FILE_APPEND);
         } finally {
             touch($release);
             foreach ($workers as $worker) if ($worker->isRunning()) $worker->stop();
@@ -396,11 +439,21 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         if (str_contains($this->name(), 'legacy_payment_post') && getenv('MGI_TEST_PORT') !== '33391') {
             $this->markTestSkipped('Legacy overlap requires the dedicated disposable port.');
         }
+        $inbound = str_contains($this->name(), 'warehouse_inbound_race');
+        if ($inbound && getenv('MGI_TEST_PORT') !== '33394') {
+            $this->markTestSkipped('Inbound overlap requires the dedicated disposable port.');
+        }
         $this->isolatedDatabase = 'audit_manual_writer_'.bin2hex(random_bytes(8));
         $config = ['driver' => 'mysql', 'host' => '127.0.0.1', 'port' => getenv('MGI_TEST_PORT') ?: 3306,
             'username' => 'root', 'password' => '', 'database' => 'information_schema', 'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci', 'prefix' => '', 'strict' => true];
         config(['database.connections.writer_admin' => $config]);
+        if ($inbound) {
+            $identity = DB::connection('writer_admin')->selectOne('SELECT @@datadir AS datadir, VERSION() AS version');
+            $this->assertSame('d:/erp-recovery/m1-f03-inbound-patch-20261127-db/data',
+                strtolower(rtrim(preg_replace('~[\\\\/]+~', '/', $identity->datadir), '/')));
+            $this->assertStringContainsString('MariaDB', $identity->version);
+        }
         DB::connection('writer_admin')->statement('CREATE DATABASE `'.$this->isolatedDatabase.'`');
         $config['database'] = $this->isolatedDatabase;
         config(['database.connections.writer_test' => $config, 'database.default' => 'writer_test']);

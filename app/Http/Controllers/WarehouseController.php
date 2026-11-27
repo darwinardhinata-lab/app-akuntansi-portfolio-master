@@ -10,6 +10,7 @@ use App\Models\JournalHeader;
 use App\Models\JournalDetail;
 use App\Models\SystemLog;
 use App\Modules\Manufacturing\Models\WorkOrder;
+use App\Modules\PaymentPlan\Services\LegacyFinancialFence;
 use Illuminate\Support\Facades\DB;
 
 class WarehouseController extends Controller
@@ -145,9 +146,25 @@ class WarehouseController extends Controller
         $request->validate(['evidence_number' => 'required|string|max:100', 'transaction_date' => 'required|date', 'offset_account' => 'required', 'items' => 'required|array|min:1', 'items.*.product_id' => 'required|exists:products,id', 'items.*.qty' => 'required|integer|min:1', 'items.*.unit_cost' => 'required|numeric|min:0']);
         DB::beginTransaction();
         try {
+            LegacyFinancialFence::lock();
+            $totalValue = 0;
+            foreach ($request->items as $item) {
+                $totalValue += (float) $item['qty'] * (float) $item['unit_cost'];
+            }
+
+            $journalLines = [];
+            if ($totalValue > 0) {
+                // Guard the same two-decimal amount that will be written to journal_details.
+                $amount = number_format($totalValue, 2, '.', '');
+                $journalLines = [
+                    ['account_code' => config('coa.persediaan'), 'position' => 'DEBET', 'amount' => $amount],
+                    ['account_code' => $request->offset_account, 'position' => 'KREDIT', 'amount' => $amount],
+                ];
+                LegacyFinancialFence::assertBankCapacity($journalLines);
+            }
+
             \App\Support\AccountingPeriodGuard::source([$request->transaction_date]);
             $now = now();
-            $totalValue = 0;
             $ledgers = [];
 
             foreach ($request->items as $item) {
@@ -165,7 +182,6 @@ class WarehouseController extends Controller
                     
                     $product->update(['stock_quantity' => $newStock, 'average_cost' => $newMac]);
                     $lineTotal = $qty * $cost;
-                    $totalValue += $lineTotal;
 
                     $ledgers[] = [
                         'transaction_date' => $request->transaction_date, 'evidence_number' => $request->evidence_number,
@@ -178,12 +194,11 @@ class WarehouseController extends Controller
             if ($ledgers) {
                 InventoryLedger::insert($ledgers);
             }
-            if ($totalValue > 0) {
+            if ($journalLines) {
                 $jh = JournalHeader::create(['transaction_date' => $request->transaction_date, 'evidence_number' => $request->evidence_number, 'description' => $request->description ?? 'Barang Masuk Manual', 'source_doc_no' => $request->evidence_number, 'transaction_type' => 'Inbound']);
-                JournalDetail::insert([
-                    ['journal_id' => $jh->getKey(), 'account_code' => config('coa.persediaan'), 'position' => 'DEBET', 'amount' => $totalValue, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null],
-                    ['journal_id' => $jh->getKey(), 'account_code' => $request->offset_account, 'position' => 'KREDIT', 'amount' => $totalValue, 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null]
-                ]);
+                JournalDetail::insert(array_map(fn ($line) => $line + [
+                    'journal_id' => $jh->getKey(), 'created_at' => $now, 'updated_at' => $now, 'helper_code' => null,
+                ], $journalLines));
             }
             DB::commit();
             SystemLog::record('CREATE', 'Warehouse', 'Penerimaan manual: ' . $request->evidence_number);
