@@ -9,6 +9,8 @@ use App\Models\JournalHeader;
 use App\Models\JournalDetail;
 use App\Models\Product;
 use App\Models\InventoryLedger;
+use App\Modules\PaymentPlan\Services\ErpBankBalance;
+use App\Modules\PaymentPlan\Services\LegacyFinancialFence;
 use Illuminate\Support\Facades\DB;
 use App\Support\PostingService;
 use Exception;
@@ -252,6 +254,7 @@ class SalesOrderService
     {
         DB::beginTransaction();
         try {
+            LegacyFinancialFence::lock();
             if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
             // B13 FIX: Lock baris SO agar void tidak bentrok dengan ship paralel
             $so = SalesOrder::lockForUpdate()->findOrFail($soId);
@@ -260,32 +263,41 @@ class SalesOrderService
                 throw new Exception("Gagal: SO belum berstatus SHIPPED.");
             }
 
-            $invoice = SalesInvoice::where('sales_order_id', $so->id)->first();
+            $invoice = SalesInvoice::where('sales_order_id', $so->id)->lockForUpdate()->first();
 
             if ($invoice) {
                 $evidenceNumber = $invoice->invoice_number;
 
-                // Batch delete jurnal
-                $journalIds = JournalHeader::where('source_doc_no', $evidenceNumber)->pluck('journal_id');
-                if ($journalIds->isNotEmpty()) {
+                $journals = JournalHeader::where('source_doc_no', $evidenceNumber)->orderBy('journal_id')->lockForUpdate()->get();
+                $movements = InventoryLedger::where('evidence_number', $evidenceNumber)->orderBy('id')->lockForUpdate()->get();
+                // An evidence number alone is not ownership. Never delete another writer's GL or stock rows.
+                $expectedDescription = "Faktur Penjualan: {$evidenceNumber} (Reff: {$so->so_number})";
+                if ($journals->count() !== ($invoice->journal_id ? 1 : 0)
+                    || $journals->contains(fn ($journal) => $journal->getKey() !== $invoice->journal_id
+                        || $journal->transaction_type !== 'Faktur')
+                    || $movements->contains(fn ($line) => $line->type !== 'OUT' || $line->description !== $expectedDescription)) {
+                    throw new \RuntimeException(__('erp.audit_invoice_journal_invalid'));
+                }
+                if (LegacyFinancialFence::bankCapacityEnabled()) {
+                    $today = ErpBankBalance::businessDate();
+                    LegacyFinancialFence::assertBankCapacity($journals->flatMap(
+                        fn (JournalHeader $journal) => LegacyFinancialFence::removedBankLines($journal, $today)
+                    )->all());
+                }
+                $journalIds = $journals->modelKeys();
+                if ($journalIds !== []) {
                     \App\Support\ProtectedJournalQuery::table('journal_details')->whereIn('journal_id', $journalIds)->delete();
                     \App\Support\ProtectedJournalQuery::table('journal_headers')->whereIn('journal_id', $journalIds)->delete();
                 }
 
-                // OPTIMASI N+1: Agregasi delta stok dalam 1 query, bukan loop delete + save
-                $stockChanges = DB::table('inventory_ledgers')
-                    ->where('evidence_number', $evidenceNumber)
-                    ->where('type', 'OUT')
-                    ->groupBy('product_id')
-                    ->select('product_id', DB::raw('SUM(qty) as total_qty'))
-                    ->pluck('total_qty', 'product_id');
+                $stockChanges = $movements->groupBy('product_id')->map(fn ($rows) => $rows->sum('qty'));
 
                 foreach ($stockChanges as $productId => $qty) {
                     Product::where('id', $productId)->increment('stock_quantity', (int)$qty);
                 }
 
                 // Batch delete kartu stok
-                InventoryLedger::where('evidence_number', $evidenceNumber)->delete();
+                InventoryLedger::whereIn('id', $movements->modelKeys())->delete();
 
                 $invoice->delete();
             }

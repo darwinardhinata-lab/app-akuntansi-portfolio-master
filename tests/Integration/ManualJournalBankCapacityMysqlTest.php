@@ -16,6 +16,18 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
 
     private ?string $isolatedDatabase = null;
 
+    #[\PHPUnit\Framework\Attributes\DataProvider('outboundRollbackCases')]
+    public function test_outbound_rollback_keeps_manual_funding(bool $collision): void
+    {
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-27 12:00:00', 'Asia/Jakarta'));
+        $this->overlap('maker', $collision ? 'outbound-rollback' : 'outbound-clean', true);
+    }
+
+    public static function outboundRollbackCases(): array
+    {
+        return ['shared reference fails closed' => [true], 'unambiguous rollback succeeds' => [false]];
+    }
+
     #[\PHPUnit\Framework\Attributes\DataProvider('residualWriterCases')]
     public function test_residual_writer_committed(string $action, string $first, string $amount): void
     {
@@ -231,6 +243,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         DB::table('ppl_financial_contexts')->insert(['company_id' => $company->id, 'settings' => json_encode($settings)]);
         $opening = $future || in_array($journalAction, ['manual', 'fx', 'legacy', 'cash_bill', 'inbound'], true) ? '500.00' : '300.00';
         if ($residualAmount !== null) $opening = bcsub('500.00', $residualAmount, 2);
+        if (in_array($journalAction, ['outbound-rollback', 'outbound-clean'], true)) $opening = '399.99';
         \App\Support\PostingService::post(['transaction_date' => '2026-01-01'], [
             ['account_code' => $bankCoa, 'position' => 'DEBET', 'amount' => $opening], ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => $opening]]);
         $openingAction = !$future && str_starts_with($journalAction, 'opening');
@@ -324,6 +337,10 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
                 ->assertOk()->assertSee('value="'.$bankCoa.'"', false);
             $this->assertSame(1, preg_match('/name="evidence_number"[^>]+value="(IN-[^"]+)"/', $form->getContent(), $match));
             $inboundRef = $match[1];
+        }
+        if (in_array($journalAction, ['outbound-rollback', 'outbound-clean'], true)) {
+            $this->observeOutboundRollback($company, $settings, $users, $id, $version, $bankCoa, $journalAction === 'outbound-rollback');
+            return;
         }
         if ($future && $residualAmount === null) {
             if ($inbound) {
@@ -768,6 +785,69 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         };
     }
 
+    private function observeOutboundRollback(Company $company, array $settings, array $users, string $id, int $version, string $bankCoa, bool $collision): void
+    {
+        config(['coa.piutang_usaha' => '12001', 'coa.hpp' => '610001']);
+        foreach (['12001', '11200'] as $code) {
+            DB::table('accounts')->insert(['account_code' => $code, 'account_name' => 'Synthetic',
+                'normal_balance' => 'DEBET', 'report_pos' => 'NERACA', 'coa_type' => 'Other']);
+        }
+        DB::table('accounts')->insert(['account_code' => '411001', 'account_name' => 'Synthetic sales',
+            'normal_balance' => 'KREDIT', 'report_pos' => 'LABA RUGI', 'coa_type' => 'Sales']);
+        $day = ErpBankBalance::businessDate();
+        $sales = \App\Models\Product::create(['sku' => 'F03-SALES', 'name' => 'Synthetic', 'stock_quantity' => 1, 'average_cost' => '20.00']);
+        $manual = \App\Models\Product::create(['sku' => 'F03-OUT', 'name' => 'Synthetic', 'stock_quantity' => 1, 'average_cost' => '100.01']);
+        $so = \App\Models\SalesOrder::create(['so_number' => 'SO-F03-OUT', 'transaction_date' => $day, 'contact_name' => 'Synthetic', 'status' => 'OPEN']);
+        $this->actingAs($users['fs'])->post(route('so.ship', $so->id), ['ship_date' => $day, 'sales_semantic' => 'LOCAL',
+            'items' => [['item_code' => $sales->sku, 'qty' => 1, 'price' => 50]], 'sub_total' => 50, 'grand_total' => 50])->assertSessionHas('success');
+        $number = \App\Models\SalesInvoice::where('sales_order_id', $so->id)->sole()->invoice_number;
+        $manualNumber = $collision ? $number : 'OUT-F03-SEPARATE';
+        $this->post(route('warehouse.outbound.store'), ['evidence_number' => $manualNumber, 'transaction_date' => $day,
+            'offset_account' => $bankCoa, 'items' => [['product_id' => $manual->id, 'qty' => 1]]])->assertSessionHas('success');
+        $this->actingAs($users['mk'])->postJson(route('payment-plan-v33.action'), ['id' => $id, 'version' => $version,
+            'mutationId' => 'outbound-maker', 'action' => 'mark_maker', 'input' => ['reference' => 'SYNTHETIC']])->assertOk();
+        $balance = fn () => app(ErpBankBalance::class)->project($company->id, ['id' => 'idr3', 'currency' => 'IDR'], $settings);
+        $snapshot = fn () => [
+            'balance' => $balance(),
+            'gl' => DB::table('journal_headers as h')->join('journal_details as d', 'd.journal_id', '=', 'h.journal_id')
+                ->whereIn('h.source_doc_no', [$number, $manualNumber])->orderBy('d.id')->get(['h.source_doc_no', 'h.transaction_type', 'd.*'])->all(),
+            'stock' => DB::table('products')->whereIn('id', [$sales->id, $manual->id])->orderBy('id')->get()->all(),
+            'ledger' => DB::table('inventory_ledgers')->whereIn('evidence_number', [$number, $manualNumber])->orderBy('id')->get()->all(),
+            'invoice' => DB::table('sales_invoices')->where('invoice_number', $number)->first(),
+            'so' => DB::table('sales_orders')->where('id', $so->id)->first(),
+            'hold' => DB::table('ppl_reservations')->where('request_id', $id)->first(),
+        ];
+        $before = $snapshot();
+        $this->assertSame('100.00', $before['balance']['available']);
+        $this->assertSame('400.00', $before['balance']['reserved']);
+        $this->assertCount(2, $before['ledger']);
+        $response = $this->actingAs($users['fs'])->post(route('so.rollback', $so->id))->assertRedirect();
+        config(['database.connections.writer_final' => config('database.connections.writer_test')]);
+        $writer = DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+        DB::setDefaultConnection('writer_final');
+        try {
+            $reader = DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+            $this->assertNotSame($writer, $reader);
+            $after = $snapshot();
+            file_put_contents(getenv('F03_RESIDUAL_EVIDENCE'), json_encode(compact('collision', 'before', 'after', 'reader', 'writer'), JSON_THROW_ON_ERROR).PHP_EOL, FILE_APPEND);
+            $this->assertSame('100.00', $after['balance']['available']);
+            $this->assertEquals($before['hold'], $after['hold']);
+            if ($collision) {
+                $response->assertSessionHas('error');
+                $this->assertEquals($before, $after);
+            } else {
+                $response->assertSessionHas('success');
+                $this->assertNull($after['invoice']);
+                $this->assertSame('APPROVED', $after['so']->status);
+                $this->assertEquals([1, 0], array_column($after['stock'], 'stock_quantity'));
+                $this->assertEquals(array_values(array_filter($before['gl'], fn ($line) => $line->source_doc_no === $manualNumber)), $after['gl']);
+                $this->assertEquals(array_values(array_filter($before['ledger'], fn ($line) => $line->evidence_number === $manualNumber)), $after['ledger']);
+            }
+        } finally {
+            DB::setDefaultConnection('writer_test');
+        }
+    }
+
     private function seedResidualWriter(string $action, User $actor, string $bankCoa, string $amount): array
     {
         $day = ErpBankBalance::businessDate();
@@ -888,7 +968,8 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $inbound = str_contains($this->name(), 'warehouse_inbound_race');
         $future = str_contains($this->name(), 'future_inbound');
         $futureWriter = str_contains($this->name(), 'future_writer');
-        $residual = str_contains($this->name(), 'residual_writer_committed');
+        $lifecycle = str_contains($this->name(), 'outbound_rollback');
+        $residual = $lifecycle || str_contains($this->name(), 'residual_writer_committed');
         if ($residual && (getenv('MGI_TEST_PORT') !== '33397' || !getenv('F03_RESIDUAL_EVIDENCE'))) {
             $this->markTestSkipped('Residual capacity tests require the dedicated disposable runner.');
         }
@@ -908,7 +989,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         config(['database.connections.writer_admin' => $config]);
         if ($residual) {
             $identity = DB::connection('writer_admin')->selectOne('SELECT @@datadir AS datadir, VERSION() AS version');
-            $this->assertSame('d:/erp-recovery/m1-f03-residual-guard-20261127-db/data',
+            $this->assertSame($lifecycle ? 'd:/erp-recovery/m1-f03-lifecycle-20261127-db/data' : 'd:/erp-recovery/m1-f03-residual-guard-20261127-db/data',
                 strtolower(rtrim(preg_replace('~[\\\\/]+~', '/', $identity->datadir), '/')));
             $this->assertStringContainsString('MariaDB', $identity->version);
         }
