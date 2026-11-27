@@ -15,6 +15,12 @@ class FastSyncJurnal extends Command
 
     public function handle()
     {
+        if (config('payment_plan_v33.bank_workflow', false)) {
+            $this->error('Bank workflow v33 aktif. Gunakan impor jurnal melalui menu Jurnal.');
+
+            return self::FAILURE;
+        }
+
         // 1. BEBASKAN LIMIT RAM UNTUK BIG DATA
         ini_set('memory_limit', '1024M'); 
         

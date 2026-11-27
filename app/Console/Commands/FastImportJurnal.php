@@ -15,6 +15,12 @@ class FastImportJurnal extends Command
 
     public function handle()
     {
+        if (config('payment_plan_v33.bank_workflow', false)) {
+            $this->error('Bank workflow v33 aktif. Gunakan impor jurnal melalui menu Jurnal.');
+
+            return self::FAILURE;
+        }
+
         $filePath = $this->argument('file');
         
         if (!file_exists($filePath)) {
