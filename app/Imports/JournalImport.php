@@ -76,7 +76,7 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
         $prefixes = [];
         $rawNoBuktiList = [];
 
-        foreach ($rows as $row) {
+        foreach ($rows as $index => $row) {
             $r = is_object($row) ? $row->toArray() : (is_array($row) ? $row : []);
             if (count($r) < 9) continue;
 
@@ -110,6 +110,7 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
             ];
 
             $parsedRows[] = [
+                'row'        => $this->startRow() + $index,
                 'tanggal'    => $tanggal,
                 'evidence'   => $evidenceNumber,
                 'no_bukti'   => $noBukti, // simpan No Bukti mentah untuk source_doc_no + cross-check
@@ -203,6 +204,10 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
 
         try {
             \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
+            $capacityRows = array_map(static fn (array $row) => $row + ['raw_debet' => $row['debet'], 'raw_kredit' => $row['kredit']], $parsedRows);
+            // Match the actual Excel rounding-leg direction.
+            $capacityRounding = array_map(static fn (array $entry) => $entry + ['d' => $entry['kredit'], 'k' => $entry['debet']], $needsRounding);
+            \App\Services\JournalCsvImportService::assertImportBankCreditDates($capacityRows, $capacityRounding, $accountMapping, $this->roundingAccountCode);
             // --- FASE AUTO-WIPE ---
             \App\Support\AccountingPeriodGuard::source(array_values(array_unique($datesInChunk)));
             $minDate = min($datesInChunk);
@@ -224,9 +229,6 @@ class JournalImport implements ToCollection, WithStartRow, WithCustomCsvSettings
             }
 
             if (config('payment_plan_v33.bank_workflow', false) && config('payment_plan_v33.erp_bank_balance', false)) {
-                $capacityRows = array_map(static fn (array $row) => $row + ['raw_debet' => $row['debet'], 'raw_kredit' => $row['kredit']], $parsedRows);
-                // Preserve the existing Excel rounding-leg direction in the preflight.
-                $capacityRounding = array_map(static fn (array $entry) => $entry + ['d' => $entry['kredit'], 'k' => $entry['debet']], $needsRounding);
                 \App\Services\JournalCsvImportService::assertReplacementBankCapacity(
                     $allHeadersToDelete->unique()->all(), $capacityRows, $capacityRounding, $accountMapping, $this->roundingAccountCode,
                 );

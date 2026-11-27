@@ -470,7 +470,7 @@ class AccountController extends Controller
         DB::beginTransaction();
         try {
             \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
-            $header = app(\App\Services\OpeningBalanceService::class)->headerForDate($tanggal);
+            $header = app(\App\Services\OpeningBalanceService::class)->headerForDate($tanggal, save: false);
             if (! config('platform.multicurrency_enabled')
                 && JournalDetail::query()->where('journal_id', $header->getKey())->whereNotNull('amount_txn')->exists()) {
                 fclose($handle);
@@ -480,7 +480,10 @@ class AccountController extends Controller
             $existingAccounts = Account::pluck('account_code')->toArray();
             $accountMapping = ['1133' => '11307'];
 
+            $rowNumber = 1;
+            $creditRows = [];
             while (($rawLine = fgets($handle)) !== false) {
+                ++$rowNumber;
                 if (trim($rawLine) === '') continue;
                 $delimiter = str_contains($rawLine, ';') ? ';' : ',';
                 $r = str_getcsv($rawLine, $delimiter, '"', '\\');
@@ -526,6 +529,7 @@ class AccountController extends Controller
                         $kredit = 0;
                     } else {
                         $detailsToInsert[] = ['journal_id' => $primaryKeyId, 'account_code' => $kodeAkun, 'helper_code' => null, 'position' => 'KREDIT', 'amount' => $kredit, 'created_at' => $now, 'updated_at' => $now];
+                        $creditRows[] = ['account_code' => $kodeAkun, 'position' => 'KREDIT', 'amount' => number_format($kredit, 2, '.', ''), 'source' => 'baris '.$rowNumber];
                         $totalKredit += $kredit;
                         $kredit = 0;
                     }
@@ -557,7 +561,12 @@ class AccountController extends Controller
                 );
             }
 
+            $errors = \App\Modules\PaymentPlan\Services\LegacyFinancialFence::futureBankCreditRows([
+                ['date' => $tanggal, 'lines' => $creditRows],
+            ]);
+            if ($errors) throw new \RuntimeException('future_protected_bank_credit: '.implode(', ', $errors));
             app(\App\Services\OpeningBalanceService::class)->assertReplacementCapacity($header, $detailsToInsert);
+            $header->save();
             JournalDetail::where('journal_id', $primaryKeyId)->delete();
             foreach (array_chunk($detailsToInsert, 200) as $chunk) {
                 JournalDetail::insert($chunk);

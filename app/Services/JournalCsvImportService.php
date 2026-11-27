@@ -47,7 +47,7 @@ class JournalCsvImportService
 
             if (in_array($extension, ['xlsx', 'xls'])) {
                 $import = fn () => Excel::import(new \App\Imports\JournalImport, $file);
-                if (config('payment_plan_v33.bank_workflow', false) && config('payment_plan_v33.erp_bank_balance', false)) {
+                if (config('payment_plan_v33.bank_workflow', false)) {
                     // Excel wraps collection() in a transaction; fence before its first consistent read.
                     DB::transaction(function () use ($import) {
                         LegacyFinancialFence::lock();
@@ -113,8 +113,10 @@ class JournalCsvImportService
             // First pass: Read all rows for validation
             $tempHandle = fopen($file->getRealPath(), 'r');
             fgets($tempHandle); // Skip header
+            $rowNumber = 1;
 
             while (($rawLine = fgets($tempHandle)) !== false) {
+                ++$rowNumber;
                 $rawLine = str_replace("\x00", "", $rawLine);
                 $rawLine = preg_replace('/\r\n|\r/', "\n", $rawLine);
                 
@@ -161,6 +163,7 @@ class JournalCsvImportService
                 }
 
                 $parsedRows[] = [
+                    'row'        => $rowNumber,
                     'tanggal'    => $tanggal,
                     'evidence'   => $evidenceNumber,
                     'noBukti'    => $noBukti,
@@ -245,6 +248,7 @@ class JournalCsvImportService
 
             try {
                 \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
+                self::assertImportBankCreditDates($parsedRows, $needsRounding, $this->accountMapping, $this->roundingAccountCode);
                 \App\Support\AccountingPeriodGuard::source(array_values(array_unique($datesInChunk)));
                 // FIX #1390: Delete existing headers in chunks
                 $sourceDocumentNumbersToImport = array_unique(array_column($parsedRows, 'evidence'));
@@ -431,6 +435,37 @@ class JournalCsvImportService
     }
 
     /** Both import engines preflight the same projected replacement before auto-wipe. */
+    public static function assertImportBankCreditDates(array $rows, array $rounding, array $accountMapping, string $roundingAccount): void
+    {
+        $journals = (static function () use ($rows, $rounding, $accountMapping, $roundingAccount) {
+            $first = [];
+            foreach ($rows as $row) {
+                $debit = NumberParser::parseDecimal($row['raw_debet']);
+                $credit = NumberParser::parseDecimal($row['raw_kredit']);
+                if ($debit == 0 && $credit == 0) continue;
+                $header = $first[$row['evidence']] ??= $row;
+                $code = str_replace('-', '', trim(explode(' - ', $row['raw_akun'])[0]));
+                $code = $accountMapping[$code] ?? $code;
+                $lines = [];
+                foreach (['DEBET' => $debit, 'KREDIT' => $credit] as $side => $amount) {
+                    $lines[] = ['account_code' => $code, 'position' => $side, 'amount' => number_format($amount, 2, '.', ''),
+                        'source' => 'baris '.$row['row']];
+                }
+                yield ['date' => $header['tanggal'], 'lines' => $lines];
+            }
+            foreach ($rounding as $entry) {
+                $header = $first[$entry['evidence']] ?? null;
+                if (!$header) continue;
+                yield ['date' => $header['tanggal'], 'lines' => [[
+                    'account_code' => $roundingAccount, 'position' => $entry['d'] > $entry['k'] ? 'KREDIT' : 'DEBET',
+                    'amount' => number_format($entry['diff'], 2, '.', ''), 'source' => 'baris '.$header['row'].' (pembulatan)',
+                ]]];
+            }
+        })();
+        $errors = LegacyFinancialFence::futureBankCreditRows($journals);
+        if ($errors) throw new \RuntimeException('future_protected_bank_credit: '.implode(', ', $errors));
+    }
+
     public static function assertReplacementBankCapacity(array $replacedIds, array $rows, array $rounding, array $accountMapping, string $roundingAccount): void
     {
         $today = now('Asia/Jakarta')->toDateString();

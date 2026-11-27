@@ -77,6 +77,35 @@ class ManualJournalBankCapacityTest extends \Tests\TestCase
         ], null, $actor);
     }
 
+    public function test_bank_credit_date_switches_at_jakarta_midnight_and_does_not_require_erp_projection(): void
+    {
+        $this->fixture();
+        $payload = ['transaction_date' => '2026-11-28', 'description' => 'Synthetic Jakarta boundary', 'details' => [
+            ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '100.00'],
+            ['account_code' => '111003', 'position' => 'KREDIT', 'amount' => '100.00'],
+        ]];
+        config(['payment_plan_v33.erp_bank_balance' => false]);
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-27 16:59:59 UTC'));
+        try {
+            $this->assertSame('2026-11-27', ErpBankBalance::businessDate());
+            $this->post(route('jurnal.store'), $payload)->assertSessionHas('error',
+                fn ($error) => str_contains($error, 'future_protected_bank_credit'));
+            $this->assertDatabaseCount('journal_headers', 1);
+
+            $nonBank = $payload;
+            $nonBank['details'][1]['account_code'] = '310001';
+            $this->post(route('jurnal.store'), $nonBank)->assertSessionHas('success');
+
+            config(['payment_plan_v33.erp_bank_balance' => true]);
+            $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-27 17:00:00 UTC'));
+            $this->assertSame('2026-11-28', ErpBankBalance::businessDate());
+            $this->post(route('jurnal.store'), $payload)->assertSessionHas('success');
+            $this->assertDatabaseHas('journal_details', ['account_code' => '111003', 'position' => 'KREDIT', 'amount' => '100.00']);
+        } finally {
+            $this->travelBack();
+        }
+    }
+
     public function test_manual_journal_cannot_spend_reserved_idr3_and_affordable_write_preserves_hold(): void
     {
         $f = $this->fixture();

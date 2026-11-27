@@ -41,7 +41,7 @@ class OpeningBalanceService
     }
 
     /** Shared journals currently support a single operational company only. */
-    public function headerForDate(string $date): JournalHeader
+    public function headerForDate(string $date, bool $save = true): JournalHeader
     {
         $date = Carbon::parse($date)->toDateString();
         $headers = $this->query()->whereDate('transaction_date', $date)->lockForUpdate()->get();
@@ -61,7 +61,8 @@ class OpeningBalanceService
             'journal_type' => 'OPENING',
             'transaction_type' => 'OPENING BALANCE',
             'notes' => 'SETUP SALDO AWAL SISTEM (OPENING BALANCE)',
-        ])->save();
+        ]);
+        if ($save) $header->save();
 
         return $header;
     }

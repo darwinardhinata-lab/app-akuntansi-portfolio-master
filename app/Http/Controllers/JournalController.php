@@ -121,6 +121,7 @@ class JournalController extends Controller
         try {
             DB::beginTransaction();
             \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCreditDate($request->transaction_date, $request->details);
             \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCapacity($request->details);
             $journal = \App\Support\PostingService::post([
                 'transaction_date' => $request->transaction_date,
@@ -235,6 +236,7 @@ class JournalController extends Controller
             \App\Support\SourceJournalProtection::check($journal);
 
             $date = $request->transaction_date;
+            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCreditDate($date, $request->details);
             if (\App\Modules\PaymentPlan\Services\LegacyFinancialFence::bankCapacityEnabled()) {
                 $date = \Illuminate\Support\Carbon::parse($date)->toDateTimeString();
                 $today = now('Asia/Jakarta')->toDateString();
@@ -314,7 +316,6 @@ class JournalController extends Controller
         try {
             DB::transaction(function () use ($data) {
                 \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
-                \App\Support\AccountingPeriodGuard::source([$data['transaction_date']]);
                 $service = app(\App\Modules\Currency\Services\FxPostingService::class);
                 $date = \Carbon\Carbon::parse($data['transaction_date']);
                 $metadata = $service->resolvePostingRate($data['currency_code'], $date,
@@ -326,6 +327,8 @@ class JournalController extends Controller
                 unset($line);
                 $prepared = $service::prepareManualJournal($lines, $data['currency_code'], $metadata['rate'], $date);
                 $lines = $prepared['lines'];
+                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCreditDate($data['transaction_date'], $lines);
+                \App\Support\AccountingPeriodGuard::source([$data['transaction_date']]);
                 if ($data['transaction_date'] <= now('Asia/Jakarta')->toDateString()) {
                     \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCapacity($lines);
                 }

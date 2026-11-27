@@ -3,6 +3,8 @@
 Scope: source at `5da595ee9b684acaf380314f372742d227f9bdbe`; no operational DB
 or scheduler inspection. Pilot is single MGI with active `idr3` bank mapping.
 
+27 November follow-up: see the [GL and business-date matrix](r1-f03-writer-dates-20261127.md).
+
 | Entry point | Control and evidence | Disposition |
 | --- | --- | --- |
 | `payment.post_journal` | Posting authorization, shared fence before capacity/write; committed-hold and both race orders in `r1-legacy-payment-post-f03-race-20261126.md`. | PR #31 merged at `d9b3537eec4b964d025f01f9665a26cf88aea9f7`; not deployed. |
