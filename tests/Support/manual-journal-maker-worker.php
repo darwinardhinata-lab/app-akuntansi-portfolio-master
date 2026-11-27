@@ -28,6 +28,8 @@ final class ManualJournalMakerWorker extends \Tests\TestCase
                 'maker' => $this->postJson(route('payment-plan-v33.action'), $f['payload']),
                 'legacy' => $this->post(route('payment.post_journal'), $f['payload']),
                 'cash_bill' => $this->post(route('purchase-bills.store'), $f['payload']),
+                'inbound' => $this->from(route('warehouse.inbound.create', ['tab' => 'transfer_masuk']))
+                    ->post(route('warehouse.inbound.store'), $f['payload']),
                 'manual' => $this->post(route('jurnal.store'), $f['payload']),
                 'fx' => $this->post(route('jurnal.store'), $f['payload']),
                 'delete' => $this->delete(route('jurnal.destroy', [$f['payload']['journal_id']])),
