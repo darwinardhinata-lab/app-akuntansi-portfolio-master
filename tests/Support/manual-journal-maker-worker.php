@@ -11,6 +11,7 @@ final class ManualJournalMakerWorker extends \Tests\TestCase
         try {
             if (!preg_match('/\Aaudit_manual_writer_[a-f0-9]{16}\z/', $f['connection']['database'])) throw new RuntimeException('Disposable schema required');
             config($f['flags'] + ['database.connections.race_worker' => $f['connection'], 'database.default' => 'race_worker']);
+            if (!empty($f['clock'])) $this->travelTo(\Illuminate\Support\Carbon::parse($f['clock']));
             \Illuminate\Support\Facades\DB::setDefaultConnection('race_worker');
             $db = \Illuminate\Support\Facades\DB::connection();
             $this->actingAs(\App\Models\User::findOrFail($f['actor']));
@@ -28,6 +29,9 @@ final class ManualJournalMakerWorker extends \Tests\TestCase
                 'maker' => $this->postJson(route('payment-plan-v33.action'), $f['payload']),
                 'legacy' => $this->post(route('payment.post_journal'), $f['payload']),
                 'cash_bill' => $this->post(route('purchase-bills.store'), $f['payload']),
+                'bill-delete' => $this->delete(route('purchase-bills.destroy', $f['payload']['id'])),
+                'ar-reverse' => $this->postJson(route('invoice-payment-allocations.reverse', $f['payload']['id']),
+                    ['reason' => 'Synthetic reversal for disposable audit']),
                 'inbound' => $this->from(route('warehouse.inbound.create', ['tab' => 'transfer_masuk']))
                     ->post(route('warehouse.inbound.store'), $f['payload']),
                 'manual' => $this->post(route('jurnal.store'), $f['payload']),
@@ -44,7 +48,7 @@ final class ManualJournalMakerWorker extends \Tests\TestCase
                 ]),
                 'csv', 'xlsx' => $this->importReplacement($f['action']),
             };
-            $result = ['status' => $response->status(), 'body' => $f['action'] === 'maker' ? $response->json() : null,
+            $result = ['status' => $response->status(), 'body' => in_array($f['action'], ['maker', 'ar-reverse'], true) ? $response->json() : null,
                 'error' => session('error') ?? session('errors')?->first('currency_code'), 'success' => session('success')];
             echo 'RESULT:'.json_encode($result, JSON_THROW_ON_ERROR).PHP_EOL;
             flush();

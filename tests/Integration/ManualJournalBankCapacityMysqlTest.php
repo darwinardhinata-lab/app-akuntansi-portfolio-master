@@ -16,6 +16,26 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
 
     private ?string $isolatedDatabase = null;
 
+    #[\PHPUnit\Framework\Attributes\DataProvider('residualWriterCases')]
+    public function test_residual_writer_committed(string $action, string $first, string $amount): void
+    {
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-27 12:00:00', 'Asia/Jakarta'));
+        try {
+            $this->overlap($first, $action, true, $amount);
+        } finally {
+            $this->travelBack();
+        }
+    }
+
+    public static function residualWriterCases(): iterable
+    {
+        foreach (['bill-delete', 'ar-reverse'] as $action) {
+            yield "$action maker first" => [$action, 'maker', '100.01'];
+            yield "$action writer first" => [$action, $action, '100.01'];
+            yield "$action exact capacity" => [$action, 'maker', '100.00'];
+        }
+    }
+
     #[\PHPUnit\Framework\Attributes\DataProvider('futureWriterCases')]
     public function test_future_writer(string $action, bool $makerFirst): void
     {
@@ -169,7 +189,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         }
     }
 
-    private function overlap(string $first, string $journalAction = 'manual', bool $future = false): void
+    private function overlap(string $first, string $journalAction = 'manual', bool $future = false, ?string $residualAmount = null): void
     {
         $legacy = $journalAction === 'legacy';
         $cashBill = $journalAction === 'cash_bill';
@@ -193,10 +213,10 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             $flags['platform.payment_post_user_ids'] = [$users['fs']->id];
             config($flags);
         }
-        $bankCoa = $legacy || $cashBill ? '111101' : '111003';
+        $bankCoa = $legacy || $cashBill || $journalAction === 'ar-reverse' ? '111101' : '111003';
         foreach ([$bankCoa => 'DEBET', '310001' => 'KREDIT', '610001' => 'DEBET', '211001' => 'KREDIT'] as $code => $side) {
             DB::table('accounts')->insert(['account_code' => $code, 'account_name' => 'Synthetic', 'normal_balance' => $side,
-                'coa_type' => $legacy && (string) $code === $bankCoa ? 'Cash & Bank' : 'Other', 'report_pos' => 'NERACA']);
+                'coa_type' => ($legacy || $journalAction === 'ar-reverse') && (string) $code === $bankCoa ? 'Cash & Bank' : 'Other', 'report_pos' => 'NERACA']);
         }
         if ($journalAction === 'fx') {
             $this->seedFx($users['fs']->id);
@@ -210,6 +230,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             'number' => 'TEST', 'currency' => 'IDR', 'payment' => true, 'opening' => '500.00', 'asOf' => '2026-01-01']], 'receipts' => []];
         DB::table('ppl_financial_contexts')->insert(['company_id' => $company->id, 'settings' => json_encode($settings)]);
         $opening = $future || in_array($journalAction, ['manual', 'fx', 'legacy', 'cash_bill', 'inbound'], true) ? '500.00' : '300.00';
+        if ($residualAmount !== null) $opening = bcsub('500.00', $residualAmount, 2);
         \App\Support\PostingService::post(['transaction_date' => '2026-01-01'], [
             ['account_code' => $bankCoa, 'position' => 'DEBET', 'amount' => $opening], ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => $opening]]);
         $openingAction = !$future && str_starts_with($journalAction, 'opening');
@@ -304,7 +325,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             $this->assertSame(1, preg_match('/name="evidence_number"[^>]+value="(IN-[^"]+)"/', $form->getContent(), $match));
             $inboundRef = $match[1];
         }
-        if ($future) {
+        if ($future && $residualAmount === null) {
             if ($inbound) {
                 $this->observeFutureInbound($first, $company, $settings, $users, $id, $version, $product, $inboundRef, $bankCoa);
             } else {
@@ -312,6 +333,12 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             }
 
             return;
+        }
+        if ($residualAmount !== null) {
+            $residual = $this->seedResidualWriter($journalAction, $users['fs'], $bankCoa, $residualAmount);
+            $flags += ['platform.payment_reverse_user_ids' => [$users['fs']->id], 'coa.piutang_usaha' => '12001'];
+            $sourceBefore = $this->residualSource($residual);
+            $this->assertSame('500.00', app(ErpBankBalance::class)->project($company->id, ['id' => 'idr3', 'currency' => 'IDR'], $settings)['available']);
         }
         $release = tempnam(sys_get_temp_dir(), 'manual_maker_');
         unlink($release);
@@ -334,6 +361,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
                     ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '200.00'],
                 ]];
             if ($action === 'bulk') $payload = ['ids' => $bulkIds];
+            if ($residualAmount !== null && $action !== 'maker') $payload = $residual;
             if ($action === 'opening') $payload = ['transaction_date' => $openingDate, 'balances' => ['610001' => '200.00', '310001' => '200.00']];
             if ($action === 'opening-csv') $payload = ['transaction_date' => $openingDate];
             if ($action === 'opening-fx') $payload = ['transaction_date' => $openingDate, 'balances' => ['111004' => '4.00', '310001' => '200.00']];
@@ -347,7 +375,8 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             }
             $workers[] = new Process([PHP_BINARY, base_path('tests/Support/manual-journal-maker-worker.php')], base_path(), ['MANUAL_MAKER_FIXTURE' => json_encode([
                 'connection' => config('database.connections.writer_test'), 'flags' => $flags, 'action' => $action, 'actor' => $users[$action === 'maker' ? 'mk' : 'fs']->id,
-                'payload' => $payload, 'hold' => $index === 0, 'release' => $release, 'proof_root' => $proofRoot], JSON_THROW_ON_ERROR)], null, 110);
+                'payload' => $payload, 'hold' => $index === 0, 'release' => $release, 'proof_root' => $proofRoot,
+                'clock' => $residualAmount !== null ? now()->toIso8601String() : null], JSON_THROW_ON_ERROR)], null, 110);
         }
         try {
             $workers[0]->start();
@@ -386,6 +415,11 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             foreach ($workers as $worker) {
                 preg_match('/RESULT:(.*)/', $worker->getOutput(), $m);
                 $results[] = json_decode($m[1], true, 512, JSON_THROW_ON_ERROR);
+            }
+            if ($residualAmount !== null) {
+                $this->assertResidualOutcome($first, $journalAction, $residualAmount, $residual, $sourceBefore,
+                    $results, $wait, [(int) $holder[1], (int) $waiter[1], $observerId], $company, $settings, $id, $makerBefore, $bankCoa);
+                return;
             }
             if ($first === 'maker') {
                 $this->assertSame(200, $results[0]['status']);
@@ -734,6 +768,110 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         };
     }
 
+    private function seedResidualWriter(string $action, User $actor, string $bankCoa, string $amount): array
+    {
+        $day = ErpBankBalance::businessDate();
+        $this->actingAs($actor);
+        switch ($action) {
+            case 'bill-delete':
+                $this->post(route('purchase-bills.store'), ['bill_date' => $day, 'vendor_name' => 'Synthetic debit bill',
+                    'credit_account' => '211001', 'details' => [['account_code' => $bankCoa, 'amount' => $amount]]])
+                    ->assertSessionHas('success');
+                $bill = DB::table('purchase_bills')->where('vendor_name', 'Synthetic debit bill')->sole();
+                return ['id' => $bill->id, 'journal_id' => $bill->journal_id, 'kind' => $action];
+            case 'ar-reverse':
+                config(['platform.payment_reverse_user_ids' => [$actor->id], 'platform.payment_post_user_ids' => [$actor->id],
+                    'coa.piutang_usaha' => '12001']);
+                DB::table('accounts')->insert(['account_code' => '12001', 'account_name' => 'Synthetic AR',
+                    'normal_balance' => 'DEBET', 'coa_type' => 'Other', 'report_pos' => 'NERACA']);
+                $source = \App\Models\JournalHeader::create(['transaction_date' => $day, 'transaction_type' => 'Sales Invoice']);
+                $source->details()->create(['account_code' => '12001', 'position' => 'DEBET', 'amount' => $amount]);
+                $invoice = \App\Models\SalesInvoice::create(['invoice_number' => 'SYNTH-F03-AR', 'transaction_date' => $day,
+                    'contact_name' => 'Synthetic', 'grand_total' => $amount, 'payment_status' => 'UNPAID', 'journal_id' => $source->getKey()]);
+                $receipt = \App\Models\JournalHeader::create(['transaction_date' => $day, 'journal_type' => 'MANUAL', 'source_doc_no' => 'SYNTH-F03-AR']);
+                $receipt->details()->createMany([
+                    ['account_code' => $bankCoa, 'position' => 'DEBET', 'amount' => $amount],
+                    ['account_code' => '12001', 'position' => 'KREDIT', 'amount' => $amount],
+                ]);
+                $this->postJson(route('invoice-payment-allocations.store'), ['sales_invoice_id' => $invoice->id,
+                    'journal_id' => $receipt->getKey()])->assertOk();
+                $allocation = DB::table('invoice_payment_allocations')->sole();
+                return ['id' => $allocation->id, 'journal_id' => $receipt->getKey(), 'invoice_id' => $invoice->id,
+                    'invoice_journal_id' => $source->getKey(), 'kind' => $action];
+        }
+        throw new \LogicException('Unknown residual writer');
+    }
+
+    private function residualSource(array $target): array
+    {
+        $tables = $target['kind'] === 'bill-delete'
+            ? ['purchase_bills' => ['id', $target['id']], 'purchase_bill_details' => ['purchase_bill_id', $target['id']]]
+            : ['invoice_payment_allocations' => ['id', $target['id']], 'sales_invoices' => ['id', $target['invoice_id']]];
+        $state = [];
+        foreach ($tables as $table => [$column, $id]) $state[$table] = DB::table($table)->where($column, $id)->orderBy('id')->get()->all();
+        $ids = array_filter([$target['journal_id'], $target['invoice_journal_id'] ?? null]);
+        $state['headers'] = DB::table('journal_headers')->whereIn('journal_id', $ids)->orderBy('journal_id')->get()->all();
+        $state['lines'] = DB::table('journal_details')->whereIn('journal_id', $ids)->orderBy('id')->get()->all();
+        $state['reversals'] = DB::table('journal_headers')->where('source_doc_no', 'SYNTH-F03-AR')->where('journal_type', 'REVERSAL')->get()->all();
+        return $state;
+    }
+
+    private function assertResidualOutcome(string $first, string $action, string $amount, array $target, array $sourceBefore,
+        array $results, object $wait, array $threads, Company $company, array $settings, string $id, object $makerBefore, string $bankCoa): void
+    {
+        $makerFirst = $first === 'maker';
+        $rejected = $makerFirst && $amount === '100.01';
+        [$maker, $writer] = $makerFirst ? $results : array_reverse($results);
+        config(['database.connections.writer_final' => config('database.connections.writer_test')]);
+        DB::purge('writer_final');
+        DB::setDefaultConnection('writer_final');
+        $reader = (int) DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+        $this->assertNotContains($reader, [...$threads, (int) DB::connection('writer_test')->selectOne('SELECT CONNECTION_ID() AS id')->id]);
+        $balance = app(ErpBankBalance::class)->project($company->id, ['id' => 'idr3', 'currency' => 'IDR'], $settings);
+        $hold = DB::table('ppl_reservations')->where('request_id', $id)->get(['amount', 'status'])->all();
+        $ap = DB::table('ppl_ap_allocations')->where('request_id', $id)->get(['amount', 'status'])->all();
+        $request = DB::table('ppl_requests')->where('id', $id)->first();
+        $source = $this->residualSource($target);
+        if ($path = getenv('F03_RESIDUAL_EVIDENCE')) {
+            file_put_contents($path, json_encode(compact('first', 'action', 'amount', 'wait', 'threads', 'reader', 'results',
+                'balance', 'hold', 'ap', 'request', 'sourceBefore', 'source'), JSON_THROW_ON_ERROR).PHP_EOL, FILE_APPEND | LOCK_EX);
+        }
+        $this->assertSame($makerFirst ? 200 : 422, $maker['status']);
+        if (!$makerFirst) {
+            $this->assertSame('funds_insufficient', $maker['body']['error']);
+            $this->assertEquals($makerBefore, $request);
+        } else {
+            $this->assertSame('bank_prepared', $request->status);
+            $this->assertSame($makerBefore->version + 1, $request->version);
+        }
+        $expectedHold = $makerFirst ? [['400.00', 'active']] : [];
+        foreach ([$hold, $ap] as $rows) $this->assertSame($expectedHold, array_map(fn ($row) => array_values((array) $row), $rows));
+        if ($rejected) {
+            if ($action === 'bill-delete') $this->assertStringContainsString('funds_insufficient', $writer['error'] ?? '');
+            else {
+                $this->assertSame(422, $writer['status']);
+                $this->assertSame('funds_insufficient', $writer['body']['message']);
+            }
+            $this->assertEquals($sourceBefore, $source);
+        } elseif ($action === 'bill-delete') {
+            $this->assertNotEmpty($writer['success']);
+            foreach ($source as $rows) $this->assertSame([], $rows);
+        } else {
+            $this->assertSame(200, $writer['status']);
+            $this->assertEquals($sourceBefore['headers'], $source['headers']);
+            $this->assertEquals($sourceBefore['lines'], $source['lines']);
+            $this->assertSame('UNPAID', $source['sales_invoices'][0]->payment_status);
+            $this->assertCount(1, $source['reversals']);
+            $reversal = $source['invoice_payment_allocations'][0]->reversal_journal_id;
+            $this->assertSame($source['reversals'][0]->journal_id, $reversal);
+            $this->assertDatabaseHas('journal_details', ['journal_id' => $reversal, 'account_code' => $bankCoa, 'position' => 'KREDIT', 'amount' => $amount]);
+            $this->assertDatabaseHas('journal_details', ['journal_id' => $reversal, 'account_code' => '12001', 'position' => 'DEBET', 'amount' => $amount]);
+        }
+        $this->assertSame($rejected ? '500.00' : bcsub('500.00', $amount, 2), $balance['actual']);
+        $this->assertSame($makerFirst ? '400.00' : '0.00', $balance['reserved']);
+        $this->assertSame($rejected ? '100.00' : ($makerFirst ? '0.00' : '399.99'), $balance['available']);
+    }
+
     private function waitForMarker(Process $worker, string $marker): void
     {
         $deadline = microtime(true) + 20;
@@ -750,6 +888,10 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $inbound = str_contains($this->name(), 'warehouse_inbound_race');
         $future = str_contains($this->name(), 'future_inbound');
         $futureWriter = str_contains($this->name(), 'future_writer');
+        $residual = str_contains($this->name(), 'residual_writer_committed');
+        if ($residual && (getenv('MGI_TEST_PORT') !== '33397' || !getenv('F03_RESIDUAL_EVIDENCE'))) {
+            $this->markTestSkipped('Residual capacity tests require the dedicated disposable runner.');
+        }
         if ($futureWriter && getenv('MGI_TEST_PORT') !== '33396') {
             $this->markTestSkipped('Writer-date probe requires its dedicated disposable port.');
         }
@@ -764,6 +906,12 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             'username' => 'root', 'password' => '', 'database' => 'information_schema', 'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci', 'prefix' => '', 'strict' => true];
         config(['database.connections.writer_admin' => $config]);
+        if ($residual) {
+            $identity = DB::connection('writer_admin')->selectOne('SELECT @@datadir AS datadir, VERSION() AS version');
+            $this->assertSame('d:/erp-recovery/m1-f03-residual-guard-20261127-db/data',
+                strtolower(rtrim(preg_replace('~[\\\\/]+~', '/', $identity->datadir), '/')));
+            $this->assertStringContainsString('MariaDB', $identity->version);
+        }
         if ($future || $futureWriter) {
             $identity = DB::connection('writer_admin')->selectOne('SELECT @@datadir AS datadir, VERSION() AS version');
             $this->assertSame($futureWriter ? 'd:/erp-recovery/m1-f03-writer-date-20261127-db/data' : 'd:/erp-recovery/m1-f03-future-20261127-db/data',
