@@ -191,7 +191,8 @@ class PurchaseBillController extends Controller
     {
         DB::beginTransaction();
         try {
-            \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
+            LegacyFinancialFence::lock();
+            if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
             $bill = PurchaseBill::lockForUpdate()->findOrFail($id);
             if (\Illuminate\Support\Facades\Schema::hasTable('ppl_ap_allocations')
                 && DB::table('ppl_ap_allocations')->where('purchase_bill_id', $bill->id)->exists()) {
@@ -199,15 +200,23 @@ class PurchaseBillController extends Controller
             }
             \App\Support\GrnProtection::bill((int) $bill->id);
 
+            $journals = $bill->journal_id
+                ? JournalHeader::whereKey($bill->journal_id)
+                : JournalHeader::where('source_doc_no', $bill->bill_number);
+            $journals = $journals->orderBy('journal_id')->lockForUpdate()->get();
+            $journalIds = $journals->modelKeys();
+            if (LegacyFinancialFence::bankCapacityEnabled()) {
+                $today = \App\Modules\PaymentPlan\Services\ErpBankBalance::businessDate();
+                $removed = $journals->flatMap(fn (JournalHeader $journal) => LegacyFinancialFence::removedBankLines($journal, $today));
+                LegacyFinancialFence::assertBankCapacity($removed->all());
+            }
+
             // 1. Reverse stock movements (BIL → IN) jika ada inventory ledger
             $inventoryService = new InventorySyncService();
             $inventoryService->reverseStockMovements($bill->bill_number, 'BIL');
 
             // 2. Hapus Jurnal
-            $journalIds = $bill->journal_id
-                ? collect([$bill->journal_id])
-                : JournalHeader::where('source_doc_no', $bill->bill_number)->pluck('journal_id');
-            if ($journalIds->isNotEmpty()) {
+            if ($journalIds !== []) {
                 JournalDetail::whereIn('journal_id', $journalIds)->delete();
                 JournalHeader::whereIn('journal_id', $journalIds)->delete();
             }

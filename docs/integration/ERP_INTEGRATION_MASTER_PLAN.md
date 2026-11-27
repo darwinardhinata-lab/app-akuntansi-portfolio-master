@@ -309,7 +309,7 @@ Jangan membuat commit hanya untuk mengisi field source_ref. Working tree yang be
 |---|---|---|---|---|
 | F01 | Sumber saldo ERP dan cutoff | IMPLEMENTED | B01 | GL+cutoff/pending-debit dedup teruji SQLite; VERIFIED memerlukan rekonsiliasi subledger/statement staging, cutoff boundary dan setiap source tepat sekali |
 | F02 | Bank jasa IDR end-to-end | IMPLEMENTED | Domain dan WorkflowStore existing | Request sampai ACK journal; mapping hilang tetap paid; retry tidak menggandakan; evidence HTTP tersedia |
-| F03 | Reservation dan locks shared invariant | IN_PROGRESS | F01-F02 | Funds/AP locks tersedia untuk alur baru; satukan writer luar fence; dua maker/residual race aman MySQL, hold tidak release, lock order konsisten |
+| F03 | Reservation dan locks shared invariant | IN_PROGRESS | F01-F02 | PR #36 merged; [kandidat bill-delete dan reversal AR](r1-f03-residual-committed-20261127.md) teruji di MariaDB disposable, belum merge. Penggantian debit saldo awal menunggu keputusan Accounting; audit outbound correction/cancellation dan reachability reversal purchase return tetap terbuka. |
 | F04 | AP invoice by ID dan partial payment | IN_PROGRESS | F01-F03, purchase/AP existing | Partial `purchaseBillId` HTTP teruji; lengkapi residual manual/legacy/retur/credit note, source trace dan cross-account race MySQL; tidak expense/VAT ulang |
 | F05 | DP, progress, final, retention | TODO | F04 | Advance lifecycle/alokasi tertaut; residual kontrak benar; pembatalan/return dan reversal terkontrol |
 | F06 | Pajak, fee dan multi-account allocation | TODO | F04-F05, mapping sah | Gross/net/debit konsisten; allocation balance; payable withholding dan fee tertelusur; fixture bukan tarif produksi |

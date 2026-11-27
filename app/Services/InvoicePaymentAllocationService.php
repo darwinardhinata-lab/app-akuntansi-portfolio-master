@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\JournalHeader;
 use App\Models\SalesInvoice;
+use App\Modules\PaymentPlan\Services\LegacyFinancialFence;
 use App\Support\JournalBalanceValidator;
 use App\Support\PaymentFundingAccount;
 use Illuminate\Support\Facades\DB;
@@ -57,6 +58,7 @@ class InvoicePaymentAllocationService
             throw new \RuntimeException(__('erp.audit_invoice_allocation_guard'));
         }
         DB::transaction(function () use ($allocationId, $userId, $reason) {
+            LegacyFinancialFence::lock();
             if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
             $reference = DB::table('invoice_payment_allocations')->where('id', $allocationId)->first();
             if (!$reference) {
@@ -85,11 +87,6 @@ class InvoicePaymentAllocationService
                 || $paid + $refund > round((float) $invoice->grand_total, 2)) {
                 throw new \RuntimeException(__('erp.audit_invoice_allocation_guard'));
             }
-            $reversal = JournalHeader::create([
-                'transaction_date' => now()->toDateString(), 'source_doc_no' => $invoice->invoice_number,
-                'transaction_type' => 'AR Receipt Reversal', 'journal_type' => 'REVERSAL',
-                'notes' => 'Reverse '.$journal->getKey().': '.trim($reason),
-            ]);
             $reversedLines = $lines->map(fn ($line) => [
                 'account_code' => $line->account_code, 'helper_code' => $line->helper_code,
                 'position' => $line->position === 'DEBET' ? 'KREDIT' : 'DEBET', 'amount' => $line->amount,
@@ -97,6 +94,12 @@ class InvoicePaymentAllocationService
             if (!JournalBalanceValidator::isBalanced($reversedLines)) {
                 throw new \RuntimeException(__('erp.audit_invoice_allocation_guard'));
             }
+            LegacyFinancialFence::assertBankCapacity($reversedLines);
+            $reversal = JournalHeader::create([
+                'transaction_date' => now()->toDateString(), 'source_doc_no' => $invoice->invoice_number,
+                'transaction_type' => 'AR Receipt Reversal', 'journal_type' => 'REVERSAL',
+                'notes' => 'Reverse '.$journal->getKey().': '.trim($reason),
+            ]);
             $reversal->details()->createMany($reversedLines);
             DB::table('invoice_payment_allocations')->where('id', $allocationId)->update([
                 'reversal_journal_id' => $reversal->getKey(), 'reversed_by' => $userId,
