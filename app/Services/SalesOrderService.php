@@ -6,9 +6,10 @@ use App\Models\SalesOrder;
 use App\Models\SalesInvoice;
 use App\Models\SalesInvoiceDetail;
 use App\Models\JournalHeader;
-use App\Models\JournalDetail;
 use App\Models\Product;
 use App\Models\InventoryLedger;
+use App\Modules\PaymentPlan\Services\ErpBankBalance;
+use App\Modules\PaymentPlan\Services\LegacyFinancialFence;
 use Illuminate\Support\Facades\DB;
 use App\Support\PostingService;
 use Exception;
@@ -96,7 +97,6 @@ class SalesOrderService
             ]);
 
             $totalCogsValue = 0;
-            $invoiceDetails = [];
             $inventoryLedgers = [];
             // OPTIMASI N+1: Kumpulkan perubahan stok, update batch di luar loop
             $productStockUpdates = []; // [product_id => new_stock]
@@ -115,7 +115,7 @@ class SalesOrderService
                 $lineCogsValue = $qtyKeluar * $currentMac;
                 $totalCogsValue += $lineCogsValue;
 
-                $invoiceDetails[] = [
+                $detail = new SalesInvoiceDetail([
                     'sales_invoice_id' => $invoice->id,
                     'product_id'       => $productId,
                     'item_code'        => $item['item_code'],
@@ -125,9 +125,10 @@ class SalesOrderService
                     'disc_amount'      => 0,
                     'amount'           => $qtyKeluar * $item['price'],
                     'is_substitution'  => $item['is_substitution'] ?? false,
-                    'created_at'       => now(),
-                    'updated_at'       => now(),
-                ];
+                ]);
+                // Server-only marker: a historical null product is not evidence of a non-stock line.
+                $detail->shipment_without_stock = !$product;
+                $detail->save();
 
                 if ($product) {
                     // H1 FIX: Validasi stok cukup sebelum mengurangi
@@ -141,6 +142,7 @@ class SalesOrderService
                     $productStockUpdates[$product->id] = $newStock;
 
                     $inventoryLedgers[] = [
+                        'shipment_invoice_detail_id' => $detail->id,
                         'transaction_date'    => $shipDate,
                         'evidence_number'     => $invoiceNumber,
                         'product_id'          => $product->id,
@@ -156,10 +158,6 @@ class SalesOrderService
                         'updated_at'          => now(),
                     ];
                 }
-            }
-
-            if (!empty($invoiceDetails)) {
-                SalesInvoiceDetail::insert($invoiceDetails);
             }
 
             // OPTIMASI N+1: Batch update stok — sebelumnya $product->save() per item
@@ -252,6 +250,7 @@ class SalesOrderService
     {
         DB::beginTransaction();
         try {
+            LegacyFinancialFence::lock();
             if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
             // B13 FIX: Lock baris SO agar void tidak bentrok dengan ship paralel
             $so = SalesOrder::lockForUpdate()->findOrFail($soId);
@@ -260,37 +259,42 @@ class SalesOrderService
                 throw new Exception("Gagal: SO belum berstatus SHIPPED.");
             }
 
-            $invoice = SalesInvoice::where('sales_order_id', $so->id)->first();
-
-            if ($invoice) {
-                $evidenceNumber = $invoice->invoice_number;
-
-                // Batch delete jurnal
-                $journalIds = JournalHeader::where('source_doc_no', $evidenceNumber)->pluck('journal_id');
-                if ($journalIds->isNotEmpty()) {
-                    \App\Support\ProtectedJournalQuery::table('journal_details')->whereIn('journal_id', $journalIds)->delete();
-                    \App\Support\ProtectedJournalQuery::table('journal_headers')->whereIn('journal_id', $journalIds)->delete();
-                }
-
-                // OPTIMASI N+1: Agregasi delta stok dalam 1 query, bukan loop delete + save
-                $stockChanges = DB::table('inventory_ledgers')
-                    ->where('evidence_number', $evidenceNumber)
-                    ->where('type', 'OUT')
-                    ->groupBy('product_id')
-                    ->select('product_id', DB::raw('SUM(qty) as total_qty'))
-                    ->pluck('total_qty', 'product_id');
-
-                foreach ($stockChanges as $productId => $qty) {
-                    Product::where('id', $productId)->increment('stock_quantity', (int)$qty);
-                }
-
-                // Batch delete kartu stok
-                InventoryLedger::where('evidence_number', $evidenceNumber)->delete();
-
-                $invoice->delete();
+            $invoices = SalesInvoice::where('sales_order_id', $so->id)->orderBy('id')->lockForUpdate()->get();
+            $invoice = $invoices->first();
+            if ($invoices->count() !== 1 || (string) $invoice->id !== $so->invoice_id || $invoice->cancelled_at) {
+                throw new \RuntimeException(__('erp.audit_shipment_stock_source_invalid'));
             }
 
+            $journals = JournalHeader::where('source_doc_no', $invoice->invoice_number)->orderBy('journal_id')->lockForUpdate()->get();
+            $movements = $this->ownedShipmentMovements($invoice);
+            if ($journals->count() !== ($invoice->journal_id ? 1 : 0)
+                || $journals->contains(fn ($journal) => $journal->getKey() !== $invoice->journal_id
+                    || $journal->transaction_type !== 'Faktur')) {
+                throw new \RuntimeException(__('erp.audit_invoice_journal_invalid'));
+            }
+            if (LegacyFinancialFence::bankCapacityEnabled()) {
+                $today = ErpBankBalance::businessDate();
+                LegacyFinancialFence::assertBankCapacity($journals->flatMap(
+                    fn (JournalHeader $journal) => LegacyFinancialFence::removedBankLines($journal, $today)
+                )->all());
+            }
+            $journalIds = $journals->modelKeys();
+            if ($journalIds !== []) {
+                \App\Support\ProtectedJournalQuery::table('journal_details')->whereIn('journal_id', $journalIds)->delete();
+                \App\Support\ProtectedJournalQuery::table('journal_headers')->whereIn('journal_id', $journalIds)->delete();
+            }
+
+            $stockChanges = $movements->groupBy('product_id')->map(fn ($rows) => $rows->sum('qty'));
+            foreach ($stockChanges as $productId => $qty) {
+                Product::where('id', $productId)->increment('stock_quantity', (int) $qty);
+            }
+
+            InventoryLedger::whereIn('id', $movements->modelKeys())->delete();
+            $invoice->delete();
+
             $so->status = 'APPROVED';
+            $so->invoice_id = null;
+            $so->invoice_no = null;
             $so->save();
 
             DB::commit();
@@ -300,5 +304,31 @@ class SalesOrderService
             DB::rollBack();
             throw $e;
         }
+    }
+
+    private function ownedShipmentMovements(SalesInvoice $invoice): \Illuminate\Database\Eloquent\Collection
+    {
+        $details = $invoice->details()->orderBy('id')->lockForUpdate()->get();
+        $movements = InventoryLedger::whereIn('shipment_invoice_detail_id', $details->modelKeys())
+            ->orderBy('id')->lockForUpdate()->get();
+        $byDetail = $movements->keyBy('shipment_invoice_detail_id');
+        if ($details->isEmpty()) {
+            throw new \RuntimeException(__('erp.audit_shipment_stock_source_invalid'));
+        }
+        foreach ($details as $detail) {
+            $movement = $byDetail->get($detail->id);
+            if ($detail->shipment_without_stock && $detail->product_id === null && !$movement) {
+                continue;
+            }
+            if ($detail->product_id === null || !$movement || $movement->type !== 'OUT'
+                || $detail->shipment_without_stock
+                || (int) $movement->product_id !== (int) $detail->product_id
+                || $detail->qty_actual <= 0 || bccomp($movement->qty, (string) $detail->qty_actual, 4) !== 0) {
+                // A nullable product can also be a deleted historical product; it is not proof of no stock write.
+                throw new \RuntimeException(__('erp.audit_shipment_stock_source_invalid'));
+            }
+        }
+
+        return $movements;
     }
 }

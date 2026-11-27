@@ -221,6 +221,7 @@ class WarehouseController extends Controller
         $request->validate(['evidence_number' => 'required|string|max:100', 'transaction_date' => 'required|date', 'offset_account' => 'required', 'items' => 'required|array|min:1', 'items.*.product_id' => 'required|exists:products,id', 'items.*.qty' => 'required|integer|min:1']);
         DB::beginTransaction();
         try {
+            LegacyFinancialFence::lock();
             \App\Support\AccountingPeriodGuard::source([$request->transaction_date]);
             $now = now();
             $totalValue = 0;

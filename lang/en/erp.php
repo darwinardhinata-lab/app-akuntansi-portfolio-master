@@ -1678,6 +1678,7 @@ return [
     'audit_invoice_cancelled' => 'Invoice cancelled. Original records are retained and reversing journal and stock entries have been recorded.',
     'audit_invoice_cancel_blocked' => 'Cancellation is blocked: reverse payments and resolve sales returns first.',
     'audit_invoice_journal_invalid' => 'Cancellation is blocked: the source journal or inventory values require reconciliation.',
+    'audit_shipment_stock_source_invalid' => 'Rollback is blocked: shipment stock ownership could not be verified. Refer it to Warehouse and Accounting for manual review.',
     'audit_invoice_cancel_confirm' => 'Cancel this invoice? Original records will be retained and reversal entries created.',
     'audit_cancelled' => 'CANCELLED',
     'audit_opening_duplicates' => 'Multiple opening balances exist for this date. Reconcile them before saving; no entries were deleted.',

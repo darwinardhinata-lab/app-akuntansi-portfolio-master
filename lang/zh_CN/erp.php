@@ -1884,6 +1884,7 @@ return [
     'audit_invoice_cancelled' => '发票已取消。原始记录已保留，并已生成冲销凭证和库存记录。',
     'audit_invoice_cancel_blocked' => '无法取消：请先冲销付款并处理销售退货。',
     'audit_invoice_journal_invalid' => '无法取消：来源凭证或库存金额需要核对。',
+    'audit_shipment_stock_source_invalid' => '无法撤销发货：无法验证库存变动归属。请联系仓库和财务人工审核。',
     'audit_invoice_cancel_confirm' => '取消此发票？原始记录将保留并生成冲销记录。',
     'audit_cancelled' => '已取消',
     'audit_opening_duplicates' => '此日期存在多笔期初余额。请先核对再保存；未删除任何分录。',

@@ -16,6 +16,21 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
 
     private ?string $isolatedDatabase = null;
 
+    #[\PHPUnit\Framework\Attributes\DataProvider('outboundRollbackCases')]
+    public function test_outbound_rollback_keeps_manual_funding(string $scenario): void
+    {
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-27 12:00:00', 'Asia/Jakarta'));
+        $this->overlap('maker', 'outbound-'.$scenario, true);
+    }
+
+    public static function outboundRollbackCases(): array
+    {
+        return ['shared reference fails closed' => ['rollback'], 'unambiguous rollback succeeds' => ['clean'],
+            'stock-only collision preserves manual movement' => ['stock-only'],
+            'legacy stock-only collision fails closed' => ['legacy'],
+            'concurrent rollback retry is rejected' => ['race'], 'owned journal cannot consume hold' => ['capacity']];
+    }
+
     #[\PHPUnit\Framework\Attributes\DataProvider('residualWriterCases')]
     public function test_residual_writer_committed(string $action, string $first, string $amount): void
     {
@@ -231,6 +246,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         DB::table('ppl_financial_contexts')->insert(['company_id' => $company->id, 'settings' => json_encode($settings)]);
         $opening = $future || in_array($journalAction, ['manual', 'fx', 'legacy', 'cash_bill', 'inbound'], true) ? '500.00' : '300.00';
         if ($residualAmount !== null) $opening = bcsub('500.00', $residualAmount, 2);
+        if (in_array($journalAction, ['outbound-rollback', 'outbound-clean', 'outbound-capacity'], true)) $opening = '399.99';
         \App\Support\PostingService::post(['transaction_date' => '2026-01-01'], [
             ['account_code' => $bankCoa, 'position' => 'DEBET', 'amount' => $opening], ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => $opening]]);
         $openingAction = !$future && str_starts_with($journalAction, 'opening');
@@ -324,6 +340,10 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
                 ->assertOk()->assertSee('value="'.$bankCoa.'"', false);
             $this->assertSame(1, preg_match('/name="evidence_number"[^>]+value="(IN-[^"]+)"/', $form->getContent(), $match));
             $inboundRef = $match[1];
+        }
+        if (str_starts_with($journalAction, 'outbound-')) {
+            $this->observeOutboundRollback($company, $settings, $users, $id, $version, $bankCoa, substr($journalAction, 9));
+            return;
         }
         if ($future && $residualAmount === null) {
             if ($inbound) {
@@ -768,6 +788,147 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         };
     }
 
+    private function observeOutboundRollback(Company $company, array $settings, array $users, string $id, int $version, string $bankCoa, string $scenario): void
+    {
+        config(['coa.piutang_usaha' => '12001', 'coa.hpp' => '610001']);
+        foreach (['12001', '11200'] as $code) {
+            DB::table('accounts')->insert(['account_code' => $code, 'account_name' => 'Synthetic',
+                'normal_balance' => 'DEBET', 'report_pos' => 'NERACA', 'coa_type' => 'Other']);
+        }
+        DB::table('accounts')->insert(['account_code' => '411001', 'account_name' => 'Synthetic sales',
+            'normal_balance' => 'KREDIT', 'report_pos' => 'LABA RUGI', 'coa_type' => 'Sales']);
+        $day = ErpBankBalance::businessDate();
+        $price = $scenario === 'capacity' ? '100.01' : '50.00';
+        // Synthetic mapping only: isolate the guard for a bank debit in the linked shipment journal.
+        if ($scenario === 'capacity') config(['coa.piutang_usaha' => $bankCoa]);
+        $sales = \App\Models\Product::create(['sku' => 'F03-SALES', 'name' => 'Synthetic', 'stock_quantity' => 1, 'average_cost' => '20.00']);
+        $stockOnly = in_array($scenario, ['stock-only', 'legacy', 'race', 'capacity'], true);
+        $manual = \App\Models\Product::create(['sku' => 'F03-OUT', 'name' => 'Synthetic', 'stock_quantity' => 1, 'average_cost' => $stockOnly ? '0.00' : '100.01']);
+        $so = \App\Models\SalesOrder::create(['so_number' => 'SO-F03-OUT', 'transaction_date' => $day, 'contact_name' => 'Synthetic', 'status' => 'OPEN']);
+        $this->actingAs($users['fs'])->post(route('so.ship', $so->id), ['ship_date' => $day, 'sales_semantic' => 'LOCAL',
+            'items' => [['item_code' => $sales->sku, 'qty' => 1, 'price' => $price]], 'sub_total' => $price, 'grand_total' => $price])->assertSessionHas('success');
+        $invoice = \App\Models\SalesInvoice::where('sales_order_id', $so->id)->sole();
+        $number = $invoice->invoice_number;
+        $manualNumber = $scenario === 'clean' ? 'OUT-F03-SEPARATE' : $number;
+        $this->post(route('warehouse.outbound.store'), ['evidence_number' => $manualNumber, 'transaction_date' => $day,
+            'description' => $stockOnly ? "Faktur Penjualan: {$number} (Reff: {$so->so_number})" : 'Synthetic manual outbound',
+            'offset_account' => $bankCoa, 'items' => [['product_id' => $manual->id, 'qty' => 1]]])->assertSessionHas('success');
+        if ($stockOnly) $this->assertDatabaseMissing('journal_headers', ['source_doc_no' => $manualNumber, 'transaction_type' => 'Outbound']);
+        if ($scenario === 'legacy' && \Illuminate\Support\Facades\Schema::hasColumn('inventory_ledgers', 'shipment_invoice_detail_id')) {
+            DB::table('inventory_ledgers')->where('product_id', $sales->id)->update(['shipment_invoice_detail_id' => null]);
+        }
+        $this->actingAs($users['mk'])->postJson(route('payment-plan-v33.action'), ['id' => $id, 'version' => $version,
+            'mutationId' => 'outbound-maker', 'action' => 'mark_maker', 'input' => ['reference' => 'SYNTHETIC']])->assertOk();
+        $balance = fn () => app(ErpBankBalance::class)->project($company->id, ['id' => 'idr3', 'currency' => 'IDR'], $settings);
+        $snapshot = fn () => [
+            'balance' => $balance(),
+            'gl' => DB::table('journal_headers as h')->join('journal_details as d', 'd.journal_id', '=', 'h.journal_id')
+                ->whereIn('h.source_doc_no', [$number, $manualNumber])->orderBy('d.id')->get(['h.source_doc_no', 'h.transaction_type', 'd.*'])->all(),
+            'stock' => DB::table('products')->whereIn('id', [$sales->id, $manual->id])->orderBy('id')->get()->all(),
+            'ledger' => DB::table('inventory_ledgers')->whereIn('evidence_number', [$number, $manualNumber])->orderBy('id')->get()->all(),
+            'invoice' => DB::table('sales_invoices')->where('invoice_number', $number)->first(),
+            'invoiceLines' => DB::table('sales_invoice_details')->where('sales_invoice_id', $invoice->id)->orderBy('id')->get()->all(),
+            'so' => DB::table('sales_orders')->where('id', $so->id)->first(),
+            'hold' => DB::table('ppl_reservations')->where('request_id', $id)->first(),
+        ];
+        $before = $snapshot();
+        $this->assertSame('100.00', $before['balance']['available']);
+        $this->assertSame('400.00', $before['balance']['reserved']);
+        $this->assertCount(2, $before['ledger']);
+        $wait = $scenario === 'race' ? $this->raceShipmentRollback($users['fs'], $so->id, $company->id) : null;
+        $response = $wait ? null : $this->actingAs($users['fs'])->post(route('so.rollback', $so->id))->assertRedirect();
+        config(['database.connections.writer_final' => config('database.connections.writer_test')]);
+        DB::purge('writer_final');
+        $writer = DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+        DB::setDefaultConnection('writer_final');
+        try {
+            $reader = DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+            $this->assertNotSame($writer, $reader);
+            if ($wait) $this->assertNotContains((int) $reader, $wait['connections']);
+            $after = $snapshot();
+            file_put_contents(getenv('F03_RESIDUAL_EVIDENCE'), json_encode(compact('scenario', 'before', 'after', 'reader', 'writer', 'wait'), JSON_THROW_ON_ERROR).PHP_EOL, FILE_APPEND);
+            $this->assertSame('100.00', $after['balance']['available']);
+            $this->assertEquals($before['hold'], $after['hold']);
+            if (in_array($scenario, ['legacy', 'rollback', 'capacity'], true)) {
+                $response->assertSessionHas('error');
+                if ($scenario === 'legacy') $this->assertStringContainsString(__('erp.audit_shipment_stock_source_invalid'), session('error'));
+                if ($scenario === 'capacity') $this->assertStringContainsString('funds_insufficient', session('error'));
+                $this->assertEquals($before, $after);
+            } else {
+                $response?->assertSessionHas('success');
+                $this->assertNull($after['invoice']);
+                $this->assertSame([], $after['invoiceLines']);
+                $this->assertSame('APPROVED', $after['so']->status);
+                $this->assertEquals([1, 0], array_column($after['stock'], 'stock_quantity'));
+                $this->assertEquals(array_values(array_filter($before['gl'], fn ($line) => $line->transaction_type === 'Outbound')), $after['gl']);
+                $this->assertEquals(array_values(array_filter($before['ledger'], fn ($line) => $line->product_id == $manual->id)), $after['ledger']);
+            }
+        } finally {
+            DB::setDefaultConnection('writer_test');
+        }
+    }
+
+    private function raceShipmentRollback(User $actor, int $orderId, int $companyId): array
+    {
+        $release = sys_get_temp_dir().DIRECTORY_SEPARATOR.'f03-shipment-'.bin2hex(random_bytes(8));
+        $workers = [];
+        foreach ([true, false] as $hold) {
+            $workers[] = new Process([PHP_BINARY, base_path('tests/Support/manual-journal-maker-worker.php')], base_path(),
+                ['MANUAL_MAKER_FIXTURE' => json_encode([
+                    'connection' => config('database.connections.writer_test'),
+                    'flags' => ['payment_plan_v33.bank_workflow' => true, 'payment_plan_v33.erp_bank_balance' => true,
+                        'customs.enabled' => false],
+                    'action' => 'shipment-rollback', 'actor' => $actor->id, 'payload' => ['id' => $orderId],
+                    'hold' => $hold, 'release' => $release, 'clock' => now()->toIso8601String(),
+                ], JSON_THROW_ON_ERROR)], null, 80);
+        }
+        try {
+            $workers[0]->start();
+            $this->waitForMarker($workers[0], 'UNCOMMITTED');
+            $workers[1]->start();
+            $this->waitForMarker($workers[1], 'READY:');
+            $connections = [];
+            foreach ($workers as $worker) {
+                $this->assertSame(1, preg_match('/READY:(\d+)/', $worker->getOutput(), $match));
+                $connections[] = (int) $match[1];
+            }
+            $observer = DB::connection('writer_admin');
+            $connections[] = (int) $observer->selectOne('SELECT CONNECTION_ID() AS id')->id;
+            $this->assertCount(3, array_unique($connections));
+            $deadline = microtime(true) + 20;
+            do {
+                $lock = $observer->selectOne('SELECT l.lock_table, l.lock_index, l.lock_data
+                    FROM information_schema.innodb_lock_waits w
+                    JOIN information_schema.innodb_trx r ON r.trx_id = w.requesting_trx_id
+                    JOIN information_schema.innodb_trx b ON b.trx_id = w.blocking_trx_id
+                    JOIN information_schema.innodb_locks l ON l.lock_id = w.requested_lock_id
+                    WHERE r.trx_mysql_thread_id = ? AND b.trx_mysql_thread_id = ?', [$connections[1], $connections[0]]);
+                if ($lock) break;
+                usleep(250000);
+            } while (microtime(true) < $deadline);
+            $this->assertNotNull($lock, $workers[1]->getOutput().$workers[1]->getErrorOutput());
+            $this->assertStringContainsString('ppl_financial_contexts', $lock->lock_table);
+            $this->assertSame('PRIMARY', $lock->lock_index);
+            $this->assertSame((string) $companyId, (string) $lock->lock_data);
+            touch($release);
+            $results = [];
+            foreach ($workers as $worker) {
+                $worker->wait();
+                $this->assertSame(0, $worker->getExitCode(), $worker->getOutput().$worker->getErrorOutput());
+                $this->assertSame(1, preg_match('/RESULT:(.*)/', $worker->getOutput(), $match));
+                $results[] = json_decode($match[1], true, 512, JSON_THROW_ON_ERROR);
+            }
+            $this->assertStringContainsString('COMMITTED', $workers[0]->getOutput());
+            $this->assertNotEmpty($results[0]['success']);
+            $this->assertStringContainsString('SHIPPED', $results[1]['error'] ?? '');
+
+            return compact('connections', 'lock', 'results');
+        } finally {
+            foreach ($workers as $worker) $worker->stop();
+            if (is_file($release)) unlink($release);
+        }
+    }
+
     private function seedResidualWriter(string $action, User $actor, string $bankCoa, string $amount): array
     {
         $day = ErpBankBalance::businessDate();
@@ -888,7 +1049,8 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $inbound = str_contains($this->name(), 'warehouse_inbound_race');
         $future = str_contains($this->name(), 'future_inbound');
         $futureWriter = str_contains($this->name(), 'future_writer');
-        $residual = str_contains($this->name(), 'residual_writer_committed');
+        $lifecycle = str_contains($this->name(), 'outbound_rollback');
+        $residual = $lifecycle || str_contains($this->name(), 'residual_writer_committed');
         if ($residual && (getenv('MGI_TEST_PORT') !== '33397' || !getenv('F03_RESIDUAL_EVIDENCE'))) {
             $this->markTestSkipped('Residual capacity tests require the dedicated disposable runner.');
         }
@@ -908,7 +1070,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         config(['database.connections.writer_admin' => $config]);
         if ($residual) {
             $identity = DB::connection('writer_admin')->selectOne('SELECT @@datadir AS datadir, VERSION() AS version');
-            $this->assertSame('d:/erp-recovery/m1-f03-residual-guard-20261127-db/data',
+            $this->assertSame($lifecycle ? 'd:/erp-recovery/m1-f03-lifecycle-20261127-db/data' : 'd:/erp-recovery/m1-f03-residual-guard-20261127-db/data',
                 strtolower(rtrim(preg_replace('~[\\\\/]+~', '/', $identity->datadir), '/')));
             $this->assertStringContainsString('MariaDB', $identity->version);
         }
