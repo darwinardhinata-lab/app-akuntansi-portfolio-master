@@ -129,7 +129,27 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         $this->overlap('inbound', 'inbound');
     }
 
-    private function overlap(string $first, string $journalAction = 'manual'): void
+    public function test_future_inbound_maker_first(): void
+    {
+        $this->runFutureInbound('maker');
+    }
+
+    public function test_future_inbound_receipt_first(): void
+    {
+        $this->runFutureInbound('inbound');
+    }
+
+    private function runFutureInbound(string $first): void
+    {
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-27 00:30:00', 'Asia/Jakarta'));
+        try {
+            $this->overlap($first, 'inbound', true);
+        } finally {
+            $this->travelBack();
+        }
+    }
+
+    private function overlap(string $first, string $journalAction = 'manual', bool $future = false): void
     {
         $legacy = $journalAction === 'legacy';
         $cashBill = $journalAction === 'cash_bill';
@@ -260,6 +280,11 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
                 ->assertOk()->assertSee('value="'.$bankCoa.'"', false);
             $this->assertSame(1, preg_match('/name="evidence_number"[^>]+value="(IN-[^"]+)"/', $form->getContent(), $match));
             $inboundRef = $match[1];
+        }
+        if ($future) {
+            $this->observeFutureInbound($first, $company, $settings, $users, $id, $version, $product, $inboundRef, $bankCoa);
+
+            return;
         }
         $release = tempnam(sys_get_temp_dir(), 'manual_maker_');
         unlink($release);
@@ -459,6 +484,93 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         }
     }
 
+    private function observeFutureInbound(string $first, Company $company, array $settings, array $users, string $id,
+        int $version, \App\Models\Product $product, string $inboundRef, string $bankCoa): void
+    {
+        $day = now('Asia/Jakarta')->toDateString();
+        $next = now('Asia/Jakarta')->addDay()->toDateString();
+        $this->assertSame('2026-11-27', $day);
+        $this->assertSame('2026-11-28', $next);
+        $writer = (int) DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+        $snapshots = [];
+        $results = [];
+        $snapshot = function (string $key) use (&$snapshots, $company, $settings, $writer, $id, $product, $inboundRef): void {
+            $this->assertSame(0, DB::connection('writer_test')->transactionLevel());
+            config(['database.connections.writer_final' => config('database.connections.writer_test')]);
+            DB::purge('writer_final');
+            DB::setDefaultConnection('writer_final');
+            try {
+                $reader = (int) DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+                $this->assertNotContains($reader, [$writer, ...array_column($snapshots, 'reader')]);
+                $journal = DB::table('journal_headers')->where('source_doc_no', $inboundRef)->first(['journal_id', 'transaction_date']);
+                $snapshots[$key] = [
+                    'day' => now('Asia/Jakarta')->toDateString(), 'reader' => $reader,
+                    'balance' => app(ErpBankBalance::class)->project($company->id, ['id' => 'idr3', 'currency' => 'IDR'], $settings),
+                    'hold' => DB::table('ppl_reservations')->where('request_id', $id)->get(['account_key', 'amount', 'status'])->all(),
+                    'allocation' => DB::table('ppl_ap_allocations')->where('request_id', $id)->get(['amount', 'status'])->all(),
+                    'maker_status' => DB::table('ppl_requests')->where('id', $id)->value('status'),
+                    'journal' => $journal,
+                    'lines' => $journal ? DB::table('journal_details')->where('journal_id', $journal->journal_id)
+                        ->orderBy('position')->get(['account_code', 'position', 'amount'])->all() : [],
+                    'stock' => DB::table('products')->where('id', $product->id)->first(['stock_quantity', 'average_cost']),
+                    'ledger' => DB::table('inventory_ledgers')->where('evidence_number', $inboundRef)->get(['transaction_date', 'type', 'qty', 'total_cost'])->all(),
+                ];
+            } finally {
+                DB::setDefaultConnection('writer_test');
+            }
+        };
+        $snapshot('before');
+        foreach ([$first, $first === 'maker' ? 'inbound' : 'maker'] as $action) {
+            if ($action === 'maker') {
+                $response = $this->actingAs($users['mk'])->postJson(route('payment-plan-v33.action'), [
+                    'id' => $id, 'version' => $version, 'mutationId' => 'future-credit-maker',
+                    'action' => 'mark_maker', 'input' => ['reference' => 'SYNTHETIC-FUTURE'],
+                ]);
+                $results[$action] = ['http' => $response->status(), 'error' => $response->json('error')];
+            } else {
+                session()->forget(['success', 'error', 'errors']);
+                DB::flushQueryLog();
+                DB::enableQueryLog();
+                $response = $this->actingAs($users['fs'])->from(route('warehouse.inbound.create', ['tab' => 'transfer_masuk']))
+                    ->post(route('warehouse.inbound.store'), [
+                        'transaction_date' => $next, 'evidence_number' => $inboundRef,
+                        'description' => 'Synthetic future receipt', 'offset_account' => $bankCoa,
+                        'items' => [['product_id' => $product->id, 'qty' => 1, 'unit_cost' => '100.01']],
+                    ]);
+                $writes = array_values(array_filter(array_column(DB::getQueryLog(), 'query'),
+                    static fn ($sql) => preg_match('/^\s*(insert|update|delete|replace)\b/i', $sql)));
+                DB::disableQueryLog();
+                $results[$action] = ['http' => $response->status(), 'location' => $response->headers->get('Location'),
+                    'success' => session('success'), 'error' => session('error'), 'validation' => session('errors')?->getBag('default')->toArray(),
+                    'writes' => $writes];
+            }
+            $snapshot('after_'.$action);
+        }
+        $this->travelTo(\Illuminate\Support\Carbon::parse($next.' 10:00:00', 'Asia/Jakarta'));
+        $snapshot('next_day');
+        if ($path = getenv('WAREHOUSE_INBOUND_EVIDENCE')) {
+            $this->assertGreaterThan(0, file_put_contents($path, json_encode(compact('first', 'writer', 'day', 'next',
+                'inboundRef', 'results', 'snapshots'), JSON_THROW_ON_ERROR).PHP_EOL, FILE_APPEND));
+        }
+
+        $this->assertSame('500.00', $snapshots['before']['balance']['available']);
+        $this->assertSame(200, $results['maker']['http']);
+        $this->assertSame('future_protected_bank_credit', $results['inbound']['error']);
+        $this->assertSame([], $results['inbound']['writes']);
+        $lastOnDay = $snapshots[$first === 'maker' ? 'after_inbound' : 'after_maker'];
+        foreach ([$lastOnDay, $snapshots['next_day']] as $state) {
+            $this->assertSame('100.00', $state['balance']['available']);
+            $this->assertSame('500.00', $state['balance']['actual']);
+            $this->assertSame([['idr3', '400.00', 'active']], array_map(fn ($row) => array_values((array) $row), $state['hold']));
+            $this->assertSame('bank_prepared', $state['maker_status']);
+            $this->assertNull($state['journal']);
+            $this->assertSame([], $state['lines']);
+            $this->assertSame([], $state['ledger']);
+            $this->assertEquals(0, $state['stock']->stock_quantity);
+            $this->assertSame('0.00', $state['stock']->average_cost);
+        }
+    }
+
     private function waitForMarker(Process $worker, string $marker): void
     {
         $deadline = microtime(true) + 20;
@@ -473,6 +585,10 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             $this->markTestSkipped('F03 tests require the dedicated disposable port.');
         }
         $inbound = str_contains($this->name(), 'warehouse_inbound_race');
+        $future = str_contains($this->name(), 'future_inbound');
+        if ($future && getenv('MGI_TEST_PORT') !== '33395') {
+            $this->markTestSkipped('Future-date probe requires its dedicated disposable port.');
+        }
         if ($inbound && getenv('MGI_TEST_PORT') !== '33394') {
             $this->markTestSkipped('Inbound overlap requires the dedicated disposable port.');
         }
@@ -481,6 +597,12 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             'username' => 'root', 'password' => '', 'database' => 'information_schema', 'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci', 'prefix' => '', 'strict' => true];
         config(['database.connections.writer_admin' => $config]);
+        if ($future) {
+            $identity = DB::connection('writer_admin')->selectOne('SELECT @@datadir AS datadir, VERSION() AS version');
+            $this->assertSame('d:/erp-recovery/m1-f03-future-20261127-db/data',
+                strtolower(rtrim(preg_replace('~[\\\\/]+~', '/', $identity->datadir), '/')));
+            $this->assertStringContainsString('MariaDB', $identity->version);
+        }
         if ($inbound) {
             $identity = DB::connection('writer_admin')->selectOne('SELECT @@datadir AS datadir, VERSION() AS version');
             $this->assertSame('d:/erp-recovery/m1-f03-inbound-patch-20261127-db/data',

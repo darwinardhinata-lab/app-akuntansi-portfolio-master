@@ -3,6 +3,7 @@
 namespace App\Modules\PaymentPlan\Services;
 
 use App\Modules\PaymentPlan\Domain\RuleViolation;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 final class LegacyFinancialFence
@@ -10,6 +11,28 @@ final class LegacyFinancialFence
     public static function bankCapacityEnabled(): bool
     {
         return config('payment_plan_v33.bank_workflow', false) && config('payment_plan_v33.erp_bank_balance', false);
+    }
+
+    /** Inbound posting policy; call under the financial fence, before numbering or writes. */
+    public static function assertInboundBankCreditDate(string $glDate, array $lines): void
+    {
+        if (!config('payment_plan_v33.bank_workflow', false)
+            || Carbon::parse($glDate)->toDateString() <= ErpBankBalance::businessDate()) return;
+
+        if (DB::transactionLevel() === 0) throw new RuleViolation('financial_transaction_required', 409);
+        $credits = [];
+        foreach ($lines as $line) {
+            if ($line['position'] === 'KREDIT' && bccomp((string) $line['amount'], '0.00', 2) > 0) {
+                $credits[] = $line['account_code'];
+            }
+        }
+        if (!$credits) return;
+
+        $keys = array_map(static fn ($id) => 'ppl.bank.'.$id, array_keys(config('payment_plan_v33.payment_accounts', [])));
+        if (DB::table('company_coa_mappings')->where('active', true)->whereIn('semantic_key', $keys)
+            ->whereIn('account_code', $credits)->exists()) {
+            throw new RuleViolation('future_protected_bank_credit', 409);
+        }
     }
 
     /** Turn the removal of an existing, currently projected journal into opposite ledger lines. */

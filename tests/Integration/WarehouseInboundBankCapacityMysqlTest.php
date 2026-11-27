@@ -21,11 +21,16 @@ class WarehouseInboundBankCapacityMysqlTest extends TestCase
             'credit rounds over capacity' => ['100.005', true, null],
             'exact capacity' => ['100.00', true, '100.00'],
             'non-bank' => ['100.01', false, '100.01'],
+            'same Jakarta business day' => ['100.00', true, '100.00', '2026-11-27'],
+            'future non-bank' => ['100.01', false, '100.01', '2026-11-28'],
+            'future bank with ERP projection off' => ['100.00', true, null, '2026-11-28', false],
+            'future bank with workflow off' => ['100.00', true, '100.00', '2026-11-28', true, false],
         ];
     }
 
     #[\PHPUnit\Framework\Attributes\DataProvider('cases')]
-    public function test_manual_receipt_capacity(string $cost, bool $useBank, ?string $posted): void
+    public function test_manual_receipt_capacity(string $cost, bool $useBank, ?string $posted,
+        string $glDate = '2026-01-03', bool $projection = true, bool $workflow = true): void
     {
         if (getenv('AP_MYSQL_TESTS') !== '1' || getenv('MGI_TEST_PORT') !== '33394') {
             $this->markTestSkipped('Requires the dedicated disposable MariaDB runner.');
@@ -45,13 +50,14 @@ class WarehouseInboundBankCapacityMysqlTest extends TestCase
         $config = array_replace($admin, ['database' => $db]);
         config(['database.connections.probe_writer' => $config, 'database.connections.probe_reader' => $config]);
         DB::setDefaultConnection('probe_writer');
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-27 00:30:00', 'Asia/Jakarta'));
         try {
             $this->assertSame(0, Artisan::call('migrate', ['--database' => 'probe_writer', '--force' => true]), Artisan::output());
             $inventory = '11200';
             $bankCoa = '111003';
             $offset = '610001';
-            config(['coa.persediaan' => $inventory, 'payment_plan_v33.bank_workflow' => true,
-                'payment_plan_v33.erp_bank_balance' => true, 'payment_plan_v33.primary_navigation' => true,
+            config(['coa.persediaan' => $inventory, 'payment_plan_v33.bank_workflow' => $workflow,
+                'payment_plan_v33.erp_bank_balance' => $projection, 'payment_plan_v33.primary_navigation' => true,
                 'payment_plan_v33.posting' => false]);
             $company = Company::create(['code' => 'MGI', 'name' => 'Synthetic MGI', 'active' => true, 'base_currency' => 'IDR']);
             $user = User::factory()->create(['role' => 'FINANCE']);
@@ -86,7 +92,7 @@ class WarehouseInboundBankCapacityMysqlTest extends TestCase
             $credit = $useBank ? $bankCoa : $offset;
             DB::enableQueryLog();
             $response = $this->from($formUrl)->post(route('warehouse.inbound.store'), [
-                'evidence_number' => $evidence, 'transaction_date' => '2026-01-03', 'description' => 'Synthetic manual receipt',
+                'evidence_number' => $evidence, 'transaction_date' => $glDate, 'description' => 'Synthetic manual receipt',
                 'offset_account' => $credit, 'items' => [['product_id' => $product->id, 'qty' => 1, 'unit_cost' => $cost]],
             ]);
             $writes = array_values(array_filter(array_column(DB::getQueryLog(), 'query'),
@@ -116,7 +122,7 @@ class WarehouseInboundBankCapacityMysqlTest extends TestCase
             }
             $this->assertSame(['amount' => '400.00', 'status' => 'active'], (array) $hold);
             if ($posted === null) {
-                $response->assertRedirect($formUrl)->assertSessionHas('error', 'funds_insufficient');
+                $response->assertRedirect($formUrl)->assertSessionHas('error', $projection ? 'funds_insufficient' : 'future_protected_bank_credit');
                 $this->assertSame([], $writes);
                 $this->assertSame($before, $after);
                 $this->assertCount(0, $headers);
@@ -131,12 +137,13 @@ class WarehouseInboundBankCapacityMysqlTest extends TestCase
             $this->assertCount(1, $headers);
             $this->assertSame([[$inventory, 'DEBET', $posted], [$credit, 'KREDIT', $posted]],
                 $lines->map(fn ($line) => [$line->account_code, $line->position, (string) $line->amount])->all());
-            $this->assertSame($useBank ? '0.00' : '100.00', $after['available']);
+            $this->assertSame($useBank && $workflow ? '0.00' : '100.00', $after['available']);
             $this->assertEquals(1, $stock->stock_quantity);
             $this->assertEquals($posted, $stock->average_cost);
             $this->assertCount(1, $ledger);
             $this->assertEquals(['IN', 1, $posted, $posted, 1, $posted, $posted], array_values((array) $ledger[0]));
         } finally {
+            $this->travelBack();
             DB::purge('probe_reader');
             DB::purge('probe_writer');
             DB::setDefaultConnection('sqlite');
