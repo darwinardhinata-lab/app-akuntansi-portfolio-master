@@ -13,26 +13,42 @@ final class LegacyFinancialFence
         return config('payment_plan_v33.bank_workflow', false) && config('payment_plan_v33.erp_bank_balance', false);
     }
 
-    /** Inbound posting policy; call under the financial fence, before numbering or writes. */
-    public static function assertInboundBankCreditDate(string $glDate, array $lines): void
+    /** Call before writes, under the same financial fence as Maker. */
+    public static function assertBankCreditDate(string $glDate, array $lines): void
     {
-        if (!config('payment_plan_v33.bank_workflow', false)
-            || Carbon::parse($glDate)->toDateString() <= ErpBankBalance::businessDate()) return;
-
-        if (DB::transactionLevel() === 0) throw new RuleViolation('financial_transaction_required', 409);
-        $credits = [];
-        foreach ($lines as $line) {
-            if ($line['position'] === 'KREDIT' && bccomp((string) $line['amount'], '0.00', 2) > 0) {
-                $credits[] = $line['account_code'];
-            }
-        }
-        if (!$credits) return;
-
-        $keys = array_map(static fn ($id) => 'ppl.bank.'.$id, array_keys(config('payment_plan_v33.payment_accounts', [])));
-        if (DB::table('company_coa_mappings')->where('active', true)->whereIn('semantic_key', $keys)
-            ->whereIn('account_code', $credits)->exists()) {
+        if (self::futureBankCreditRows([['date' => $glDate, 'lines' => $lines]])) {
             throw new RuleViolation('future_protected_bank_credit', 409);
         }
+    }
+
+    /** Return source labels of final GL lines that lower a future protected balance. */
+    public static function futureBankCreditRows(iterable $journals): array
+    {
+        if (!config('payment_plan_v33.bank_workflow', false)) return [];
+        if (DB::transactionLevel() === 0) throw new RuleViolation('financial_transaction_required', 409);
+
+        $today = ErpBankBalance::businessDate();
+        $credits = [];
+        foreach ($journals as $journal) {
+            if (Carbon::parse($journal['date'])->toDateString() <= $today) continue;
+            foreach ($journal['lines'] as $line) {
+                $direction = bccomp((string) $line['amount'], '0.00', 2);
+                if (($line['position'] === 'KREDIT' && $direction > 0)
+                    || ($line['position'] === 'DEBET' && $direction < 0)) {
+                    $credits[$line['account_code']][] = $line['source'] ?? true;
+                }
+            }
+        }
+        if (!$credits) return [];
+
+        $keys = array_map(static fn ($id) => 'ppl.bank.'.$id, array_keys(config('payment_plan_v33.payment_accounts', [])));
+        $matches = [];
+        foreach (array_chunk(array_keys($credits), 500) as $codes) {
+            $matched = DB::table('company_coa_mappings')->where('active', true)->whereIn('semantic_key', $keys)
+                ->whereIn('account_code', $codes)->distinct()->pluck('account_code');
+            foreach ($matched as $code) foreach ($credits[$code] as $source) $matches[] = $source;
+        }
+        return array_values(array_unique($matches, SORT_REGULAR));
     }
 
     /** Turn the removal of an existing, currently projected journal into opposite ledger lines. */

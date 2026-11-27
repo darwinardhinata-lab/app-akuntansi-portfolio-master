@@ -100,6 +100,7 @@ class PurchaseBillController extends Controller
                 }
                 if ($taxAmount > 0) $jDetails[] = $line(config('coa.pajak_masukan'), 'DEBET', $taxAmount);
                 $jDetails[] = $line($request->credit_account, 'KREDIT', $grandTotal);
+                LegacyFinancialFence::assertBankCreditDate($request->bill_date, $jDetails);
                 LegacyFinancialFence::assertBankCapacity($jDetails);
             }
 

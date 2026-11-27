@@ -598,7 +598,6 @@ class PaymentPlanController extends Controller
             try {
                 // Serialize with v33 bank decisions before period/payment locks or GL reads.
                 \App\Modules\PaymentPlan\Services\LegacyFinancialFence::lock();
-                if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
                 $item = PaymentPlan::where('id_payment', $item->id_payment)->lockForUpdate()->firstOrFail();
                 if ($item->status_payment !== 'PAID') {
                     throw new \RuntimeException(__('erp.payment_paid_posting_guard'));
@@ -616,10 +615,13 @@ class PaymentPlanController extends Controller
                 }
                 $transactionDate = $item->tgl_transaksi;
                 $jumlahDijurnal = $item->nominal_aktual_efektif;
-                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCapacity([
+                $journalLines = [
                     ['account_code' => $debitAccount, 'position' => 'DEBET', 'amount' => $jumlahDijurnal],
                     ['account_code' => $selectedKasAccount, 'position' => 'KREDIT', 'amount' => $jumlahDijurnal],
-                ]);
+                ];
+                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCreditDate($transactionDate, $journalLines);
+                if (\App\Support\AccountingPeriodGuard::enabled()) \App\Support\AccountingPeriodGuard::lock();
+                \App\Modules\PaymentPlan\Services\LegacyFinancialFence::assertBankCapacity($journalLines);
 
                 JournalHeader::create([
                     'journal_id'       => $journalId,

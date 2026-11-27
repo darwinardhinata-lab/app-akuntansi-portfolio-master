@@ -16,6 +16,26 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
 
     private ?string $isolatedDatabase = null;
 
+    #[\PHPUnit\Framework\Attributes\DataProvider('futureWriterCases')]
+    public function test_future_writer(string $action, bool $makerFirst): void
+    {
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-27 00:30:00', 'Asia/Jakarta'));
+        try {
+            $this->overlap($makerFirst ? 'maker' : $action, $action, true);
+        } finally {
+            $this->travelBack();
+        }
+    }
+
+    public static function futureWriterCases(): iterable
+    {
+        foreach (['manual', 'edit', 'fx', 'csv', 'xlsx', 'cash_bill', 'opening-csv', 'legacy'] as $action) {
+            foreach ([true, false] as $makerFirst) {
+                yield $action.($makerFirst ? '-maker-first' : '-writer-first') => [$action, $makerFirst];
+            }
+        }
+    }
+
     public function test_cash_bill_race_maker_first(): void
     {
         $this->overlap('maker', 'cash_bill');
@@ -158,7 +178,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             'payment_plan_v33.erp_bank_balance' => true, 'payment_plan_v33.ap_allocations' => true,
             'payment_plan_v33.reservations' => true, 'platform.posting_intents_enabled' => true,
             'platform.legacy_sync_enabled' => false, 'customs.enabled' => false];
-        if ($inbound) $flags += ['coa.persediaan' => '11200', 'payment_plan_v33.primary_navigation' => true,
+        if ($inbound || $future) $flags += ['coa.persediaan' => '11200', 'payment_plan_v33.primary_navigation' => true,
             'payment_plan_v33.posting' => false];
         config($flags);
         $company = Company::create(['code' => 'MGI', 'name' => 'Synthetic', 'active' => true, 'base_currency' => 'IDR']);
@@ -180,17 +200,20 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         }
         if ($journalAction === 'fx') {
             $this->seedFx($users['fs']->id);
+            if ($future) app(\App\Modules\Currency\Services\ExchangeRateService::class)->save([
+                'currency_code' => 'USD', 'rate' => '100.01', 'rate_date' => '2026-11-27', 'type' => 'SPOT', 'source' => 'BI',
+            ], null, $users['fs']->id);
             $flags['platform.multicurrency_enabled'] = true;
         }
         DB::table('company_coa_mappings')->insert(['company_id' => $company->id, 'semantic_key' => 'ppl.bank.idr3', 'account_code' => $bankCoa, 'active' => true]);
         $settings = ['version' => 1, 'erp_cutoff' => '2026-01-01', 'accounts' => [['id' => 'idr3', 'name' => 'Synthetic',
             'number' => 'TEST', 'currency' => 'IDR', 'payment' => true, 'opening' => '500.00', 'asOf' => '2026-01-01']], 'receipts' => []];
         DB::table('ppl_financial_contexts')->insert(['company_id' => $company->id, 'settings' => json_encode($settings)]);
-        $opening = in_array($journalAction, ['manual', 'fx', 'legacy', 'cash_bill', 'inbound'], true) ? '500.00' : '300.00';
+        $opening = $future || in_array($journalAction, ['manual', 'fx', 'legacy', 'cash_bill', 'inbound'], true) ? '500.00' : '300.00';
         \App\Support\PostingService::post(['transaction_date' => '2026-01-01'], [
             ['account_code' => $bankCoa, 'position' => 'DEBET', 'amount' => $opening], ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => $opening]]);
-        $openingAction = str_starts_with($journalAction, 'opening');
-        $receipt = ! $openingAction && !in_array($journalAction, ['manual', 'bulk', 'fx', 'legacy', 'cash_bill', 'inbound'], true) ? \App\Support\PostingService::post([
+        $openingAction = !$future && str_starts_with($journalAction, 'opening');
+        $receipt = !$future && ! $openingAction && !in_array($journalAction, ['manual', 'bulk', 'fx', 'legacy', 'cash_bill', 'inbound'], true) ? \App\Support\PostingService::post([
             'transaction_date' => '2026-01-03', 'source_doc_no' => 'RACE-RECEIPT', 'journal_type' => 'MANUAL',
         ], [
             ['account_code' => '111003', 'position' => 'DEBET', 'amount' => '200.00'],
@@ -256,7 +279,7 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             $proofRoot = $disk->path('');
             $this->actingAs($users['req']);
             $payment = \App\Models\PaymentPlan::create(['no_transaksi' => 'F03-LEGACY-RACE', 'id_divisi' => $division,
-                'tgl_pengajuan' => '2026-01-02', 'tgl_transaksi' => '2026-01-02', 'jenis_transaksi' => $bankCoa,
+                'tgl_pengajuan' => '2026-01-02', 'tgl_transaksi' => $future ? '2026-11-28' : '2026-01-02', 'jenis_transaksi' => $bankCoa,
                 'kategori_payment' => 'OPERASIONAL', 'vendor_toko' => 'Synthetic', 'penerima_pj' => 'Synthetic',
                 'keterangan' => 'Synthetic direct service', 'id_akun' => '610001', 'nominal' => '100.01',
                 'nominal_aktual' => '100.01', 'status_payment' => 'PENGAJUAN']);
@@ -282,7 +305,11 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             $inboundRef = $match[1];
         }
         if ($future) {
-            $this->observeFutureInbound($first, $company, $settings, $users, $id, $version, $product, $inboundRef, $bankCoa);
+            if ($inbound) {
+                $this->observeFutureInbound($first, $company, $settings, $users, $id, $version, $product, $inboundRef, $bankCoa);
+            } else {
+                $this->observeFutureWriter($first, $journalAction, $company, $settings, $users, $id, $version, $bankCoa, $payment);
+            }
 
             return;
         }
@@ -571,6 +598,142 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         }
     }
 
+    private function observeFutureWriter(string $first, string $action, Company $company, array $settings, array $users,
+        string $id, int $version, string $bankCoa, ?\App\Models\PaymentPlan $payment): void
+    {
+        $day = now('Asia/Jakarta')->toDateString();
+        $next = now('Asia/Jakarta')->addDay()->toDateString();
+        $this->assertSame('2026-11-27', $day);
+        $this->assertSame('2026-11-28', $next);
+        $writer = (int) DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+        $snapshots = $results = [];
+        $snapshot = function (string $key) use (&$snapshots, $company, $settings, $writer, $id, $bankCoa, $next, $payment): void {
+            $this->assertSame(0, DB::connection('writer_test')->transactionLevel());
+            config(['database.connections.writer_final' => config('database.connections.writer_test')]);
+            DB::purge('writer_final');
+            DB::setDefaultConnection('writer_final');
+            try {
+                $reader = (int) DB::selectOne('SELECT CONNECTION_ID() AS id')->id;
+                $this->assertNotContains($reader, [$writer, ...array_column($snapshots, 'reader')]);
+                $snapshots[$key] = [
+                    'day' => now('Asia/Jakarta')->toDateString(), 'reader' => $reader,
+                    'balance' => app(ErpBankBalance::class)->project($company->id, ['id' => 'idr3', 'currency' => 'IDR'], $settings),
+                    'hold' => DB::table('ppl_reservations')->where('request_id', $id)->get(['account_key', 'amount', 'status'])->all(),
+                    'allocation' => DB::table('ppl_ap_allocations')->where('request_id', $id)->get(['amount', 'status'])->all(),
+                    'maker_status' => DB::table('ppl_requests')->where('id', $id)->value('status'),
+                    'future_credits' => DB::table('journal_details as l')->join('journal_headers as h', 'h.journal_id', '=', 'l.journal_id')
+                        ->whereDate('h.transaction_date', $next)->where('l.account_code', $bankCoa)->where('l.position', 'KREDIT')
+                        ->get(['h.journal_id', 'h.transaction_date', 'h.source_doc_no', 'l.amount'])->all(),
+                    'legacy_status' => $payment?->fresh()?->status_payment,
+                ];
+            } finally {
+                DB::setDefaultConnection('writer_test');
+            }
+        };
+        $snapshot('before');
+        $sourceState = static function (): array {
+            $state = [];
+            foreach (['journal_headers' => 'journal_id', 'journal_details' => 'id', 'purchase_bills' => 'id',
+                'purchase_bill_details' => 'id', 'transaksi_payment_plan' => 'id_payment', 'assets' => 'id',
+                'inventory_ledgers' => 'id', 'accounting_posting_intents' => 'idempotency_key'] as $table => $key) {
+                $state[$table] = DB::table($table)->orderBy($key)->get()->toJson();
+            }
+            return $state;
+        };
+        if ($action === 'edit' || in_array($action, ['csv', 'xlsx'], true)) {
+            $neutral = \App\Support\PostingService::post(['transaction_date' => $day, 'journal_type' => 'MANUAL'], [
+                ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '100.01'],
+                ['account_code' => '310001', 'position' => 'KREDIT', 'amount' => '100.01'],
+            ]);
+            if ($action !== 'edit') $neutral->forceFill(['journal_no' => 'FUTURE-WRITER', 'journal_type' => 'IMPORT'])->save();
+        }
+        $unchanged = false;
+        foreach ([$first, $first === 'maker' ? $action : 'maker'] as $step) {
+            session()->forget(['success', 'error', 'errors']);
+            if ($step !== 'maker') $beforeSource = $sourceState();
+            $response = $step === 'maker'
+                ? $this->actingAs($users['mk'])->postJson(route('payment-plan-v33.action'), [
+                    'id' => $id, 'version' => $version, 'mutationId' => 'future-writer-maker', 'action' => 'mark_maker',
+                    'input' => ['reference' => 'SYNTHETIC-FUTURE-WRITER'],
+                ])
+                : $this->actingAs($users['fs'])->submitFutureWriter($action, $next, $bankCoa, $payment, $neutral?->getKey() ?? null);
+            $results[$step] = ['http' => $response->status(), 'success' => session('success'),
+                'error' => $step === 'maker' ? $response->json('error') : session('error'),
+                'validation' => session('errors')?->getBag('default')->toArray()];
+            if ($step !== 'maker') $unchanged = $beforeSource === $sourceState();
+            $snapshot('after_'.$step);
+        }
+        $this->travelTo(\Illuminate\Support\Carbon::parse($next.' 10:00:00', 'Asia/Jakarta'));
+        $snapshot('next_day');
+        $path = getenv('F03_WRITER_DATE_EVIDENCE');
+        $this->assertNotEmpty($path);
+        $this->assertGreaterThan(0, file_put_contents($path, json_encode(compact('first', 'action', 'writer', 'day', 'next',
+            'results', 'snapshots', 'unchanged'), JSON_THROW_ON_ERROR).PHP_EOL, FILE_APPEND | LOCK_EX));
+
+        $this->assertSame(200, $results['maker']['http']);
+        $failure = json_encode($results[$action], JSON_THROW_ON_ERROR);
+        $this->assertStringContainsString('future_protected_bank_credit', $failure);
+        if (in_array($action, ['csv', 'xlsx', 'opening-csv'], true)) $this->assertStringContainsString('baris ', $failure);
+        $this->assertTrue($unchanged, 'Rejected writer modified committed source tables.');
+        $afterBoth = $snapshots['after_'.($first === 'maker' ? $action : 'maker')];
+        $this->assertSame('500.00', $afterBoth['balance']['actual']);
+        $this->assertSame('100.00', $afterBoth['balance']['available']);
+        foreach ([$afterBoth, $snapshots['next_day']] as $state) {
+            $this->assertSame([['idr3', '400.00', 'active']], array_map(fn ($row) => array_values((array) $row), $state['hold']));
+            $this->assertSame('bank_prepared', $state['maker_status']);
+            $this->assertSame([], $state['future_credits']);
+        }
+        $this->assertSame('500.00', $snapshots['next_day']['balance']['actual']);
+        $this->assertSame('100.00', $snapshots['next_day']['balance']['available']);
+    }
+
+    private function submitFutureWriter(string $action, string $next, string $bankCoa,
+        ?\App\Models\PaymentPlan $payment, ?string $neutral): \Illuminate\Testing\TestResponse
+    {
+        $payload = ['transaction_date' => $next, 'source_doc_no' => 'SYNTHETIC-F03', 'description' => 'Synthetic D+1 credit',
+            'details' => [
+                ['account_code' => '610001', 'position' => 'DEBET', 'amount' => '100.01'],
+                ['account_code' => $bankCoa, 'position' => 'KREDIT', 'amount' => '100.01'],
+            ]];
+        if ($action === 'edit') {
+            return $this->put(route('jurnal.update', [$neutral]), $payload);
+        }
+        if ($action === 'fx') {
+            $payload['currency_code'] = 'USD';
+            foreach ($payload['details'] as &$line) $line['amount_txn'] = '1.00';
+            unset($line);
+        }
+        if (in_array($action, ['csv', 'xlsx'], true)) {
+            $rows = [
+                ['Tanggal', 'No Jurnal', 'No Bukti', 'Deskripsi', 'Col5', 'Col6', 'Nilai Debet', 'Nilai Kredit', 'Akun'],
+                ['2026-11-27', 'F03-VALID-FIRST', 'VALID', 'Synthetic', '', '', '10.00', '0.00', '610001'],
+                ['2026-11-27', 'F03-VALID-FIRST', 'VALID', 'Synthetic', '', '', '0.00', '10.00', '310001'],
+                [$next, 'FUTURE-WRITER', 'TEST', 'Synthetic', '', '', '100.01', '0.00', '610001'],
+                [$next, 'FUTURE-WRITER', 'TEST', 'Synthetic', '', '', '0.00', '100.01', $bankCoa],
+            ];
+            if ($action === 'xlsx') {
+                $book = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+                $book->getActiveSheet()->fromArray($rows);
+                ob_start();
+                (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($book))->save('php://output');
+                $content = ob_get_clean();
+            } else {
+                $content = implode("\n", array_map(fn ($row) => implode(',', $row), $rows))."\n";
+            }
+            return $this->post(route('jurnal.import'), ['file_excel' => \Illuminate\Http\UploadedFile::fake()
+                ->createWithContent('synthetic.'.$action, $content)]);
+        }
+        return match ($action) {
+            'manual', 'fx' => $this->post(route('jurnal.store'), $payload),
+            'legacy' => $this->post(route('payment.post_journal'), ['selected_ids' => $payment->no_transaksi]),
+            'cash_bill' => $this->post(route('purchase-bills.store'), ['bill_date' => $next, 'vendor_name' => 'Synthetic D+1',
+                'credit_account' => $bankCoa, 'details' => [['account_code' => '610001', 'amount' => '100.01']]]),
+            'opening-csv' => $this->post(route('account.import_opening_balance'), ['tanggal_saldo' => $next,
+                'file' => \Illuminate\Http\UploadedFile::fake()->createWithContent('synthetic.csv',
+                    "Account,Name,Debit,Credit\n610001,Other,100.01,0\n{$bankCoa},Bank,0,100.01\n")]),
+        };
+    }
+
     private function waitForMarker(Process $worker, string $marker): void
     {
         $deadline = microtime(true) + 20;
@@ -586,6 +749,10 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
         }
         $inbound = str_contains($this->name(), 'warehouse_inbound_race');
         $future = str_contains($this->name(), 'future_inbound');
+        $futureWriter = str_contains($this->name(), 'future_writer');
+        if ($futureWriter && getenv('MGI_TEST_PORT') !== '33396') {
+            $this->markTestSkipped('Writer-date probe requires its dedicated disposable port.');
+        }
         if ($future && getenv('MGI_TEST_PORT') !== '33395') {
             $this->markTestSkipped('Future-date probe requires its dedicated disposable port.');
         }
@@ -597,9 +764,9 @@ class ManualJournalBankCapacityMysqlTest extends \Tests\Feature\ManualJournalBan
             'username' => 'root', 'password' => '', 'database' => 'information_schema', 'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci', 'prefix' => '', 'strict' => true];
         config(['database.connections.writer_admin' => $config]);
-        if ($future) {
+        if ($future || $futureWriter) {
             $identity = DB::connection('writer_admin')->selectOne('SELECT @@datadir AS datadir, VERSION() AS version');
-            $this->assertSame('d:/erp-recovery/m1-f03-future-20261127-db/data',
+            $this->assertSame($futureWriter ? 'd:/erp-recovery/m1-f03-writer-date-20261127-db/data' : 'd:/erp-recovery/m1-f03-future-20261127-db/data',
                 strtolower(rtrim(preg_replace('~[\\\\/]+~', '/', $identity->datadir), '/')));
             $this->assertStringContainsString('MariaDB', $identity->version);
         }
