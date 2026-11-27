@@ -160,6 +160,7 @@ class WarehouseController extends Controller
                     ['account_code' => config('coa.persediaan'), 'position' => 'DEBET', 'amount' => $amount],
                     ['account_code' => $request->offset_account, 'position' => 'KREDIT', 'amount' => $amount],
                 ];
+                LegacyFinancialFence::assertInboundBankCreditDate($request->transaction_date, $journalLines);
                 LegacyFinancialFence::assertBankCapacity($journalLines);
             }
 

@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\DB;
 /** Read projection only: ERP GL plus actual debit events not yet represented in GL. */
 final class ErpBankBalance
 {
+    public static function businessDate(): string
+    {
+        return now('Asia/Jakarta')->toDateString();
+    }
+
     public function ledgerLines(string $code, string $through): Builder
     {
         return ProtectedJournalQuery::table('journal_details')->join('journal_headers as h', 'h.journal_id', '=', 'journal_details.journal_id')
@@ -32,7 +37,7 @@ final class ErpBankBalance
         $code = CompanyCoaMapping::where('company_id', $company)->where('semantic_key', 'ppl.bank.'.$account['id'])
             ->where('active', true)->value('account_code');
         if (!$code || !DB::table('accounts')->where('account_code', $code)->exists()) throw new RuleViolation('approved_coa_mapping_required', 409);
-        $today = now('Asia/Jakarta')->toDateString();
+        $today = self::businessDate();
         $opening = '0.00';
         $movement = '0.00';
         foreach ($this->ledgerLines($code, $today)
